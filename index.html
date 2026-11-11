@@ -61,7 +61,6 @@
   transition:transform .2s;
 }
 
- <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f1f5fb;color:#172033;font-family:Arial,Tahoma,sans-serif;padding-bottom:80px}
 header{background:linear-gradient(135deg,#1769d2,#104b9e);color:white;padding:20px 15px 24px;border-radius:0 0 22px 22px}
@@ -363,8 +362,15 @@ function money(n){
  return (Number(n)||0).toLocaleString("en-US") + " AFN";
 }
 
-function number(id){
- return Number(document.getElementById(id)?.value || 0);
+  
+function number(input){
+  if(typeof input === "string"){
+    const el = document.getElementById(input);
+    if(el) return Number(el.value || 0);
+  }
+  return Number(input || 0);
+}
+
 }
 
 function value(id){
