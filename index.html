@@ -353,8 +353,17 @@ function addSale(){
  const p=db.products.find(x=>x.id===value("saleProduct"));
  if(!p)return alert("جنس انتخاب کړه");
  const qty=number("saleQty"),price=number("salePrice"),paid=number("salePaid"),discount=number("saleDiscount"),customer=value("saleCustomer");
- if(qty<=0||price<0||paid<0||paid>total)return alert("د پېرود شمېرې سمې نه دي");
-if(paid>Number(db.cash))return alert("په صندوق کې دومره نغدې پیسې نشته");
+ if(qty<=0||price<0||paid<0||discount<0)
+ return alert("شمېرې سمې ولیکه");
+
+if(qty>Number(p.qty))
+ return alert("په ګدام کې دومره جنس نشته");
+
+const subtotal=qty*price;
+const total=subtotal-discount;
+
+if(total<0||paid>total)
+ return alert("تخفیف یا ورکړل شوې پیسې سمې نه دي");
  if(qty>Number(p.qty))return alert("په ګدام کې دومره جنس نشته");
  const subtotal=qty*price,total=subtotal-discount;
  if(total<0||paid>total)return alert("تخفیف یا ورکړل شوې پیسې سمې نه دي");
@@ -394,6 +403,8 @@ function addPurchase(){
  if(!p)return alert("جنس انتخاب کړه");
  const supplier=value("buySupplier"),qty=number("buyQty"),price=number("buyPrice"),paid=number("buyPaid"),total=qty*price;
  if(qty<=0||price<0||paid<0||paid>total)return alert("د پېرود شمېرې سمې نه دي");
+ if(paid>Number(db.cash))
+ return alert("په صندوق کې دومره نغدې پیسې نشته");
  let s=null;
  if(supplier){
   s=db.suppliers.find(x=>x.name.toLowerCase()===supplier.toLowerCase());
