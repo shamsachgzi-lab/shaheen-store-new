@@ -181,8 +181,11 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
   </div>
   <div class="row">
    <div><label>موجودي</label><input id="pQty" type="number" min="0" step="any"></div>
-   <div><label>واحد</label><select id="pUnit"><option>کیلو</option><option>ګرام</option><option>بوجۍ</option><option>ټوټه</option><option>کارټن</option><option>بوتل</option><option>لیټر</option><option>پاکټ</option><option>ګلاس</option></select></div>
+   <div><label>اصلي واحد (د ګدام موجودي)</label><select id="pUnit"><option>کیلو</option><option>ګرام</option><option>بوجۍ</option><option>ټوټه</option><option>کارټن</option><option>بوتل</option><option>لیټر</option><option>پاکټ</option><option>ګلاس</option></select></div>
   </div>
+  <label>د خرڅلاو/پېرود دویم واحد</label><select id="pTradeUnit"><option>کیلو</option><option>ګرام</option><option>بوجۍ</option><option>ټوټه</option><option>کارټن</option><option>بوتل</option><option>لیټر</option><option>پاکټ</option><option>ګلاس</option></select>
+  <label>په یوه دویم واحد کې د اصلي واحد مقدار (مثلاً یوه بوجۍ = ۵۰ کیلو)</label><input id="pUnitFactor" type="number" min="0.000001" step="any" value="1">
+  <p class="notice">مثال: اصلي واحد «کیلو»، دویم واحد «بوجۍ»، مقدار «۵۰». موجودي په کیلو ساتل کېږي.</p>
   <button class="primary" onclick="addProduct()">جنس ثبت کړه</button>
  </div>
  <div class="panel"><input id="productSearch" placeholder="🔍 د جنس نوم ولټوه"><div id="productList"></div></div>
@@ -202,6 +205,7 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
 
   <label>جنس انتخاب کړه</label>
   <select id="saleProduct"></select>
+  <label>د خرڅلاو واحد</label><select id="saleUnit"></select>
 
   <div class="row">
    <div>
@@ -456,6 +460,7 @@ function fillProductSelects(){
 
  const p=db.products.find(x=>x.id===sale.value)||db.products[0];
 
+ if(p){const u=document.getElementById("saleUnit");if(u){u.innerHTML=`<option>${safe(p.tradeUnit||p.unit)}</option><option>${safe(p.unit)}</option>`;u.value=p.tradeUnit||p.unit;}}
  if(p&&!document.activeElement.isSameNode(document.getElementById("salePrice"))){
   if(!document.getElementById("salePrice").value)
    document.getElementById("salePrice").value=p.price;
@@ -468,8 +473,9 @@ function addProduct(){
  const name=value("pName"),cost=number("pCost"),price=number("pPrice"),qty=number("pQty"),unit=value("pUnit");
  if(!name)return alert("د جنس نوم ولیکه");
  if(cost<0||price<0||qty<0)return alert("منفي شمېرې سمې نه دي");
- db.products.push({id:uid(),name,cost,price,qty,unit,code:value("pCode"),min:5,created:today()});
- saveDB();["pName","pCode","pCost","pPrice","pQty"].forEach(id=>document.getElementById(id).value="");
+ const tradeUnit=value("pTradeUnit")||unit,factor=number("pUnitFactor")||1;if(factor<=0)return alert("د واحد د بدلون مقدار باید له صفر څخه زیات وي");
+ db.products.push({id:uid(),name,cost,price,qty,unit,tradeUnit,unitFactor:factor,code:value("pCode"),min:5,created:today()});
+ saveDB();["pName","pCode","pCost","pPrice","pQty"].forEach(id=>document.getElementById(id).value="");document.getElementById("pUnitFactor").value="1";
  refreshAll();alert("جنس ثبت شو");
 }
 function renderProducts(){
@@ -488,8 +494,10 @@ function editProduct(id){
  const cost=prompt("د پېرود قیمت",p.cost);if(cost===null)return;
  const price=prompt("د خرڅلاو قیمت",p.price);if(price===null)return;
  const code=prompt("بارکوډ / کوډ",p.code||"");if(code===null)return;
- if(!name.trim()||![qty,cost,price].every(x=>Number.isFinite(Number(x))&&Number(x)>=0))return alert("معلومات سم نه دي");
- Object.assign(p,{name:name.trim(),qty:Number(qty),cost:Number(cost),price:Number(price),code:code.trim()});
+ const tradeUnit=prompt("د خرڅلاو/پېرود واحد",p.tradeUnit||p.unit);if(tradeUnit===null)return;
+ const factorText=prompt("په یوه "+tradeUnit+" کې څو "+p.unit+" دي؟",p.unitFactor||1);if(factorText===null)return;const factor=Number(factorText);
+ if(!name.trim()||![qty,cost,price,factor].every(x=>Number.isFinite(Number(x))&&Number(x)>=0)||factor<=0)return alert("معلومات سم نه دي");
+ Object.assign(p,{name:name.trim(),qty:Number(qty),cost:Number(cost),price:Number(price),code:code.trim(),tradeUnit:tradeUnit.trim(),unitFactor:factor});
  saveDB();refreshAll();
 }
 function deleteProduct(id){
@@ -552,7 +560,7 @@ function filterSaleProducts(){
  if(list.some(p=>p.id===old))select.value=old;
 
  const p=db.products.find(x=>x.id===select.value);
- if(p)document.getElementById("salePrice").value=p.price;
+ if(p){document.getElementById("salePrice").value=p.price;const u=document.getElementById("saleUnit");u.innerHTML=`<option>${safe(p.tradeUnit||p.unit)}</option><option>${safe(p.unit)}</option>`;u.value=p.tradeUnit||p.unit;}
 
  updateSalePreview();
 }
@@ -590,6 +598,7 @@ function addSale(){
  if(!p)return alert("جنس انتخاب کړه");
 
  const qty=number("saleQty");
+ const factor=Number(p.unitFactor)||1;
  const price=number("salePrice");
  const paid=number("salePaid");
  const discount=number("saleDiscount");
@@ -598,7 +607,8 @@ function addSale(){
  if(qty<=0||price<0||paid<0||discount<0)
   return alert("شمېرې سمې ولیکه");
 
- if(qty>Number(p.qty))
+ const factor=Number(p.unitFactor)||1;
+ if(qty*factor>Number(p.qty))
   return alert("په ګدام کې دومره جنس نشته");
 
  const subtotal=qty*price;
@@ -628,7 +638,7 @@ function addSale(){
  }
 
  const cost=Number(p.cost)||0;
- p.qty=Number(p.qty)-qty;
+ p.qty=Number(p.qty)-qty*factor;
  db.cash=Number(db.cash)+paid;
 
  const sale={
@@ -637,13 +647,14 @@ function addSale(){
   productId:p.id,
   productName:p.name,
   qty,
-  unit:p.unit,
+  unit:value("saleUnit")||p.tradeUnit||p.unit,
+  stockQty:qty*factor,unitFactor:factor,
   price,
   subtotal,
   discount,
   total,
   costAtSale:cost,
-  profit:(price-cost)*qty-discount,
+  profit:(price-cost*factor)*qty-discount,
   paid,
   debt,
   customer:c?.name||customer||"نغدي مشتری",
@@ -697,14 +708,14 @@ function editSale(id){
  const qty=Number(qt),price=Number(pt),discount=Number(dt),paid=Number(pay),total=qty*price-discount;
  if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<0||!Number.isFinite(discount)||discount<0||discount>qty*price||!Number.isFinite(paid)||paid<0||paid>total)return alert("شمېرې سمې نه دي");
  const p=db.products.find(x=>x.id===s.productId);if(!p)return alert('جنس ونه موندل شو');
- const oldQty=Number(s.qty)||0,oldPaid=Number(s.paid)||0,available=Number(p.qty)+oldQty;
- if(qty>available)return alert("موجودي بسنه نه کوي");
+ const oldQty=Number(s.stockQty)||((Number(s.qty)||0)*(Number(s.unitFactor)||1)),factor=Number(s.unitFactor)||Number(p.unitFactor)||1,oldPaid=Number(s.paid)||0,available=Number(p.qty)+oldQty;
+ if(qty*factor>available)return alert("موجودي بسنه نه کوي");
  if(Number(db.cash)+paid-oldPaid<0)return alert("صندوق کې د سمون لپاره کافي نغدې نشته");
  const oldC=db.customers.find(c=>c.id===s.customerId);if(oldC)oldC.debt=Math.max(0,Number(oldC.debt||0)-Number(s.debt||0));
  let c=null;if(cn.trim()){c=db.customers.find(x=>x.name.toLowerCase()===cn.trim().toLowerCase());if(!c){c={id:uid(),name:cn.trim(),phone:'',debt:0,type:'active',created:today()};db.customers.push(c)}}
  const debt=total-paid;if(debt>0&&!c){if(oldC)oldC.debt+=Number(s.debt||0);return alert('د پور لپاره مشتری حتمي دی')}
- p.qty=available-qty;db.cash=Number(db.cash)+paid-oldPaid;if(c)c.debt=Number(c.debt||0)+debt;
- Object.assign(s,{qty,price,subtotal:qty*price,discount,total,paid,debt,customer:c?c.name:'نغدي مشتری',customerId:c?c.id:'',profit:(price-Number(s.costAtSale||p.cost||0))*qty-discount,editedAt:new Date().toISOString()});
+ p.qty=available-qty*factor;db.cash=Number(db.cash)+paid-oldPaid;if(c)c.debt=Number(c.debt||0)+debt;
+ Object.assign(s,{qty,price,subtotal:qty*price,discount,total,paid,debt,customer:c?c.name:'نغدي مشتری',customerId:c?c.id:'',stockQty:qty*factor,unitFactor:factor,profit:(price-Number(s.costAtSale||p.cost||0)*factor)*qty-discount,editedAt:new Date().toISOString()});
  saveDB();refreshAll();alert('رسید سم شو؛ حسابونه تازه شول.');
 }
 function printSale(id){
@@ -726,12 +737,12 @@ function addPurchase(){
   if(!s){s={id:uid(),name:supplier,phone:"",debt:0,created:today()};db.suppliers.push(s)}
  }else if(total-paid>0)return alert("که پېرود په پور وي، د شرکت نوم حتمي ولیکه.");
  /* د موجودۍ نوی منځنی پېرود قیمت */
- const oldQty=Number(p.qty)||0,oldCost=Number(p.cost)||0;
- p.cost=(oldQty*oldCost+qty*price)/(oldQty+qty);
- p.qty=oldQty+qty;
+ const factor=Number(p.unitFactor)||1,stockAdd=qty*factor,oldQty=Number(p.qty)||0,oldCost=Number(p.cost)||0;
+ p.cost=(oldQty*oldCost+stockAdd*(price/factor))/(oldQty+stockAdd);
+ p.qty=oldQty+stockAdd;
  db.cash=Number(db.cash)-paid;
  const debt=total-paid;if(s)s.debt=Number(s.debt||0)+debt;
- db.purchases.push({id:uid(),productId:p.id,productName:p.name,qty,unit:p.unit,price,total,paid,debt,supplier:supplier||"نغدي پېرود",supplierId:s?.id||"",date:today()});
+ db.purchases.push({id:uid(),productId:p.id,productName:p.name,qty,unit:p.tradeUnit||p.unit,stockQty:stockAdd,unitFactor:factor,price,total,paid,debt,supplier:supplier||"نغدي پېرود",supplierId:s?.id||"",date:today()});
  saveDB();["buySupplier","buyQty","buyPrice"].forEach(id=>document.getElementById(id).value="");document.getElementById("buyPaid").value="0";
  refreshAll();alert("پېرود ثبت شو");
 }
