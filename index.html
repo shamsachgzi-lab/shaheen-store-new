@@ -205,7 +205,7 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
 
   <label>جنس انتخاب کړه</label>
   <select id="saleProduct"></select>
-  <label>د خرڅلاو واحد</label><select id="saleUnit"></select>
+  <label>د خرڅلاو واحد</label><select id="saleUnit" onchange="updateSaleUnit()"></select>
 
   <div class="row">
    <div>
@@ -565,6 +565,14 @@ function filterSaleProducts(){
  updateSalePreview();
 }
 
+function updateSaleUnit(){
+ const p=db.products.find(x=>x.id===value("saleProduct"));if(!p)return;
+ const factor=(value("saleUnit")===(p.unit||""))?1:(Number(p.unitFactor)||1);
+ const tradeFactor=Number(p.unitFactor)||1;
+ const tradePrice=Number(p.price)||0;
+ document.getElementById("salePrice").value=(factor===1&&tradeFactor!==1)?(tradePrice/tradeFactor).toFixed(4):tradePrice;
+ updateSalePreview();
+}
 function updateSalePreview(){
  const qty=number("saleQty");
  const price=number("salePrice");
@@ -607,7 +615,7 @@ function addSale(){
  if(qty<=0||price<0||paid<0||discount<0)
   return alert("شمېرې سمې ولیکه");
 
- const factor=Number(p.unitFactor)||1;
+ const factor=(value("saleUnit")===(p.unit||""))?1:(Number(p.unitFactor)||1);
  if(qty*factor>Number(p.qty))
   return alert("په ګدام کې دومره جنس نشته");
 
@@ -782,6 +790,7 @@ function deleteCustomer(id){
 }document.getElementById("saleCustomer").addEventListener("input",searchSaleCustomers);
 
 document.getElementById("saleProductSearch").addEventListener("input",filterSaleProducts);
+document.getElementById("saleProduct").addEventListener("change",()=>{filterSaleProducts();updateSaleUnit()});
 
 ["saleQty","salePrice","saleDiscount","salePaid"].forEach(id=>{
  document.getElementById(id).addEventListener("input",updateSalePreview);
