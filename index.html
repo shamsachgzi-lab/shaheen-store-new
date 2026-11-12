@@ -282,7 +282,7 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
 <section id="purchases" class="hidden">
  <h3>🚚 پېرود او د جنس داخلول</h3>
  <div class="panel">
-  <label>جنس</label><select id="buyProduct"></select>
+  <label>🔎 د پېرود جنس د نوم یا بارکوډ له مخې ولټوه</label><input id="buyProductSearch" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off"><label>جنس انتخاب کړه</label><select id="buyProduct"></select>
   <label>د عرضه کوونکي نوم</label><input id="buySupplier">
   <div class="row">
    <div><label>تعداد</label><input id="buyQty" type="number" min="0.01" step="any"></div>
@@ -740,6 +740,21 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 </body></html>`);
  w.document.close();
 }
+function filterPurchaseProducts(){
+ const q=value("buyProductSearch").toLowerCase();
+ const select=document.getElementById("buyProduct");
+ const old=select.value;
+ const list=db.products.filter(p=>
+  String(p.name||"").toLowerCase().includes(q)||
+  String(p.code||"").toLowerCase().includes(q)
+ );
+ select.innerHTML=list.map(p=>
+  `<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(p.unit)} | کوډ: ${safe(p.code||"-")}</option>`
+ ).join("")||'<option value="">جنس ونه موندل شو</option>';
+ if(list.some(p=>p.id===old))select.value=old;
+}
+document.getElementById("buyProductSearch").addEventListener("input",filterPurchaseProducts);
+
 function addPurchase(){
  const p=db.products.find(x=>x.id===value("buyProduct"));
  if(!p)return alert("جنس انتخاب کړه");
