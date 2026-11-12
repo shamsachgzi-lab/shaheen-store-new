@@ -43,7 +43,17 @@
   border-color:#f2a5b5;
 }
 .cards .card:nth-child(6) strong{color:#b52e4d}
+.cards .card:nth-child(7){
+  background:#e0f7f5;
+  border-color:#83d9e4;
+}
+.cards .card:nth-child(7) strong{color:#087b75}
 
+.cards .card:nth-child(8){
+  background:#fff6d9;
+  border-color:#e8d27b;
+}
+.cards .card:nth-child(8) strong{color:#876400}
 /* د چټکو لارو جلا رنګونه */
 .shortcuts .shortcut:nth-child(1){background:#dff5e7;color:#087a39}
 .shortcuts .shortcut:nth-child(2){background:#e1efff;color:#1556a5}
@@ -129,8 +139,10 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
   <div class="card"><span>📦 د جنسونو ارزښت</span><strong id="stockValue">0 AFN</strong></div>
   <div class="card"><span>👥 د مشتریانو پور</span><strong id="debt">0 AFN</strong></div>
   <div class="card"><span>🏢 د شرکتونو پور</span><strong id="supplierDebt">0 AFN</strong></div>
-  <div class="card"><span>🛒 ټول خرڅلاو</span><strong id="salesTotal">0 AFN</strong></div>
-  <div class="card"><span>💸 ټول لګښتونه</span><strong id="expenseTotal">0 AFN</strong></div>
+    <div class="card"><span>🛒 د نن خرڅلاو</span><strong id="salesTotal">0 AFN</strong></div>
+  <div class="card"><span>💰 د نن ګټه</span><strong id="profitToday">0 AFN</strong></div>
+  <div class="card"><span>📒 د نن پور</span><strong id="debtToday">0 AFN</strong></div>
+  <div class="card"><span>💸 د نن لګښتونه</span><strong id="expenseTotal">0 AFN</strong></div>
  </div>
 
  <h3>چټکې لارې</h3>
@@ -371,8 +383,6 @@ function number(input){
   return Number(input || 0);
 }
 
-}
-
 function value(id){
  return (document.getElementById(id)?.value || "").trim();
 }
@@ -578,9 +588,11 @@ function addSale(){
   qty,
   unit:product.unit,
   price,
-  subtotal,
+    subtotal,
   discount,
   total,
+  costAtSale:Number(product.cost || 0),
+  profit:(price-Number(product.cost || 0))*qty-discount,
   paid,
   debt,
   customer:customer || "نغدي مشتری",
@@ -1151,7 +1163,13 @@ function updateDashboard(){
   const expensesToday = db.expenses
     .filter(e=>e.date===today())
     .reduce((sum,e)=>sum+number(e.amount),0);
+  const profitToday = db.sales
+    .filter(s=>s.date===today())
+    .reduce((sum,s)=>sum+number(s.profit),0);
 
+  const debtToday = db.sales
+    .filter(s=>s.date===today())
+    .reduce((sum,s)=>sum+number(s.debt),0);
   /* خالصه پانګه = صندوق + د جنسونو ارزښت + د مشتریانو پور - د شرکتونو پور */
   const capital = number(db.cash) + stockValue + customerDebt - supplierDebt;
 
@@ -1165,6 +1183,8 @@ function updateDashboard(){
   setText("debt",money(customerDebt)+" AFN");
   setText("supplierDebt",money(supplierDebt)+" AFN");
   setText("salesTotal",money(salesToday)+" AFN");
+    setText("profitToday",money(profitToday)+" AFN");
+  setText("debtToday",money(debtToday)+" AFN");
   setText("expenseTotal",money(expensesToday)+" AFN");
   setText("capital",money(capital)+" AFN");
 
