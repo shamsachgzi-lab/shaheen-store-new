@@ -291,12 +291,28 @@ function refreshAll(){
  renderCustomers();renderSuppliers();renderExpenses();renderDebtLists();updateDashboard();
 }
 function fillProductSelects(){
- const opts=db.products.map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(p.unit)}</option>`).join("");
- ["saleProduct","buyProduct"].forEach(id=>{
-  const el=document.getElementById(id);if(el)el.innerHTML=opts||'<option value="">لومړی جنس ثبت کړه</option>';
- });
- const p=db.products.find(x=>x.id===value("saleProduct"))||db.products[0];
- if(p&&!value("salePrice"))document.getElementById("salePrice").value=p.price;
+ const sale=document.getElementById("saleProduct");
+ const buy=document.getElementById("buyProduct");
+
+ const oldSale=sale.value;
+ const oldBuy=buy.value;
+
+ const opts=db.products.map(p=>
+  `<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(p.unit)}</option>`
+ ).join("");
+
+ sale.innerHTML=opts||'<option value="">لومړی جنس ثبت کړه</option>';
+ buy.innerHTML=opts||'<option value="">لومړی جنس ثبت کړه</option>';
+
+ if(db.products.some(p=>p.id===oldSale))sale.value=oldSale;
+ if(db.products.some(p=>p.id===oldBuy))buy.value=oldBuy;
+
+ const p=db.products.find(x=>x.id===sale.value)||db.products[0];
+
+ if(p&&!document.activeElement.isSameNode(document.getElementById("salePrice"))){
+  if(!document.getElementById("salePrice").value)
+   document.getElementById("salePrice").value=p.price;
+ }
 }
 </script>
 
@@ -337,7 +353,8 @@ function addSale(){
  const p=db.products.find(x=>x.id===value("saleProduct"));
  if(!p)return alert("جنس انتخاب کړه");
  const qty=number("saleQty"),price=number("salePrice"),paid=number("salePaid"),discount=number("saleDiscount"),customer=value("saleCustomer");
- if(qty<=0||price<0||paid<0||discount<0)return alert("شمېرې سمې ولیکه");
+ if(qty<=0||price<0||paid<0||paid>total)return alert("د پېرود شمېرې سمې نه دي");
+if(paid>Number(db.cash))return alert("په صندوق کې دومره نغدې پیسې نشته");
  if(qty>Number(p.qty))return alert("په ګدام کې دومره جنس نشته");
  const subtotal=qty*price,total=subtotal-discount;
  if(total<0||paid>total)return alert("تخفیف یا ورکړل شوې پیسې سمې نه دي");
@@ -349,7 +366,7 @@ function addSale(){
  }else if(debt>0)return alert("که خرڅلاو پور وي، د مشتری نوم حتمي ولیکه.");
  const cost=Number(p.cost)||0;
  p.qty=Number(p.qty)-qty;db.cash=Number(db.cash)+paid;
- const sale={id:uid(),invoice:"SH-"+Date.now(),productId:p.id,productName:p.name,qty,unit:p.unit,price,subtotal,discount,total,costAtSale:cost,profit:(price-cost)*qty-discount,paid,debt,customer:customer||"نغدي مشتری",customerId:c?.id||"",note:value("saleNote"),date:today()};
+ const sale={id:uid(),invoice:"SH-"+Date.now(),productId:p.id,productName:p.name,qty,unit:p.unit,price,subtotal,discount,total,costAtSale:cost,profit:(price-cost)*qty-discount,paid,debt,customer:c?.name||customer||"نغدي مشتری",customerId:c?.id||"",note:value("saleNote"),date:today()};
  if(c)c.debt=Number(c.debt||0)+debt;
  db.sales.push(sale);saveDB();
  ["saleCustomer","salePaid","saleDiscount","saleNote"].forEach(id=>document.getElementById(id).value="");
@@ -579,7 +596,10 @@ function restoreData(){
  const reader=new FileReader();
  reader.onload=()=>{
   try{
-   const saved=JSON.parse(reader.result),restored=saved.database||saved;
+   const saved=JSON.parse(reader.result);
+if(saved.app && saved.app!==DB_KEY)
+  throw new Error("دا د بل اپلیکیشن Backup دی");
+const restored=saved.database||saved;
    if(!restored||!Array.isArray(restored.products)||!Array.isArray(restored.sales))throw new Error("دا سم Backup نه دی");
    ["products","sales","purchases","customers","suppliers","expenses","payments"].forEach(k=>{if(!Array.isArray(restored[k]))restored[k]=[]});
    restored.cash=Number(restored.cash)||0;
