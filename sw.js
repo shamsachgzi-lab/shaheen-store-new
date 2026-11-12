@@ -1,4 +1,4 @@
-const CACHE_NAME = "shaheen-store-v1";
+const CACHE_NAME = "shaheen-store-v2";
 const CORE = ["./", "./index.html", "./manifest.webmanifest"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE)));
