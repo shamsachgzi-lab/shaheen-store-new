@@ -174,7 +174,7 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
 <section id="products" class="hidden">
  <h3>📦 محصولات او جنسونه</h3>
  <div class="panel">
-  <label>د جنس نوم</label><input id="pName" placeholder="مثلاً وریجې">
+  <label>د جنس نوم</label><input id="pName" placeholder="مثلاً وریجې"><label>بارکوډ / کوډ</label><input id="pCode" placeholder="اختیاري بارکوډ یا کوډ">
   <div class="row">
    <div><label>د پېرود قیمت</label><input id="pCost" type="number" min="0"></div>
    <div><label>د خرڅلاو قیمت</label><input id="pPrice" type="number" min="0"></div>
@@ -352,7 +352,7 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
  <div class="panel">
   <label>له نېټې</label><input type="date" id="reportFrom">
   <label>تر نېټې</label><input type="date" id="reportTo">
-  <button class="primary" onclick="makeReport()">راپور ښکاره کړه</button>
+  <button class="primary" onclick="makeReport()">راپور ښکاره کړه</button><hr><h3>د میاشتې پای آرشیف</h3><label>میاشت انتخاب کړه</label><input type="month" id="archiveMonth"><button class="gray" onclick="archiveMonth()">د میاشتې راپور خوندي کړه</button><div id="archiveList"></div>
   <div id="reportContent"></div>
  </div>
 </section>
@@ -435,7 +435,7 @@ function runGlobalSearch(){
 
 function refreshAll(){
  fillProductSelects();renderProducts();renderSales();renderPurchases();
- renderCustomers();renderSuppliers();renderExpenses();renderDebtLists();updateDashboard();
+ renderCustomers();renderSuppliers();renderExpenses();renderDebtLists();renderArchives();updateDashboard();
 }
 function fillProductSelects(){
  const sale=document.getElementById("saleProduct");
@@ -468,8 +468,8 @@ function addProduct(){
  const name=value("pName"),cost=number("pCost"),price=number("pPrice"),qty=number("pQty"),unit=value("pUnit");
  if(!name)return alert("د جنس نوم ولیکه");
  if(cost<0||price<0||qty<0)return alert("منفي شمېرې سمې نه دي");
- db.products.push({id:uid(),name,cost,price,qty,unit,code:"",min:5,created:today()});
- saveDB();["pName","pCost","pPrice","pQty"].forEach(id=>document.getElementById(id).value="");
+ db.products.push({id:uid(),name,cost,price,qty,unit,code:value("pCode"),min:5,created:today()});
+ saveDB();["pName","pCode","pCost","pPrice","pQty"].forEach(id=>document.getElementById(id).value="");
  refreshAll();alert("جنس ثبت شو");
 }
 function renderProducts(){
@@ -478,7 +478,7 @@ function renderProducts(){
  document.getElementById("productList").innerHTML=list.map(p=>`
  <div class="item"><b>${safe(p.name)}</b>
  <div>موجودي: ${p.qty} ${safe(p.unit)}</div>
- <div>پېرود: ${money(p.cost)} | خرڅلاو: ${money(p.price)}</div>
+ <div>پېرود: ${money(p.cost)} | خرڅلاو: ${money(p.price)}</div><div>کوډ: ${safe(p.code||"-")}</div>
  <div class="actions"><button class="gray" onclick="editProduct('${p.id}')">سمون</button><button class="red" onclick="deleteProduct('${p.id}')">حذف</button></div></div>`).join("")||"<p>جنس نشته</p>";
 }
 function editProduct(id){
@@ -487,8 +487,9 @@ function editProduct(id){
  const qty=prompt("موجودي",p.qty);if(qty===null)return;
  const cost=prompt("د پېرود قیمت",p.cost);if(cost===null)return;
  const price=prompt("د خرڅلاو قیمت",p.price);if(price===null)return;
+ const code=prompt("بارکوډ / کوډ",p.code||"");if(code===null)return;
  if(!name.trim()||![qty,cost,price].every(x=>Number.isFinite(Number(x))&&Number(x)>=0))return alert("معلومات سم نه دي");
- Object.assign(p,{name:name.trim(),qty:Number(qty),cost:Number(cost),price:Number(price)});
+ Object.assign(p,{name:name.trim(),qty:Number(qty),cost:Number(cost),price:Number(price),code:code.trim()});
  saveDB();refreshAll();
 }
 function deleteProduct(id){
@@ -686,6 +687,26 @@ function renderSales(){
  <div>ټول: ${money(s.total)} | ورکړل: ${money(s.paid)} | پور: ${money(s.debt)}</div>
  <button class="gray" onclick="printSale('${s.id}')">رسید چاپ</button></div>`).join("")||"<p>خرڅلاو نشته</p>";
 }
+function editSale(id){
+ const s=db.sales.find(x=>x.id===id);if(!s)return;
+ const qt=prompt("نوی تعداد ("+s.unit+")",s.qty);if(qt===null)return;
+ const pt=prompt("نوی فی واحد قیمت",s.price);if(pt===null)return;
+ const dt=prompt("نوی تخفیف",s.discount||0);if(dt===null)return;
+ const pay=prompt("نوې ورکړل شوې پیسې",s.paid||0);if(pay===null)return;
+ const cn=prompt("د مشتری نوم (تش = نغدي)",s.customer==="نغدي مشتری"?"":s.customer);if(cn===null)return;
+ const qty=Number(qt),price=Number(pt),discount=Number(dt),paid=Number(pay),total=qty*price-discount;
+ if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<0||!Number.isFinite(discount)||discount<0||discount>qty*price||!Number.isFinite(paid)||paid<0||paid>total)return alert("شمېرې سمې نه دي");
+ const p=db.products.find(x=>x.id===s.productId);if(!p)return alert('جنس ونه موندل شو');
+ const oldQty=Number(s.qty)||0,oldPaid=Number(s.paid)||0,available=Number(p.qty)+oldQty;
+ if(qty>available)return alert("موجودي بسنه نه کوي");
+ if(Number(db.cash)+paid-oldPaid<0)return alert("صندوق کې د سمون لپاره کافي نغدې نشته");
+ const oldC=db.customers.find(c=>c.id===s.customerId);if(oldC)oldC.debt=Math.max(0,Number(oldC.debt||0)-Number(s.debt||0));
+ let c=null;if(cn.trim()){c=db.customers.find(x=>x.name.toLowerCase()===cn.trim().toLowerCase());if(!c){c={id:uid(),name:cn.trim(),phone:'',debt:0,type:'active',created:today()};db.customers.push(c)}}
+ const debt=total-paid;if(debt>0&&!c){if(oldC)oldC.debt+=Number(s.debt||0);return alert('د پور لپاره مشتری حتمي دی')}
+ p.qty=available-qty;db.cash=Number(db.cash)+paid-oldPaid;if(c)c.debt=Number(c.debt||0)+debt;
+ Object.assign(s,{qty,price,subtotal:qty*price,discount,total,paid,debt,customer:c?c.name:'نغدي مشتری',customerId:c?c.id:'',profit:(price-Number(s.costAtSale||p.cost||0))*qty-discount,editedAt:new Date().toISOString()});
+ saveDB();refreshAll();alert('رسید سم شو؛ حسابونه تازه شول.');
+}
 function printSale(id){
  const s=db.sales.find(x=>x.id===id);if(!s)return;
  const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه");
@@ -865,6 +886,20 @@ function updateDashboard(){
  <div class="item"><b>${safe(p.name)}</b><div>پاتې مقدار: ${p.qty} ${safe(p.unit)}</div></div>`).join("")||"<p>کم‌موجوده جنس نشته</p>";
 }
 
+function archiveMonth(){
+ const month=value("archiveMonth");if(!month)return alert("لومړی میاشت انتخاب کړه");
+ if(!Array.isArray(db.archives))db.archives=[];
+ if(db.archives.some(a=>a.month===month))return alert("دا میاشت مخکې آرشیف شوې ده");
+ const inside=d=>String(d||"").slice(0,7)===month;
+ const ss=db.sales.filter(x=>inside(x.date)),pp=db.purchases.filter(x=>inside(x.date)),ee=db.expenses.filter(x=>inside(x.date));
+ const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
+ db.archives.push({id:uid(),month,createdAt:new Date().toISOString(),salesCount:ss.length,sales:sum(ss,"total"),purchases:sum(pp,"total"),grossProfit:sum(ss,"profit"),expenses:sum(ee,"amount")});
+ saveDB();renderArchives();alert("میاشت آرشیف شوه؛ اصلي معلومات نه دي حذف شوي");
+}
+function renderArchives(){
+ const box=document.getElementById("archiveList");if(!box)return;
+ box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>خرڅلاو: "+money(a.sales)+" | پېرود: "+money(a.purchases)+"</div><div>ګټه: "+money(a.grossProfit)+" | لګښت: "+money(a.expenses)+"</div></div>").join("")||"<p>آرشیف نشته</p>";
+}
 function makeReport(){
  const from=value("reportFrom"),to=value("reportTo");
  if(from&&to&&from>to)return alert("د پیل نېټه باید د پای له نېټې مخکې وي");
