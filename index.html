@@ -685,7 +685,7 @@ function renderSales(){
  <div>نېټه: ${safe(s.date)} | مشتری: ${safe(s.customer)}</div>
  <div>جنس: ${safe(s.productName)} — ${s.qty} ${safe(s.unit)}</div>
  <div>ټول: ${money(s.total)} | ورکړل: ${money(s.paid)} | پور: ${money(s.debt)}</div>
- <button class="gray" onclick="printSale('${s.id}')">رسید چاپ</button></div>`).join("")||"<p>خرڅلاو نشته</p>";
+ <div class="actions"><button class="gray" onclick="printSale('${s.id}')">رسید چاپ</button><button class="gray" onclick="editSale('${s.id}')">رسید سمون</button></div></div>`).join("")||"<p>خرڅلاو نشته</p>";
 }
 function editSale(id){
  const s=db.sales.find(x=>x.id===id);if(!s)return;
