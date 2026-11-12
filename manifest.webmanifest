@@ -1,0 +1,12 @@
+{
+  "name": "SHAHEEN STORE - شاهین فروشگاه",
+  "short_name": "شاهین ستور",
+  "lang": "ps",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f5fb",
+  "theme_color": "#1769d2",
+  "description": "د شاهین فروشگاه د موجودۍ او حساب اپلیکیشن"
+}
