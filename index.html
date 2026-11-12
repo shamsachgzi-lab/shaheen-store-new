@@ -73,6 +73,65 @@ nav button.active{color:#1769d2}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .actions button{font-size:12px;padding:8px}
 hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
+/* د نوي خرڅلاو پاڼې ډیزاین */
+.sale-panel{
+ background:#fff;
+ border-radius:22px 22px 0 0;
+ padding:20px 14px;
+ margin:12px -14px;
+ box-shadow:0 2px 12px #17203312;
+}
+.sale-heading{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ margin-bottom:20px;
+}
+.sale-heading h3{font-size:24px;margin:0}
+.sale-search{
+ border:2px solid #1769d2;
+ border-radius:17px;
+ padding:16px;
+ font-size:17px;
+}
+.sale-customer-results{
+ background:white;
+ border:1px solid #d9e1ec;
+ border-radius:12px;
+ max-height:190px;
+ overflow:auto;
+ box-shadow:0 4px 12px #17203315;
+}
+.sale-customer-results button{
+ display:block;
+ width:100%;
+ background:white;
+ border-bottom:1px solid #edf0f5;
+ text-align:right;
+ padding:13px;
+ color:#172033;
+}
+.sale-summary{
+ background:#f3f6fa;
+ border-radius:17px;
+ padding:15px;
+ margin:16px 0;
+}
+.sale-summary div{
+ display:flex;
+ justify-content:space-between;
+ gap:10px;
+ padding:7px 2px;
+ font-size:16px;
+}
+.sale-summary strong{direction:ltr}
+.sale-cash{color:#07965e}
+.sale-debt{color:#e04444}
+.sale-total{color:#1769d2;font-size:21px!important;font-weight:bold}
+.sale-actions{display:flex;gap:10px;margin:12px 0}
+.sale-actions button{flex:1;padding:15px;font-size:17px}
+.sale-cash-btn{background:#e8faf2;color:#078052;border:1px solid #a8e8cd}
+.sale-debt-btn{background:#fff0f0;color:#df4545;border:1px solid #ffcaca}
 </style>
 </head>
 <body>
@@ -129,22 +188,87 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
 </section>
 
 <section id="sales" class="hidden">
- <h3>🛒 خرڅلاو او رسید</h3>
- <div class="panel">
-  <label>جنس انتخاب کړه</label><select id="saleProduct"></select>
-  <label>د مشتری نوم</label><input id="saleCustomer" placeholder="د مشتری نوم">
-  <div class="row">
-   <div><label>تعداد</label><input id="saleQty" type="number" min="0.01" step="any" value="1"></div>
-   <div><label>فی واحد قیمت</label><input id="salePrice" type="number" min="0"></div>
+ <div class="sale-panel">
+
+  <div class="sale-heading">
+   <h3>🧾 نوی خرڅلاو</h3>
+   <span class="badge">AFN</span>
   </div>
+
+  <label>🔍 د جنس نوم یا بارکوډ ولټوه</label>
+  <input id="saleProductSearch" class="sale-search"
+   placeholder="د جنس نوم یا بارکوډ ولیکه...">
+
+  <label>جنس انتخاب کړه</label>
+  <select id="saleProduct"></select>
+
   <div class="row">
-   <div><label>ورکړل شوې پیسې</label><input id="salePaid" type="number" min="0" value="0"></div>
-   <div><label>تخفیف</label><input id="saleDiscount" type="number" min="0" value="0"></div>
+   <div>
+    <label>👤 د مشتری نوم یا شمېره</label>
+    <input id="saleCustomer"
+     placeholder="مشتری ولټوه..."
+     autocomplete="off">
+    <div id="saleCustomerResults"
+     class="sale-customer-results hidden"></div>
+   </div>
+   <div>
+    <label>نېټه</label>
+    <input id="saleDate" type="date">
+   </div>
   </div>
-  <label>یادښت</label><input id="saleNote" placeholder="اختیاري">
-  <button class="primary" onclick="addSale()">خرڅلاو ثبت کړه</button>
+
+  <div class="row">
+   <div>
+    <label>تعداد</label>
+    <input id="saleQty" type="number" min="0.01"
+     step="any" value="1">
+   </div>
+   <div>
+    <label>فی واحد قیمت</label>
+    <input id="salePrice" type="number" min="0">
+   </div>
+  </div>
+
+  <div class="row">
+   <div>
+    <label>تخفیف (AFN)</label>
+    <input id="saleDiscount" type="number" min="0" value="0">
+   </div>
+   <div>
+    <label>ورکړل شوې پیسې</label>
+    <input id="salePaid" type="number" min="0" value="0">
+   </div>
+  </div>
+
+  <div class="sale-actions">
+   <button class="sale-cash-btn" onclick="setSalePayment('cash')">
+    💵 ټول نغدي
+   </button>
+   <button class="sale-debt-btn" onclick="setSalePayment('debt')">
+    📒 ټول پور
+   </button>
+  </div>
+
+  <label>یادښت</label>
+  <input id="saleNote" placeholder="اختیاري یادښت">
+
+  <div class="sale-summary">
+   <div><span>ټول مبلغ</span><strong id="saleSubtotalPreview">AFN 0</strong></div>
+   <div><span>تخفیف</span><strong id="saleDiscountPreview">AFN 0</strong></div>
+   <div class="sale-total"><span>وروستی مبلغ</span><strong id="saleTotalPreview">AFN 0</strong></div>
+   <div><span>ورکړل شوې پیسې</span><strong id="salePaidPreview" class="sale-cash">AFN 0</strong></div>
+   <div><span>پاتې پور</span><strong id="saleDebtPreview" class="sale-debt">AFN 0</strong></div>
+  </div>
+
+  <button class="primary" onclick="addSale()" style="padding:19px;font-size:19px">
+   ✅ خرڅلاو ثبت کړه
+  </button>
  </div>
- <div class="panel"><input id="salesSearch" placeholder="د رسید، جنس یا مشتری نوم ولټوه"><div id="salesList"></div></div>
+
+ <div class="panel">
+  <input id="salesSearch" placeholder="د رسید، جنس یا مشتری نوم ولټوه">
+  <div id="salesList"></div>
+ </div>
 </section>
 
 <section id="purchases" class="hidden">
@@ -349,7 +473,94 @@ function deleteProduct(id){
  if(db.sales.some(x=>x.productId===id)||db.purchases.some(x=>x.productId===id))return alert("دا جنس د معاملې تاریخچه لري؛ حذف یې مه کوه.");
  if(confirm("دا جنس حذف شي؟")){db.products=db.products.filter(x=>x.id!==id);saveDB();refreshAll()}
 }
+let selectedSaleCustomerId="";
 
+function searchSaleCustomers(){
+ const q=value("saleCustomer").toLowerCase();
+ const box=document.getElementById("saleCustomerResults");
+
+ selectedSaleCustomerId="";
+
+ if(!q){
+  box.classList.add("hidden");
+  box.innerHTML="";
+  return;
+ }
+
+ const list=db.customers.filter(c=>
+  String(c.name).toLowerCase().includes(q)||
+  String(c.phone||"").toLowerCase().includes(q)
+ );
+
+ box.innerHTML=list.map(c=>`
+  <button type="button" onclick="selectSaleCustomer('${safe(c.id)}')">
+   <b>${safe(c.name)}</b>
+   <div>شمېره: ${safe(c.phone||"-")} | پور: ${money(c.debt)}</div>
+  </button>
+ `).join("")||'<div class="item">مشتری ونه موندل شو</div>';
+
+ box.classList.remove("hidden");
+}
+
+function selectSaleCustomer(id){
+ const c=db.customers.find(x=>x.id===id);
+ if(!c)return;
+
+ selectedSaleCustomerId=c.id;
+ document.getElementById("saleCustomer").value=c.name;
+ document.getElementById("saleCustomerResults").classList.add("hidden");
+}
+
+function filterSaleProducts(){
+ const q=value("saleProductSearch").toLowerCase();
+ const select=document.getElementById("saleProduct");
+ const old=select.value;
+
+ const list=db.products.filter(p=>
+  String(p.name).toLowerCase().includes(q)||
+  String(p.code||"").toLowerCase().includes(q)
+ );
+
+ select.innerHTML=list.map(p=>
+  `<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(p.unit)}</option>`
+ ).join("")||'<option value="">جنس ونه موندل شو</option>';
+
+ if(list.some(p=>p.id===old))select.value=old;
+
+ const p=db.products.find(x=>x.id===select.value);
+ if(p)document.getElementById("salePrice").value=p.price;
+
+ updateSalePreview();
+}
+
+function updateSalePreview(){
+ const qty=number("saleQty");
+ const price=number("salePrice");
+ const discount=number("saleDiscount");
+ const paid=number("salePaid");
+
+ const subtotal=qty*price;
+ const total=Math.max(0,subtotal-discount);
+ const validPaid=Math.min(total,Math.max(0,paid));
+ const debt=Math.max(0,total-validPaid);
+
+ document.getElementById("saleSubtotalPreview").textContent=money(subtotal);
+ document.getElementById("saleDiscountPreview").textContent=money(discount);
+ document.getElementById("saleTotalPreview").textContent=money(total);
+ document.getElementById("salePaidPreview").textContent=money(validPaid);
+ document.getElementById("saleDebtPreview").textContent=money(debt);
+}
+
+function setSalePayment(type){
+ const total=Math.max(0,
+  number("saleQty")*number("salePrice")-number("saleDiscount")
+ );
+
+ document.getElementById("salePaid").value=
+  type==="cash"?total:0;
+
+ updateSalePreview();
+}
 function addSale(){
  const p=db.products.find(x=>x.id===value("saleProduct"));
  if(!p)return alert("جنس انتخاب کړه");
@@ -414,7 +625,7 @@ function addSale(){
   customer:c?.name||customer||"نغدي مشتری",
   customerId:c?.id||"",
   note:value("saleNote"),
-  date:today()
+  date:value("saleDate")||today()
  };
 
  if(c)c.debt=Number(c.debt||0)+debt;
@@ -427,7 +638,11 @@ function addSale(){
  });
 
  document.getElementById("saleQty").value="1";
-
+selectedSaleCustomerId="";
+document.getElementById("saleProductSearch").value="";
+document.getElementById("saleDate").value=today();
+document.getElementById("saleCustomerResults").classList.add("hidden");
+updateSalePreview();
  refreshAll();
 
  alert(
@@ -497,7 +712,8 @@ function renderCustomers(){
  <button class="gray" onclick="editCustomer('${c.id}')">سمون</button><button class="red" onclick="deleteCustomer('${c.id}')">حذف</button></div>`).join("")||"<p>مشتری نشته</p>";
 }
 function editCustomer(id){
- const c=db.customers.find(x=>x.id===id);if(!c)return;
+ c=db.customers.find(x=>x.id===selectedSaleCustomerId)||
+  db.customers.find(x=>x.name.toLowerCase()===customer.toLowerCase());
  const name=prompt("د مشتری نوم",c.name);if(name===null)return;
  const phone=prompt("شمېره",c.phone||"");if(phone===null)return;
  const type=prompt("active یا old ولیکه",c.type||"active");if(type===null)return;
@@ -509,7 +725,15 @@ function deleteCustomer(id){
  if(Number(c.debt)>0)return alert("پور لرونکی مشتری مه حذفوه.");
  if(db.sales.some(s=>s.customerId===id))return alert("د خرڅلاو تاریخچه لري؛ حذف یې مه کوه.");
  if(confirm("مشتری حذف شي؟")){db.customers=db.customers.filter(x=>x.id!==id);saveDB();refreshAll()}
-}
+}document.getElementById("saleCustomer").addEventListener("input",searchSaleCustomers);
+
+document.getElementById("saleProductSearch").addEventListener("input",filterSaleProducts);
+
+["saleQty","salePrice","saleDiscount","salePaid"].forEach(id=>{
+ document.getElementById(id).addEventListener("input",updateSalePreview);
+});
+
+document.getElementById("saleDate").value=today();
 </script>
 
 <script>
