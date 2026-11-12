@@ -283,7 +283,9 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
  <h3>🚚 پېرود او د جنس داخلول</h3>
  <div class="panel">
   <label>🔎 د پېرود جنس د نوم یا بارکوډ له مخې ولټوه</label><input id="buyProductSearch" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off"><label>جنس انتخاب کړه</label><select id="buyProduct"></select>
-  <label>د عرضه کوونکي نوم</label><input id="buySupplier">
+  <label>د پېرود واحد</label><select id="buyUnit"></select>
+  <label>د عرضه کوونکي نوم</label><input id="buySupplier" list="supplierOptions" autocomplete="off"><datalist id="supplierOptions"></datalist>
+  <label>د پېرود نېټه</label><input id="buyDate" type="date">
   <div class="row">
    <div><label>تعداد</label><input id="buyQty" type="number" min="0.01" step="any"></div>
    <div><label>فی واحد قیمت</label><input id="buyPrice" type="number" min="0"></div>
@@ -291,7 +293,7 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
   <label>ورکړل شوې پیسې</label><input id="buyPaid" type="number" min="0" value="0">
   <button class="primary" onclick="addPurchase()">پېرود ثبت کړه</button>
  </div>
- <div class="panel"><div id="purchasesList"></div></div>
+ <div class="panel"><label>🔍 د پېرود تاریخچه ولټوه</label><input id="purchasesSearch" placeholder="د جنس، عرضه کوونکي یا رسید شمېره..."><div id="purchasesList"></div></div>
 </section>
 
 <section id="customers" class="hidden">
@@ -461,6 +463,11 @@ function fillProductSelects(){
  if(db.products.some(p=>p.id===oldSale))sale.value=oldSale;
  if(db.products.some(p=>p.id===oldBuy))buy.value=oldBuy;
 
+ const search=document.getElementById("buyProductSearch");
+ const supplierList=document.getElementById("supplierOptions");
+ if(supplierList)supplierList.innerHTML=db.suppliers.map(x=>`<option value="${safe(x.name)}"></option>`).join("");
+ if(search&&search.value)filterPurchaseProducts();
+ updatePurchaseUnitOptions();
  const p=db.products.find(x=>x.id===sale.value)||db.products[0];
 
  if(p){const u=document.getElementById("saleUnit");if(u){u.innerHTML=`<option>${safe(p.tradeUnit||p.unit)}</option><option>${safe(p.unit)}</option>`;u.value=p.tradeUnit||p.unit;}}
@@ -752,34 +759,65 @@ function filterPurchaseProducts(){
   `<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(p.unit)} | کوډ: ${safe(p.code||"-")}</option>`
  ).join("")||'<option value="">جنس ونه موندل شو</option>';
  if(list.some(p=>p.id===old))select.value=old;
+ if(!select.value&&list.length)select.value=list[0].id;
+ updatePurchaseUnitOptions();
+}
+function updatePurchaseUnitOptions(){
+ const p=db.products.find(x=>x.id===value("buyProduct"));
+ const unit=document.getElementById("buyUnit");if(!unit)return;
+ if(!p){unit.innerHTML="";return;}
+ const main=p.unit||"واحد",trade=p.tradeUnit||main;
+ unit.innerHTML=trade===main?`<option value="main">${safe(main)}</option>`:`<option value="trade">${safe(trade)}</option><option value="main">${safe(main)}</option>`;
+ if(!unit.value)unit.value=trade===main?"main":"trade";
+}
+function updatePurchasePriceForUnit(){
+ const p=db.products.find(x=>x.id===value("buyProduct"));if(!p)return;
+ const factor=value("buyUnit")==="main"?1:(Number(p.unitFactor)||1);
+ document.getElementById("buyPrice").value=(Number(p.cost)||0)*factor;
 }
 document.getElementById("buyProductSearch").addEventListener("input",filterPurchaseProducts);
+document.getElementById("buyProduct").addEventListener("change",()=>{updatePurchaseUnitOptions();updatePurchasePriceForUnit()});
+document.getElementById("buyUnit").addEventListener("change",updatePurchasePriceForUnit);
+document.getElementById("buyDate").value=today();
 
 function addPurchase(){
  const p=db.products.find(x=>x.id===value("buyProduct"));
  if(!p)return alert("جنس انتخاب کړه");
- const supplier=value("buySupplier"),qty=number("buyQty"),price=number("buyPrice"),paid=number("buyPaid"),total=qty*price;
- if(qty<=0||price<0||paid<0||paid>total)return alert("د پېرود شمېرې سمې نه دي");
- if(paid>Number(db.cash))
- return alert("په صندوق کې دومره نغدې پیسې نشته");
- let s=null;
+ const supplier=value("buySupplier"),qty=number("buyQty"),price=number("buyPrice"),paid=number("buyPaid");
+ const factor=value("buyUnit")==="main"?1:(Number(p.unitFactor)||1);
+ const stockAdd=qty*factor,total=qty*price,date=value("buyDate")||today();
+ if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<=0||!Number.isFinite(paid)||paid<0||paid>total)return alert("د پېرود شمېرې سمې نه دي");
+ if(paid>Number(db.cash))return alert("په صندوق کې دومره نغدې پیسې نشته");
+ let supplierRecord=null;
  if(supplier){
-  s=db.suppliers.find(x=>x.name.toLowerCase()===supplier.toLowerCase());
-  if(!s){s={id:uid(),name:supplier,phone:"",debt:0,created:today()};db.suppliers.push(s)}
+  supplierRecord=db.suppliers.find(x=>String(x.name).toLowerCase()===supplier.toLowerCase());
+  if(!supplierRecord){supplierRecord={id:uid(),name:supplier,phone:"",debt:0,created:today()};db.suppliers.push(supplierRecord);}
  }else if(total-paid>0)return alert("که پېرود په پور وي، د شرکت نوم حتمي ولیکه.");
- /* د موجودۍ نوی منځنی پېرود قیمت */
- const factor=Number(p.unitFactor)||1,stockAdd=qty*factor,oldQty=Number(p.qty)||0,oldCost=Number(p.cost)||0;
- p.cost=(oldQty*oldCost+stockAdd*(price/factor))/(oldQty+stockAdd);
+ const oldQty=Number(p.qty)||0,oldCost=Number(p.cost)||0;
+ const baseUnitCost=price/factor;
+ p.cost=oldQty+stockAdd>0?(oldQty*oldCost+stockAdd*baseUnitCost)/(oldQty+stockAdd):baseUnitCost;
  p.qty=oldQty+stockAdd;
  db.cash=Number(db.cash)-paid;
- const debt=total-paid;if(s)s.debt=Number(s.debt||0)+debt;
- db.purchases.push({id:uid(),productId:p.id,productName:p.name,qty,unit:p.tradeUnit||p.unit,stockQty:stockAdd,unitFactor:factor,price,total,paid,debt,supplier:supplier||"نغدي پېرود",supplierId:s?.id||"",date:today()});
- saveDB();["buySupplier","buyQty","buyPrice"].forEach(id=>document.getElementById(id).value="");document.getElementById("buyPaid").value="0";
- refreshAll();alert("پېرود ثبت شو");
+ const debt=total-paid;if(supplierRecord)supplierRecord.debt=Number(supplierRecord.debt||0)+debt;
+ const purchase={id:uid(),invoice:"PUR-"+Date.now(),productId:p.id,productName:p.name,qty,unit:value("buyUnit")==="main"?(p.unit||"واحد"):(p.tradeUnit||p.unit),stockQty:stockAdd,unitFactor:factor,price,total,paid,debt,supplier:supplier||"نغدي پېرود",supplierId:supplierRecord?.id||"",date};
+ db.purchases.push(purchase);
+ saveDB();
+ ["buySupplier","buyQty","buyPrice"].forEach(id=>document.getElementById(id).value="");
+ document.getElementById("buyPaid").value="0";
+ document.getElementById("buyProductSearch").value="";
+ document.getElementById("buyDate").value=today();
+ refreshAll();alert("پېرود ثبت شو\nرسید: "+purchase.invoice+"\nټول: "+money(total));
 }
 function renderPurchases(){
- document.getElementById("purchasesList").innerHTML=db.purchases.slice().reverse().map(p=>`
- <div class="item"><b>${safe(p.productName)}</b><div>عرضه کوونکی: ${safe(p.supplier)}</div><div>تعداد: ${p.qty} ${safe(p.unit)}</div><div>ټول: ${money(p.total)} | ورکړل: ${money(p.paid)} | پور: ${money(p.debt)}</div><div>نېټه: ${safe(p.date)}</div></div>`).join("")||"<p>پېرود نشته</p>";
+ const q=value("purchasesSearch").toLowerCase();
+ const list=db.purchases.filter(p=>
+  String(p.productName||"").toLowerCase().includes(q)||
+  String(p.supplier||"").toLowerCase().includes(q)||
+  String(p.invoice||"").toLowerCase().includes(q)||
+  String(p.date||"").includes(q)
+ ).slice().reverse();
+ document.getElementById("purchasesList").innerHTML=list.map(p=>`
+ <div class="item"><b>${safe(p.productName)}</b><div>رسید: ${safe(p.invoice||"-")} | نېټه: ${safe(p.date||"-")}</div><div>عرضه کوونکی: ${safe(p.supplier)}</div><div>تعداد: ${p.qty} ${safe(p.unit)} | ګدام ته داخل: ${p.stockQty??p.qty} ${safe(p.productUnit||p.unit)}</div><div>فی واحد: ${money(p.price)} | ټول: ${money(p.total)}</div><div>ورکړل: ${money(p.paid)} | پور: ${money(p.debt)}</div></div>`).join("")||"<p>پېرود ونه موندل شو</p>";
 }
 function addCustomer(){
  const name=value("cName"),debt=number("cDebt");
