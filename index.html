@@ -145,7 +145,6 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
  </div>
 </header>
 <main>
-<div class="panel" style="margin-top:12px"><label>🔎 عمومي لټون — جنس، مشتری، شرکت، رسید او لګښت</label><input id="globalSearch" placeholder="نوم، شمېره یا د رسید شمېره ولیکه..." autocomplete="off"><div id="globalSearchResults"></div></div>
 <section id="home">
  <div class="section-title"><h3>د دکان عمومي حساب</h3><span class="badge">AFN افغانۍ</span></div>
  <div class="cards">
@@ -1040,7 +1039,6 @@ const restored=saved.database||saved;
 }
 
 /* د لټون او انتخابونو فعالول */
-document.getElementById("globalSearch").addEventListener("input",runGlobalSearch);
 document.getElementById("productSearch").addEventListener("input",renderProducts);
 document.getElementById("salesSearch").addEventListener("input",renderSales);
 document.getElementById("customerSearch").addEventListener("input",renderCustomers);
