@@ -142,6 +142,7 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
  </div>
 </header>
 <main>
+<div class="panel" style="margin-top:12px"><label>🔎 عمومي لټون — جنس، مشتری، شرکت، رسید او لګښت</label><input id="globalSearch" placeholder="نوم، شمېره یا د رسید شمېره ولیکه..." autocomplete="off"><div id="globalSearchResults"></div></div>
 <section id="home">
  <div class="section-title"><h3>د دکان عمومي حساب</h3><span class="badge">AFN افغانۍ</span></div>
  <div class="cards">
@@ -380,6 +381,8 @@ hr{border:0;border-top:1px solid #edf0f5;margin:15px 0}
 
 <script>
 "use strict";
+/* د Netlify غوښتنې: عمومي لټون؛ د رسید سمون، تخفیف او چاپ؛ د مشتریانو فعال او پخواني پورونه جلا؛ د پانګې محاسبه؛ د لګښتونو نېټه/ډول او ورځني، میاشتني راپورونه؛ د kg/g، بوجۍ، ټوټه، کارټن، بوتل، لیټر، پاکټ او ګلاس واحدونو بدلون؛ میاشتنی آرشیف؛ پښتو/دري؛ موبایل/کمپیوټر؛ آفلاین PWA؛ Backup/Restore. د واحدونو د بدلون سیستم، میاشتنی آرشیف، بشپړه دري ژبه او PWA لا بشپړ کار غواړي. دا نسخه د SHAHEEN_STORE_NEW_V1 ذخیره کاروي او د SHAHEEN_DUKAN_PRO_V2 زړې ذخیرې ته لاس نه وهي. */
+
 const DB_KEY="SHAHEEN_STORE_NEW_V1";
 let db;
 try{db=JSON.parse(localStorage.getItem(DB_KEY)||"null")}catch(e){db=null}
@@ -410,6 +413,26 @@ function show(id,btn){
 function toggleLang(){
  alert("دري ژبه به په راتلونکې نسخه کې بشپړه فعاله شي. اوسنی حساب په پښتو کې دی.");
 }
+
+function runGlobalSearch(){
+ const q=value("globalSearch").toLowerCase(),box=document.getElementById("globalSearchResults");
+ if(!q){box.innerHTML="";return;}
+ const groups=[
+ ["جنسونه","products",db.products.filter(x=>(x.name||"").toLowerCase().includes(q)||(x.code||"").toLowerCase().includes(q))],
+ ["مشتریان","customers",db.customers.filter(x=>(x.name||"").toLowerCase().includes(q)||(x.phone||"").includes(q))],
+ ["شرکتونه","suppliers",db.suppliers.filter(x=>(x.name||"").toLowerCase().includes(q)||(x.phone||"").includes(q))],
+ ["رسیدونه","sales",db.sales.filter(x=>(x.invoice||"").toLowerCase().includes(q)||(x.customer||"").toLowerCase().includes(q)||(x.productName||"").toLowerCase().includes(q))],
+ ["پېرود","purchases",db.purchases.filter(x=>(x.productName||"").toLowerCase().includes(q)||(x.supplier||"").toLowerCase().includes(q))],
+ ["لګښتونه","expenses",db.expenses.filter(x=>(x.name||"").toLowerCase().includes(q)||(x.category||"").toLowerCase().includes(q))]
+ ];
+ let html="";
+ groups.forEach(g=>g[2].slice(0,8).forEach(x=>{
+  const label=x.name||x.invoice||x.productName||x.supplier||"ریکارډ";
+  html+='<div class="item"><b>'+safe(g[0])+'</b> — '+safe(label)+' <button class="gray" onclick="show(\''+g[1]+'\')">خلاص کړه</button></div>';
+ }));
+ box.innerHTML=html||"<p class='notice'>پایله ونه موندل شوه.</p>";
+}
+
 function refreshAll(){
  fillProductSelects();renderProducts();renderSales();renderPurchases();
  renderCustomers();renderSuppliers();renderExpenses();renderDebtLists();updateDashboard();
@@ -712,8 +735,7 @@ function renderCustomers(){
  <button class="gray" onclick="editCustomer('${c.id}')">سمون</button><button class="red" onclick="deleteCustomer('${c.id}')">حذف</button></div>`).join("")||"<p>مشتری نشته</p>";
 }
 function editCustomer(id){
- c=db.customers.find(x=>x.id===selectedSaleCustomerId)||
-  db.customers.find(x=>x.name.toLowerCase()===customer.toLowerCase());
+ const c=db.customers.find(x=>x.id===id);if(!c)return;
  const name=prompt("د مشتری نوم",c.name);if(name===null)return;
  const phone=prompt("شمېره",c.phone||"");if(phone===null)return;
  const type=prompt("active یا old ولیکه",c.type||"active");if(type===null)return;
@@ -902,6 +924,7 @@ const restored=saved.database||saved;
 }
 
 /* د لټون او انتخابونو فعالول */
+document.getElementById("globalSearch").addEventListener("input",runGlobalSearch);
 document.getElementById("productSearch").addEventListener("input",renderProducts);
 document.getElementById("salesSearch").addEventListener("input",renderSales);
 document.getElementById("customerSearch").addEventListener("input",renderCustomers);
