@@ -1082,7 +1082,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
    <div><label>نېټه</label><input id="eDate" type="date"></div>
   </div>
   <label>د لګښت ډول</label>
-  <select id="eCategory" onchange="toggleStockExpenseFields()"><option value="cash">نغدي لګښت</option><option value="stock">د دکان له موجودۍ مصرف</option></select>
+  <select id="eCategory" onchange="toggleStockExpenseFields()"><option value="cash">نغدي لګښت (له ګټې کمېږي)</option><option value="cash_nonprofit">نغدي فیس (یوازې له نغدو کمېږي)</option><option value="stock">د دکان له موجودۍ مصرف</option></select>
   <div id="stockExpenseFields" class="hidden">
    <label>🔎 د موجودۍ جنس ولټوه</label><input id="eProductSearch" type="search" placeholder="د جنس نوم یا کوډ ولیکه..." oninput="filterExpenseProducts()">
    <label>جنس انتخاب کړه</label><select id="eProduct" onchange="updateExpenseProductInfo()"></select>
@@ -1995,7 +1995,8 @@ function addExpense(){
   if(!Number.isFinite(amount)||amount<=0)return alert("سم مبلغ ولیکه");
   if(amount>Number(db.cash))return alert("په صندوق کې دومره پیسې نشته");
   db.cash=Number(db.cash)-amount;
-  db.expenses.push({id:uid(),name,amount,date,category:value("eCategory"),note,paymentType:"cash"});
+  const nonProfitCash=category==="cash_nonprofit";
+  db.expenses.push({id:uid(),name,amount,date,category:nonProfitCash?"نغدي فیس — له ګټې نه کمېږي":"نغدي لګښت",note,paymentType:nonProfitCash?"cash_nonprofit":"cash"});
  }
  saveDB();
  ["eName","eAmount","eNote","eQty","eProductSearch"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
@@ -2071,7 +2072,7 @@ function renderCapitalPage(){
  const customerPayouts=sum(payments.filter(p=>p.type==="customer_out"),"amount");
  const cashExpenses=sum(expenses.filter(e=>e.paymentType!=="stock"),"amount");
  const openingCash=cash-salesCash-customerReceipts+purchaseCash+supplierPayments+cashExpenses+customerPayouts;
- const grossProfit=sum(sales,"profit"),allExpenses=sum(expenses,"amount"),netProfit=grossProfit-allExpenses;
+ const grossProfit=sum(sales,"profit"),allExpenses=sum(expenses.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),netProfit=grossProfit-allExpenses;
  const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
  put("capitalPageTotal",total);put("capitalCash",cash);put("capitalStock",stock);
  put("capitalActiveDebt",activeDebt);put("capitalOldDebt",oldDebt);put("capitalReceivables",receivables);put("capitalPayables",payables);
@@ -2098,7 +2099,7 @@ function updateDashboard(){
  const expensesToday=db.expenses.filter(e=>e.date===today());
  const totalSales=salesToday.reduce((a,s)=>a+Number(s.total||0),0);
  const grossProfit=salesToday.reduce((a,s)=>a+Number(s.profit||0),0);
- const dailyExpenses=expensesToday.reduce((a,e)=>a+Number(e.amount||0),0);
+ const dailyExpenses=expensesToday.filter(e=>e.paymentType!=="cash_nonprofit").reduce((a,e)=>a+Number(e.amount||0),0);
  const dailyDebt=salesToday.reduce((a,s)=>a+Number(s.debt||0),0);
  const netProfit=grossProfit-dailyExpenses;
  const sarafHeld=(db.sarafAccounts||[]).reduce((n,x)=>n+sarafTotals(x.id).held,0);
@@ -2139,7 +2140,7 @@ function archiveMonth(){
  const inside=d=>String(d||"").slice(0,7)===month;
  const ss=db.sales.filter(x=>inside(x.date)),pp=db.purchases.filter(x=>inside(x.date)),ee=db.expenses.filter(x=>inside(x.date));
  const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
- db.archives.push({id:uid(),month,createdAt:new Date().toISOString(),salesCount:ss.length,sales:sum(ss,"total"),purchases:sum(pp,"total"),grossProfit:sum(ss,"profit"),expenses:sum(ee,"amount")});
+ db.archives.push({id:uid(),month,createdAt:new Date().toISOString(),salesCount:ss.length,sales:sum(ss,"total"),purchases:sum(pp,"total"),grossProfit:sum(ss,"profit"),expenses:sum(ee.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),cashNonProfit:sum(ee.filter(e=>e.paymentType==="cash_nonprofit"),"amount")});
  saveDB();renderArchives();alert("میاشت آرشیف شوه؛ اصلي معلومات نه دي حذف شوي");
 }
 function renderArchives(){
@@ -2186,7 +2187,7 @@ function makeReport(){
  const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
  const totalSales=sum(sales,"total"),totalPaid=sum(sales,"paid"),totalDebt=sum(sales,"debt");
  const totalPurchases=sum(purchases,"total"),purchasePaid=sum(purchases,"paid");
- const gross=sum(sales,"profit"),expenseTotal=sum(expenses,"amount");
+ const gross=sum(sales,"profit"),expenseTotal=sum(expenses.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),cashNonProfitTotal=sum(expenses.filter(e=>e.paymentType==="cash_nonprofit"),"amount");
  const net=gross-expenseTotal;
  const dateLabel=from===to?jalaliDisplayDate(from):(from||to?jalaliDisplayDate(from)+" تر "+jalaliDisplayDate(to):"ټولې نېټې");
  const esc=x=>safe(x==null?"":String(x));
@@ -2213,7 +2214,7 @@ function makeReport(){
   <section class="daily-report-section">
    <h3>💸 مصارف او مصرف شوي جنسونه — ${esc(dateLabel)}</h3>
    ${table(["تشریح","مقدار","مبلغ","له"],expenseRows,"معلومات نشته")}
-   <div class="daily-report-total">ټول مصارف <b>${money(expenseTotal)}</b></div>
+   <div class="daily-report-total">د ګټې حساب مصارف <b>${money(expenseTotal)}</b></div><div class="daily-report-total">نغدي فیسونه (له ګټې بهر) <b>${money(cashNonProfitTotal)}</b></div>
   </section>
   <section class="daily-report-section">
    <h3>🧾 پلورل شوي جنسونه — ${esc(dateLabel)}</h3>
@@ -2347,7 +2348,7 @@ function renderMonthOverview(){
  const period=monthPeriod(),inside=d=>String(d||"")>=period.start&&String(d||"")<=period.end;
  const sales=db.sales.filter(x=>inside(x.date)),purchases=db.purchases.filter(x=>inside(x.date)),expenses=db.expenses.filter(x=>inside(x.date));
  const sum=(arr,k)=>arr.reduce((n,x)=>n+Number(x[k]||0),0);
- const saleTotal=sum(sales,"total"),gross=sum(sales,"profit"),expenseTotal=sum(expenses,"amount"),net=gross-expenseTotal;
+ const saleTotal=sum(sales,"total"),gross=sum(sales,"profit"),expenseTotal=sum(expenses.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),cashNonProfitTotal=sum(expenses.filter(e=>e.paymentType==="cash_nonprofit"),"amount"),net=gross-expenseTotal;
  const currentStock=stockValueNow();
  if(!Number.isFinite(Number(db.monthOpeningStockValue)))db.monthOpeningStockValue=currentStock;
  const byDay={};
@@ -2363,13 +2364,14 @@ function renderMonthOverview(){
    <div><small>د دې میاشتې خرڅلاو</small><b>${money(saleTotal)}</b></div>
    <div><small>خالصه ګټه</small><b>${money(net)}</b></div>
    <div><small>د دې میاشتې خرید</small><b>${money(sum(purchases,"total"))}</b></div>
-   <div><small>د دې میاشتې مصارف</small><b>${money(expenseTotal)}</b></div>
+   <div><small>د دې میاشتې مصارف (د ګټې حساب)</small><b>${money(expenseTotal)}</b></div>
+   <div><small>نغدي فیسونه (له ګټې بهر)</small><b>${money(cashNonProfitTotal)}</b></div>
    <div><small>ناخالصه ګټه</small><b>${money(gross)}</b></div>
    <div><small>اوسنی د مال ارزښت</small><b>${money(currentStock)}</b></div>
   </div>
   <h4>ورځني راپورونه (روانه میاشت)</h4>
   <div class="daily-table-wrap"><table class="daily-report-table"><thead><tr><th>نېټه</th><th>فروش</th><th>خالصه ګټه</th></tr></thead><tbody>
-  ${days.map(d=>`<tr><td>${safe(fmt(d))}</td><td>${money(byDay[d].sales)}</td><td>${money(byDay[d].profit-expenses.filter(e=>e.date===d).reduce((n,e)=>n+(Number(e.amount)||0),0))}</td></tr>`).join("")||'<tr><td colspan="3">معلومات نشته</td></tr>'}
+  ${days.map(d=>`<tr><td>${safe(fmt(d))}</td><td>${money(byDay[d].sales)}</td><td>${money(byDay[d].profit-expenses.filter(e=>e.date===d&&e.paymentType!=="cash_nonprofit").reduce((n,e)=>n+(Number(e.amount)||0),0))}</td></tr>`).join("")||'<tr><td colspan="3">معلومات نشته</td></tr>'}
   </tbody></table></div>
  </div>`;
 }
@@ -2386,7 +2388,7 @@ function closeCurrentMonth(){
   const inside=d=>String(d||"")>=p.start&&String(d||"")<=p.end;
   const ss=db.sales.filter(x=>inside(x.date)),pp=db.purchases.filter(x=>inside(x.date)),ee=db.expenses.filter(x=>inside(x.date));
   const sum=(arr,k)=>arr.reduce((n,x)=>n+Number(x[k]||0),0);
-  db.archives.push({id:uid(),month:p.month,start:p.start,end:p.end,createdAt:new Date().toISOString(),salesCount:ss.length,sales:sum(ss,"total"),purchases:sum(pp,"total"),grossProfit:sum(ss,"profit"),expenses:sum(ee,"amount"),netProfit:sum(ss,"profit")-sum(ee,"amount"),openingStock:Number(db.monthOpeningStockValue)||0,closingStock:stockValueNow()});
+  db.archives.push({id:uid(),month:p.month,start:p.start,end:p.end,createdAt:new Date().toISOString(),salesCount:ss.length,sales:sum(ss,"total"),purchases:sum(pp,"total"),grossProfit:sum(ss,"profit"),expenses:sum(ee.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),cashNonProfit:sum(ee.filter(e=>e.paymentType==="cash_nonprofit"),"amount"),netProfit:sum(ss,"profit")-sum(ee.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),openingStock:Number(db.monthOpeningStockValue)||0,closingStock:stockValueNow()});
  }
  const next=new Date(p.end+"T12:00:00");next.setDate(next.getDate()+1);
  db.monthStart=next.toISOString().slice(0,10);db.monthOpeningStockValue=stockValueNow();
