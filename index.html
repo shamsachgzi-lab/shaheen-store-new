@@ -2285,7 +2285,7 @@ function archiveMonth(){
  const inside=d=>String(d||"").slice(0,7)===month;
  const ss=db.sales.filter(x=>inside(x.date)),pp=db.purchases.filter(x=>inside(x.date)),ee=db.expenses.filter(x=>inside(x.date));
  const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
- db.archives.push({id:uid(),month,createdAt:new Date().toISOString(),salesCount:ss.length,sales:sum(ss,"total"),purchases:sum(pp,"total"),grossProfit:sum(ss,"profit"),expenses:sum(ee.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),cashNonProfit:sum(ee.filter(e=>e.paymentType==="cash_nonprofit"),"amount")});
+ db.archives.push({id:uid(),month,createdAt:new Date().toISOString(),salesCount:ss.length,sales:sum(ss,"total"),cashSales:sum(ss,"paid"),creditSales:sum(ss,"debt"),purchases:sum(pp,"total"),grossProfit:sum(ss,"profit"),expenses:sum(ee.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),cashNonProfit:sum(ee.filter(e=>e.paymentType==="cash_nonprofit"),"amount")});
  saveDB();renderArchives();alert("میاشت آرشیف شوه؛ اصلي معلومات نه دي حذف شوي");
 }
 function renderArchives(){
@@ -2338,6 +2338,7 @@ function makeReport(){
  const payments=(db.payments||[]).filter(x=>inside(x.date));
  const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
  const totalSales=sum(sales,"total"),totalPaid=sum(sales,"paid"),totalDebt=sum(sales,"debt");
+ const cashSales=totalPaid,creditSales=totalDebt;
  const totalPurchases=sum(purchases,"total"),purchasePaid=sum(purchases,"paid");
  const gross=sum(sales,"profit"),expenseTotal=sum(expenses.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),cashNonProfitTotal=sum(expenses.filter(e=>e.paymentType==="cash_nonprofit"),"amount");
  const net=gross-expenseTotal;
@@ -2365,6 +2366,8 @@ function makeReport(){
    <div class="daily-stat purchase"><span>🛒 خرید</span><b>${money(totalPurchases)}</b></div>
    <div class="daily-stat expense"><span>💸 مصارف</span><b>${money(expenseTotal)}</b></div>
    <div class="daily-stat sales"><span>🧾 خرڅلاو (${sales.length})</span><b>${money(totalSales)}</b></div>
+   <div class="daily-stat"><span>💵 نغدي خرڅلاو</span><b>${money(cashSales)}</b></div>
+   <div class="daily-stat"><span>📒 په پور خرڅلاو</span><b>${money(creditSales)}</b></div>
    <div class="daily-stat profit"><span>💰 خالصه ګټه</span><b>${money(net)}</b></div>
   </div>
   <section class="daily-report-section">
@@ -2514,10 +2517,11 @@ function renderMonthOverview(){
  const sales=db.sales.filter(x=>inside(x.date)),purchases=db.purchases.filter(x=>inside(x.date)),expenses=db.expenses.filter(x=>inside(x.date));
  const sum=(arr,k)=>arr.reduce((n,x)=>n+Number(x[k]||0),0);
  const saleTotal=sum(sales,"total"),gross=sum(sales,"profit"),expenseTotal=sum(expenses.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),cashNonProfitTotal=sum(expenses.filter(e=>e.paymentType==="cash_nonprofit"),"amount"),net=gross-expenseTotal;
+  const cashSales=sum(sales,"paid"),creditSales=sum(sales,"debt");
  const currentStock=stockValueNow();
  if(!Number.isFinite(Number(db.monthOpeningStockValue)))db.monthOpeningStockValue=currentStock;
  const byDay={};
- sales.forEach(x=>{const d=String(x.date||"");if(!d)return;if(!byDay[d])byDay[d]={sales:0,profit:0};byDay[d].sales+=Number(x.total)||0;byDay[d].profit+=Number(x.profit)||0;});
+ sales.forEach(x=>{const d=String(x.date||"");if(!d)return;if(!byDay[d])byDay[d]={sales:0,cash:0,credit:0,profit:0};byDay[d].sales+=Number(x.total)||0;byDay[d].cash+=Number(x.paid)||0;byDay[d].credit+=Number(x.debt)||0;byDay[d].profit+=Number(x.profit)||0;});
  const days=Object.keys(byDay).sort().reverse();
  const fmt=d=>jalaliDisplayDate(d).replace(/^[^،]+،\s*/,"");
  box.innerHTML=`
@@ -2527,6 +2531,8 @@ function renderMonthOverview(){
   <div class="month-opening">د میاشتې په شروع کې د مال ارزښت: <b>${money(db.monthOpeningStockValue)}</b> <button class="gray" onclick="editMonthOpeningStock()">✏️</button></div>
   <div class="month-stats">
    <div><small>د دې میاشتې خرڅلاو</small><b>${money(saleTotal)}</b></div>
+    <div><small>💵 د میاشتې نغدي خرڅلاو</small><b>${money(cashSales)}</b></div>
+    <div><small>📒 د میاشتې په پور خرڅلاو</small><b>${money(creditSales)}</b></div>
    <div><small>خالصه ګټه</small><b>${money(net)}</b></div>
    <div><small>د دې میاشتې خرید</small><b>${money(sum(purchases,"total"))}</b></div>
    <div><small>د دې میاشتې مصارف (د ګټې حساب)</small><b>${money(expenseTotal)}</b></div>
@@ -2535,8 +2541,8 @@ function renderMonthOverview(){
    <div><small>اوسنی د مال ارزښت</small><b>${money(currentStock)}</b></div>
   </div>
   <h4>ورځني راپورونه (روانه میاشت)</h4>
-  <div class="daily-table-wrap"><table class="daily-report-table"><thead><tr><th>نېټه</th><th>فروش</th><th>خالصه ګټه</th></tr></thead><tbody>
-  ${days.map(d=>`<tr><td>${safe(fmt(d))}</td><td>${money(byDay[d].sales)}</td><td>${money(byDay[d].profit-expenses.filter(e=>e.date===d&&e.paymentType!=="cash_nonprofit").reduce((n,e)=>n+(Number(e.amount)||0),0))}</td></tr>`).join("")||'<tr><td colspan="3">معلومات نشته</td></tr>'}
+  <div class="daily-table-wrap"><table class="daily-report-table"><thead><tr><th>نېټه</th><th>ټول خرڅلاو</th><th>نغدي</th><th>په پور</th><th>خالصه ګټه</th></tr></thead><tbody>
+  ${days.map(d=>`<tr><td>${safe(fmt(d))}</td><td>${money(byDay[d].sales)}</td><td>${money(byDay[d].cash)}</td><td>${money(byDay[d].credit)}</td><td>${money(byDay[d].profit-expenses.filter(e=>e.date===d&&e.paymentType!=="cash_nonprofit").reduce((n,e)=>n+(Number(e.amount)||0),0))}</td></tr>`).join("")||'<tr><td colspan="3">معلومات نشته</td></tr>'}
   </tbody></table></div>
  </div>`;
 }
