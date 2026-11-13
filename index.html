@@ -728,15 +728,43 @@ nav button{font-size:10px;padding:5px 3px}
 </section>
 
 <section id="capitalPage" class="hidden">
- <h3>🏦 د دکان ټوله پانګه</h3>
+ <h3>🏦 پانګه</h3>
  <div class="panel">
-  <div class="capital-total"><small>خالصه ټوله پانګه</small><strong id="capitalPageTotal">0 AFN</strong></div>
+  <div class="capital-total"><small>ټوله پانګه / مالي حالت</small><strong id="capitalPageTotal">0 AFN</strong></div>
+  <p class="notice">نغدي + موجودي + د مشتریانو پورونه − د تامین کوونکو پور</p>
   <div class="item"><b>💵 نغدې پیسې</b><strong id="capitalCash">0 AFN</strong></div>
-  <div class="item"><b>📦 د موجودۍ ارزښت (د پېرود په قیمت)</b><strong id="capitalStock">0 AFN</strong></div>
-  <div class="item"><b>👥 د مشتریانو پاتې پورونه</b><strong id="capitalReceivables">0 AFN</strong></div>
-  <div class="item"><b>🏢 د تامین کوونکو پاتې پورونه</b><strong id="capitalPayables">0 AFN</strong></div>
-  <hr>
-  <p class="notice">د پانګې حساب: نغدې پیسې + د موجودۍ ارزښت + د مشتریانو پورونه − د تامین کوونکو پورونه.</p>
+  <div class="item"><b>📦 د موجودي ارزښت</b><strong id="capitalStock">0 AFN</strong></div>
+  <div class="item"><b>👥 د اوسنیو مشتریانو پور</b><strong id="capitalActiveDebt">0 AFN</strong></div>
+  <div class="item"><b>🕰 د زړو پوروړو پور</b><strong id="capitalOldDebt">0 AFN</strong></div>
+  <div class="item"><b>ټول د مشتریانو پورونه</b><strong id="capitalReceivables">0 AFN</strong></div>
+  <div class="item"><b>🏢 زموږ پور (تامین کوونکي)</b><strong id="capitalPayables">0 AFN</strong></div>
+ </div>
+ <div class="panel">
+  <h3>پانګه څنګه جوړه ده</h3>
+  <div class="item">💵 نغدې پیسې <strong id="capitalBreakCash">0 AFN</strong></div>
+  <div class="item">📦 موجودي <strong id="capitalBreakStock">0 AFN</strong></div>
+  <div class="item">👥 اوسني مشتریان <strong id="capitalBreakActive">0 AFN</strong></div>
+  <div class="item">🕰 زاړه پوروړي <strong id="capitalBreakOld">0 AFN</strong></div>
+  <div class="item">🏢 تامین کوونکو ته پور <strong id="capitalBreakPayables">0 AFN</strong></div>
+  <div class="item"><b>ټوله پانګه</b><strong id="capitalBreakTotal">0 AFN</strong></div>
+ </div>
+ <div class="panel">
+  <h3>د نغدو پیسو حساب</h3>
+  <div class="item">د پیل نغدي / سمون <strong id="capitalOpeningCash">0 AFN</strong></div>
+  <div class="item">＋ له خرڅلاو نغدي <strong id="capitalSalesCash">0 AFN</strong></div>
+  <div class="item">＋ له مشتریانو د پور پیسې <strong id="capitalCustomerReceipts">0 AFN</strong></div>
+  <div class="item">− نغدي خرید <strong id="capitalPurchaseCash">0 AFN</strong></div>
+  <div class="item">− تامین کوونکو ته ورکړه <strong id="capitalSupplierPayments">0 AFN</strong></div>
+  <div class="item">− نغدي مصارف <strong id="capitalCashExpenses">0 AFN</strong></div>
+  <div class="item"><b>اوسني نغدي</b><strong id="capitalCashCurrent">0 AFN</strong></div>
+  <button class="gray" onclick="adjustCapitalCash()">✏️ په لاس کې اصلي نغدي تنظیم کړه</button>
+ </div>
+ <div class="panel">
+  <h3>ګټه او مصارف (ټول وخت)</h3>
+  <div class="item">ناخالصه ګټه (نغدي + پور خرڅلاو) <strong id="capitalGrossProfit">0 AFN</strong></div>
+  <div class="item">ټول مصارف <strong id="capitalAllExpenses">− 0 AFN</strong></div>
+  <div class="item"><b>خالصه ګټه</b><strong id="capitalNetProfit">0 AFN</strong></div>
+  <p class="notice">ګټه پخپله پانګې ته ورزیاتېږي: نغدي خرڅلاو نغدو ته، پور خرڅلاو د مشتری پور ته ځي او موجودي د جنس په قیمت کمېږي. مصارف نغدي (یا موجودي) کموي. له همدې امله ګټه بیا جلا نه جمع کېږي، چې یوه پیسه دوه ځله ونه شمېرل شي.</p>
   <button class="gray" onclick="renderCapitalPage()">🔄 حساب تازه کړه</button>
  </div>
 </section>
@@ -1537,13 +1565,38 @@ function paySupplierDebt(){
 
 /* د پانګې او ورځني حساب */
 function renderCapitalPage(){
- const stock=(db.products||[]).reduce((a,p)=>a+Number(p.qty||0)*Number(p.cost||0),0);
- const receivables=(db.customers||[]).reduce((a,c)=>a+Number(c.debt||0),0);
- const payables=(db.suppliers||[]).reduce((a,v)=>a+Number(v.debt||0),0);
- const cash=Number(db.cash||0);
+ const products=db.products||[],customers=db.customers||[],suppliers=db.suppliers||[];
+ const sales=db.sales||[],purchases=db.purchases||[],expenses=db.expenses||[],payments=db.payments||[];
+ const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
+ const stock=products.reduce((n,p)=>n+Number(p.qty||0)*Number(p.cost||0),0);
+ const activeDebt=sum(customers.filter(c=>c.type!=="old"),"debt");
+ const oldDebt=sum(customers.filter(c=>c.type==="old"),"debt");
+ const receivables=activeDebt+oldDebt,payables=sum(suppliers,"debt"),cash=Number(db.cash||0);
  const total=cash+stock+receivables-payables;
+ const salesCash=sum(sales,"paid");
+ const customerReceipts=sum(payments.filter(p=>p.type==="customer"),"amount");
+ const purchaseCash=sum(purchases,"paid");
+ const supplierPayments=sum(payments.filter(p=>p.type==="supplier"),"amount");
+ const cashExpenses=sum(expenses.filter(e=>e.paymentType!=="stock"),"amount");
+ const openingCash=cash-salesCash-customerReceipts+purchaseCash+supplierPayments+cashExpenses;
+ const grossProfit=sum(sales,"profit"),allExpenses=sum(expenses,"amount"),netProfit=grossProfit-allExpenses;
  const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
- put("capitalCash",cash);put("capitalStock",stock);put("capitalReceivables",receivables);put("capitalPayables",payables);put("capitalPageTotal",total);
+ put("capitalPageTotal",total);put("capitalCash",cash);put("capitalStock",stock);
+ put("capitalActiveDebt",activeDebt);put("capitalOldDebt",oldDebt);put("capitalReceivables",receivables);put("capitalPayables",payables);
+ put("capitalBreakCash",cash);put("capitalBreakStock",stock);put("capitalBreakActive",activeDebt);put("capitalBreakOld",oldDebt);put("capitalBreakPayables",-payables);put("capitalBreakTotal",total);
+ put("capitalOpeningCash",openingCash);put("capitalSalesCash",salesCash);put("capitalCustomerReceipts",customerReceipts);
+ put("capitalPurchaseCash",-purchaseCash);put("capitalSupplierPayments",-supplierPayments);put("capitalCashExpenses",-cashExpenses);put("capitalCashCurrent",cash);
+ put("capitalGrossProfit",grossProfit);put("capitalAllExpenses",-allExpenses);put("capitalNetProfit",netProfit);
+}
+function adjustCapitalCash(){
+ const current=Number(db.cash||0);
+ const entered=prompt("په لاس کې د موجودو اصلي نغدو پیسو اندازه ولیکه (AFN):",String(current));
+ if(entered===null)return;
+ const amount=Number(String(entered).replace(/,/g,"").trim());
+ if(!Number.isFinite(amount)||amount<0)return alert("د نغدو پیسو سمه اندازه ولیکه");
+ db.cash=amount;
+ try{saveDB()}catch(e){return alert("سمون خوندي نه شو؛ لومړی بیک‌اف واخله.")}
+ refreshAll();renderCapitalPage();alert("د نغدو پیسو حساب تازه شو");
 }
 function updateDashboard(){
  const stock=db.products.reduce((a,p)=>a+Number(p.qty||0)*Number(p.cost||0),0);
