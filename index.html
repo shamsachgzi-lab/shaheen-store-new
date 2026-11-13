@@ -1178,15 +1178,32 @@ function renderPurchases(){
  document.getElementById("purchasesList").innerHTML=list.map(p=>`
  <div class="item"><b>${safe(p.productName)}</b><div>رسید: ${safe(p.invoice||"-")} | نېټه: ${safe(p.date||"-")}</div><div>عرضه کوونکی: ${safe(p.supplier)}</div><div>تعداد: ${p.qty} ${safe(p.unit)} | ګدام ته داخل: ${p.stockQty??p.qty} ${safe(p.productUnit||p.unit)}</div><div>فی واحد: ${money(p.price)} | ټول: ${money(p.total)}</div><div>ورکړل: ${money(p.paid)} | پور: ${money(p.debt)}</div></div>`).join("")||"<p>پېرود ونه موندل شو</p>";
 }
-function addCustomer(){
- const name=value("cName"),debt=number("cDebt");
- if(!name)return alert("د مشتری نوم ولیکه");
- if(debt<0)return alert("پور منفي نه شي کېدای");
- if(db.customers.some(c=>c.name.toLowerCase()===name.toLowerCase()))return alert("دا مشتری مخکې ثبت شوی دی");
- db.customers.push({id:uid(),name,phone:value("cPhone"),debt,type:value("cType")||"active",created:today()});
- saveDB();["cName","cPhone","cDebt"].forEach(id=>document.getElementById(id).value="");
- refreshAll();alert("مشتری ثبت شو");
-}
+window.addCustomer=function(){
+ const name=(document.getElementById("cName")?.value||"").trim();
+ const phone=(document.getElementById("cPhone")?.value||"").trim();
+ const debtInput=document.getElementById("cDebt");
+ const debt=Number(debtInput?.value||0);
+ const type=document.getElementById("cType")?.value||"active";
+ if(!name){alert("د مشتری نوم ولیکه");document.getElementById("cName")?.focus();return;}
+ if(!Number.isFinite(debt)||debt<0){alert("د پور اندازه سمه ولیکه");return;}
+ if(!Array.isArray(db.customers))db.customers=[];
+ if(db.customers.some(c=>String(c.name||"").trim().toLowerCase()===name.toLowerCase())){alert("دا مشتری مخکې ثبت شوی دی");return;}
+ const customer={id:uid(),name,phone,debt,type,created:today()};
+ db.customers.push(customer);
+ try{
+  saveDB();
+ }catch(err){
+  db.customers=db.customers.filter(c=>c.id!==customer.id);
+  alert("مشتری ثبت نه شو؛ د موبایل د زېرمتون ځای ډک دی. لومړی بیک اپ واخله.");
+  return;
+ }
+ ["cName","cPhone","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ const panel=document.getElementById("customerFormPanel");
+ if(panel)panel.classList.add("hidden");
+ currentCustomerId="";
+ refreshAll();
+ alert("مشتری ثبت شو");
+};
 let customerView="all";
 let currentCustomerId="";
 function setCustomerView(view){
