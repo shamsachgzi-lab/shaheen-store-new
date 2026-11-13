@@ -617,6 +617,43 @@ nav button:active{background:rgba(255,255,255,.22)}
 .supplier-summary b{font-size:18px}
 .supplier-form-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .supplier-form-title button{padding:5px 10px}
+
+/* ساده، سپین کارتونه او لږ رنګونه د کورپاڼې لپاره */
+#home .cards .card{
+ background:#fff!important;border:1px solid #dce5ef!important;
+ border-right:4px solid #6b9dcc!important;border-radius:10px!important;
+ box-shadow:0 1px 4px rgba(20,40,70,.05)!important;
+ min-height:68px!important;padding:9px 10px!important;
+}
+#home .cards .card:nth-child(2){border-right-color:#399b70!important}
+#home .cards .card:nth-child(3){border-right-color:#d39a42!important}
+#home .cards .card:nth-child(4){border-right-color:#8c78b8!important}
+#home .cards .card:nth-child(5){border-right-color:#4797a2!important}
+#home .cards .card:nth-child(6){border-right-color:#527aa9!important}
+#home .cards .card span{font-size:12px!important;color:#475569!important;font-weight:600!important}
+#home .cards .card strong{font-size:16px!important;color:#20364d!important}
+#home .shortcuts .shortcut{
+ background:#fff!important;color:#29445f!important;border:1px solid #dce5ef!important;
+ border-radius:10px!important;min-height:72px!important;
+ box-shadow:0 1px 4px rgba(20,40,70,.05)!important;gap:5px!important;
+}
+#home .shortcuts .shortcut:nth-child(3n+1){border-top:3px solid #6b9dcc!important}
+#home .shortcuts .shortcut:nth-child(3n+2){border-top:3px solid #55a486!important}
+#home .shortcuts .shortcut:nth-child(3n){border-top:3px solid #d3a052!important}
+#home .shortcuts .shortcut .shortcut-icon{
+ width:30px!important;height:30px!important;background:transparent!important;
+ box-shadow:none!important;border-radius:0!important;
+}
+#home .shortcuts .shortcut .shortcut-icon svg{width:23px!important;height:23px!important;stroke-width:1.6!important}
+#home .shortcuts .shortcut span{font-size:11px!important;font-weight:700!important;color:#334b63!important}
+@media(max-width:380px){
+ #home .cards .card{min-height:64px!important;padding:7px!important}
+ #home .cards .card span{font-size:10px!important}
+ #home .cards .card strong{font-size:14px!important}
+ #home .shortcuts .shortcut{min-height:67px!important}
+ #home .shortcuts .shortcut .shortcut-icon{width:27px!important;height:27px!important}
+ #home .shortcuts .shortcut .shortcut-icon svg{width:21px!important;height:21px!important}
+}
 </style>
 
 </head>
@@ -638,12 +675,12 @@ nav button:active{background:rgba(255,255,255,.22)}
 <section id="home">
  <div class="section-title"><h3>د دکان عمومي حساب</h3><span class="badge">AFN افغانۍ</span></div>
  <div class="cards">
-  <div class="card"><span>🛒 د نن خرڅلاو</span><strong id="salesTotal">0 AFN</strong></div>
-  <div class="card"><span>💰 د نن ګټه</span><strong id="profitToday">0 AFN</strong></div>
-  <div class="card"><span>📦 د مال ارزښت</span><strong id="stockValue">0 AFN</strong></div>
-  <div class="card debt-card"><span>📒 پورونه</span><div><small>مشتریان</small><strong id="debt">0 AFN</strong></div><div><small>تامین کوونکي</small><strong id="supplierDebt">0 AFN</strong></div></div>
-  <div class="card"><span>💵 نغدې پیسې</span><strong id="cash">0 AFN</strong></div>
-  <div class="card capital-card"><span>🏦 ټوله پانګه</span><strong id="capital">0 AFN</strong></div>
+  <div class="card"><span>د نن خرڅلاو</span><strong id="salesTotal">0 AFN</strong></div>
+  <div class="card"><span>د نن ګټه</span><strong id="profitToday">0 AFN</strong></div>
+  <div class="card"><span>د مال ارزښت</span><strong id="stockValue">0 AFN</strong></div>
+  <div class="card debt-card"><span>پورونه</span><div><small>مشتریان</small><strong id="debt">0 AFN</strong></div><div><small>تامین کوونکي</small><strong id="supplierDebt">0 AFN</strong></div></div>
+  <div class="card"><span>نغدې پیسې</span><strong id="cash">0 AFN</strong></div>
+  <div class="card capital-card"><span>ټوله پانګه</span><strong id="capital">0 AFN</strong></div>
  </div>
  <div class="shortcuts">
   <button class="shortcut" onclick="show('sales')"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></b><span>فروش</span></button>
