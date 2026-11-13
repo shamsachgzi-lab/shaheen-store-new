@@ -1236,7 +1236,6 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <div class="item">ټول مصارف <strong id="capitalAllExpenses">− 0 AFN</strong></div>
   <div class="item"><b>خالصه ګټه</b><strong id="capitalNetProfit">0 AFN</strong></div>
   <p class="notice">ګټه پخپله پانګې ته ورزیاتېږي: نغدي خرڅلاو نغدو ته، پور خرڅلاو د مشتری پور ته ځي او موجودي د جنس په قیمت کمېږي. مصارف نغدي (یا موجودي) کموي. له همدې امله ګټه بیا جلا نه جمع کېږي، چې یوه پیسه دوه ځله ونه شمېرل شي.</p>
-  <button class="gray" onclick="renderCapitalPage()">🔄 حساب تازه کړه</button>
  </div>
 </section>
 
@@ -1390,7 +1389,7 @@ function runGlobalSearch(){
 function refreshAll(){
  updateProductUnitOptions();
  fillProductSelects();renderProducts();renderSales();renderPurchases();
- renderCustomers();renderSuppliers();renderSaraf();renderExpenses();renderDebtLists();renderArchives();updateDashboard();renderMonthOverview();
+ renderCustomers();renderSuppliers();renderSaraf();renderExpenses();renderDebtLists();renderArchives();updateDashboard();renderMonthOverview();renderCapitalPage();
 }
 function fillProductSelects(){
  const sale=document.getElementById("saleProduct");
