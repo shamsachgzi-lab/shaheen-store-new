@@ -501,6 +501,26 @@ nav button.active{
 }
 nav button:active{background:rgba(255,255,255,.22)}
 
+
+/* د کورپاڼې د حساب کارتونه: کوچني، عصري او رنګین */
+#home .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:0 0 12px}
+#home .card{
+ min-height:70px;
+ padding:8px 9px;
+ border-width:1px;
+ border-radius:12px;
+ gap:3px;
+ box-shadow:0 2px 7px rgba(20,40,70,.07);
+}
+#home .card span{font-size:11px;font-weight:700;line-height:1.35;color:#26364d}
+#home .card strong{font-size:15px;line-height:1.2;margin-top:3px;font-weight:800}
+@media(max-width:380px){
+ #home .cards{gap:6px}
+ #home .card{min-height:64px;padding:7px}
+ #home .card span{font-size:10px}
+ #home .card strong{font-size:14px}
+}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
