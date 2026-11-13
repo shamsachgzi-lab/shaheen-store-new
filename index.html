@@ -1661,28 +1661,40 @@ function editSale(id){
  saveDB();refreshAll();alert('رسید سم شو؛ حسابونه تازه شول.');
 }
 function printSale(id){
- const s=db.sales.find(x=>x.id===id);if(!s)return;
+ const sale=db.sales.find(x=>x.id===id);if(!sale)return;
  const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه");
  const shop=safe(db.settings?.shopName||"شاهین فروشگاه"),phone=db.settings?.shopPhone?safe(db.settings.shopPhone):"";
- const subtotal=Number(s.subtotal)||Number(s.qty||0)*Number(s.price||0);
- w.document.write(`<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>فاکتور ${safe(s.invoice)}</title>
+ const subtotal=Number(sale.subtotal)||Number(sale.qty||0)*Number(sale.price||0);
+ w.document.write(`<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>فاکتور ${safe(sale.invoice)}</title>
  <style>
- *{box-sizing:border-box}body{font-family:Arial,Tahoma,sans-serif;color:#172033;margin:0;padding:24px;background:#fff}
- .invoice{max-width:760px;margin:auto;border:1px solid #dce4ee;border-radius:16px;overflow:hidden}
- .top{background:#145bb5;color:#fff;padding:24px;text-align:center}.top h1{margin:0 0 7px;font-size:25px}.top p{margin:4px 0;color:#eaf3ff}
- .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:18px;background:#f5f8fc}.meta div{padding:10px;background:#fff;border:1px solid #e3eaf2;border-radius:9px}
+ *{box-sizing:border-box}
+ @page{size:auto;margin:10mm}
+ body{font-family:Arial,Tahoma,sans-serif;color:#172033;margin:0;padding:12px;background:#fff;font-size:14px}
+ .invoice{width:100%;max-width:760px;margin:0 auto;border:1px solid #d5deea;border-radius:12px;overflow:hidden}
+ .top{background:#145bb5;color:#fff;padding:20px 16px;text-align:center}.top h1{margin:0 0 7px;font-size:24px}.top p{margin:4px 0;color:#eaf3ff}
+ .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px;background:#f5f8fc}.meta div{padding:9px;background:#fff;border:1px solid #e3eaf2;border-radius:8px;min-width:0;overflow-wrap:anywhere}
  .meta b{display:block;color:#64748b;font-size:12px;margin-bottom:5px}
- table{width:100%;border-collapse:collapse;margin:18px 0}th,td{text-align:right;padding:13px 15px;border-bottom:1px solid #e7edf4}th{background:#edf4fc;color:#174f91}
- .totals{width:min(100%,340px);margin:12px 15px 20px auto}.totals div{display:flex;justify-content:space-between;padding:9px;border-bottom:1px dashed #d8e1ec}.totals .grand{font-size:18px;font-weight:bold;color:#145bb5;background:#eef5ff;border-radius:8px}
- .note{padding:0 15px 15px;color:#64748b}.thanks{text-align:center;padding:18px;background:#f5f8fc;color:#52647b}
- @media print{body{padding:0}.invoice{border:0;border-radius:0}.top{-webkit-print-color-adjust:exact;print-color-adjust:exact}.meta,.totals .grand,th,.thanks{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+ table{width:calc(100% - 24px);border-collapse:collapse;margin:14px 12px}th,td{text-align:right;padding:11px 8px;border:1px solid #e1e8f0;overflow-wrap:anywhere}th{background:#edf4fc;color:#174f91}
+ .totals{width:min(100% - 24px,360px);margin:12px 12px 18px auto}
+ .totals div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #e6ebf2}
+ .totals .grand{font-size:17px;font-weight:bold;color:#145bb5;background:#eef5ff;border:1px solid #cfe0f5;border-radius:8px;margin-bottom:8px}
+ .paid{background:#e6f7ed;color:#087a3d;border:1px solid #a9dfbd!important;border-radius:8px;font-weight:bold;margin-bottom:7px}
+ .debt{background:#fff0f0;color:#bd2929;border:1px solid #f0b7b7!important;border-radius:8px;font-weight:bold}
+ .note{padding:0 14px 14px;color:#64748b;overflow-wrap:anywhere}
+ .thanks{text-align:center;padding:15px;background:#f5f8fc;color:#52647b}
+ @media print{
+  html,body{width:100%;margin:0!important;padding:0!important;background:#fff!important}
+  .invoice{width:100%;max-width:none;margin:0;border:0;border-radius:0;overflow:visible}
+  .top,.meta,.totals .grand,.paid,.debt,th,.thanks{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  tr,.meta div,.totals div{break-inside:avoid;page-break-inside:avoid}
+ }
  </style></head><body><main class="invoice">
  <header class="top"><h1>${shop}</h1>${phone?`<p>د اړیکې شمېره: ${phone}</p>`:""}<p>د خرڅلاو فاکتور</p></header>
- <section class="meta"><div><b>د فاکتور شمېره</b>${safe(s.invoice||"-")}</div><div><b>نېټه</b>${safe(s.date||"-")}</div><div><b>مشتری</b>${safe(s.customer||"نغدي مشتری")}</div><div><b>پیسې</b>${safe(db.settings?.currency||"AFN")}</div></section>
- <table><thead><tr><th>جنس</th><th>تعداد</th><th>فی واحد</th><th>مجموعه</th></tr></thead><tbody><tr><td>${safe(s.productName||"-")}</td><td>${safe(s.qty)} ${safe(s.unit||"")}</td><td>${money(s.price)}</td><td>${money(subtotal)}</td></tr></tbody></table>
- <section class="totals"><div><span>ټول مبلغ</span><b>${money(subtotal)}</b></div><div><span>تخفیف</span><b>${money(s.discount)}</b></div><div class="grand"><span>وروستی مبلغ</span><b>${money(s.total)}</b></div><div><span>ورکړل شوې پیسې</span><b>${money(s.paid)}</b></div><div><span>پاتې پور</span><b>${money(s.debt)}</b></div></section>
- ${s.note?`<p class="note">یادښت: ${safe(s.note)}</p>`:""}<footer class="thanks">له پېرود څخه مو مننه 🌿</footer></main></body></html>`);
- w.document.close();w.focus();w.print();
+ <section class="meta"><div><b>د فاکتور شمېره</b>${safe(sale.invoice||"-")}</div><div><b>نېټه</b>${safe(sale.date||"-")}</div><div><b>مشتری</b>${safe(sale.customer||"نغدي مشتری")}</div><div><b>پیسې</b>${safe(db.settings?.currency||"AFN")}</div></section>
+ <table><thead><tr><th>جنس</th><th>تعداد</th><th>فی واحد</th><th>مجموعه</th></tr></thead><tbody><tr><td>${safe(sale.productName||"-")}</td><td>${safe(sale.qty)} ${safe(sale.unit||"")}</td><td>${money(sale.price)}</td><td>${money(subtotal)}</td></tr></tbody></table>
+ <section class="totals"><div><span>ټول مبلغ</span><b>${money(subtotal)}</b></div><div><span>تخفیف</span><b>${money(sale.discount)}</b></div><div class="grand"><span>وروستی مبلغ</span><b>${money(sale.total)}</b></div><div class="paid"><span>💵 نغدي ورکړه</span><b>${money(sale.paid)}</b></div><div class="debt"><span>📕 پاتې پور</span><b>${money(sale.debt)}</b></div></section>
+ ${sale.note?`<p class="note">یادښت: ${safe(sale.note)}</p>`:""}<footer class="thanks">له پېرود څخه مو مننه 🌿</footer></main></body></html>`);
+ w.document.close();w.focus();setTimeout(()=>w.print(),300);
 }
 function filterPurchaseProducts(){
  const q=value("buyProductSearch").toLowerCase();
