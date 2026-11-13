@@ -977,7 +977,6 @@ function addSale(){
  if(!p)return alert("جنس انتخاب کړه");
 
  const qty=number("saleQty");
- const factor=Number(p.unitFactor)||1;
  const price=number("salePrice");
  const paid=number("salePaid");
  const discount=number("saleDiscount");
@@ -1101,7 +1100,7 @@ function editSale(id){
 function printSale(id){
  const s=db.sales.find(x=>x.id===id);if(!s)return;
  const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه");
- w.document.write(`<!doctype html><html lang="ps" dir="rtl"><meta charset="UTF-8"><title>رسید</title><body style="font-family:Arial;text-align:center;padding:15px"><h2>شاهین فروشگاه</h2><p>رسید: ${safe(s.invoice)}</p><p>نېټه: ${safe(s.date)}</p><p>مشتری: ${safe(s.customer)}</p><hr><p>جنس: ${safe(s.productName)}</p><p>تعداد: ${s.qty} ${safe(s.unit)}</p><p>ټول: ${money(s.total)}</p><p>ورکړل: ${money(s.paid)}</p><p>پاتې پور: ${money(s.debt)}</p><p>له پېرود څخه مو مننه</p></p></body></html>`);
+ w.document.write(`<!doctype html><html lang="ps" dir="rtl"><meta charset="UTF-8"><title>رسید</title><body style="font-family:Arial;text-align:center;padding:15px"><h2>شاهین فروشگاه</h2><p>رسید: ${safe(s.invoice)}</p><p>نېټه: ${safe(s.date)}</p><p>مشتری: ${safe(s.customer)}</p><hr><p>جنس: ${safe(s.productName)}</p><p>تعداد: ${s.qty} ${safe(s.unit)}</p><p>ټول: ${money(s.total)}</p><p>ورکړل: ${money(s.paid)}</p><p>پاتې پور: ${money(s.debt)}</p><p>له پېرود څخه مو مننه</p></body></html>`);
  w.document.close();
  w.focus();
  w.print();
