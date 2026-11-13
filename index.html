@@ -1092,6 +1092,19 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <label>تشریح</label><textarea id="eNote" rows="2"></textarea>
   <button class="primary" onclick="addExpense()">لګښت ثبت کړه</button>
  </div>
+
+ <div class="panel" style="border:2px solid #d69e2e">
+  <h3>💵 نغدي فیس — یوازې له صندوقه کمېږي</h3>
+  <p class="notice">د دکان کرایه، د متر کرایه، د موټر/اموالو کرایه او د چوکېدارانو پیسې دلته ثبت کړه. دا فیس د ګټې له حسابه نه کمېږي.</p>
+  <label>د فیس نوم</label><input id="feeName" placeholder="مثلاً د دکان کرایه یا د چوکېدار معاش">
+  <div class="row">
+   <div><label>د فیس اندازه (AFN)</label><input id="feeAmount" type="number" min="0" step="any"></div>
+   <div><label>نېټه</label><input id="feeDate" type="date"></div>
+  </div>
+  <label>یادښت (اختیاري)</label><textarea id="feeNote" rows="2" placeholder="تفصیل ولیکه..."></textarea>
+  <button class="primary" onclick="addCashFee()">💾 نغدي فیس ثبت کړه</button>
+ </div>
+
  <div class="panel">
   <label>🔎 لګښتونه ولټوه</label><input id="expenseSearch" type="search" placeholder="د لګښت، جنس، ډول یا یادښت لټون..." oninput="renderExpenses()">
   <div id="expensesList"></div>
@@ -2003,6 +2016,19 @@ function addExpense(){
  const dateEl=document.getElementById("eDate");if(dateEl)dateEl.value="";
  refreshAll();alert("لګښت ثبت شو");
 }
+
+function addCashFee(){
+ const name=value("feeName").trim(),amount=number("feeAmount"),date=value("feeDate")||today(),note=value("feeNote");
+ if(!name)return alert("د فیس نوم ولیکه");
+ if(!Number.isFinite(amount)||amount<=0)return alert("د فیس اندازه سمه ولیکه");
+ if(amount>Number(db.cash||0))return alert("په صندوق کې دومره نغدې پیسې نشته");
+ db.cash=Number(db.cash||0)-amount;
+ db.expenses.push({id:uid(),name,amount,date,category:"نغدي فیس — یوازې له نغدو کمېږي",note,paymentType:"cash_nonprofit"});
+ saveDB();
+ ["feeName","feeAmount","feeDate","feeNote"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ refreshAll();alert("نغدي فیس ثبت شو؛ له نغدو کم شو، ګټه بدله نه شوه");
+}
+
 function renderExpenses(){
  const q=(value("expenseSearch")||"").trim().toLowerCase();
  const list=(db.expenses||[]).filter(e=>[e.name,e.category,e.note,e.productName,e.date].some(v=>String(v||"").toLowerCase().includes(q))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
