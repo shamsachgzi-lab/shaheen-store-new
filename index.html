@@ -557,6 +557,11 @@ nav button:active{background:rgba(255,255,255,.22)}
  #home .shortcut span{font-size:10px}
 }
 
+
+/* د چټکو برخو لپاره یو شان عصري کرښیز سمبولونه */
+#home .shortcut-icon{display:flex;align-items:center;justify-content:center;width:34px;height:34px;margin:0}
+#home .shortcut-icon svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -605,16 +610,16 @@ nav button:active{background:rgba(255,255,255,.22)}
   <div class="card capital-card"><span>🏦 ټوله پانګه</span><strong id="capital">0 AFN</strong></div>
  </div>
  <div class="shortcuts">
-  <button class="shortcut" onclick="show('sales')"><b>🧾</b><span>فروش</span></button>
-  <button class="shortcut" onclick="show('purchases')"><b>📦</b><span>خرید</span></button>
-  <button class="shortcut" onclick="show('products')"><b>📋</b><span>موجودي</span></button>
-  <button class="shortcut" onclick="show('customers')"><b>👥</b><span>مشتریان</span></button>
-  <button class="shortcut" onclick="show('suppliers')"><b>🏢</b><span>تامین کوونکي</span></button>
-  <button class="shortcut" onclick="show('reports')"><b>📊</b><span>راپورونه</span></button>
-  <button class="shortcut" onclick="show('expenses')"><b>💸</b><span>مصارف</span></button>
-  <button class="shortcut" onclick="makeDailyReport()"><b>📅</b><span>ورځنی راپور</span></button>
-  <button class="shortcut" onclick="show('capitalPage',this);renderCapitalPage()"><b>💰</b><span>پانګه</span></button>
-   <button class="shortcut" onclick="show('settings',this);renderSettings()"><b>⚙️</b><span>تنظیمات</span></button>
+  <button class="shortcut" onclick="show('sales')"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h16v18l-3-2-3 2-2-2-3 2-2-2-3 2z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg></b><span>فروش</span></button>
+  <button class="shortcut" onclick="show('purchases')"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 8 9 5 9-5M3 8v9l9 5 9-5V8M12 13v9"/></svg></b><span>خرید</span></button>
+  <button class="shortcut" onclick="show('products')"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6M9 18h3"/></svg></b><span>موجودي</span></button>
+  <button class="shortcut" onclick="show('customers')"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></b><span>مشتریان</span></button>
+  <button class="shortcut" onclick="show('suppliers')"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 21V7h6v14M7 10h2m6 0h2M7 14h2m6 0h2M11 17h2"/></svg></b><span>تامین کوونکي</span></button>
+  <button class="shortcut" onclick="show('reports')"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6" rx="1"/><rect x="13" y="8" width="3" height="10" rx="1"/><rect x="19" y="4" width="2" height="14" rx="1"/></svg></b><span>راپورونه</span></button>
+  <button class="shortcut" onclick="show('expenses')"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M7 6V4h13M12 10v5m-2-3h4M3 10h3m12 5h3"/></svg></b><span>مصارف</span></button>
+  <button class="shortcut" onclick="makeDailyReport()"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3m-3 3h7"/></svg></b><span>ورځنی راپور</span></button>
+  <button class="shortcut" onclick="show('capitalPage',this);renderCapitalPage()"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M7 9h.01M17 15h.01"/></svg></b><span>پانګه</span></button>
+   <button class="shortcut" onclick="show('settings',this);renderSettings()"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6L6.3 16l1.4-1.1a7 7 0 0 1 0-1.8L6.3 12l1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8H14l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a7 7 0 0 1-.1 1.9Z"/></svg></b><span>تنظیمات</span></button>
  </div>
  <div class="panel"><h3>⚠️ کم موجودي جنسونه <small id="lowStockCount" class="badge">0 جنس</small></h3><input id="lowStockSearch" placeholder="🔍 په کم‌موجودۍ جنسونو کې لټون..." oninput="renderLowStock()"><div id="lowStock" style="max-height:420px;overflow:auto;margin-top:8px">معلومات نشته.</div></div>
 </section>
