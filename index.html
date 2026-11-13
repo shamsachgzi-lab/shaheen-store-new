@@ -2290,8 +2290,15 @@ function archiveMonth(){
  saveDB();renderArchives();alert("میاشت آرشیف شوه؛ اصلي معلومات نه دي حذف شوي");
 }
 function renderArchives(){
- const box=document.getElementById("archiveList");if(!box)return;
- box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>"+safe(a.start||a.month+"-01")+" → "+safe(a.end||a.month+"-31")+" · خرڅلاو "+money(a.sales)+" · خالصه ګټه "+money(a.netProfit??((Number(a.grossProfit)||0)-(Number(a.expenses)||0)))+"</div><button class=\"gray\" onclick=\"showArchiveReport('"+safe(a.id)+"')\">📄 راپور</button></div>").join("")||"<p>آرشیف نشته</p>";
+  const box=document.getElementById("archiveList");if(!box)return;
+  box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>"+safe(a.start||a.month+"-01")+" → "+safe(a.end||a.month+"-31")+" · خرڅلاو "+money(a.sales)+" · خالصه ګټه "+money(a.netProfit??((Number(a.grossProfit)||0)-(Number(a.expenses)||0)))+"</div><div class=\"actions\"><button class=\"gray\" onclick=\"showArchiveReport('"+safe(a.id)+"')\">📄 راپور</button><button class=\"red\" onclick=\"deleteArchiveReport('"+safe(a.id)+"')\">🗑 راپور حذف کړه</button></div></div>").join("")||"<p>آرشیف نشته</p>";
+ }
+function deleteArchiveReport(id){
+  const a=(db.archives||[]).find(x=>x.id===id);if(!a)return;
+  if(!confirm("ایا د "+a.month+" میاشتنی آرشیف راپور په بشپړ ډول حذف کړې؟ یوازې د راپور آرشیف حذف کېږي؛ خرڅلاو، پېرود، مصارف، مشتریانو پورونه، عرضه‌کوونکي پورونه او موجودي نه حذف کېږي."))return;
+  db.archives=db.archives.filter(x=>x.id!==id);
+  saveDB();renderArchives();renderMonthOverview();
+  alert("د "+a.month+" میاشتنی آرشیف راپور حذف شو؛ اصلي معاملې او حسابونه خوندي پاتې دي.");
 }
 function makeDailyReport(){
  show("reports");
