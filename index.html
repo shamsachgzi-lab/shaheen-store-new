@@ -1031,8 +1031,12 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <button id="customerTabOld" onclick="setCustomerView('old')">زاړه پوروړي</button>
  </div>
  <div class="panel hidden" id="customerFormPanel">
-  <label>د مشتری نوم</label><input id="cName">
-  <label>د موبایل شمېره</label><input id="cPhone" type="tel">
+  <label>د مشتری نوم</label><input id="cName" placeholder="د مشتری نوم">
+  <label>د موبایل شمېره</label><input id="cPhone" type="tel" placeholder="د موبایل شمېره">
+  <div class="row">
+   <div><label>کلی</label><input id="cVillage" placeholder="د کلي نوم"></div>
+   <div><label>سیمه</label><input id="cArea" placeholder="د سیمې نوم"></div>
+  </div>
   <label>د پخواني پور اندازه</label><input id="cDebt" type="number" min="0" value="0">
   <label>د مشتری ډول</label>
   <select id="cType"><option value="active">اوسنی مشتری</option><option value="old">پخوانی پور لرونکی</option></select>
@@ -1691,6 +1695,8 @@ function renderPurchases(){
 window.addCustomer=function(){
  const name=(document.getElementById("cName")?.value||"").trim();
  const phone=(document.getElementById("cPhone")?.value||"").trim();
+ const village=(document.getElementById("cVillage")?.value||"").trim();
+ const area=(document.getElementById("cArea")?.value||"").trim();
  const debtInput=document.getElementById("cDebt");
  const debt=Number(debtInput?.value||0);
  const type=document.getElementById("cType")?.value||"active";
@@ -1698,7 +1704,7 @@ window.addCustomer=function(){
  if(!Number.isFinite(debt)||debt<0){alert("د پور اندازه سمه ولیکه");return;}
  if(!Array.isArray(db.customers))db.customers=[];
  if(db.customers.some(c=>String(c.name||"").trim().toLowerCase()===name.toLowerCase())){alert("دا مشتری مخکې ثبت شوی دی");return;}
- const customer={id:uid(),name,phone,debt,type,created:today()};
+ const customer={id:uid(),name,phone,village,area,debt,type,created:today()};
  db.customers.push(customer);
  try{
   saveDB();
@@ -1707,7 +1713,7 @@ window.addCustomer=function(){
   alert("مشتری ثبت نه شو؛ د موبایل د زېرمتون ځای ډک دی. لومړی بیک اپ واخله.");
   return;
  }
- ["cName","cPhone","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ ["cName","cPhone","cVillage","cArea","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
  const panel=document.getElementById("customerFormPanel");
  if(panel)panel.classList.add("hidden");
  currentCustomerId="";
@@ -1738,7 +1744,7 @@ function renderCustomers(){
  document.getElementById("oldCustomerDebt").textContent=money(debtOf(old));
  document.getElementById("allCustomerDebt").textContent=money(debtOf(db.customers));
  const base=customerView==="active"?active:customerView==="old"?old:db.customers;
- const list=base.filter(c=>String(c.name).toLowerCase().includes(q)||String(c.phone||"").includes(q));
+ const list=base.filter(c=>String(c.name).toLowerCase().includes(q)||String(c.phone||"").includes(q)||String(c.village||"").toLowerCase().includes(q)||String(c.area||"").toLowerCase().includes(q));
  const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي"};
  document.getElementById("customerListTitle").textContent=titles[customerView];
  document.getElementById("customerListCount").textContent="("+list.length+")";
@@ -1746,7 +1752,7 @@ function renderCustomers(){
  document.getElementById("customersList").innerHTML=list.map(c=>`
  <div class="customer-row">
   <div class="customer-row-main"><b>${safe(c.name)} <small style="display:inline">${c.type==="old"?"زاړه پوروړي":"اوسنی"}</small></b>
-   <small>${c.phone?"شمېره: "+safe(c.phone):" "}</small>
+   <small>${c.phone?"شمېره: "+safe(c.phone):""}${c.village?" · کلی: "+safe(c.village):""}${c.area?" · سیمه: "+safe(c.area):""}</small>
    <div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger('${c.id}')">📒</button><button class="gray" title="سمون" onclick="editCustomer('${c.id}')">✏️</button></div>
   </div>
   <div class="customer-row-debt">${money(c.debt)}</div>
@@ -1757,12 +1763,14 @@ function renderCustomerDetail(){
  if(!c){currentCustomerId="";renderCustomers();return;}
  const sales=db.sales.filter(x=>x.customerId===c.id||(!x.customerId&&x.customer===c.name)).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const receipts=(db.payments||[]).filter(p=>p.type==="customer"&&(p.personId===c.id||(!p.personId&&p.personName===c.name))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const payouts=(db.payments||[]).filter(p=>p.type==="customer_out"&&(p.personId===c.id||(!p.personId&&p.personName===c.name))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const sum=(a,k)=>a.reduce((n,x)=>n+Number(x[k]||0),0);
- const creditSales=sum(sales,"debt"),received=sum(receipts,"amount"),profit=sum(sales,"profit");
+ const creditSales=sum(sales,"debt"),received=sum(receipts,"amount"),paidToCustomer=sum(payouts,"amount"),profit=sum(sales,"profit");
  const opening=Math.max(0,Number(c.debt||0)-creditSales+received);
  const history=[
   ...sales.map(x=>({kind:"sale",date:x.date||"",id:x.id,record:x})),
-  ...receipts.map(x=>({kind:"payment",date:x.date||"",id:x.id,record:x}))
+  ...receipts.map(x=>({kind:"payment",date:x.date||"",id:x.id,record:x})),
+  ...payouts.map(x=>({kind:"payout",date:x.date||"",id:x.id,record:x}))
  ].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const dateText=d=>d?jalaliDisplayDate(d):"نېټه نشته";
  document.getElementById("customerListTitle").textContent="د مشتری حساب";
@@ -1772,11 +1780,20 @@ function renderCustomerDetail(){
  <div class="customer-detail">
   <button class="gray" onclick="currentCustomerId='';renderCustomers()">← بېرته د مشتریانو لېست ته</button>
   <h3>${safe(c.name)}</h3>
+  <div class="item">کلی: ${safe(c.village||"—")} · سیمه: ${safe(c.area||"—")} · شمېره: ${safe(c.phone||"—")}</div>
   <div class="customer-summary customer-detail-summary">
    <div><small>پاتې پور</small><b>${money(c.debt)}</b></div>
    <div><small>ترلاسه شوې پیسې</small><b>${money(received)}</b></div>
+   <div><small>مشتری ته ورکړل شوې نغدې</small><b>${money(paidToCustomer)}</b></div>
    <div><small>په پور اخیستل</small><b>${money(creditSales)}</b></div>
    <div><small>له دې مشتری ګټه</small><b>${money(profit)}</b></div>
+  </div>
+  <div class="panel customer-payment-panel">
+   <h3>💸 مشتری ته نغدې پیسې ورکړه</h3>
+   <label>مبلغ</label><input id="customerPayoutAmount" type="number" min="0.01" step="any" placeholder="د ورکړل شوو پیسو اندازه">
+   <label>نېټه</label><input id="customerPayoutDate" type="date" value="${today()}">
+   <label>یادښت</label><input id="customerPayoutNote" placeholder="د پیسو د ورکړې دلیل">
+   <button class="primary" onclick="saveCustomerPayout('${c.id}')">نغدې ورکړه ثبت کړه</button>
   </div>
   <div class="panel customer-payment-panel">
    <h3>💵 پیسې ترلاسه کړه</h3>
@@ -1786,7 +1803,8 @@ function renderCustomerDetail(){
    <button class="green" onclick="saveCustomerReceipt('${c.id}')">ثبت</button>
   </div>
   <h3>تاریخچه</h3>
-  ${history.map(h=>h.kind==="payment"?`
+  ${history.map(h=>h.kind==="payout"?`
+   <div class="item customer-history-payment"><b>💸 مشتری ته نغدې ورکړل شوې · ${safe(dateText(h.record.date))}</b><div class="customer-history-amount">− ${money(h.record.amount)}</div>${h.record.note?`<small>${safe(h.record.note)}</small>`:""}<button class="red" onclick="deleteCustomerPayout('${h.id}')">🗑</button></div>`:h.kind==="payment"?`
    <div class="item customer-history-payment">
     <b>💵 پیسې ترلاسه شوې · ${safe(dateText(h.record.date))}</b>
     <div class="customer-history-amount">− ${money(h.record.amount)}</div>
@@ -1801,6 +1819,22 @@ function renderCustomerDetail(){
    </div>`).join("")||"<p>تاریخچه نشته</p>"}
   <div class="item customer-opening-debt"><b>📝 پخوانی / لاسي ثبت شوی پور</b><div>${money(opening)}</div></div>
  </div>`;
+}
+function saveCustomerPayout(id){
+ const c=db.customers.find(x=>x.id===id);if(!c)return;
+ const amount=number("customerPayoutAmount"),date=value("customerPayoutDate")||today(),note=value("customerPayoutNote");
+ if(amount<=0)return alert("مبلغ په سمه توګه ولیکه");
+ if(amount>Number(db.cash||0))return alert("په صندوق کې دومره نغدې پیسې نشته");
+ db.cash=Number(db.cash||0)-amount;
+ db.payments.push({id:uid(),type:"customer_out",personId:c.id,personName:c.name,amount,date,note});
+ saveDB();refreshAll();renderCustomerDetail();
+}
+function deleteCustomerPayout(id){
+ const p=(db.payments||[]).find(x=>x.id===id&&x.type==="customer_out");if(!p)return;
+ if(!confirm("دا ورکړل شوې پیسې حذف شي؟ نغدې به بېرته صندوق ته زیاتې شي."))return;
+ db.cash=Number(db.cash||0)+Number(p.amount||0);
+ db.payments=db.payments.filter(x=>x.id!==id);
+ saveDB();refreshAll();renderCustomerDetail();
 }
 function saveCustomerReceipt(id){
  const c=db.customers.find(x=>x.id===id);if(!c)return;
@@ -1825,8 +1859,10 @@ function editCustomer(id){
  const c=db.customers.find(x=>x.id===id);if(!c)return;
  const name=prompt("د مشتری نوم",c.name);if(name===null)return;
  const phone=prompt("شمېره",c.phone||"");if(phone===null)return;
+ const village=prompt("کلی",c.village||"");if(village===null)return;
+ const area=prompt("سیمه",c.area||"");if(area===null)return;
  const type=prompt("active یا old ولیکه",c.type||"active");if(type===null)return;
- c.name=name.trim()||c.name;c.phone=phone.trim();c.type=type==="old"?"old":"active";
+ c.name=name.trim()||c.name;c.phone=phone.trim();c.village=village.trim();c.area=area.trim();c.type=type==="old"?"old":"active";
  saveDB();refreshAll();
 }
 function deleteCustomer(id){
@@ -2006,8 +2042,9 @@ function renderCapitalPage(){
  const customerReceipts=sum(payments.filter(p=>p.type==="customer"),"amount");
  const purchaseCash=sum(purchases,"paid");
  const supplierPayments=sum(payments.filter(p=>p.type==="supplier"),"amount");
+ const customerPayouts=sum(payments.filter(p=>p.type==="customer_out"),"amount");
  const cashExpenses=sum(expenses.filter(e=>e.paymentType!=="stock"),"amount");
- const openingCash=cash-salesCash-customerReceipts+purchaseCash+supplierPayments+cashExpenses;
+ const openingCash=cash-salesCash-customerReceipts+purchaseCash+supplierPayments+cashExpenses+customerPayouts;
  const grossProfit=sum(sales,"profit"),allExpenses=sum(expenses,"amount"),netProfit=grossProfit-allExpenses;
  const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
  put("capitalPageTotal",total);put("capitalCash",cash);put("capitalStock",stock);
@@ -2249,16 +2286,18 @@ document.getElementById("saleProduct").addEventListener("change",()=>{
 window.addCustomer=function(){
  const name=(document.getElementById("cName")?.value||"").trim();
  const phone=(document.getElementById("cPhone")?.value||"").trim();
+ const village=(document.getElementById("cVillage")?.value||"").trim();
+ const area=(document.getElementById("cArea")?.value||"").trim();
  const debt=Number(document.getElementById("cDebt")?.value||0);
  const type=document.getElementById("cType")?.value||"active";
  if(!name){alert("د مشتری نوم ولیکه");document.getElementById("cName")?.focus();return;}
  if(!Number.isFinite(debt)||debt<0){alert("د پور اندازه سمه ولیکه");return;}
  if(!Array.isArray(db.customers))db.customers=[];
  if(db.customers.some(c=>String(c.name||"").trim().toLowerCase()===name.toLowerCase())){alert("دا مشتری مخکې ثبت شوی دی");return;}
- const item={id:uid(),name,phone,debt,type,created:today()};
+ const item={id:uid(),name,phone,village,area,debt,type,created:today()};
  db.customers.push(item);
  try{saveDB();}catch(e){db.customers.pop();alert("ثبت ناکام شو. د اپ بیک اپ واخله او د موبایل د زېرمتون ځای وګوره.");return;}
- ["cName","cPhone","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ ["cName","cPhone","cVillage","cArea","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
  document.getElementById("customerFormPanel")?.classList.add("hidden");
  if(typeof currentCustomerId!=="undefined")currentCustomerId="";
  refreshAll();
