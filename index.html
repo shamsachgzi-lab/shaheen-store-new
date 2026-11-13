@@ -487,7 +487,7 @@ nav button{font-size:10px;padding:5px 3px}
   <button class="shortcut" onclick="show('reports')"><b>📊</b><span>راپورونه</span></button>
   <button class="shortcut" onclick="show('expenses')"><b>💸</b><span>مصارف</span></button>
   <button class="shortcut" onclick="makeDailyReport()"><b>📅</b><span>ورځنی راپور</span></button>
-  <button class="shortcut" onclick="document.getElementById('capital').scrollIntoView({behavior:'smooth',block:'center'})"><b>💰</b><span>پانګه</span></button>
+  <button class="shortcut" onclick="show('capitalPage',this);renderCapitalPage()"><b>💰</b><span>پانګه</span></button>
  </div>
  <div class="panel"><h3>⚠️ کم موجودي جنسونه</h3><div id="lowStock" class="notice">معلومات نشته.</div></div>
 </section>
@@ -724,6 +724,20 @@ nav button{font-size:10px;padding:5px 3px}
   <label>میاشت انتخاب کړه</label><input type="month" id="archiveMonth"><button class="gray" onclick="archiveMonth()">د میاشتې راپور خوندي کړه</button>
   <div id="archiveList"></div>
   <div id="reportContent"></div>
+ </div>
+</section>
+
+<section id="capitalPage" class="hidden">
+ <h3>🏦 د دکان ټوله پانګه</h3>
+ <div class="panel">
+  <div class="capital-total"><small>خالصه ټوله پانګه</small><strong id="capitalPageTotal">0 AFN</strong></div>
+  <div class="item"><b>💵 نغدې پیسې</b><strong id="capitalCash">0 AFN</strong></div>
+  <div class="item"><b>📦 د موجودۍ ارزښت (د پېرود په قیمت)</b><strong id="capitalStock">0 AFN</strong></div>
+  <div class="item"><b>👥 د مشتریانو پاتې پورونه</b><strong id="capitalReceivables">0 AFN</strong></div>
+  <div class="item"><b>🏢 د تامین کوونکو پاتې پورونه</b><strong id="capitalPayables">0 AFN</strong></div>
+  <hr>
+  <p class="notice">د پانګې حساب: نغدې پیسې + د موجودۍ ارزښت + د مشتریانو پورونه − د تامین کوونکو پورونه.</p>
+  <button class="gray" onclick="renderCapitalPage()">🔄 حساب تازه کړه</button>
  </div>
 </section>
 
@@ -1522,6 +1536,15 @@ function paySupplierDebt(){
 }
 
 /* د پانګې او ورځني حساب */
+function renderCapitalPage(){
+ const stock=(db.products||[]).reduce((a,p)=>a+Number(p.qty||0)*Number(p.cost||0),0);
+ const receivables=(db.customers||[]).reduce((a,c)=>a+Number(c.debt||0),0);
+ const payables=(db.suppliers||[]).reduce((a,v)=>a+Number(v.debt||0),0);
+ const cash=Number(db.cash||0);
+ const total=cash+stock+receivables-payables;
+ const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
+ put("capitalCash",cash);put("capitalStock",stock);put("capitalReceivables",receivables);put("capitalPayables",payables);put("capitalPageTotal",total);
+}
 function updateDashboard(){
  const stock=db.products.reduce((a,p)=>a+Number(p.qty||0)*Number(p.cost||0),0);
  const customerDebt=db.customers.reduce((a,c)=>a+Number(c.debt||0),0);
