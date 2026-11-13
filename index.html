@@ -597,6 +597,34 @@ nav button:active{background:rgba(255,255,255,.22)}
  #home .shortcuts .shortcut span{font-size:10px!important}
 }
 
+
+/* عصري فاکتور او خرڅلاو ډیزاین */
+#sales>h3{display:none}
+#sales .sale-panel{background:linear-gradient(180deg,#f8fbff 0%,#fff 180px);border:1px solid #dce7f5;border-radius:22px;margin:8px 0 16px;padding:18px 15px;box-shadow:0 8px 24px #17365d12}
+#sales .sale-heading{background:linear-gradient(120deg,#145bb5,#2784d8);color:#fff;border-radius:16px;padding:17px;margin:-2px -2px 20px;box-shadow:0 5px 14px #1769d233}
+#sales .sale-heading h3{display:block;color:#fff;font-size:21px}
+#sales .sale-heading .badge{background:#ffffff24;color:#fff;border:1px solid #ffffff55}
+#sales label{display:block;color:#34445c;font-size:13px;margin-top:5px}
+#sales input:not([type=hidden]),#sales select{border:1px solid #d6e1ef;border-radius:12px;background:#fff;min-height:47px;padding:12px 13px;box-shadow:0 1px 3px #152b4b08}
+#sales input:focus,#sales select:focus{outline:0;border-color:#3988df;box-shadow:0 0 0 3px #3988df20}
+#sales .sale-search{border:2px solid #3988df;background:#fafdff;font-size:16px;font-weight:600}
+#sales .sale-summary{background:#f0f5fb;border:1px solid #dce7f3;border-radius:17px;padding:14px;margin:18px 0}
+#sales .sale-summary>div{padding:9px 2px;border-bottom:1px dashed #d2deeb}
+#sales .sale-summary>div:last-child{border-bottom:0}
+#sales .sale-summary .sale-total{font-size:16px;color:#124f9c;padding:13px 2px}
+#sales .sale-summary .sale-total strong{font-size:21px}
+#sales .sale-actions{display:flex;gap:10px;margin:12px 0}
+#sales .sale-actions button{flex:1;border-radius:12px;padding:13px}
+#sales .sale-cash-btn{background:#e1f6eb;color:#087b42}
+#sales .sale-debt-btn{background:#fff1db;color:#9a5b08}
+#sales .sale-panel>.primary{border-radius:14px;background:linear-gradient(110deg,#1769d2,#2784d8);box-shadow:0 6px 15px #1769d233}
+#sales>.panel{border:1px solid #e0e8f2;border-radius:18px;padding:15px}
+#sales #salesList .item{background:#fff;border:1px solid #e2eaf3;border-radius:14px;padding:13px;margin:10px 0;line-height:1.8;box-shadow:0 3px 10px #17203308}
+#sales #salesList .item>b{color:#145bb5;font-size:15px}
+#sales #salesList .actions button{border-radius:9px;padding:9px 12px}
+@media(min-width:700px){#sales .sale-panel{padding:24px 26px}#sales .sale-heading{padding:20px 22px}#sales .sale-panel{max-width:780px;margin:12px auto 18px}}
+@media print{body{background:#fff!important}}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -1635,13 +1663,26 @@ function editSale(id){
 function printSale(id){
  const s=db.sales.find(x=>x.id===id);if(!s)return;
  const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه");
- w.document.write(`<!doctype html><html lang="ps" dir="rtl"><meta charset="UTF-8"><title>رسید</title><body style="font-family:Arial;text-align:center;padding:15px"><h2>${safe(db.settings?.shopName||"شاهین فروشگاه")}</h2>${db.settings?.shopPhone?`<p>تلیفون: ${safe(db.settings.shopPhone)}</p>`:""}<p>رسید: ${safe(s.invoice)}</p><p>نېټه: ${safe(s.date)}</p><p>مشتری: ${safe(s.customer)}</p><hr><p>جنس: ${safe(s.productName)}</p><p>تعداد: ${s.qty} ${safe(s.unit)}</p><p>ټول: ${money(s.total)}</p><p>ورکړل: ${money(s.paid)}</p><p>پاتې پور: ${money(s.debt)}</p><p>له پېرود څخه مو مننه</p>
-
-
-</body></html>`);
- w.document.close();
- w.focus();
- w.print();
+ const shop=safe(db.settings?.shopName||"شاهین فروشگاه"),phone=db.settings?.shopPhone?safe(db.settings.shopPhone):"";
+ const subtotal=Number(s.subtotal)||Number(s.qty||0)*Number(s.price||0);
+ w.document.write(`<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>فاکتور ${safe(s.invoice)}</title>
+ <style>
+ *{box-sizing:border-box}body{font-family:Arial,Tahoma,sans-serif;color:#172033;margin:0;padding:24px;background:#fff}
+ .invoice{max-width:760px;margin:auto;border:1px solid #dce4ee;border-radius:16px;overflow:hidden}
+ .top{background:#145bb5;color:#fff;padding:24px;text-align:center}.top h1{margin:0 0 7px;font-size:25px}.top p{margin:4px 0;color:#eaf3ff}
+ .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:18px;background:#f5f8fc}.meta div{padding:10px;background:#fff;border:1px solid #e3eaf2;border-radius:9px}
+ .meta b{display:block;color:#64748b;font-size:12px;margin-bottom:5px}
+ table{width:100%;border-collapse:collapse;margin:18px 0}th,td{text-align:right;padding:13px 15px;border-bottom:1px solid #e7edf4}th{background:#edf4fc;color:#174f91}
+ .totals{width:min(100%,340px);margin:12px 15px 20px auto}.totals div{display:flex;justify-content:space-between;padding:9px;border-bottom:1px dashed #d8e1ec}.totals .grand{font-size:18px;font-weight:bold;color:#145bb5;background:#eef5ff;border-radius:8px}
+ .note{padding:0 15px 15px;color:#64748b}.thanks{text-align:center;padding:18px;background:#f5f8fc;color:#52647b}
+ @media print{body{padding:0}.invoice{border:0;border-radius:0}.top{-webkit-print-color-adjust:exact;print-color-adjust:exact}.meta,.totals .grand,th,.thanks{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+ </style></head><body><main class="invoice">
+ <header class="top"><h1>${shop}</h1>${phone?`<p>د اړیکې شمېره: ${phone}</p>`:""}<p>د خرڅلاو فاکتور</p></header>
+ <section class="meta"><div><b>د فاکتور شمېره</b>${safe(s.invoice||"-")}</div><div><b>نېټه</b>${safe(s.date||"-")}</div><div><b>مشتری</b>${safe(s.customer||"نغدي مشتری")}</div><div><b>پیسې</b>${safe(db.settings?.currency||"AFN")}</div></section>
+ <table><thead><tr><th>جنس</th><th>تعداد</th><th>فی واحد</th><th>مجموعه</th></tr></thead><tbody><tr><td>${safe(s.productName||"-")}</td><td>${safe(s.qty)} ${safe(s.unit||"")}</td><td>${money(s.price)}</td><td>${money(subtotal)}</td></tr></tbody></table>
+ <section class="totals"><div><span>ټول مبلغ</span><b>${money(subtotal)}</b></div><div><span>تخفیف</span><b>${money(s.discount)}</b></div><div class="grand"><span>وروستی مبلغ</span><b>${money(s.total)}</b></div><div><span>ورکړل شوې پیسې</span><b>${money(s.paid)}</b></div><div><span>پاتې پور</span><b>${money(s.debt)}</b></div></section>
+ ${s.note?`<p class="note">یادښت: ${safe(s.note)}</p>`:""}<footer class="thanks">له پېرود څخه مو مننه 🌿</footer></main></body></html>`);
+ w.document.close();w.focus();w.print();
 }
 function filterPurchaseProducts(){
  const q=value("buyProductSearch").toLowerCase();
