@@ -398,6 +398,13 @@ nav button{font-size:10px;padding:5px 3px}
  border-radius:12px;box-shadow:0 3px 8px rgba(20,90,160,.15)
 }
 
+
+#sales .sale-date-jalali{
+ background:#e7f2ff;color:#1457a0;border:1px solid #b8d5f5;
+ border-radius:8px;padding:6px 9px;margin:0 0 8px;font-size:12px;
+ font-weight:800;text-align:center
+}
+
 </style>
 </head>
 <body>
@@ -479,7 +486,7 @@ nav button{font-size:10px;padding:5px 3px}
    </div>
    <div>
     <label>نېټه</label>
-    <input id="saleDate" type="date">
+    <input id="saleDate" type="date" onchange="updateSaleDateLabel()"><div id="saleDateJalali" class="sale-date-jalali"></div>
    </div>
   </div>
 
@@ -672,6 +679,20 @@ function today(){
  const d=new Date();
  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
+
+function updateSaleDateLabel(){
+ const el=document.getElementById("saleDate");
+ const out=document.getElementById("saleDateJalali");
+ if(!el||!out)return;
+ if(!el.value){out.textContent="";return;}
+ const d=new Date(el.value+"T12:00:00");
+ try{
+  out.textContent=new Intl.DateTimeFormat("fa-AF-u-ca-persian",{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(d);
+ }catch(e){
+  out.textContent=new Intl.DateTimeFormat("fa-u-ca-persian",{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(d);
+ }
+}
+
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function show(id,btn){
  document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
@@ -955,6 +976,7 @@ function addSale(){
 selectedSaleCustomerId="";
 document.getElementById("saleProductSearch").value="";
 document.getElementById("saleDate").value=today();
+updateSaleDateLabel();
 document.getElementById("saleCustomerResults").classList.add("hidden");
 updateSalePreview();
  refreshAll();
