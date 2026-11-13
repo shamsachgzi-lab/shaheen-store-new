@@ -658,7 +658,11 @@ nav button{font-size:10px;padding:5px 3px}
   <label>اوسنی پور/بدهی (لاسي سمون)</label><input id="sDebt" type="number" min="0" value="0">
   <button class="primary" onclick="window.addSupplier()">💾 ذخیره</button>
  </div>
- <div class="panel"><div id="suppliersList"></div></div>
+ <div class="panel">
+  <label for="supplierSearch">🔎 د تامین کوونکي لټون</label>
+  <input id="supplierSearch" type="search" placeholder="نوم یا د موبایل شمېره ولیکه..." oninput="renderSuppliers()">
+  <div id="suppliersList"></div>
+ </div>
 </section>
 
 <section id="expenses" class="hidden">
@@ -1384,11 +1388,14 @@ window.addSupplier=function(){
  refreshAll();alert("تامین کوونکی ثبت شو");
 };
 function renderSuppliers(){
- const total=(db.suppliers||[]).reduce((n,x)=>n+(Number(x.debt)||0),0);
+ const q=(document.getElementById("supplierSearch")?.value||"").trim().toLowerCase();
+ const all=db.suppliers||[];
+ const total=all.reduce((n,x)=>n+(Number(x.debt)||0),0);
+ const filtered=all.filter(x=>String(x.name||"").toLowerCase().includes(q)||String(x.phone||"").toLowerCase().includes(q));
  const totalEl=document.getElementById("supplierDebtTotal");if(totalEl)totalEl.textContent=money(total);
- document.getElementById("suppliersList").innerHTML=(db.suppliers||[]).map(s=>`
+ document.getElementById("suppliersList").innerHTML=filtered.map(s=>`
  <div class="item"><b>${safe(s.name)}</b><div>شمېره: ${safe(s.phone||"-")}</div><div>اوسنی پور/بدهی: ${money(s.debt)}</div>
- <button class="gray" onclick="editSupplier('${s.id}')">✏️ سمون</button><button class="red" onclick="deleteSupplier('${s.id}')">حذف</button></div>`).join("")||"<p>تامین کوونکی نشته</p>";
+ <button class="gray" onclick="editSupplier('${s.id}')">✏️ سمون</button><button class="red" onclick="deleteSupplier('${s.id}')">حذف</button></div>`).join("")||(q?"د لټون نتیجه ونه موندل شوه":"تامین کوونکی نشته");
 }
 function editSupplier(id){
  const s=db.suppliers.find(x=>x.id===id);if(!s)return;
