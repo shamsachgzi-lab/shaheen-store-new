@@ -687,9 +687,13 @@ function updateSaleDateLabel(){
  if(!el.value){out.textContent="";return;}
  const d=new Date(el.value+"T12:00:00");
  try{
-  out.textContent=new Intl.DateTimeFormat("fa-AF-u-ca-persian",{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(d);
+  const parts=new Intl.DateTimeFormat("fa-AF-u-ca-persian",{weekday:"long",month:"long",day:"numeric"}).formatToParts(d);
+  const yearPart=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric"}).format(d);
+  const year=yearPart.replace(/[0-9]/g,n=>"۰۱۲۳۴۵۶۷۸۹"[Number(n)]);
+  const get=t=>parts.find(p=>p.type===t)?.value||"";
+  out.textContent=[get("weekday"),get("day"),get("month"),year].filter(Boolean).join(" ");
  }catch(e){
-  out.textContent=new Intl.DateTimeFormat("fa-u-ca-persian",{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(d);
+  out.textContent=new Intl.DateTimeFormat("fa-AF-u-ca-persian",{weekday:"long",month:"long",day:"numeric"}).format(d);
  }
 }
 
