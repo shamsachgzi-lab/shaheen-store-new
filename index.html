@@ -905,6 +905,59 @@ main{max-width:860px!important;padding:13px!important}
 }
 </style>
 
+
+<style id="shaheen-home-layout-fix">
+/* د کور خانې په واضح قطارونو او جلا واټنونو کې */
+#home{display:block!important;width:100%!important}
+#home .section-title{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin:8px 2px 14px!important}
+#home .cards{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:14px!important;align-items:stretch!important;width:100%!important;margin:0 0 18px!important
+}
+#home .cards>.card{
+ box-sizing:border-box!important;min-width:0!important;width:100%!important;
+ margin:0!important;padding:14px 12px!important;min-height:96px!important;
+ border-radius:14px!important;display:flex!important;flex-direction:column!important;
+ align-items:flex-start!important;justify-content:center!important;gap:10px!important;
+ overflow:hidden!important;white-space:normal!important
+}
+#home .cards>.card span{display:block!important;max-width:100%!important;line-height:1.5!important;overflow-wrap:anywhere!important}
+#home .cards>.card strong{display:block!important;max-width:100%!important;line-height:1.4!important;overflow-wrap:anywhere!important}
+#home .cards>.card:nth-child(6){
+ grid-column:1/-1!important;min-height:78px!important;
+ flex-direction:row!important;align-items:center!important;justify-content:space-between!important;
+ gap:12px!important;padding:14px 16px!important
+}
+#home .shortcuts{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:14px!important;align-items:stretch!important;width:100%!important;margin:16px 0 20px!important
+}
+#home .shortcuts>.shortcut{
+ box-sizing:border-box!important;min-width:0!important;width:100%!important;
+ min-height:82px!important;margin:0!important;padding:12px!important;
+ display:flex!important;flex-direction:row!important;align-items:center!important;
+ justify-content:flex-start!important;gap:12px!important;
+ border-radius:14px!important;overflow:hidden!important
+}
+#home .shortcuts>.shortcut .shortcut-icon{
+ flex:0 0 44px!important;width:44px!important;height:44px!important;
+ margin:0!important;border-radius:12px!important;display:grid!important;place-items:center!important
+}
+#home .shortcuts>.shortcut span{
+ display:block!important;min-width:0!important;flex:1!important;
+ text-align:right!important;white-space:normal!important;line-height:1.45!important;
+ overflow-wrap:anywhere!important;font-size:12px!important
+}
+#home .panel{margin-top:18px!important;padding:14px!important;clear:both!important}
+@media(max-width:350px){
+ #home .cards,#home .shortcuts{gap:9px!important}
+ #home .cards>.card{padding:10px 8px!important;min-height:88px!important}
+ #home .shortcuts>.shortcut{padding:9px!important;gap:8px!important;min-height:72px!important}
+ #home .shortcuts>.shortcut .shortcut-icon{flex-basis:38px!important;width:38px!important;height:38px!important}
+ #home .shortcuts>.shortcut span{font-size:11px!important}
+}
+</style>
+
 </head>
 <body>
 <header class="brand-header">
