@@ -438,6 +438,45 @@ nav button{font-size:10px;padding:5px 3px}
 .customer-top{display:flex;align-items:center;justify-content:space-between;padding:10px 4px}.customer-top small{color:#64748b}.customer-top h3{margin:3px 0;font-size:20px}.customer-top span{font-size:13px;color:#475569}.customer-addbar{display:flex;align-items:center;gap:12px;margin:8px 0}.customer-addbar button{min-width:44px;font-size:22px;padding:7px 14px}.customer-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}.customer-summary>div{background:#f1f6fc;border:1px solid #dce7f3;border-radius:12px;padding:11px 7px;text-align:center;min-width:0}.customer-summary small{display:block;font-size:11px;color:#526174;margin-bottom:7px}.customer-summary b{font-size:13px;overflow-wrap:anywhere}.customer-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}.customer-tabs button{background:#edf2f7;color:#334155;border:1px solid #d8e1eb;border-radius:9px;padding:10px 4px}.customer-tabs button.selected{background:#1769d2;color:#fff;border-color:#1769d2}.customer-list-head{display:flex;justify-content:space-between;align-items:center;padding:8px 3px}.customer-list-head small{margin-right:8px;color:#64748b}.customer-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 9px;border-bottom:1px solid #e8edf3}.customer-row:last-child{border-bottom:0}.customer-row-main{min-width:0}.customer-row-main b{display:block;overflow-wrap:anywhere}.customer-row-main small{display:block;color:#64748b;font-size:11px;margin-top:4px}.customer-row-debt{text-align:left;white-space:nowrap;font-weight:700;color:#1e3a5f;font-size:13px}.customer-row-actions{display:flex;gap:5px;margin-top:6px}.customer-row-actions button{padding:5px 8px;font-size:13px;min-width:34px}
 
 .customer-detail>h3{margin:14px 0}.customer-detail-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.customer-detail-summary>div{background:#f5f8fc}.customer-payment-panel{background:#f7fbff}.customer-payment-panel h3{margin-top:0}.customer-payment-panel input{margin-bottom:7px}.customer-history-payment,.customer-history-sale{margin:9px 0}.customer-history-amount{font-weight:800;font-size:17px;margin:7px 0;color:#1b6b42}.customer-opening-debt{background:#fffaf0}
+
+/* د شاهین فروشگاه ځانګړی رنګین سرلیک */
+.brand-header{
+ background:linear-gradient(125deg,#082f49 0%,#075985 48%,#0e7490 100%);
+ color:#fff;padding:15px 14px 12px;border-radius:0 0 22px 22px;
+ box-shadow:0 5px 18px rgba(4,47,73,.22);position:relative;overflow:hidden
+}
+.brand-header:before{
+ content:"";position:absolute;width:190px;height:190px;border:1px solid rgba(255,211,105,.18);
+ border-radius:50%;left:-75px;top:-115px;pointer-events:none
+}
+.brand-head{position:relative;z-index:1;gap:10px}
+.brand-lockup{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-emblem{
+ width:48px;height:48px;flex:0 0 48px;border-radius:15px;
+ display:grid;place-items:center;font-size:27px;
+ color:#713f12;background:linear-gradient(145deg,#fff2c2,#e9b949);
+ border:1px solid rgba(255,255,255,.75);
+ box-shadow:0 3px 10px rgba(0,0,0,.18)
+}
+.brand-copy{min-width:0}
+.brand-copy h2{
+ margin:0;color:#fff;font-size:22px;font-weight:900;letter-spacing:.2px;
+ text-shadow:0 2px 5px rgba(0,0,0,.2);line-height:1.35
+}
+.brand-subtitle{font-size:11px;color:#d8f3ff;font-weight:700;margin-top:3px;letter-spacing:.2px}
+.brand-header .lang{
+ background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.32);
+ white-space:nowrap;backdrop-filter:blur(5px)
+}
+.brand-rule{height:3px;background:rgba(255,255,255,.16);border-radius:9px;margin:12px 2px 0;overflow:hidden}
+.brand-rule span{display:block;width:38%;height:100%;border-radius:9px;background:linear-gradient(90deg,#f6d365,#fff1b8)}
+@media(max-width:380px){
+ .brand-header{padding:12px 11px 10px}
+ .brand-emblem{width:42px;height:42px;flex-basis:42px;font-size:24px;border-radius:13px}
+ .brand-copy h2{font-size:19px}
+ .brand-subtitle{font-size:10px}
+}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -461,11 +500,18 @@ nav button{font-size:10px;padding:5px 3px}
 </style>
 </head>
 <body>
-<header>
- <div class="head">
-  <div><h2 id="shopTitle">شاهین فروشگاه 🛒</h2></div>
+<header class="brand-header">
+ <div class="head brand-head">
+  <div class="brand-lockup">
+   <div class="brand-emblem" aria-hidden="true">🦅</div>
+   <div class="brand-copy">
+    <h2 id="shopTitle">شاهین فروشگاه</h2>
+    <div class="brand-subtitle">عمده او پرچون · حساب او موجودي</div>
+   </div>
+  </div>
   <button class="lang" onclick="toggleLang()" id="langBtn">دري</button>
  </div>
+ <div class="brand-rule"><span></span></div>
 </header>
 <main>
 <section id="home">
