@@ -433,6 +433,9 @@ nav button{font-size:10px;padding:5px 3px}
 .daily-extra{display:grid;gap:7px;font-size:12px}
 .daily-extra div{display:flex;justify-content:space-between;border-bottom:1px dashed #e7edf3;padding-bottom:6px}
 @media(min-width:650px){.daily-summary{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Customer debt dashboard */
+.customer-top{display:flex;align-items:center;justify-content:space-between;padding:10px 4px}.customer-top small{color:#64748b}.customer-top h3{margin:3px 0;font-size:20px}.customer-top span{font-size:13px;color:#475569}.customer-addbar{display:flex;align-items:center;gap:12px;margin:8px 0}.customer-addbar button{min-width:44px;font-size:22px;padding:7px 14px}.customer-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}.customer-summary>div{background:#f1f6fc;border:1px solid #dce7f3;border-radius:12px;padding:11px 7px;text-align:center;min-width:0}.customer-summary small{display:block;font-size:11px;color:#526174;margin-bottom:7px}.customer-summary b{font-size:13px;overflow-wrap:anywhere}.customer-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}.customer-tabs button{background:#edf2f7;color:#334155;border:1px solid #d8e1eb;border-radius:9px;padding:10px 4px}.customer-tabs button.selected{background:#1769d2;color:#fff;border-color:#1769d2}.customer-list-head{display:flex;justify-content:space-between;align-items:center;padding:8px 3px}.customer-list-head small{margin-right:8px;color:#64748b}.customer-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 9px;border-bottom:1px solid #e8edf3}.customer-row:last-child{border-bottom:0}.customer-row-main{min-width:0}.customer-row-main b{display:block;overflow-wrap:anywhere}.customer-row-main small{display:block;color:#64748b;font-size:11px;margin-top:4px}.customer-row-debt{text-align:left;white-space:nowrap;font-weight:700;color:#1e3a5f;font-size:13px}.customer-row-actions{display:flex;gap:5px;margin-top:6px}.customer-row-actions button{padding:5px 8px;font-size:13px;min-width:34px}
 </style>
 </head>
 <body>
@@ -598,8 +601,19 @@ nav button{font-size:10px;padding:5px 3px}
 </section>
 
 <section id="customers" class="hidden">
- <h3>👥 مشتریان</h3>
- <div class="panel">
+ <div class="customer-top"><div><small>Dukan Pro</small><h3>شاهین فروشگاه</h3></div><span>فارسي</span></div>
+ <div class="customer-addbar"><button class="primary" onclick="toggleCustomerForm()">＋</button><b>مشتریان او پورونه</b></div>
+ <div class="customer-summary">
+  <div><small>اوسني مشتریان</small><b id="activeCustomerDebt">0 AFN</b></div>
+  <div><small>زاړه پوروړي</small><b id="oldCustomerDebt">0 AFN</b></div>
+  <div><small>ټول پورونه</small><b id="allCustomerDebt">0 AFN</b></div>
+ </div>
+ <div class="customer-tabs">
+  <button class="selected" id="customerTabAll" onclick="setCustomerView('all')">ټول</button>
+  <button id="customerTabActive" onclick="setCustomerView('active')">اوسني</button>
+  <button id="customerTabOld" onclick="setCustomerView('old')">زاړه پوروړي</button>
+ </div>
+ <div class="panel hidden" id="customerFormPanel">
   <label>د مشتری نوم</label><input id="cName">
   <label>د موبایل شمېره</label><input id="cPhone" type="tel">
   <label>د پخواني پور اندازه</label><input id="cDebt" type="number" min="0" value="0">
@@ -607,6 +621,7 @@ nav button{font-size:10px;padding:5px 3px}
   <select id="cType"><option value="active">اوسنی مشتری</option><option value="old">پخوانی پور لرونکی</option></select>
   <button class="primary" onclick="addCustomer()">مشتری ثبت کړه</button>
  </div>
+ <div class="customer-list-head"><div><b id="customerListTitle">ټول مشتریان</b><small id="customerListCount">0</small></div><b id="customerListTotal">0 AFN</b></div>
  <div class="panel"><input id="customerSearch" placeholder="🔍 د مشتری نوم یا شمېره ولټوه"><div id="customersList"></div></div>
 </section>
 
@@ -1170,12 +1185,41 @@ function addCustomer(){
  saveDB();["cName","cPhone","cDebt"].forEach(id=>document.getElementById(id).value="");
  refreshAll();alert("مشتری ثبت شو");
 }
+let customerView="all";
+function setCustomerView(view){
+ customerView=view;
+ ["all","active","old"].forEach(k=>document.getElementById("customerTab"+(k==="all"?"All":k==="active"?"Active":"Old"))?.classList.toggle("selected",k===view));
+ renderCustomers();
+}
+function toggleCustomerForm(){document.getElementById("customerFormPanel").classList.toggle("hidden")}
+function openCustomerLedger(id){
+ const c=db.customers.find(x=>x.id===id);if(!c)return;
+ show("debts");
+ const sel=document.getElementById("payCustomer");if(sel)sel.value=id;
+ document.getElementById("customerPayment")?.focus();
+}
 function renderCustomers(){
  const q=value("customerSearch").toLowerCase();
- const list=db.customers.filter(c=>String(c.name).toLowerCase().includes(q)||String(c.phone||"").includes(q));
+ const active=db.customers.filter(c=>(c.type||"active")!=="old");
+ const old=db.customers.filter(c=>c.type==="old");
+ const debtOf=list=>list.reduce((n,c)=>n+Number(c.debt||0),0);
+ document.getElementById("activeCustomerDebt").textContent=money(debtOf(active));
+ document.getElementById("oldCustomerDebt").textContent=money(debtOf(old));
+ document.getElementById("allCustomerDebt").textContent=money(debtOf(db.customers));
+ const base=customerView==="active"?active:customerView==="old"?old:db.customers;
+ const list=base.filter(c=>String(c.name).toLowerCase().includes(q)||String(c.phone||"").includes(q));
+ const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي"};
+ document.getElementById("customerListTitle").textContent=titles[customerView];
+ document.getElementById("customerListCount").textContent="("+list.length+")";
+ document.getElementById("customerListTotal").textContent=money(debtOf(list));
  document.getElementById("customersList").innerHTML=list.map(c=>`
- <div class="item"><b>${safe(c.name)}</b><div>شمېره: ${safe(c.phone||"-")}</div><div>پور: ${money(c.debt)}</div><div>${c.type==="old"?"پخوانی پوروړی":"فعال مشتری"}</div>
- <button class="gray" onclick="editCustomer('${c.id}')">سمون</button><button class="red" onclick="deleteCustomer('${c.id}')">حذف</button></div>`).join("")||"<p>مشتری نشته</p>";
+ <div class="customer-row">
+  <div class="customer-row-main"><b>${safe(c.name)} <small style="display:inline">${c.type==="old"?"زاړه پوروړي":"اوسنی"}</small></b>
+   <small>${c.phone?"شمېره: "+safe(c.phone):" "}</small>
+   <div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger('${c.id}')">📒</button><button class="gray" title="سمون" onclick="editCustomer('${c.id}')">✏️</button></div>
+  </div>
+  <div class="customer-row-debt">${money(c.debt)}</div>
+ </div>`).join("")||"<p>مشتری نشته</p>";
 }
 function editCustomer(id){
  const c=db.customers.find(x=>x.id===id);if(!c)return;
