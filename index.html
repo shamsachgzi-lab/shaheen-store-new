@@ -449,6 +449,16 @@ nav button{font-size:10px;padding:5px 3px}
 .month-overview h4{margin:14px 0 8px}
 @media(min-width:700px){.month-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
+<style>
+.supplier-top{display:flex;align-items:center;justify-content:space-between;padding:12px 4px}
+.supplier-top small{color:#64748b}.supplier-top h3{margin:3px 0}
+.supplier-addbar{display:flex;align-items:center;gap:10px;margin:8px 0 12px}
+.supplier-addbar button{min-width:42px;font-size:20px}
+.supplier-summary{display:flex;justify-content:space-between;align-items:center;padding:13px;margin:8px 0 12px;background:#f0f6ff;border:1px solid #dbeafe;border-radius:12px}
+.supplier-summary b{font-size:18px}
+.supplier-form-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.supplier-form-title button{padding:5px 10px}
+</style>
 </head>
 <body>
 <header>
@@ -638,12 +648,15 @@ nav button{font-size:10px;padding:5px 3px}
 </section>
 
 <section id="suppliers" class="hidden">
- <h3>🏢 عرضه کوونکي او شرکتونه</h3>
- <div class="panel">
-  <label>د شرکت نوم</label><input id="sName">
-  <label>د موبایل شمېره</label><input id="sPhone" type="tel">
-  <label>پخوانی پور</label><input id="sDebt" type="number" min="0" value="0">
-  <button class="primary" onclick="addSupplier()">شرکت ثبت کړه</button>
+ <div class="supplier-top"><div><small>Dukan Pro</small><h3>🏢 تامین کوونکي او شرکتونه</h3></div><span>فارسي</span></div>
+ <div class="supplier-addbar"><button class="primary" onclick="toggleSupplierForm()">＋</button><b>تامین کوونکی</b></div>
+ <div class="supplier-summary"><small>د عرضه کوونکو ټول پور / بدهی</small><b id="supplierDebtTotal">0 AFN</b></div>
+ <div class="panel hidden" id="supplierFormPanel">
+  <div class="supplier-form-title"><b>➕ تامین کوونکی</b><button class="gray" onclick="toggleSupplierForm()">✕</button></div>
+  <label>نوم</label><input id="sName" placeholder="د شرکت یا تامین کوونکي نوم">
+  <label>شمېره</label><input id="sPhone" type="tel" placeholder="د موبایل شمېره">
+  <label>اوسنی پور/بدهی (لاسي سمون)</label><input id="sDebt" type="number" min="0" value="0">
+  <button class="primary" onclick="window.addSupplier()">💾 ذخیره</button>
  </div>
  <div class="panel"><div id="suppliersList"></div></div>
 </section>
@@ -1350,19 +1363,32 @@ initJalaliSaleDate();
 </script>
 
 <script>
-function addSupplier(){
- const name=value("sName"),debt=number("sDebt");
- if(!name)return alert("د شرکت نوم ولیکه");
- if(debt<0)return alert("پور منفي نه شي کېدای");
- if(db.suppliers.some(s=>s.name.toLowerCase()===name.toLowerCase()))return alert("دا شرکت مخکې ثبت شوی دی");
- db.suppliers.push({id:uid(),name,phone:value("sPhone"),debt,created:today()});
- saveDB();["sName","sPhone","sDebt"].forEach(id=>document.getElementById(id).value="");
- refreshAll();alert("شرکت ثبت شو");
+function toggleSupplierForm(){
+ const panel=document.getElementById("supplierFormPanel");
+ if(panel)panel.classList.toggle("hidden");
 }
+window.addSupplier=function(){
+ const name=(document.getElementById("sName")?.value||"").trim();
+ const phone=(document.getElementById("sPhone")?.value||"").trim();
+ const debt=Number(document.getElementById("sDebt")?.value||0);
+ if(!name){alert("د تامین کوونکي نوم ولیکه");document.getElementById("sName")?.focus();return;}
+ if(!Number.isFinite(debt)||debt<0){alert("د پور اندازه سمه ولیکه");return;}
+ if(!Array.isArray(db.suppliers))db.suppliers=[];
+ if(db.suppliers.some(x=>String(x.name||"").trim().toLowerCase()===name.toLowerCase()))return alert("دا تامین کوونکی مخکې ثبت شوی دی");
+ const item={id:uid(),name,phone,debt,created:today()};
+ db.suppliers.push(item);
+ try{saveDB();}catch(e){db.suppliers.pop();alert("ثبت ناکام شو؛ د موبایل زېرمتون وګوره او بیک اپ واخله.");return;}
+ ["sName","sPhone"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ const debtEl=document.getElementById("sDebt");if(debtEl)debtEl.value="0";
+ document.getElementById("supplierFormPanel")?.classList.add("hidden");
+ refreshAll();alert("تامین کوونکی ثبت شو");
+};
 function renderSuppliers(){
- document.getElementById("suppliersList").innerHTML=db.suppliers.map(s=>`
- <div class="item"><b>${safe(s.name)}</b><div>شمېره: ${safe(s.phone||"-")}</div><div>شرکت ته پور: ${money(s.debt)}</div>
- <button class="gray" onclick="editSupplier('${s.id}')">سمون</button><button class="red" onclick="deleteSupplier('${s.id}')">حذف</button></div>`).join("")||"<p>شرکت نشته</p>";
+ const total=(db.suppliers||[]).reduce((n,x)=>n+(Number(x.debt)||0),0);
+ const totalEl=document.getElementById("supplierDebtTotal");if(totalEl)totalEl.textContent=money(total);
+ document.getElementById("suppliersList").innerHTML=(db.suppliers||[]).map(s=>`
+ <div class="item"><b>${safe(s.name)}</b><div>شمېره: ${safe(s.phone||"-")}</div><div>اوسنی پور/بدهی: ${money(s.debt)}</div>
+ <button class="gray" onclick="editSupplier('${s.id}')">✏️ سمون</button><button class="red" onclick="deleteSupplier('${s.id}')">حذف</button></div>`).join("")||"<p>تامین کوونکی نشته</p>";
 }
 function editSupplier(id){
  const s=db.suppliers.find(x=>x.id===id);if(!s)return;
