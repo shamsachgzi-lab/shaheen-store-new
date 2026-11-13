@@ -405,6 +405,34 @@ nav button{font-size:10px;padding:5px 3px}
  font-weight:800;text-align:center
 }
 
+
+/* ورځنی راپور: لنډیز او جلا جدولونه */
+.daily-report{margin-top:14px;color:#172033}
+.daily-report-head{background:linear-gradient(120deg,#164f9c,#1879bd);color:#fff;padding:14px;border-radius:13px;margin-bottom:10px}
+.daily-report-head h3{color:#fff;margin:0 0 5px;font-size:17px}
+.daily-report-head div{font-size:13px;font-weight:700}
+.daily-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px}
+.daily-stat{padding:12px 10px;border-radius:12px;border:1px solid #dce5ef;display:flex;flex-direction:column;gap:7px}
+.daily-stat span{font-size:13px;font-weight:700}
+.daily-stat b{font-size:17px;direction:ltr;text-align:right}
+.daily-stat.purchase{background:#e6f1ff;border-color:#a8c9f0}
+.daily-stat.expense{background:#fff0e7;border-color:#f2c5a5}
+.daily-stat.sales{background:#e5f8ed;border-color:#a8dfbd}
+.daily-stat.profit{background:#f0eaff;border-color:#cbb7f2}
+.daily-report-section{background:#fff;border:1px solid #e1e8f0;border-radius:13px;padding:11px;margin:10px 0}
+.daily-report-section h3{font-size:14px;line-height:1.6;margin:0 0 9px;color:#1c416b}
+.daily-table-wrap{width:100%;overflow-x:auto}
+.daily-report-table{min-width:360px;width:100%;border-collapse:collapse;font-size:12px}
+.daily-report-table th{background:#edf4fc;color:#294563;font-weight:800;white-space:nowrap}
+.daily-report-table td,.daily-report-table th{padding:9px 6px;border-bottom:1px solid #edf0f5}
+.daily-report-table td{vertical-align:top}
+.daily-empty{text-align:center!important;color:#8a96a6;padding:16px!important}
+.daily-report-total{display:flex;justify-content:space-between;align-items:center;padding:10px 3px 2px;font-size:13px;font-weight:800}
+.daily-report-total b,.daily-report-footer b{direction:ltr}
+.daily-report-footer{padding:10px 3px 2px;font-size:12px;line-height:2;color:#24533c}
+.daily-extra{display:grid;gap:7px;font-size:12px}
+.daily-extra div{display:flex;justify-content:space-between;border-bottom:1px dashed #e7edf3;padding-bottom:6px}
+@media(min-width:650px){.daily-summary{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -1311,45 +1339,55 @@ function jalaliDisplayDate(iso){
 function makeReport(){
  const from=value("reportFrom"),to=value("reportTo");
  if(from&&to&&from>to)return alert("د پیل نېټه باید د پای له نېټې مخکې وي");
- const inside=d=>(!from||d>=from)&&(!to||d<=to);
- const sales=db.sales.filter(s=>inside(s.date));
- const purchases=db.purchases.filter(p=>inside(p.date));
- const expenses=db.expenses.filter(e=>inside(e.date));
- const payments=(db.payments||[]).filter(p=>inside(p.date));
- const totalSales=sales.reduce((a,s)=>a+Number(s.total||0),0);
- const totalPaid=sales.reduce((a,s)=>a+Number(s.paid||0),0);
- const totalDebt=sales.reduce((a,s)=>a+Number(s.debt||0),0);
- const totalPurchases=purchases.reduce((a,p)=>a+Number(p.total||0),0);
- const purchasePaid=purchases.reduce((a,p)=>a+Number(p.paid||0),0);
- const purchaseDebt=purchases.reduce((a,p)=>a+Number(p.debt||0),0);
- const gross=sales.reduce((a,s)=>a+Number(s.profit||0),0);
- const costExpenses=expenses.reduce((a,e)=>a+Number(e.amount||0),0);
- const customerPayments=payments.filter(p=>p.type==="customer").reduce((a,p)=>a+Number(p.amount||0),0);
- const supplierPayments=payments.filter(p=>p.type==="supplier").reduce((a,p)=>a+Number(p.amount||0),0);
+ const inside=d=>(!from||String(d||"")>=from)&&(!to||String(d||"")<=to);
+ const sales=db.sales.filter(x=>inside(x.date));
+ const purchases=db.purchases.filter(x=>inside(x.date));
+ const expenses=db.expenses.filter(x=>inside(x.date));
+ const payments=(db.payments||[]).filter(x=>inside(x.date));
+ const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
+ const totalSales=sum(sales,"total"),totalPaid=sum(sales,"paid"),totalDebt=sum(sales,"debt");
+ const totalPurchases=sum(purchases,"total"),purchasePaid=sum(purchases,"paid");
+ const gross=sum(sales,"profit"),expenseTotal=sum(expenses,"amount");
+ const net=gross-expenseTotal;
+ const dateLabel=from===to?jalaliDisplayDate(from):(from||to?jalaliDisplayDate(from)+" تر "+jalaliDisplayDate(to):"ټولې نېټې");
+ const esc=x=>safe(x==null?"":String(x));
+ const table=(headers,rows,empty)=>`
+ <div class="daily-table-wrap"><table class="daily-report-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
+ <tbody>${rows.length?rows.join(""):`<tr><td colspan="${headers.length}" class="daily-empty">${empty}</td></tr>`}</tbody></table></div>`;
+ const purchaseRows=purchases.map(p=>`<tr><td>${esc(p.productName||"—")}</td><td>${esc(p.qty)} ${esc(p.unit||"")}</td><td>${money(p.total)}</td><td>${money(p.paid)}</td></tr>`);
+ const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
+ const saleRows=sales.map(x=>`<tr><td>${esc(x.productName||"—")}</td><td>${esc(x.qty)} ${esc(x.unit||"")}</td><td>${money(x.total)}</td></tr>`);
  document.getElementById("reportContent").innerHTML=`
- <div class="item"><h3>د شاهین فروشگاه راپور</h3>
- <p>نېټه: ${safe(from===to?jalaliDisplayDate(from):jalaliDisplayDate(from)+" تر "+jalaliDisplayDate(to))}</p>
- <p>د خرڅلاو شمېر: <b>${sales.length}</b></p>
- <p>ټول خرڅلاو: <b>${money(totalSales)}</b></p>
- <p>نغدي ترلاسه: ${money(totalPaid)} | د خرڅلاو پور: ${money(totalDebt)}</p>
- <p>ټول پېرود: ${money(totalPurchases)}</p>
- <p>د پېرود ورکړې: ${money(purchasePaid)} | د شرکتونو پور: ${money(purchaseDebt)}</p>
- <p>ناخالصه ګټه: ${money(gross)}</p>
- <p>لګښتونه: ${money(costExpenses)}</p>
- <p>خالصه ګټه: <b>${money(gross-costExpenses)}</b></p>
- <p>د مشتریانو پور تادیې: ${money(customerPayments)}</p>
- <p>شرکتونو ته تادیې: ${money(supplierPayments)}</p></div>
- <h3>د خرڅلاو تفصیل</h3>
- ${sales.map(s=>`<div class="item">${safe(jalaliDisplayDate(s.date))} — رسید: ${safe(s.invoice||"-")} — ${safe(s.productName)} — ${s.qty} ${safe(s.unit)} — ټول: ${money(s.total)} — ورکړل: ${money(s.paid)} — پور: ${money(s.debt)}</div>`).join("")||"<p>خرڅلاو نشته</p>"}
- <h3>د پېرود تفصیل</h3>
- ${purchases.map(p=>`<div class="item">${safe(jalaliDisplayDate(p.date))} — ${safe(p.productName)} — ${safe(p.supplier||"نغدي")} — ټول: ${money(p.total)} — ورکړل: ${money(p.paid)} — پور: ${money(p.debt)}</div>`).join("")||"<p>پېرود نشته</p>"}
- <h3>د لګښتونو تفصیل</h3>
- ${expenses.map(e=>`<div class="item">${safe(jalaliDisplayDate(e.date))} — ${safe(e.name)} — ${safe(e.category||"-")} — ${money(e.amount)}</div>`).join("")||"<p>لګښت نشته</p>"}
- <h3>د پورونو تادیاتو تفصیل</h3>
- ${payments.map(p=>`<div class="item">${safe(jalaliDisplayDate(p.date))} — ${safe(p.personName||"-")} — ${p.type==="customer"?"د مشتری تادیه":"شرکت ته تادیه"} — ${money(p.amount)}</div>`).join("")||"<p>تادیه نشته</p>"}
- `;
+ <div class="daily-report">
+  <div class="daily-report-head"><h3>📊 د شاهین فروشگاه ورځنی راپور</h3><div>📍 ${esc(dateLabel)}</div></div>
+  <div class="daily-summary">
+   <div class="daily-stat purchase"><span>🛒 خرید</span><b>${money(totalPurchases)}</b></div>
+   <div class="daily-stat expense"><span>💸 مصارف</span><b>${money(expenseTotal)}</b></div>
+   <div class="daily-stat sales"><span>🧾 خرڅلاو (${sales.length})</span><b>${money(totalSales)}</b></div>
+   <div class="daily-stat profit"><span>💰 خالصه ګټه</span><b>${money(net)}</b></div>
+  </div>
+  <section class="daily-report-section">
+   <h3>📦 اخیستل شوي جنسونه — ${esc(dateLabel)}</h3>
+   ${table(["جنس","مقدار","مبلغ","تادیه"],purchaseRows,"معلومات نشته")}
+   <div class="daily-report-total">ټول خرید <b>${money(totalPurchases)}</b></div>
+  </section>
+  <section class="daily-report-section">
+   <h3>💸 مصارف او مصرف شوي جنسونه — ${esc(dateLabel)}</h3>
+   ${table(["تشریح","مقدار / یادښت","مبلغ","له"],expenseRows,"معلومات نشته")}
+   <div class="daily-report-total">ټول مصارف <b>${money(expenseTotal)}</b></div>
+  </section>
+  <section class="daily-report-section">
+   <h3>🧾 پلورل شوي جنسونه — ${esc(dateLabel)}</h3>
+   ${table(["جنس","مقدار","مبلغ"],saleRows,"معلومات نشته")}
+   <div class="daily-report-footer">نغدي ترلاسه: <b>${money(totalPaid)}</b> · په پور: <b>${money(totalDebt)}</b> · ناخالصه ګټه: <b>${money(gross)}</b></div>
+  </section>
+  <section class="daily-report-section daily-extra">
+   <div>د پېرود تادیه: <b>${money(purchasePaid)}</b></div>
+   <div>د مشتریانو پور تادیې: <b>${money(sum(payments.filter(p=>p.type==="customer"),"amount"))}</b></div>
+   <div>شرکتونو ته تادیې: <b>${money(sum(payments.filter(p=>p.type==="supplier"),"amount"))}</b></div>
+  </section>
+ </div>`;
 }
-
 function backupData(){
  try{
   const data={app:DB_KEY,backupDate:new Date().toISOString(),database:db};
