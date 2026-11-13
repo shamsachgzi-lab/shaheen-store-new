@@ -543,11 +543,14 @@ nav button{font-size:10px;padding:5px 3px}
 </section>
 
 <section id="reports" class="hidden">
- <h3>📊 راپورونه</h3>
+ <h3>📊 ورځني او عمومي راپورونه</h3>
  <div class="panel">
+  <button class="green" onclick="makeDailyReport()">📅 د نن ورځې بشپړ راپور</button>
+  <hr>
   <label>له نېټې</label><input type="date" id="reportFrom">
   <label>تر نېټې</label><input type="date" id="reportTo">
-  <button class="primary" onclick="makeReport()">راپور ښکاره کړه</button><hr><h3>د میاشتې پای آرشیف</h3><label>میاشت انتخاب کړه</label><input type="month" id="archiveMonth"><button class="gray" onclick="archiveMonth()">د میاشتې راپور خوندي کړه</button><div id="archiveList"></div>
+  <button class="primary" onclick="makeReport()">د ټاکلې مودې راپور ښکاره کړه</button>
+  <hr><h3>د میاشتې پای آرشیف</h3><label>میاشت انتخاب کړه</label><input type="month" id="archiveMonth"><button class="gray" onclick="archiveMonth()">د میاشتې راپور خوندي کړه</button><div id="archiveList"></div>
   <div id="reportContent"></div>
  </div>
 </section>
@@ -1164,6 +1167,12 @@ function renderArchives(){
  const box=document.getElementById("archiveList");if(!box)return;
  box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>خرڅلاو: "+money(a.sales)+" | پېرود: "+money(a.purchases)+"</div><div>ګټه: "+money(a.grossProfit)+" | لګښت: "+money(a.expenses)+"</div></div>").join("")||"<p>آرشیف نشته</p>";
 }
+function makeDailyReport(){
+ const d=today();
+ document.getElementById("reportFrom").value=d;
+ document.getElementById("reportTo").value=d;
+ makeReport();
+}
 function makeReport(){
  const from=value("reportFrom"),to=value("reportTo");
  if(from&&to&&from>to)return alert("د پیل نېټه باید د پای له نېټې مخکې وي");
@@ -1171,23 +1180,39 @@ function makeReport(){
  const sales=db.sales.filter(s=>inside(s.date));
  const purchases=db.purchases.filter(p=>inside(p.date));
  const expenses=db.expenses.filter(e=>inside(e.date));
+ const payments=(db.payments||[]).filter(p=>inside(p.date));
  const totalSales=sales.reduce((a,s)=>a+Number(s.total||0),0);
+ const totalPaid=sales.reduce((a,s)=>a+Number(s.paid||0),0);
+ const totalDebt=sales.reduce((a,s)=>a+Number(s.debt||0),0);
  const totalPurchases=purchases.reduce((a,p)=>a+Number(p.total||0),0);
+ const purchasePaid=purchases.reduce((a,p)=>a+Number(p.paid||0),0);
+ const purchaseDebt=purchases.reduce((a,p)=>a+Number(p.debt||0),0);
  const gross=sales.reduce((a,s)=>a+Number(s.profit||0),0);
  const costExpenses=expenses.reduce((a,e)=>a+Number(e.amount||0),0);
+ const customerPayments=payments.filter(p=>p.type==="customer").reduce((a,p)=>a+Number(p.amount||0),0);
+ const supplierPayments=payments.filter(p=>p.type==="supplier").reduce((a,p)=>a+Number(p.amount||0),0);
  document.getElementById("reportContent").innerHTML=`
  <div class="item"><h3>د شاهین فروشگاه راپور</h3>
  <p>له: ${safe(from||"ټولې نېټې")} تر: ${safe(to||"نن")}</p>
- <p>د خرڅلاو شمېر: ${sales.length}</p>
+ <p>د خرڅلاو شمېر: <b>${sales.length}</b></p>
  <p>ټول خرڅلاو: <b>${money(totalSales)}</b></p>
+ <p>نغدي ترلاسه: ${money(totalPaid)} | د خرڅلاو پور: ${money(totalDebt)}</p>
  <p>ټول پېرود: ${money(totalPurchases)}</p>
+ <p>د پېرود ورکړې: ${money(purchasePaid)} | د شرکتونو پور: ${money(purchaseDebt)}</p>
  <p>ناخالصه ګټه: ${money(gross)}</p>
  <p>لګښتونه: ${money(costExpenses)}</p>
- <p>خالصه ګټه: <b>${money(gross-costExpenses)}</b></p></div>
+ <p>خالصه ګټه: <b>${money(gross-costExpenses)}</b></p>
+ <p>د مشتریانو پور تادیې: ${money(customerPayments)}</p>
+ <p>شرکتونو ته تادیې: ${money(supplierPayments)}</p></div>
  <h3>د خرڅلاو تفصیل</h3>
- ${sales.map(s=>`<div class="item">${safe(s.date)} — ${safe(s.productName)} — ${s.qty} ${safe(s.unit)} — ${money(s.total)}</div>`).join("")||"<p>خرڅلاو نشته</p>"}
+ ${sales.map(s=>`<div class="item">${safe(s.date)} — رسید: ${safe(s.invoice||"-")} — ${safe(s.productName)} — ${s.qty} ${safe(s.unit)} — ټول: ${money(s.total)} — ورکړل: ${money(s.paid)} — پور: ${money(s.debt)}</div>`).join("")||"<p>خرڅلاو نشته</p>"}
+ <h3>د پېرود تفصیل</h3>
+ ${purchases.map(p=>`<div class="item">${safe(p.date)} — ${safe(p.productName)} — ${safe(p.supplier||"نغدي")} — ټول: ${money(p.total)} — ورکړل: ${money(p.paid)} — پور: ${money(p.debt)}</div>`).join("")||"<p>پېرود نشته</p>"}
  <h3>د لګښتونو تفصیل</h3>
- ${expenses.map(e=>`<div class="item">${safe(e.date)} — ${safe(e.name)} — ${money(e.amount)}</div>`).join("")||"<p>لګښت نشته</p>"}`;
+ ${expenses.map(e=>`<div class="item">${safe(e.date)} — ${safe(e.name)} — ${safe(e.category||"-")} — ${money(e.amount)}</div>`).join("")||"<p>لګښت نشته</p>"}
+ <h3>د پورونو تادیاتو تفصیل</h3>
+ ${payments.map(p=>`<div class="item">${safe(p.date)} — ${safe(p.personName||"-")} — ${p.type==="customer"?"د مشتری تادیه":"شرکت ته تادیه"} — ${money(p.amount)}</div>`).join("")||"<p>تادیه نشته</p>"}
+ `;
 }
 
 function backupData(){
