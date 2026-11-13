@@ -488,6 +488,7 @@ nav button{font-size:10px;padding:5px 3px}
   <button class="shortcut" onclick="show('expenses')"><b>💸</b><span>مصارف</span></button>
   <button class="shortcut" onclick="makeDailyReport()"><b>📅</b><span>ورځنی راپور</span></button>
   <button class="shortcut" onclick="show('capitalPage',this);renderCapitalPage()"><b>💰</b><span>پانګه</span></button>
+   <button class="shortcut" onclick="show('settings',this);renderSettings()"><b>⚙️</b><span>تنظیمات</span></button>
  </div>
  <div class="panel"><h3>⚠️ کم موجودي جنسونه <small id="lowStockCount" class="badge">0 جنس</small></h3><input id="lowStockSearch" placeholder="🔍 په کم‌موجودۍ جنسونو کې لټون..." oninput="renderLowStock()"><div id="lowStock" style="max-height:420px;overflow:auto;margin-top:8px">معلومات نشته.</div></div>
 </section>
@@ -769,16 +770,33 @@ nav button{font-size:10px;padding:5px 3px}
  </div>
 </section>
 
-<section id="backup" class="hidden">
- <h3>💾 بیک‌اف او تنظیمات</h3>
- <div class="panel">
-  <p>د دکان د معلوماتو بیک‌اف جوړ کړه او په خپل موبایل کې یې خوندي کړه.</p>
-  <button class="primary" onclick="backupData()">بیک‌اف ډاونلوډ کړه</button>
-  <hr>
-  <label>د JSON بیک‌اف فایل بېرته راوګرځوه</label>
-  <input type="file" id="restoreFile" accept=".json,application/json">
-  <button class="green" onclick="restoreData()">بیک‌اف بېرته راوګرځوه</button>
-  <p class="notice">دا اپلیکیشن خپل جلا معلومات ساتي او د زاړه Dukan Pro معلومات نه بدلوي.</p>
+<section id="settings" class="hidden">
+ <h3>⚙️ تنظیمات</h3>
+ <div class="panel"><h3>🏪 دکان معلومات</h3>
+  <label>دکان نوم / نام دکان</label><input id="settingShopName" placeholder="شاهین فروشگاه">
+  <label>تلیفون (په بل کې) / تلفن (در فاکتور)</label><input id="settingShopPhone" type="tel" placeholder="دکان د اړیکې شمېره">
+  <label>پیسې (اسعار)</label><select id="settingCurrency"><option value="AFN">AFN — افغانۍ</option><option value="USD">USD — ډالر</option><option value="IRR">IRR — تومان/ریال</option><option value="PKR">PKR — کلدارې</option></select>
+  <button class="primary" onclick="saveShopSettings()">💾 ذخیره</button>
+ </div>
+ <div class="panel"><h3>📏 واحد</h3>
+  <p class="notice">دا واحدونه د جنس، خرید، فروش او موجودي لپاره کارېږي. kg او g د وزن واحدونه دي (1 kg = 1000 g). د بوجۍ، کارټن، پاکټ او بوتل اندازه د هر جنس په فورم کې ټاکل کېږي.</p>
+  <div id="settingsUnitList"></div><hr><h4>نوی واحد</h4>
+  <label>د واحد نوم</label><input id="newUnitName" placeholder="مثلاً صندوق">
+  <label>ډول</label><select id="newUnitType"><option value="count">شمېر/بسته (اندازه په جنس کې)</option><option value="weight">وزن</option><option value="volume">حجم</option></select>
+  <button class="green" onclick="addCustomUnit()">＋ واحد اضافه کړه</button>
+ </div>
+ <div class="panel"><h3>📅 میاشت بندول / نوې میاشت</h3>
+  <p class="notice">د روانې میاشتې خرڅلاو، خرید، مصارف او ګټه جلا خوندي کېږي او نوې میاشت له صفر شروع کېږي. موجودي (Stock)، جنسونه، واحدونه او د مشتریانو/تامین کوونکو پورونه نه بدلېږي.</p>
+  <button class="green" onclick="closeCurrentMonth()">میاشت بندول / نوې میاشت</button>
+  <h3>🗂 میاشتني راپورونه</h3><label>میاشت انتخاب کړه</label><input type="month" id="archiveMonth">
+  <button class="gray" onclick="archiveMonth()">د میاشتې راپور خوندي کړه</button><div id="archiveList"></div>
+ </div>
+ <div class="panel"><h3>Backup / Restore</h3>
+  <p>Backup فایل خپل ځان ته خوندي کړه (میاشتني راپورونه، موجودي او د مال ارزښت هم پکې شامل دي). دا نسخه معلومات په همدې iPhone/Browser کې Offline ساتي.</p>
+  <button class="primary" onclick="backupData()">⬇️ Backup</button>
+  <label>⬆️ Restore — د JSON بیک‌اف فایل</label><input type="file" id="restoreFile" accept=".json,application/json">
+  <button class="green" onclick="restoreData()">⬆️ Restore</button>
+  <hr><p class="notice">Restore اوسني معلومات د Backup له معلوماتو سره بدلوي. مخکې له Restore څخه اوسنی Backup وساته.</p>
  </div>
 </section>
 
@@ -788,6 +806,7 @@ nav button{font-size:10px;padding:5px 3px}
  <button onclick="show('sales',this)">🛒<br>خرڅلاو</button>
  <button onclick="show('customers',this)">👥<br>مشتریان</button>
  <button onclick="show('reports',this)">📊<br>راپور</button>
+  <button onclick="show('settings',this);renderSettings()">⚙️<br>تنظیمات</button>
 </nav>
 </main>
 
@@ -804,9 +823,20 @@ if(!db||typeof db!=="object")db={};
 });
 if(!Number.isFinite(Number(db.cash)))db.cash=0;
 if(!db.language)db.language="ps";
+if(!db.settings||typeof db.settings!=="object")db.settings={};
+if(!Array.isArray(db.settings.units))db.settings.units=[
+ {name:"kg",type:"weight",base:"kg",factor:1,locked:true},{name:"g",type:"weight",base:"kg",factor:0.001,locked:true},
+ {name:"بوجۍ",type:"count",locked:true},{name:"ټوټه",type:"count",locked:true},{name:"کارټن",type:"count",locked:true},
+ {name:"بوتل",type:"count",locked:true},{name:"لیټر",type:"volume",locked:true},{name:"پاکټ",type:"count",locked:true},
+ {name:"دانه",type:"count",locked:true},{name:"بسته",type:"count",locked:true},{name:"پیاله",type:"count",locked:true},
+ {name:"سیر",type:"count",locked:true},{name:"0.5kg",type:"count",locked:false}
+];
+if(!db.settings.currency)db.settings.currency="AFN";
+if(!db.settings.shopName)db.settings.shopName="شاهین فروشگاه";
+
 
 function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(db))}
-function money(n){return (Number(n)||0).toLocaleString("en-US")+" AFN"}
+function money(n){return (Number(n)||0).toLocaleString("en-US")+" "+(db.settings?.currency||"AFN")}
 function number(id){const el=document.getElementById(id);return el?Number(el.value||0):Number(id||0)}
 function value(id){return (document.getElementById(id)?.value||"").trim()}
 function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -886,6 +916,7 @@ function runGlobalSearch(){
 }
 
 function refreshAll(){
+ updateProductUnitOptions();
  fillProductSelects();renderProducts();renderSales();renderPurchases();
  renderCustomers();renderSuppliers();renderExpenses();renderDebtLists();renderArchives();updateDashboard();renderMonthOverview();
 }
@@ -1728,6 +1759,46 @@ function makeReport(){
   </section>
 
  </div>`;
+}
+function renderSettings(){
+ const name=document.getElementById("settingShopName"),phone=document.getElementById("settingShopPhone"),currency=document.getElementById("settingCurrency");
+ if(name)name.value=db.settings?.shopName||"شاهین فروشگاه";
+ if(phone)phone.value=db.settings?.shopPhone||"";
+ if(currency)currency.value=db.settings?.currency||"AFN";
+ renderSettingsUnits();renderArchives();
+}
+function saveShopSettings(){
+ db.settings=db.settings||{};db.settings.shopName=value("settingShopName")||"شاهین فروشگاه";
+ db.settings.shopPhone=value("settingShopPhone");db.settings.currency=value("settingCurrency")||"AFN";
+ saveDB();const title=document.getElementById("shopTitle");if(title)title.textContent=db.settings.shopName+" 🛒";
+ refreshAll();alert("دکان معلومات ذخیره شول");
+}
+function renderSettingsUnits(){
+ const box=document.getElementById("settingsUnitList");if(!box)return;
+ box.innerHTML=(db.settings.units||[]).map((u,i)=>{
+  const count=(db.products||[]).filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
+  const desc=u.type==="weight"?(u.name==="kg"?"وزن · 1 kg = 1 kg":"وزن · 1 g = 0.001 kg"):u.type==="volume"?"حجم":"شمېر/بسته (اندازه په جنس کې)";
+  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(u.name)}</b><div class="notice">${desc} · ${count} جنس</div></div><div>${u.locked?'<span class="badge">اصلي</span>':`<button class="red" onclick="removeCustomUnit(${i})">🗑</button>`}</div></div>`;
+ }).join("")||"واحد نشته";
+}
+function addCustomUnit(){
+ const name=value("newUnitName");if(!name)return alert("د واحد نوم ولیکه");
+ if((db.settings.units||[]).some(u=>u.name.toLowerCase()===name.toLowerCase()))return alert("دا واحد مخکې شته");
+ db.settings.units.push({name,type:value("newUnitType")||"count",locked:false});saveDB();
+ document.getElementById("newUnitName").value="";updateProductUnitOptions();renderSettingsUnits();
+}
+function removeCustomUnit(index){
+ const u=db.settings.units[index];if(!u||u.locked)return;
+ if((db.products||[]).some(p=>p.unit===u.name||p.tradeUnit===u.name))return alert("دا واحد په جنسونو کې کارېږي؛ لومړی د هغو جنسونو واحد بدل کړه.");
+ if(!confirm("دا واحد حذف شي؟"))return;
+ db.settings.units.splice(index,1);saveDB();updateProductUnitOptions();renderSettingsUnits();
+}
+function updateProductUnitOptions(){
+ ["pUnit","pTradeUnit"].forEach(id=>{
+  const el=document.getElementById(id);if(!el)return;const old=el.value;
+  el.innerHTML=(db.settings.units||[]).map(u=>`<option value="${safe(u.name)}">${safe(u.name)}</option>`).join("");
+  if((db.settings.units||[]).some(u=>u.name===old))el.value=old;
+ });
 }
 function backupData(){
  try{
