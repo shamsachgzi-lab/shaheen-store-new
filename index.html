@@ -346,6 +346,14 @@ nav button{font-size:10px;padding:5px 3px}
  #home .shortcut span{font-size:10px}
 }
 
+
+/* د کورپاڼې د پور او پانګې کارتونه */
+#home .debt-card{gap:4px}
+#home .debt-card small{display:block;font-size:10px;color:#475569}
+#home .debt-card strong{display:block;font-size:15px}
+#home .capital-card{background:#e4f7e9;border-color:#2b9b55}
+#home .capital-card strong{color:#08743a}
+
 </style>
 </head>
 <body>
@@ -359,28 +367,25 @@ nav button{font-size:10px;padding:5px 3px}
 <section id="home">
  <div class="section-title"><h3>د دکان عمومي حساب</h3><span class="badge">AFN افغانۍ</span></div>
  <div class="cards">
-  <div class="card"><span>💵 نغدې پیسې</span><strong id="cash">0 AFN</strong></div>
-  <div class="card"><span>📦 د جنسونو ارزښت</span><strong id="stockValue">0 AFN</strong></div>
-  <div class="card"><span>👥 د مشتریانو پور</span><strong id="debt">0 AFN</strong></div>
-  <div class="card"><span>🏢 د شرکتونو پور</span><strong id="supplierDebt">0 AFN</strong></div>
   <div class="card"><span>🛒 د نن خرڅلاو</span><strong id="salesTotal">0 AFN</strong></div>
   <div class="card"><span>💰 د نن ګټه</span><strong id="profitToday">0 AFN</strong></div>
-  <div class="card"><span>📒 د نن پور</span><strong id="debtToday">0 AFN</strong></div>
-  <div class="card"><span>💸 د نن لګښتونه</span><strong id="expenseTotal">0 AFN</strong></div>
+  <div class="card"><span>📦 د مال ارزښت</span><strong id="stockValue">0 AFN</strong></div>
+  <div class="card debt-card"><span>📒 پورونه</span><div><small>مشتریان</small><strong id="debt">0 AFN</strong></div><div><small>تامین کوونکي</small><strong id="supplierDebt">0 AFN</strong></div></div>
+  <div class="card"><span>💵 نغدې پیسې</span><strong id="cash">0 AFN</strong></div>
+  <div class="card capital-card"><span>🏦 ټوله پانګه</span><strong id="capital">0 AFN</strong></div>
  </div>
  <div class="shortcuts">
-  <button class="shortcut" onclick="show('products')"><b>📦</b><span>محصولات</span></button>
-  <button class="shortcut" onclick="show('sales')"><b>🛒</b><span>خرڅلاو</span></button>
-  <button class="shortcut" onclick="show('purchases')"><b>🚚</b><span>پېرود</span></button>
+  <button class="shortcut" onclick="show('sales')"><b>🧾</b><span>فروش</span></button>
+  <button class="shortcut" onclick="show('purchases')"><b>📦</b><span>خرید</span></button>
+  <button class="shortcut" onclick="show('products')"><b>📋</b><span>موجودي</span></button>
   <button class="shortcut" onclick="show('customers')"><b>👥</b><span>مشتریان</span></button>
-  <button class="shortcut" onclick="show('suppliers')"><b>🏢</b><span>شرکتونه</span></button>
-  <button class="shortcut" onclick="show('expenses')"><b>💸</b><span>لګښتونه</span></button>
-  <button class="shortcut" onclick="show('debts')"><b>📒</b><span>پورونه</span></button>
+  <button class="shortcut" onclick="show('suppliers')"><b>🏢</b><span>تامین کوونکي</span></button>
   <button class="shortcut" onclick="show('reports')"><b>📊</b><span>راپورونه</span></button>
-  <button class="shortcut" onclick="show('backup')"><b>💾</b><span>بیک‌اف</span></button>
+  <button class="shortcut" onclick="show('expenses')"><b>💸</b><span>مصارف</span></button>
+  <button class="shortcut" onclick="makeDailyReport()"><b>📅</b><span>ورځنی راپور</span></button>
+  <button class="shortcut" onclick="document.getElementById('capital').scrollIntoView({behavior:'smooth',block:'center'})"><b>💰</b><span>پانګه</span></button>
  </div>
  <div class="panel"><h3>⚠️ کم موجودي جنسونه</h3><div id="lowStock" class="notice">معلومات نشته.</div></div>
- <div class="panel"><h3>د کاروبار خالصه پانګه</h3><strong id="capital" style="font-size:22px">0 AFN</strong></div>
 </section>
 
 <section id="products" class="hidden">
