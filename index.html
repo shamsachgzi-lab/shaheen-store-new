@@ -1332,17 +1332,25 @@ function makeDailyReport(){
 }
 function jalaliDisplayDate(iso){
  if(!iso)return "ټولې نېټې";
- try{
-  const parts=String(iso).slice(0,10).split("-").map(Number);
-  if(parts.length!==3||parts.some(n=>!Number.isFinite(n)))return String(iso);
-  const d=new Date(Date.UTC(parts[0],parts[1]-1,parts[2],12));
-  const fmt=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",day:"numeric",timeZone:"UTC"});
-  const get=k=>Number(fmt.formatToParts(d).find(p=>p.type===k)?.value);
-  const months=["وری","غویی","غبرګولی","چنګاښ","زمری","وږی","تله","لړم","لیندۍ","مرغومی","سلواغه","کب"];
-  const weekdays=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
-  const fa=n=>String(n).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]);
-  return weekdays[d.getUTCDay()]+"، "+fa(get("day"))+" "+(months[get("month")-1]||"")+" "+fa(get("year"));
- }catch(e){return String(iso)}
+ const parts=String(iso).slice(0,10).split("-").map(Number);
+ const gy=parts[0],gm=parts[1],gd=parts[2];
+ if(parts.length!==3||!gy||gm<1||gm>12||gd<1||gd>31)return String(iso);
+ const gdm=[0,31,59,90,120,151,181,212,243,273,304,334];
+ const gy2=gm>2?gy+1:gy;
+ let days=355666+365*gy+Math.floor((gy2+3)/4)-Math.floor((gy2+99)/100)+Math.floor((gy2+399)/400)+gd+gdm[gm-1];
+ let jy=-1595+33*Math.floor(days/12053);
+ days%=12053;
+ jy+=4*Math.floor(days/1461);
+ days%=1461;
+ if(days>365){jy+=Math.floor((days-1)/365);days=(days-1)%365;}
+ let jm,jd;
+ if(days<186){jm=1+Math.floor(days/31);jd=1+days%31;}
+ else{jm=7+Math.floor((days-186)/30);jd=1+(days-186)%30;}
+ const months=["وری","غویی","غبرګولی","چنګاښ","زمری","وږی","تله","لړم","لیندۍ","مرغومی","سلواغه","کب"];
+ const weekdays=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
+ const d=new Date(Date.UTC(gy,gm-1,gd,12));
+ const fa=n=>String(n).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]);
+ return weekdays[d.getUTCDay()]+"، "+fa(jd)+" "+months[jm-1]+" "+fa(jy);
 }
 function makeReport(){
  const from=value("reportFrom"),to=value("reportTo");
