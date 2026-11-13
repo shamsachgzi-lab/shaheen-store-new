@@ -1067,9 +1067,9 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 </section>
 
 <section id="saraf" class="hidden">
- <h3>💱 د صرافانو حساب</h3>
+ <h3>💱 د یوه صراف حساب</h3>
  <div class="panel" style="background:#edf8f6;border:1px solid #c8e8df;border-radius:12px;padding:12px"><div class="row"><div><small>له صراف سره ستا پیسې</small><b id="sarafHeldTotal">0 AFN</b></div><div><small>ته صراف ته پوروړی یې</small><b id="sarafOwedTotal">0 AFN</b></div></div></div>
- <div class="panel"><h3>➕ صراف ثبت کړه</h3><label>د صراف نوم</label><input id="sarafName" placeholder="د صراف نوم"><label>شمېره (اختیاري)</label><input id="sarafPhone" type="tel" placeholder="د اړیکې شمېره"><button class="primary" onclick="addSaraf()">صراف ثبت کړه</button></div>
+ <div class="panel" id="sarafAddPanel"><h3>➕ یوازینی صراف ثبت کړه</h3><label>د صراف نوم</label><input id="sarafName" placeholder="د صراف نوم"><label>شمېره (اختیاري)</label><input id="sarafPhone" type="tel" placeholder="د اړیکې شمېره"><button class="primary" onclick="addSaraf()">صراف ثبت کړه</button></div>
  <div class="panel"><h3>💸 د پیسو معامله ثبت کړه</h3><label>صراف انتخاب کړه</label><select id="sarafSelect"></select><label>د معاملې ډول</label><select id="sarafType"><option value="deposit">صراف ته مې پیسې ورکړې (زما پیسې ورسره دي)</option><option value="withdraw">له صرافه مې خپلې پیسې واخیستې</option><option value="borrow">له صرافه مې پور واخیست (زه پوروړی شوم)</option><option value="repay">صراف ته مې د پور پیسې ورکړې</option></select><div class="row"><div><label>مبلغ</label><input id="sarafAmount" type="number" min="0.01" step="any"></div><div><label>نېټه</label><input id="sarafDate" type="date"></div></div><label>یادښت</label><input id="sarafNote" placeholder="اختیاري یادښت"><button class="primary" onclick="addSarafTransaction()">معامله ثبت کړه</button></div>
  <div class="panel"><label>🔎 صراف ولټوه</label><input id="sarafSearch" placeholder="د صراف نوم یا شمېره" oninput="renderSaraf()"><div id="sarafList"></div></div>
 </section>
@@ -1942,9 +1942,9 @@ function addSaraf(){
  const name=value("sarafName"),phone=value("sarafPhone");
  if(!name)return alert("د صراف نوم ولیکه");
  if(!Array.isArray(db.sarafAccounts))db.sarafAccounts=[];
- if(db.sarafAccounts.some(x=>String(x.name).trim().toLowerCase()===name.toLowerCase()))return alert("دا صراف مخکې ثبت شوی دی");
+ if(db.sarafAccounts.length>0)return alert("یوازې یو صراف ثبتېدای شي؛ هماغه موجود صراف وکاروه.");
  db.sarafAccounts.push({id:uid(),name:name,phone:phone,created:today()});saveDB();
- document.getElementById("sarafName").value="";document.getElementById("sarafPhone").value="";refreshAll();alert("صراف ثبت شو");
+ document.getElementById("sarafName").value="";document.getElementById("sarafPhone").value="";refreshAll();alert("یوازینی صراف ثبت شو");
 }
 function sarafTotals(id){
  const tx=(db.sarafTransactions||[]).filter(x=>x.sarafId===id);
@@ -1965,6 +1965,9 @@ function addSarafTransaction(){
 }
 function renderSaraf(){
  const accounts=db.sarafAccounts||[],q=value("sarafSearch").toLowerCase(),sel=document.getElementById("sarafSelect");
+ const addPanel=document.getElementById("sarafAddPanel");if(addPanel)addPanel.classList.toggle("hidden",accounts.length>0);
+ const chooseLabel=sel?.previousElementSibling;if(chooseLabel&&chooseLabel.tagName==="LABEL")chooseLabel.textContent="یوازینی صراف";
+ if(sel)sel.disabled=accounts.length<=1;
  if(sel){const old=sel.value;sel.innerHTML=accounts.map(x=>'<option value="'+safe(x.id)+'">'+safe(x.name)+'</option>').join("")||'<option value="">صراف نشته</option>';if(accounts.some(x=>x.id===old))sel.value=old;}
  let held=0,owed=0;accounts.forEach(x=>{const t=sarafTotals(x.id);held+=t.held;owed+=t.owed;});
  const h=document.getElementById("sarafHeldTotal"),o=document.getElementById("sarafOwedTotal");if(h)h.textContent=money(held);if(o)o.textContent=money(owed);
