@@ -1101,7 +1101,38 @@ function editSale(id){
 function printSale(id){
  const s=db.sales.find(x=>x.id===id);if(!s)return;
  const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه");
- w.document.write(`<!doctype html><html lang="ps" dir="rtl"><meta charset="UTF-8"><title>رسید</title><body style="font-family:Arial;text-align:center;padding:15px"><h2>شاهین فروشگاه</h2><p>رسید: ${safe(s.invoice)}</p><p>نېټه: ${safe(s.date)}</p><p>مشتری: ${safe(s.customer)}</p><hr><p>جنس: ${safe(s.productName)}</p><p>تعداد: ${s.qty} ${safe(s.unit)}</p><p>ټول: ${money(s.total)}</p><p>ورکړل: ${money(s.paid)}</p><p>پاتې پور: ${money(s.debt)}</p><p>له پېرود څخه مو مننه</p></body></html>`);
+ w.document.write(`<!doctype html><html lang="ps" dir="rtl"><meta charset="UTF-8"><title>رسید</title><body style="font-family:Arial;text-align:center;padding:15px"><h2>شاهین فروشگاه</h2><p>رسید: ${safe(s.invoice)}</p><p>نېټه: ${safe(s.date)}</p><p>مشتری: ${safe(s.customer)}</p><hr><p>جنس: ${safe(s.productName)}</p><p>تعداد: ${s.qty} ${safe(s.unit)}</p><p>ټول: ${money(s.total)}</p><p>ورکړل: ${money(s.paid)}</p><p>پاتې پور: ${money(s.debt)}</p><p>له پېرود څخه مو مننه</p><script>
+/* د مشتریانو د ثبت او فورم د تڼیو مستقیم فعالول */
+(function(){
+ function bindCustomerForm(){
+  const add=document.querySelector('#customerFormPanel button[onclick*="addCustomer"]');
+  const plus=document.querySelector('.customer-addbar button');
+  const panel=document.getElementById('customerFormPanel');
+  if(plus&&panel)plus.onclick=function(){panel.classList.toggle('hidden');};
+  if(add)add.onclick=function(){
+   const name=(document.getElementById('cName')?.value||'').trim();
+   const phone=(document.getElementById('cPhone')?.value||'').trim();
+   const debt=Number(document.getElementById('cDebt')?.value||0);
+   const type=document.getElementById('cType')?.value||'active';
+   if(!name){alert('د مشتری نوم ولیکه');document.getElementById('cName')?.focus();return;}
+   if(!Number.isFinite(debt)||debt<0){alert('د پور اندازه سمه ولیکه');return;}
+   if(!Array.isArray(db.customers))db.customers=[];
+   if(db.customers.some(c=>String(c.name||'').trim().toLowerCase()===name.toLowerCase())){alert('دا مشتری مخکې ثبت شوی دی');return;}
+   const c={id:uid(),name,phone,debt,type,created:today()};
+   db.customers.push(c);
+   try{saveDB();}catch(e){db.customers.pop();alert('ثبت ناکام شو: د موبایل د زېرمتون ستونزه ده.');return;}
+   ['cName','cPhone','cDebt'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+   panel?.classList.add('hidden');
+   if(typeof currentCustomerId!=='undefined')currentCustomerId='';
+   refreshAll();
+   alert('مشتری ثبت شو');
+  };
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindCustomerForm);
+ else bindCustomerForm();
+})();
+</script>
+</body></html>`);
  w.document.close();
  w.focus();
  w.print();
