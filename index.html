@@ -485,8 +485,16 @@ nav button{font-size:10px;padding:5px 3px}
      class="sale-customer-results hidden"></div>
    </div>
    <div>
-    <label>نېټه</label>
-    <input id="saleDate" type="date" onchange="updateSaleDateLabel()"><div id="saleDateJalali" class="sale-date-jalali"></div>
+    <label>نېټه (لمریز کال)</label>
+    <div class="row">
+     <select id="saleJYear" aria-label="کال" onchange="updateSaleDateLabel()"></select>
+     <select id="saleJMonth" aria-label="میاشت" onchange="updateSaleDateLabel()">
+      <option value="1">وری</option><option value="2">غویی</option><option value="3">غبرګولی</option><option value="4">چنګاښ</option><option value="5">زمری</option><option value="6">وږی</option><option value="7">تله</option><option value="8">لړم</option><option value="9">لیندۍ</option><option value="10">مرغومی</option><option value="11">سلواغه</option><option value="12">کب</option>
+     </select>
+     <select id="saleJDay" aria-label="ورځ" onchange="updateSaleDateLabel()"></select>
+    </div>
+    <input id="saleDate" type="date" hidden>
+    <div id="saleDateJalali" class="sale-date-jalali"></div>
    </div>
   </div>
 
@@ -680,21 +688,43 @@ function today(){
  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
 
-function updateSaleDateLabel(){
- const el=document.getElementById("saleDate");
- const out=document.getElementById("saleDateJalali");
- if(!el||!out)return;
- if(!el.value){out.textContent="";return;}
- const d=new Date(el.value+"T12:00:00");
- try{
-  const parts=new Intl.DateTimeFormat("fa-AF-u-ca-persian",{weekday:"long",month:"long",day:"numeric"}).formatToParts(d);
-  const yearPart=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric"}).format(d);
-  const year=yearPart.replace(/[0-9]/g,n=>"۰۱۲۳۴۵۶۷۸۹"[Number(n)]);
-  const get=t=>parts.find(p=>p.type===t)?.value||"";
-  out.textContent=[get("weekday"),get("day"),get("month"),year].filter(Boolean).join(" ");
- }catch(e){
-  out.textContent=new Intl.DateTimeFormat("fa-AF-u-ca-persian",{weekday:"long",month:"long",day:"numeric"}).format(d);
+function jalaliToISO(jy,jm,jd){
+ const fmt=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",day:"numeric",timeZone:"UTC"});
+ const start=Date.UTC(jy+621,0,1,12),end=Date.UTC(jy+622,3,1,12);
+ for(let t=start;t<=end;t+=86400000){
+  const parts=fmt.formatToParts(new Date(t));
+  const get=k=>Number(parts.find(p=>p.type===k)?.value);
+  if(get("year")===jy&&get("month")===jm&&get("day")===jd){
+   const dt=new Date(t);
+   return dt.getUTCFullYear()+"-"+String(dt.getUTCMonth()+1).padStart(2,"0")+"-"+String(dt.getUTCDate()).padStart(2,"0");
+  }
  }
+ return "";
+}
+function initJalaliSaleDate(){
+ const y=document.getElementById("saleJYear"),m=document.getElementById("saleJMonth"),d=document.getElementById("saleJDay");
+ if(!y||!m||!d)return;
+ const parts=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",day:"numeric"}).formatToParts(new Date());
+ const get=k=>Number(parts.find(p=>p.type===k)?.value);
+ const jy=get("year"),jm=get("month"),jd=get("day");
+ y.innerHTML="";
+ for(let n=jy-5;n<=jy+10;n++)y.add(new Option(String(n).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]),String(n)));
+ y.value=String(jy);m.value=String(jm);
+ d.innerHTML="";
+ for(let n=1;n<=31;n++)d.add(new Option(String(n).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]),String(n)));
+ d.value=String(jd);
+ updateSaleDateLabel();
+}
+function updateSaleDateLabel(){
+ const el=document.getElementById("saleDate"),out=document.getElementById("saleDateJalali");
+ const y=document.getElementById("saleJYear"),m=document.getElementById("saleJMonth"),day=document.getElementById("saleJDay");
+ if(!el||!out||!y||!m||!day)return;
+ const iso=jalaliToISO(Number(y.value),Number(m.value),Number(day.value));
+ if(!iso){out.textContent="دا لمریزه نېټه سمه نه ده";el.value="";return;}
+ el.value=iso;
+ const date=new Date(iso+"T12:00:00");
+ const weekday=new Intl.DateTimeFormat("ps-AF",{weekday:"long"}).format(date);
+ out.textContent=weekday+"، "+day.options[day.selectedIndex].text+" "+m.options[m.selectedIndex].text+" "+y.options[y.selectedIndex].text;
 }
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -1141,7 +1171,7 @@ document.getElementById("saleProduct").addEventListener("change",()=>{filterSale
  document.getElementById(id).addEventListener("input",updateSalePreview);
 });
 
-document.getElementById("saleDate").value=today();
+initJalaliSaleDate();
 </script>
 
 <script>
