@@ -701,6 +701,46 @@ main{max-width:760px!important;padding:12px 10px 22px!important}
 }
 </style>
 
+
+<style id="shaheen-modern-shortcut-icons">
+/* عصري شیشې-ډول نښې د کور د خانو لپاره */
+#home .shortcut{
+ position:relative!important;isolation:isolate!important;
+ overflow:hidden!important;
+}
+#home .shortcut:before{
+ content:"";position:absolute;inset:0 0 auto;height:45%;
+ background:linear-gradient(180deg,#ffffff26,transparent);
+ pointer-events:none;z-index:-1;
+}
+#home .shortcut .shortcut-icon{
+ width:54px!important;height:54px!important;flex:0 0 54px!important;
+ display:grid!important;place-items:center!important;
+ border-radius:17px!important;
+ background:linear-gradient(145deg,#ffffff45,#ffffff12)!important;
+ border:1px solid #ffffff85!important;
+ box-shadow:0 5px 12px #001b4d35,inset 0 1px 2px #ffffff75!important;
+ color:#fff!important;
+}
+#home .shortcut .shortcut-icon svg{
+ width:32px!important;height:32px!important;
+ stroke:#fff!important;stroke-width:2.15!important;
+ fill:none!important;filter:drop-shadow(0 2px 2px #001b4d55);
+ stroke-linecap:round!important;stroke-linejoin:round!important;
+}
+#home .shortcut span{
+ font-size:12px!important;font-weight:900!important;
+ text-shadow:0 1px 3px #001b4d55!important;
+ letter-spacing:0!important;
+}
+#home .shortcut:active{transform:translateY(2px) scale(.98)!important}
+@media(max-width:380px){
+ #home .shortcut .shortcut-icon{width:46px!important;height:46px!important;flex-basis:46px!important;border-radius:14px!important}
+ #home .shortcut .shortcut-icon svg{width:28px!important;height:28px!important}
+ #home .shortcut span{font-size:10px!important}
+}
+</style>
+
 </head>
 <body>
 <header class="brand-header">
