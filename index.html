@@ -674,11 +674,20 @@ nav button{font-size:10px;padding:5px 3px}
    <div><label>نېټه</label><input id="eDate" type="date"></div>
   </div>
   <label>د لګښت ډول</label>
-  <select id="eCategory"><option>د موټر تېل</option><option>کرایه</option><option>معاش</option><option>برېښنا</option><option>نور</option></select>
+  <select id="eCategory" onchange="toggleStockExpenseFields()"><option value="cash">نغدي لګښت</option><option value="stock">د دکان له موجودۍ مصرف</option></select>
+  <div id="stockExpenseFields" class="hidden">
+   <label>🔎 د موجودۍ جنس ولټوه</label><input id="eProductSearch" type="search" placeholder="د جنس نوم یا کوډ ولیکه..." oninput="filterExpenseProducts()">
+   <label>جنس انتخاب کړه</label><select id="eProduct" onchange="updateExpenseProductInfo()"></select>
+   <div id="eProductInfo" class="notice"></div>
+   <div class="row"><div><label>مصرف شوی مقدار</label><input id="eQty" type="number" min="0.01" step="any" value="1"></div><div><label>واحد</label><select id="eUnit" onchange="updateExpenseProductInfo()"></select></div></div>
+  </div>
   <label>تشریح</label><textarea id="eNote" rows="2"></textarea>
   <button class="primary" onclick="addExpense()">لګښت ثبت کړه</button>
  </div>
- <div class="panel"><div id="expensesList"></div></div>
+ <div class="panel">
+  <label>🔎 لګښتونه ولټوه</label><input id="expenseSearch" type="search" placeholder="د لګښت، جنس، ډول یا یادښت لټون..." oninput="renderExpenses()">
+  <div id="expensesList"></div>
+ </div>
 </section>
 
 <section id="debts" class="hidden">
@@ -1410,27 +1419,73 @@ function deleteSupplier(id){
  if(confirm("شرکت حذف شي؟")){db.suppliers=db.suppliers.filter(x=>x.id!==id);saveDB();refreshAll()}
 }
 
+function toggleStockExpenseFields(){
+ const isStock=value("eCategory")==="stock";
+ document.getElementById("stockExpenseFields")?.classList.toggle("hidden",!isStock);
+ if(isStock){filterExpenseProducts();}
+}
+function filterExpenseProducts(){
+ const q=(value("eProductSearch")||"").trim().toLowerCase();
+ const el=document.getElementById("eProduct");if(!el)return;
+ const old=el.value;
+ const list=(db.products||[]).filter(p=>String(p.name||"").toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q));
+ el.innerHTML=list.map(p=>'<option value="'+safe(p.id)+'">'+safe(p.name)+' — موجودي '+safe(p.qty)+' '+safe(p.unit||"")+'</option>').join("")||'<option value="">جنس ونه موندل شو</option>';
+ if(list.some(p=>String(p.id)===String(old)))el.value=old;
+ updateExpenseProductInfo();
+}
+function updateExpenseProductInfo(){
+ const p=(db.products||[]).find(x=>String(x.id)===String(value("eProduct")));
+ const unit=document.getElementById("eUnit"),info=document.getElementById("eProductInfo");
+ if(!p){if(unit)unit.innerHTML="";if(info)info.textContent="جنس انتخاب کړه";return;}
+ const main=p.unit||"واحد",trade=p.tradeUnit||main;
+ if(unit){
+  const old=unit.value;
+  unit.innerHTML='<option value="main">'+safe(main)+'</option>'+(trade!==main?'<option value="trade">'+safe(trade)+'</option>':"");
+  unit.value=old==="trade"&&trade!==main?"trade":"main";
+ }
+ if(info)info.textContent="موجودي: "+p.qty+" "+main+" · د پېرود قیمت: "+money(p.cost)+" د "+main+" پر واحد";
+}
 function addExpense(){
- const name=value("eName"),amount=number("eAmount");
- const date=value("eDate")||today();
- if(!name)return alert("د لګښت نوم ولیکه");
- if(amount<=0)return alert("سم مبلغ ولیکه");
- if(amount>Number(db.cash))return alert("په صندوق کې دومره پیسې نشته");
- db.expenses.push({id:uid(),name,amount,date,category:value("eCategory"),note:value("eNote")});
- db.cash=Number(db.cash)-amount;
- saveDB();["eName","eAmount","eNote"].forEach(id=>document.getElementById(id).value="");
- document.getElementById("eDate").value="";
+ const date=value("eDate")||today(),category=value("eCategory"),note=value("eNote");
+ if(category==="stock"){
+  const p=(db.products||[]).find(x=>String(x.id)===String(value("eProduct")));
+  const qty=number("eQty");
+  if(!p)return alert("د موجودۍ جنس انتخاب کړه");
+  if(!Number.isFinite(qty)||qty<=0)return alert("مصرف شوی مقدار سم ولیکه");
+  const factor=value("eUnit")==="trade"?(Number(p.unitFactor)||1):1;
+  const stockQty=qty*factor,available=Number(p.qty)||0;
+  if(stockQty>available)return alert("په موجودۍ کې دومره جنس نشته. موجودي: "+available+" "+(p.unit||"واحد"));
+  const amount=stockQty*(Number(p.cost)||0);
+  p.qty=available-stockQty;
+  db.expenses.push({id:uid(),name:"د موجودۍ مصرف: "+p.name,amount,date,category:"د دکان له موجودۍ مصرف",note,productId:p.id,productName:p.name,qty,unit:value("eUnit")==="trade"?(p.tradeUnit||p.unit):(p.unit||"واحد"),stockQty,unitFactor:factor,paymentType:"stock"});
+ }else{
+  const name=value("eName"),amount=number("eAmount");
+  if(!name)return alert("د لګښت نوم ولیکه");
+  if(!Number.isFinite(amount)||amount<=0)return alert("سم مبلغ ولیکه");
+  if(amount>Number(db.cash))return alert("په صندوق کې دومره پیسې نشته");
+  db.cash=Number(db.cash)-amount;
+  db.expenses.push({id:uid(),name,amount,date,category:value("eCategory"),note,paymentType:"cash"});
+ }
+ saveDB();
+ ["eName","eAmount","eNote","eQty","eProductSearch"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ const dateEl=document.getElementById("eDate");if(dateEl)dateEl.value="";
  refreshAll();alert("لګښت ثبت شو");
 }
 function renderExpenses(){
- const list=db.expenses.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const q=(value("expenseSearch")||"").trim().toLowerCase();
+ const list=(db.expenses||[]).filter(e=>[e.name,e.category,e.note,e.productName,e.date].some(v=>String(v||"").toLowerCase().includes(q))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  document.getElementById("expensesList").innerHTML=list.map(e=>`
- <div class="item"><b>${safe(e.name)}</b><div>مبلغ: ${money(e.amount)}</div><div>نېټه: ${safe(e.date)}</div><div>ډول: ${safe(e.category)}</div><div>یادښت: ${safe(e.note||"-")}</div><button class="red" onclick="deleteExpense('${e.id}')">حذف</button></div>`).join("")||"<p>لګښت نشته</p>";
+ <div class="item"><b>${safe(e.name)}</b><div>مبلغ: ${money(e.amount)}</div><div>نېټه: ${safe(e.date)}</div><div>ډول: ${safe(e.category)}</div>${e.productName?'<div>مصرف شوی جنس: '+safe(e.productName)+' · مقدار: '+safe(e.qty)+' '+safe(e.unit||"")+'</div>':""}<div>یادښت: ${safe(e.note||"-")}</div><button class="red" onclick="deleteExpense('${e.id}')">حذف</button></div>`).join("")||(q?"د لټون نتیجه ونه موندل شوه":"لګښت نشته");
 }
 function deleteExpense(id){
  const e=db.expenses.find(x=>x.id===id);if(!e)return;
- if(!confirm("دا لګښت حذف او پیسې صندوق ته بېرته ور وګرځول شي؟"))return;
- db.cash=Number(db.cash)+Number(e.amount);
+ if(!confirm(e.paymentType==="stock"?"دا د موجودۍ مصرف حذف او جنس بېرته ګدام ته داخل شي؟":"دا لګښت حذف او پیسې صندوق ته بېرته ور وګرځول شي؟"))return;
+ if(e.paymentType==="stock"&&e.productId){
+  const p=db.products.find(x=>String(x.id)===String(e.productId));
+  if(p)p.qty=Number(p.qty||0)+Number(e.stockQty||0);
+ }else if(e.paymentType!=="stock"){
+  db.cash=Number(db.cash)+Number(e.amount||0);
+ }
  db.expenses=db.expenses.filter(x=>x.id!==id);
  saveDB();refreshAll();
 }
