@@ -884,17 +884,21 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <button class="shortcut" onclick="makeDailyReport()"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18M8 14h3m-3 3h6"/></svg></b><span>ورځنی راپور</span></button>
   <button class="shortcut" onclick="show('capitalPage',this);renderCapitalPage()"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.5-1.5-3-1.5-1.7 0-2.8.8-2.8 2s1.1 1.8 2.8 2 2.8.8 2.8 2-1.1 2-2.8 2c-1.4 0-2.5-.5-3-1.5M12 6v12"/></svg></b><span>پانګه</span></button>
    <button class="shortcut" onclick="show('settings',this);renderSettings()"><b class="shortcut-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.8L6.3 12l1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8H14l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a7 7 0 0 1-.1 1.9Z"/></svg></b><span>تنظیمات</span></button>
- </div>
+ 
+   <button class="shortcut" onclick="show(\'saraf\',this)"><b class="shortcut-icon">💱</b><span>صرافي حساب</span></button>
+  </div>
  <div class="panel"><h3>⚠️ کم موجودي جنسونه <small id="lowStockCount" class="badge">0 جنس</small></h3><input id="lowStockSearch" placeholder="🔍 په کم‌موجودۍ جنسونو کې لټون..." oninput="renderLowStock()"><div id="lowStock" style="max-height:420px;overflow:auto;margin-top:8px">معلومات نشته.</div></div>
 
-  <div id="sarafHome" style="margin-top:14px">
-   <h3>💱 د صراف حساب</h3>
-   <div class="panel" style="background:#edf8f6;border:1px solid #c8e8df;border-radius:12px;padding:12px"><div class="row"><div><small>له صراف سره ستا پیسې</small><b id="sarafHeldTotal">0 AFN</b></div><div><small>ته صراف ته پوروړی یې</small><b id="sarafOwedTotal">0 AFN</b></div></div></div>
-   <div class="panel" id="sarafAddPanel"><h3>➕ یوازینی صراف ثبت کړه</h3><label>د صراف نوم</label><input id="sarafName" placeholder="د صراف نوم"><label>شمېره (اختیاري)</label><input id="sarafPhone" type="tel" placeholder="د اړیکې شمېره"><button class="primary" onclick="addSaraf()">صراف ثبت کړه</button></div>
-   <div class="panel"><h3>💸 د پیسو معامله ثبت کړه</h3><label>یوازینی صراف</label><select id="sarafSelect"></select><label>د معاملې ډول</label><select id="sarafType"><option value="deposit">صراف ته مې پیسې ورکړې (زما پیسې ورسره دي)</option><option value="withdraw">له صرافه مې خپلې پیسې واخیستې</option><option value="borrow">له صرافه مې پور واخیست (زه پوروړی شوم)</option><option value="repay">صراف ته مې د پور پیسې ورکړې</option></select><div class="row"><div><label>مبلغ</label><input id="sarafAmount" type="number" min="0.01" step="any"></div><div><label>نېټه</label><input id="sarafDate" type="date"></div></div><label>یادښت</label><input id="sarafNote" placeholder="اختیاري یادښت"><button class="primary" onclick="addSarafTransaction()">معامله ثبت کړه</button></div>
-   <div class="panel"><div id="sarafList"></div></div>
-  </div>
+  </section>
+
+<section id="saraf" class="hidden">
+ <h3>💱 د صرافۍ حساب</h3>
+ <div class="panel" style="background:#edf8f6;border:1px solid #c8e8df;border-radius:12px;padding:12px"><div class="row"><div><small>له صراف سره ستا پیسې</small><b id="sarafHeldTotal">0 AFN</b></div><div><small>ته صراف ته پوروړی یې</small><b id="sarafOwedTotal">0 AFN</b></div></div></div>
+ <div class="panel" id="sarafAddPanel"><h3>➕ یو صراف ثبت کړه</h3><label>د صراف نوم</label><input id="sarafName" placeholder="د صراف نوم"><label>شمېره (اختیاري)</label><input id="sarafPhone" type="tel" placeholder="د اړیکې شمېره"><button class="primary" onclick="addSaraf()">صراف ثبت کړه</button></div>
+ <div class="panel"><h3>💸 د پیسو معامله ثبت کړه</h3><label>صراف</label><select id="sarafSelect"></select><label>د معاملې ډول</label><select id="sarafType"><option value="deposit">صراف ته مې پیسې ورکړې (زما پیسې ورسره دي)</option><option value="withdraw">له صرافه مې خپلې پیسې واخیستې</option><option value="borrow">له صرافه مې پور واخیست (زه پوروړی شوم)</option><option value="repay">صراف ته مې د پور پیسې ورکړې</option></select><div class="row"><div><label>مبلغ</label><input id="sarafAmount" type="number" min="0.01" step="any"></div><div><label>نېټه</label><input id="sarafDate" type="date"></div></div><label>یادښت</label><input id="sarafNote" placeholder="اختیاري یادښت"><button class="primary" onclick="addSarafTransaction()">معامله ثبت کړه</button></div>
+ <div class="panel"><div id="sarafList"></div></div>
 </section>
+
 
 <section id="products" class="hidden">
  <h3>📦 محصولات او جنسونه</h3>
