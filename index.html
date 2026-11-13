@@ -1261,15 +1261,7 @@ function printSale(id){
  const s=db.sales.find(x=>x.id===id);if(!s)return;
  const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه");
  w.document.write(`<!doctype html><html lang="ps" dir="rtl"><meta charset="UTF-8"><title>رسید</title><body style="font-family:Arial;text-align:center;padding:15px"><h2>${safe(db.settings?.shopName||"شاهین فروشگاه")}</h2>${db.settings?.shopPhone?`<p>تلیفون: ${safe(db.settings.shopPhone)}</p>`:""}<p>رسید: ${safe(s.invoice)}</p><p>نېټه: ${safe(s.date)}</p><p>مشتری: ${safe(s.customer)}</p><hr><p>جنس: ${safe(s.productName)}</p><p>تعداد: ${s.qty} ${safe(s.unit)}</p><p>ټول: ${money(s.total)}</p><p>ورکړل: ${money(s.paid)}</p><p>پاتې پور: ${money(s.debt)}</p><p>له پېرود څخه مو مننه</p>
-<script>
-/* د آفلاین کار لپاره Service Worker ثبتول */
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js", { scope: "./" })
-      .catch(error => console.warn("Offline mode registration failed:", error));
-  });
-}
-</script>
+
 
 </body></html>`);
  w.document.close();
@@ -1995,6 +1987,15 @@ function showArchiveReport(id){
 /* د اپلیکیشن پیل */
 saveDB();
 refreshAll();
+</script>
+<script>
+/* د آفلاین کار لپاره Service Worker ثبتول */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js", { scope: "./" })
+      .catch(error => console.warn("Offline mode registration failed:", error));
+  });
+}
 </script>
 </body>
 </html>
