@@ -489,7 +489,7 @@ nav button{font-size:10px;padding:5px 3px}
   <button class="shortcut" onclick="makeDailyReport()"><b>📅</b><span>ورځنی راپور</span></button>
   <button class="shortcut" onclick="show('capitalPage',this);renderCapitalPage()"><b>💰</b><span>پانګه</span></button>
  </div>
- <div class="panel"><h3>⚠️ کم موجودي جنسونه</h3><div id="lowStock" class="notice">معلومات نشته.</div></div>
+ <div class="panel"><h3>⚠️ کم موجودي جنسونه <small id="lowStockCount" class="badge">0 جنس</small></h3><input id="lowStockSearch" placeholder="🔍 په کم‌موجودۍ جنسونو کې لټون..." oninput="renderLowStock()"><div id="lowStock" style="max-height:420px;overflow:auto;margin-top:8px">معلومات نشته.</div></div>
 </section>
 
 <section id="products" class="hidden">
@@ -1615,9 +1615,27 @@ function updateDashboard(){
  put("supplierDebt",supplierDebt);put("salesTotal",totalSales);
  put("profitToday",netProfit);put("debtToday",dailyDebt);
  put("expenseTotal",dailyExpenses);put("capital",capital);
- const low=db.products.filter(p=>Number(p.qty)<=Number(p.min||5));
- document.getElementById("lowStock").innerHTML=low.map(p=>`
- <div class="item"><b>${safe(p.name)}</b><div>پاتې مقدار: ${p.qty} ${safe(p.unit)}</div></div>`).join("")||"<p>کم‌موجوده جنس نشته</p>";
+ renderLowStock();
+}
+
+function renderLowStock(){
+ const low=(db.products||[]).filter(p=>Number(p.qty||0)<=Number(p.min||5));
+ const q=String(value("lowStockSearch")||"").trim().toLowerCase();
+ const shown=low.filter(p=>!q||String(p.name||"").toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q));
+ const count=document.getElementById("lowStockCount");
+ const box=document.getElementById("lowStock");
+ if(count)count.textContent=low.length+" جنس";
+ if(!box)return;
+ box.innerHTML=shown.map(p=>{
+  const qty=Number(p.qty||0),limit=Number(p.min||5),need=Math.max(0,limit-qty);
+  return `<div class="item" style="padding:12px 4px;border-bottom:1px solid #edf0f5">
+   <b>${safe(p.name||"بې نومه جنس")}</b>
+   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:13px">
+    <span>📦 پاتې موجودي: <b>${qty} ${safe(p.unit||"واحد")}</b></span>
+    <span>⚠️ د کم‌موجودۍ حد: ${limit} ${safe(p.unit||"واحد")}</span>
+    <span>🛒 د پېرود وړاندیز: <b>${need} ${safe(p.unit||"واحد")}</b></span>
+   </div></div>`;
+ }).join("")||(q?"د لټون نتیجه ونه موندل شوه":"کم‌موجوده جنس نشته");
 }
 
 function archiveMonth(){
