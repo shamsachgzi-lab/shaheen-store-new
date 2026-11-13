@@ -1332,9 +1332,16 @@ function makeDailyReport(){
 }
 function jalaliDisplayDate(iso){
  if(!iso)return "ټولې نېټې";
- const d=new Date(String(iso).slice(0,10)+"T12:00:00");
  try{
-  return new Intl.DateTimeFormat("ps-AF-u-ca-persian",{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(d);
+  const parts=String(iso).slice(0,10).split("-").map(Number);
+  if(parts.length!==3||parts.some(n=>!Number.isFinite(n)))return String(iso);
+  const d=new Date(Date.UTC(parts[0],parts[1]-1,parts[2],12));
+  const fmt=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",day:"numeric",timeZone:"UTC"});
+  const get=k=>Number(fmt.formatToParts(d).find(p=>p.type===k)?.value);
+  const months=["وری","غویی","غبرګولی","چنګاښ","زمری","وږی","تله","لړم","لیندۍ","مرغومی","سلواغه","کب"];
+  const weekdays=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
+  const fa=n=>String(n).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]);
+  return weekdays[d.getUTCDay()]+"، "+fa(get("day"))+" "+(months[get("month")-1]||"")+" "+fa(get("year"));
  }catch(e){return String(iso)}
 }
 function makeReport(){
