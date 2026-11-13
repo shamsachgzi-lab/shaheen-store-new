@@ -797,6 +797,7 @@ nav button{font-size:10px;padding:5px 3px}
   <label>⬆️ Restore — د JSON بیک‌اف فایل</label><input type="file" id="restoreFile" accept=".json,application/json">
   <button class="green" onclick="restoreData()">⬆️ Restore</button>
   <hr><p class="notice">Restore اوسني معلومات د Backup له معلوماتو سره بدلوي. مخکې له Restore څخه اوسنی Backup وساته.</p>
+  <button class="red" onclick="clearAllData()">⚠️ ټول معلومات پاکول</button>
  </div>
 </section>
 
@@ -1213,7 +1214,7 @@ function editSale(id){
 function printSale(id){
  const s=db.sales.find(x=>x.id===id);if(!s)return;
  const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه");
- w.document.write(`<!doctype html><html lang="ps" dir="rtl"><meta charset="UTF-8"><title>رسید</title><body style="font-family:Arial;text-align:center;padding:15px"><h2>شاهین فروشگاه</h2><p>رسید: ${safe(s.invoice)}</p><p>نېټه: ${safe(s.date)}</p><p>مشتری: ${safe(s.customer)}</p><hr><p>جنس: ${safe(s.productName)}</p><p>تعداد: ${s.qty} ${safe(s.unit)}</p><p>ټول: ${money(s.total)}</p><p>ورکړل: ${money(s.paid)}</p><p>پاتې پور: ${money(s.debt)}</p><p>له پېرود څخه مو مننه</p></body></html>`);
+ w.document.write(`<!doctype html><html lang="ps" dir="rtl"><meta charset="UTF-8"><title>رسید</title><body style="font-family:Arial;text-align:center;padding:15px"><h2>${safe(db.settings?.shopName||"شاهین فروشگاه")}</h2>${db.settings?.shopPhone?`<p>تلیفون: ${safe(db.settings.shopPhone)}</p>`:""}<p>رسید: ${safe(s.invoice)}</p><p>نېټه: ${safe(s.date)}</p><p>مشتری: ${safe(s.customer)}</p><hr><p>جنس: ${safe(s.productName)}</p><p>تعداد: ${s.qty} ${safe(s.unit)}</p><p>ټول: ${money(s.total)}</p><p>ورکړل: ${money(s.paid)}</p><p>پاتې پور: ${money(s.debt)}</p><p>له پېرود څخه مو مننه</p></body></html>`);
  w.document.close();
  w.focus();
  w.print();
@@ -1799,6 +1800,12 @@ function updateProductUnitOptions(){
   el.innerHTML=(db.settings.units||[]).map(u=>`<option value="${safe(u.name)}">${safe(u.name)}</option>`).join("");
   if((db.settings.units||[]).some(u=>u.name===old))el.value=old;
  });
+}
+function clearAllData(){
+ if(!confirm("خبرداری! دکان ټول معلومات، جنسونه، خرڅلاو، پورونه، مصارف او راپورونه به پاک شي. مخکې Backup واخله. دوام ورکوې؟"))return;
+ const word=prompt("د تایید لپاره «پاکول» ولیکه:");
+ if(word!=="پاکول")return alert("عملیه لغوه شوه.");
+ try{localStorage.removeItem(DB_KEY);location.reload();}catch(e){alert("معلومات پاک نه شول: "+e.message);}
 }
 function backupData(){
  try{
