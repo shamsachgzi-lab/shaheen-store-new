@@ -1301,6 +1301,13 @@ function makeDailyReport(){
  document.getElementById("reportTo").value=d;
  makeReport();
 }
+function jalaliDisplayDate(iso){
+ if(!iso)return "ټولې نېټې";
+ const d=new Date(String(iso).slice(0,10)+"T12:00:00");
+ try{
+  return new Intl.DateTimeFormat("ps-AF-u-ca-persian",{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(d);
+ }catch(e){return String(iso)}
+}
 function makeReport(){
  const from=value("reportFrom"),to=value("reportTo");
  if(from&&to&&from>to)return alert("د پیل نېټه باید د پای له نېټې مخکې وي");
@@ -1321,7 +1328,7 @@ function makeReport(){
  const supplierPayments=payments.filter(p=>p.type==="supplier").reduce((a,p)=>a+Number(p.amount||0),0);
  document.getElementById("reportContent").innerHTML=`
  <div class="item"><h3>د شاهین فروشگاه راپور</h3>
- <p>له: ${safe(from||"ټولې نېټې")} تر: ${safe(to||"نن")}</p>
+ <p>نېټه: ${safe(from===to?jalaliDisplayDate(from):jalaliDisplayDate(from)+" تر "+jalaliDisplayDate(to))}</p>
  <p>د خرڅلاو شمېر: <b>${sales.length}</b></p>
  <p>ټول خرڅلاو: <b>${money(totalSales)}</b></p>
  <p>نغدي ترلاسه: ${money(totalPaid)} | د خرڅلاو پور: ${money(totalDebt)}</p>
@@ -1333,13 +1340,13 @@ function makeReport(){
  <p>د مشتریانو پور تادیې: ${money(customerPayments)}</p>
  <p>شرکتونو ته تادیې: ${money(supplierPayments)}</p></div>
  <h3>د خرڅلاو تفصیل</h3>
- ${sales.map(s=>`<div class="item">${safe(s.date)} — رسید: ${safe(s.invoice||"-")} — ${safe(s.productName)} — ${s.qty} ${safe(s.unit)} — ټول: ${money(s.total)} — ورکړل: ${money(s.paid)} — پور: ${money(s.debt)}</div>`).join("")||"<p>خرڅلاو نشته</p>"}
+ ${sales.map(s=>`<div class="item">${safe(jalaliDisplayDate(s.date))} — رسید: ${safe(s.invoice||"-")} — ${safe(s.productName)} — ${s.qty} ${safe(s.unit)} — ټول: ${money(s.total)} — ورکړل: ${money(s.paid)} — پور: ${money(s.debt)}</div>`).join("")||"<p>خرڅلاو نشته</p>"}
  <h3>د پېرود تفصیل</h3>
- ${purchases.map(p=>`<div class="item">${safe(p.date)} — ${safe(p.productName)} — ${safe(p.supplier||"نغدي")} — ټول: ${money(p.total)} — ورکړل: ${money(p.paid)} — پور: ${money(p.debt)}</div>`).join("")||"<p>پېرود نشته</p>"}
+ ${purchases.map(p=>`<div class="item">${safe(jalaliDisplayDate(p.date))} — ${safe(p.productName)} — ${safe(p.supplier||"نغدي")} — ټول: ${money(p.total)} — ورکړل: ${money(p.paid)} — پور: ${money(p.debt)}</div>`).join("")||"<p>پېرود نشته</p>"}
  <h3>د لګښتونو تفصیل</h3>
- ${expenses.map(e=>`<div class="item">${safe(e.date)} — ${safe(e.name)} — ${safe(e.category||"-")} — ${money(e.amount)}</div>`).join("")||"<p>لګښت نشته</p>"}
+ ${expenses.map(e=>`<div class="item">${safe(jalaliDisplayDate(e.date))} — ${safe(e.name)} — ${safe(e.category||"-")} — ${money(e.amount)}</div>`).join("")||"<p>لګښت نشته</p>"}
  <h3>د پورونو تادیاتو تفصیل</h3>
- ${payments.map(p=>`<div class="item">${safe(p.date)} — ${safe(p.personName||"-")} — ${p.type==="customer"?"د مشتری تادیه":"شرکت ته تادیه"} — ${money(p.amount)}</div>`).join("")||"<p>تادیه نشته</p>"}
+ ${payments.map(p=>`<div class="item">${safe(jalaliDisplayDate(p.date))} — ${safe(p.personName||"-")} — ${p.type==="customer"?"د مشتری تادیه":"شرکت ته تادیه"} — ${money(p.amount)}</div>`).join("")||"<p>تادیه نشته</p>"}
  `;
 }
 
