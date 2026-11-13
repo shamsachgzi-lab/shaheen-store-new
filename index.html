@@ -439,6 +439,16 @@ nav button{font-size:10px;padding:5px 3px}
 
 .customer-detail>h3{margin:14px 0}.customer-detail-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.customer-detail-summary>div{background:#f5f8fc}.customer-payment-panel{background:#f7fbff}.customer-payment-panel h3{margin-top:0}.customer-payment-panel input{margin-bottom:7px}.customer-history-payment,.customer-history-sale{margin:9px 0}.customer-history-amount{font-weight:800;font-size:17px;margin:7px 0;color:#1b6b42}.customer-opening-debt{background:#fffaf0}
 </style>
+<style>
+.month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
+.month-overview h3{margin:4px 0 8px}.month-overview p{margin:5px 0 12px;color:#536273}
+.month-opening{padding:10px;background:#fff;border-radius:9px;margin:8px 0}
+.month-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.month-stats>div{background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:10px;display:flex;flex-direction:column;gap:5px}
+.month-stats small{color:#536273}.month-stats b{font-size:16px}
+.month-overview h4{margin:14px 0 8px}
+@media(min-width:700px){.month-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
 </head>
 <body>
 <header>
@@ -675,14 +685,18 @@ nav button{font-size:10px;padding:5px 3px}
 </section>
 
 <section id="reports" class="hidden">
- <h3>📊 ورځني او عمومي راپورونه</h3>
+ <h3>📊 میاشتني او ورځني راپورونه</h3>
  <div class="panel">
-  <button class="green" onclick="makeDailyReport()">📅 د نن ورځې بشپړ راپور</button>
+  <div id="monthOverview"></div>
+  <button class="green" onclick="closeCurrentMonth()">🔒 میاشت بندول / نوې میاشت</button>
   <hr>
+  <button class="primary" onclick="makeDailyReport()">📅 د نن ورځې بشپړ راپور</button>
   <label>له نېټې</label><input type="date" id="reportFrom">
   <label>تر نېټې</label><input type="date" id="reportTo">
   <button class="primary" onclick="makeReport()">د ټاکلې مودې راپور ښکاره کړه</button>
-  <hr><h3>د میاشتې پای آرشیف</h3><label>میاشت انتخاب کړه</label><input type="month" id="archiveMonth"><button class="gray" onclick="archiveMonth()">د میاشتې راپور خوندي کړه</button><div id="archiveList"></div>
+  <hr><h3>🗂 میاشتني راپورونه</h3>
+  <label>میاشت انتخاب کړه</label><input type="month" id="archiveMonth"><button class="gray" onclick="archiveMonth()">د میاشتې راپور خوندي کړه</button>
+  <div id="archiveList"></div>
   <div id="reportContent"></div>
  </div>
 </section>
@@ -805,7 +819,7 @@ function runGlobalSearch(){
 
 function refreshAll(){
  fillProductSelects();renderProducts();renderSales();renderPurchases();
- renderCustomers();renderSuppliers();renderExpenses();renderDebtLists();renderArchives();updateDashboard();
+ renderCustomers();renderSuppliers();renderExpenses();renderDebtLists();renderArchives();updateDashboard();renderMonthOverview();
 }
 function fillProductSelects(){
  const sale=document.getElementById("saleProduct");
@@ -1454,7 +1468,7 @@ function archiveMonth(){
 }
 function renderArchives(){
  const box=document.getElementById("archiveList");if(!box)return;
- box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>خرڅلاو: "+money(a.sales)+" | پېرود: "+money(a.purchases)+"</div><div>ګټه: "+money(a.grossProfit)+" | لګښت: "+money(a.expenses)+"</div></div>").join("")||"<p>آرشیف نشته</p>";
+ box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>"+safe(a.start||a.month+"-01")+" → "+safe(a.end||a.month+"-31")+" · خرڅلاو "+money(a.sales)+" · خالصه ګټه "+money(a.netProfit??((Number(a.grossProfit)||0)-(Number(a.expenses)||0)))+"</div><button class=\"gray\" onclick=\"showArchiveReport('"+safe(a.id)+"')\">📄 راپور</button></div>").join("")||"<p>آرشیف نشته</p>";
 }
 function makeDailyReport(){
  show("reports");
@@ -1593,6 +1607,73 @@ window.addCustomer=function(){
  refreshAll();
  alert("مشتری ثبت شو");
 };
+
+
+function stockValueNow(){
+ return db.products.reduce((n,p)=>n+(Number(p.qty)||0)*(Number(p.cost)||0),0);
+}
+function monthPeriod(){
+ const now=today(),month=now.slice(0,7);
+ const dates=[...db.sales,...db.purchases,...db.expenses].map(x=>String(x.date||"")).filter(d=>d.slice(0,7)===month).sort();
+ const start=db.monthStart&&String(db.monthStart).slice(0,7)===month?db.monthStart:(dates[0]||month+"-01");
+ return {month,start,end:now};
+}
+function renderMonthOverview(){
+ const box=document.getElementById("monthOverview");if(!box)return;
+ const period=monthPeriod(),inside=d=>String(d||"")>=period.start&&String(d||"")<=period.end;
+ const sales=db.sales.filter(x=>inside(x.date)),purchases=db.purchases.filter(x=>inside(x.date)),expenses=db.expenses.filter(x=>inside(x.date));
+ const sum=(arr,k)=>arr.reduce((n,x)=>n+Number(x[k]||0),0);
+ const saleTotal=sum(sales,"total"),gross=sum(sales,"profit"),expenseTotal=sum(expenses,"amount"),net=gross-expenseTotal;
+ const currentStock=stockValueNow();
+ if(!Number.isFinite(Number(db.monthOpeningStockValue)))db.monthOpeningStockValue=currentStock;
+ const byDay={};
+ sales.forEach(x=>{const d=String(x.date||"");if(!d)return;if(!byDay[d])byDay[d]={sales:0,profit:0};byDay[d].sales+=Number(x.total)||0;byDay[d].profit+=Number(x.profit)||0;});
+ const days=Object.keys(byDay).sort().reverse();
+ const fmt=d=>jalaliDisplayDate(d).replace(/^[^،]+،\s*/,"");
+ box.innerHTML=`
+ <div class="month-overview">
+  <h3>میاشت · ${safe(period.month)}</h3>
+  <p>له ${safe(period.start)} راهیسې · ${sales.length} فروش · ${purchases.length} خرید · ${expenses.length} مصرف</p>
+  <div class="month-opening">د میاشتې په شروع کې د مال ارزښت: <b>${money(db.monthOpeningStockValue)}</b> <button class="gray" onclick="editMonthOpeningStock()">✏️</button></div>
+  <div class="month-stats">
+   <div><small>د دې میاشتې خرڅلاو</small><b>${money(saleTotal)}</b></div>
+   <div><small>خالصه ګټه</small><b>${money(net)}</b></div>
+   <div><small>د دې میاشتې خرید</small><b>${money(sum(purchases,"total"))}</b></div>
+   <div><small>د دې میاشتې مصارف</small><b>${money(expenseTotal)}</b></div>
+   <div><small>ناخالصه ګټه</small><b>${money(gross)}</b></div>
+   <div><small>اوسنی د مال ارزښت</small><b>${money(currentStock)}</b></div>
+  </div>
+  <h4>ورځني راپورونه (روانه میاشت)</h4>
+  <div class="daily-table-wrap"><table class="daily-report-table"><thead><tr><th>نېټه</th><th>فروش</th><th>خالصه ګټه</th></tr></thead><tbody>
+  ${days.map(d=>`<tr><td>${safe(fmt(d))}</td><td>${money(byDay[d].sales)}</td><td>${money(byDay[d].profit-expenses.filter(e=>e.date===d).reduce((n,e)=>n+(Number(e.amount)||0),0))}</td></tr>`).join("")||'<tr><td colspan="3">معلومات نشته</td></tr>'}
+  </tbody></table></div>
+ </div>`;
+}
+function editMonthOpeningStock(){
+ const v=prompt("د میاشتې په شروع کې د مال ارزښت (AFN)",String(db.monthOpeningStockValue??stockValueNow()));
+ if(v===null)return;const n=Number(v);if(!Number.isFinite(n)||n<0)return alert("مبلغ سم ولیکه");
+ db.monthOpeningStockValue=n;saveDB();renderMonthOverview();
+}
+function closeCurrentMonth(){
+ const p=monthPeriod();
+ if(!confirm("د "+p.month+" میاشتنی راپور آرشیف او نوې میاشت پیل شي؟ پخواني خرڅلاو، پورونه او موجودي نه حذف کېږي."))return;
+ if(!Array.isArray(db.archives))db.archives=[];
+ if(!db.archives.some(a=>a.month===p.month)){
+  const inside=d=>String(d||"")>=p.start&&String(d||"")<=p.end;
+  const ss=db.sales.filter(x=>inside(x.date)),pp=db.purchases.filter(x=>inside(x.date)),ee=db.expenses.filter(x=>inside(x.date));
+  const sum=(arr,k)=>arr.reduce((n,x)=>n+Number(x[k]||0),0);
+  db.archives.push({id:uid(),month:p.month,start:p.start,end:p.end,createdAt:new Date().toISOString(),salesCount:ss.length,sales:sum(ss,"total"),purchases:sum(pp,"total"),grossProfit:sum(ss,"profit"),expenses:sum(ee,"amount"),netProfit:sum(ss,"profit")-sum(ee,"amount"),openingStock:Number(db.monthOpeningStockValue)||0,closingStock:stockValueNow()});
+ }
+ const next=new Date(p.end+"T12:00:00");next.setDate(next.getDate()+1);
+ db.monthStart=next.toISOString().slice(0,10);db.monthOpeningStockValue=stockValueNow();
+ saveDB();renderArchives();renderMonthOverview();alert("میاشت آرشیف شوه؛ نوې میاشت پیل شوه. پخواني ریکارډونه خوندي دي.");
+}
+function showArchiveReport(id){
+ const a=(db.archives||[]).find(x=>x.id===id);if(!a)return;
+ const start=a.start||String(a.month)+"-01",end=a.end||String(a.month)+"-31";
+ document.getElementById("reportFrom").value=start;document.getElementById("reportTo").value=end;
+ makeReport();
+}
 
 /* د اپلیکیشن پیل */
 saveDB();
