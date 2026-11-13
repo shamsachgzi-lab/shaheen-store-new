@@ -1681,25 +1681,29 @@ function printSale(id){
  w.document.write(`<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>فاکتور ${safe(sale.invoice)}</title>
  <style>
  *{box-sizing:border-box}
- @page{size:auto;margin:10mm}
- body{font-family:Arial,Tahoma,sans-serif;color:#172033;margin:0;padding:12px;background:#fff;font-size:14px}
- .invoice{width:100%;max-width:760px;margin:0 auto;border:1px solid #d5deea;border-radius:12px;overflow:hidden}
- .top{background:#145bb5;color:#fff;padding:20px 16px;text-align:center}.top h1{margin:0 0 7px;font-size:24px}.top p{margin:4px 0;color:#eaf3ff}
- .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px;background:#f5f8fc}.meta div{padding:9px;background:#fff;border:1px solid #e3eaf2;border-radius:8px;min-width:0;overflow-wrap:anywhere}
- .meta b{display:block;color:#64748b;font-size:12px;margin-bottom:5px}
- table{width:calc(100% - 24px);border-collapse:collapse;margin:14px 12px}th,td{text-align:right;padding:11px 8px;border:1px solid #e1e8f0;overflow-wrap:anywhere}th{background:#edf4fc;color:#174f91}
- .totals{width:min(100% - 24px,360px);margin:12px 12px 18px auto}
- .totals div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #e6ebf2}
- .totals .grand{font-size:17px;font-weight:bold;color:#145bb5;background:#eef5ff;border:1px solid #cfe0f5;border-radius:8px;margin-bottom:8px}
- .paid{background:#e6f7ed;color:#087a3d;border:1px solid #a9dfbd!important;border-radius:8px;font-weight:bold;margin-bottom:7px}
- .debt{background:#fff0f0;color:#bd2929;border:1px solid #f0b7b7!important;border-radius:8px;font-weight:bold}
- .note{padding:0 14px 14px;color:#64748b;overflow-wrap:anywhere}
- .thanks{text-align:center;padding:15px;background:#f5f8fc;color:#52647b}
+ @page{size:auto;margin:8mm}
+ *{box-sizing:border-box}
+ body{font-family:Arial,Tahoma,sans-serif;color:#111827;margin:0;padding:12px;background:#fff;font-size:16px;line-height:1.8;font-weight:600}
+ .invoice{width:100%;max-width:760px;margin:0 auto;border:2px solid #64748b;border-radius:10px;overflow:hidden}
+ .top{background:#145bb5;color:#fff;padding:22px 16px;text-align:center;border-bottom:2px solid #0d4388}.top h1{margin:0 0 7px;font-size:27px;font-weight:800}.top p{margin:4px 0;color:#fff;font-size:16px;font-weight:700}
+ .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px;background:#f1f5f9;border-bottom:2px solid #94a3b8}.meta div{padding:10px;background:#fff;border:1.5px solid #94a3b8;border-radius:6px;min-width:0;overflow-wrap:anywhere;font-size:15px;font-weight:700}
+ .meta b{display:block;color:#334155;font-size:13px;margin-bottom:4px;font-weight:800}
+ table{width:calc(100% - 24px);border-collapse:collapse;margin:14px 12px;border:2px solid #475569}th,td{text-align:right;padding:12px 9px;border:1.5px solid #64748b;overflow-wrap:anywhere;font-size:15px;line-height:1.6;font-weight:700}th{background:#dbeafe;color:#123b70;font-size:14px;font-weight:800}
+ .totals{width:min(100% - 24px,390px);margin:12px 12px 18px auto}
+ .totals div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px;border-bottom:1px solid #94a3b8;font-size:15px;font-weight:700}
+ .totals b{font-size:16px;font-weight:800;white-space:nowrap}
+ .totals .grand{font-size:18px;font-weight:800;color:#123f78;background:#e5efff;border:2px solid #6595d0;border-radius:7px;margin-bottom:8px}
+ .paid{background:#d9fbe8;color:#075b32;border:2px solid #329b62!important;border-radius:7px;font-weight:800;margin-bottom:7px}
+ .debt{background:#ffe1e1;color:#991b1b;border:2px solid #d45a5a!important;border-radius:7px;font-weight:800}
+ .note{padding:0 14px 14px;color:#334155;overflow-wrap:anywhere;font-size:14px}
+ .thanks{text-align:center;padding:15px;background:#f1f5f9;color:#334155;border-top:1px solid #94a3b8;font-weight:700}
+ @media(max-width:480px){.top h1{font-size:23px}.meta{gap:6px;padding:10px}.meta div{font-size:13px;padding:8px}table{width:calc(100% - 16px);margin:10px 8px}th,td{padding:8px 5px;font-size:12px}.totals{width:calc(100% - 16px);margin:10px 8px 14px}}
  @media print{
-  html,body{width:100%;margin:0!important;padding:0!important;background:#fff!important}
-  .invoice{width:100%;max-width:none;margin:0;border:0;border-radius:0;overflow:visible}
+  html,body{width:100%;margin:0!important;padding:0!important;background:#fff!important;font-size:15px!important}
+  .invoice{width:100%;max-width:none;margin:0;border:1.5px solid #475569;border-radius:0;overflow:visible}
   .top,.meta,.totals .grand,.paid,.debt,th,.thanks{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   tr,.meta div,.totals div{break-inside:avoid;page-break-inside:avoid}
+  th,td{border:1.5px solid #475569!important}
  }
  </style></head><body><main class="invoice">
  <header class="top"><h1>${shop}</h1>${phone?`<p>د اړیکې شمېره: ${phone}</p>`:""}<p>د خرڅلاو فاکتور</p></header>
