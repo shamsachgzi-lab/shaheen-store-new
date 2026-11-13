@@ -436,6 +436,8 @@ nav button{font-size:10px;padding:5px 3px}
 
 /* Customer debt dashboard */
 .customer-top{display:flex;align-items:center;justify-content:space-between;padding:10px 4px}.customer-top small{color:#64748b}.customer-top h3{margin:3px 0;font-size:20px}.customer-top span{font-size:13px;color:#475569}.customer-addbar{display:flex;align-items:center;gap:12px;margin:8px 0}.customer-addbar button{min-width:44px;font-size:22px;padding:7px 14px}.customer-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}.customer-summary>div{background:#f1f6fc;border:1px solid #dce7f3;border-radius:12px;padding:11px 7px;text-align:center;min-width:0}.customer-summary small{display:block;font-size:11px;color:#526174;margin-bottom:7px}.customer-summary b{font-size:13px;overflow-wrap:anywhere}.customer-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}.customer-tabs button{background:#edf2f7;color:#334155;border:1px solid #d8e1eb;border-radius:9px;padding:10px 4px}.customer-tabs button.selected{background:#1769d2;color:#fff;border-color:#1769d2}.customer-list-head{display:flex;justify-content:space-between;align-items:center;padding:8px 3px}.customer-list-head small{margin-right:8px;color:#64748b}.customer-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 9px;border-bottom:1px solid #e8edf3}.customer-row:last-child{border-bottom:0}.customer-row-main{min-width:0}.customer-row-main b{display:block;overflow-wrap:anywhere}.customer-row-main small{display:block;color:#64748b;font-size:11px;margin-top:4px}.customer-row-debt{text-align:left;white-space:nowrap;font-weight:700;color:#1e3a5f;font-size:13px}.customer-row-actions{display:flex;gap:5px;margin-top:6px}.customer-row-actions button{padding:5px 8px;font-size:13px;min-width:34px}
+
+.customer-detail>h3{margin:14px 0}.customer-detail-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.customer-detail-summary>div{background:#f5f8fc}.customer-payment-panel{background:#f7fbff}.customer-payment-panel h3{margin-top:0}.customer-payment-panel input{margin-bottom:7px}.customer-history-payment,.customer-history-sale{margin:9px 0}.customer-history-amount{font-weight:800;font-size:17px;margin:7px 0;color:#1b6b42}.customer-opening-debt{background:#fffaf0}
 </style>
 </head>
 <body>
@@ -1186,6 +1188,7 @@ function addCustomer(){
  refreshAll();alert("مشتری ثبت شو");
 }
 let customerView="all";
+let currentCustomerId="";
 function setCustomerView(view){
  customerView=view;
  ["all","active","old"].forEach(k=>document.getElementById("customerTab"+(k==="all"?"All":k==="active"?"Active":"Old"))?.classList.toggle("selected",k===view));
@@ -1193,12 +1196,13 @@ function setCustomerView(view){
 }
 function toggleCustomerForm(){document.getElementById("customerFormPanel").classList.toggle("hidden")}
 function openCustomerLedger(id){
- const c=db.customers.find(x=>x.id===id);if(!c)return;
- show("debts");
- const sel=document.getElementById("payCustomer");if(sel)sel.value=id;
- document.getElementById("customerPayment")?.focus();
+ if(!db.customers.some(x=>x.id===id))return;
+ currentCustomerId=id;
+ show("customers");
+ renderCustomers();
 }
 function renderCustomers(){
+ if(currentCustomerId){renderCustomerDetail();return;}
  const q=value("customerSearch").toLowerCase();
  const active=db.customers.filter(c=>(c.type||"active")!=="old");
  const old=db.customers.filter(c=>c.type==="old");
@@ -1220,6 +1224,75 @@ function renderCustomers(){
   </div>
   <div class="customer-row-debt">${money(c.debt)}</div>
  </div>`).join("")||"<p>مشتری نشته</p>";
+}
+function renderCustomerDetail(){
+ const c=db.customers.find(x=>x.id===currentCustomerId);
+ if(!c){currentCustomerId="";renderCustomers();return;}
+ const sales=db.sales.filter(x=>x.customerId===c.id||(!x.customerId&&x.customer===c.name)).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const receipts=(db.payments||[]).filter(p=>p.type==="customer"&&(p.personId===c.id||(!p.personId&&p.personName===c.name))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const sum=(a,k)=>a.reduce((n,x)=>n+Number(x[k]||0),0);
+ const creditSales=sum(sales,"debt"),received=sum(receipts,"amount"),profit=sum(sales,"profit");
+ const opening=Math.max(0,Number(c.debt||0)-creditSales+received);
+ const history=[
+  ...sales.map(x=>({kind:"sale",date:x.date||"",id:x.id,record:x})),
+  ...receipts.map(x=>({kind:"payment",date:x.date||"",id:x.id,record:x}))
+ ].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const dateText=d=>d?jalaliDisplayDate(d):"نېټه نشته";
+ document.getElementById("customerListTitle").textContent="د مشتری حساب";
+ document.getElementById("customerListCount").textContent=c.name;
+ document.getElementById("customerListTotal").textContent=money(c.debt);
+ document.getElementById("customersList").innerHTML=`
+ <div class="customer-detail">
+  <button class="gray" onclick="currentCustomerId='';renderCustomers()">← بېرته د مشتریانو لېست ته</button>
+  <h3>${safe(c.name)}</h3>
+  <div class="customer-summary customer-detail-summary">
+   <div><small>پاتې پور</small><b>${money(c.debt)}</b></div>
+   <div><small>ترلاسه شوې پیسې</small><b>${money(received)}</b></div>
+   <div><small>په پور اخیستل</small><b>${money(creditSales)}</b></div>
+   <div><small>له دې مشتری ګټه</small><b>${money(profit)}</b></div>
+  </div>
+  <div class="panel customer-payment-panel">
+   <h3>💵 پیسې ترلاسه کړه</h3>
+   <label>مبلغ</label><input id="customerReceiptAmount" type="number" min="0.01" step="any" placeholder="د پیسو اندازه">
+   <label>نېټه</label><input id="customerReceiptDate" type="date" value="${today()}">
+   <label>یادښت</label><input id="customerReceiptNote" placeholder="اختیاري یادښت">
+   <button class="green" onclick="saveCustomerReceipt('${c.id}')">ثبت</button>
+  </div>
+  <h3>تاریخچه</h3>
+  ${history.map(h=>h.kind==="payment"?`
+   <div class="item customer-history-payment">
+    <b>💵 پیسې ترلاسه شوې · ${safe(dateText(h.record.date))}</b>
+    <div class="customer-history-amount">− ${money(h.record.amount)}</div>
+    ${h.record.note?`<small>${safe(h.record.note)}</small>`:""}
+    <button class="red" onclick="deleteCustomerReceipt('${h.id}')">🗑</button>
+   </div>`:`
+   <div class="item customer-history-sale">
+    <b>🧾 #${safe(h.record.invoice||"—")} · ${safe(dateText(h.record.date))} · ${Number(h.record.debt)>0?(Number(h.record.paid)>0?"نیم نغدي / نیم پور":"پور"):"نغدي"}</b>
+    <div>${safe(h.record.productName||"جنس")} ${safe(h.record.qty)} ${safe(h.record.unit||"")}</div>
+    <div>ټول ${money(h.record.total)} · ورکړل شوي ${money(h.record.paid)} · پور ${money(h.record.debt)} · ګټه ${money(h.record.profit)}</div>
+    <div class="actions"><button class="gray" onclick="printSale('${h.id}')">🖨</button><button class="gray" onclick="editSale('${h.id}')">✏️</button></div>
+   </div>`).join("")||"<p>تاریخچه نشته</p>"}
+  <div class="item customer-opening-debt"><b>📝 پخوانی / لاسي ثبت شوی پور</b><div>${money(opening)}</div></div>
+ </div>`;
+}
+function saveCustomerReceipt(id){
+ const c=db.customers.find(x=>x.id===id);if(!c)return;
+ const amount=number("customerReceiptAmount"),date=value("customerReceiptDate")||today(),note=value("customerReceiptNote");
+ if(amount<=0)return alert("مبلغ په سمه توګه ولیکه");
+ if(amount>Number(c.debt||0))return alert("مبلغ د پاتې پور څخه زیات دی");
+ c.debt=Number(c.debt||0)-amount;db.cash=Number(db.cash||0)+amount;
+ db.payments.push({id:uid(),type:"customer",personId:c.id,personName:c.name,amount,date,note});
+ saveDB();refreshAll();renderCustomerDetail();
+}
+function deleteCustomerReceipt(id){
+ const p=(db.payments||[]).find(x=>x.id===id&&x.type==="customer");if(!p)return;
+ const c=db.customers.find(x=>x.id===p.personId)||db.customers.find(x=>x.name===p.personName);
+ if(!c)return alert("د دې تادیې مشتری ونه موندل شو");
+ if(!confirm("دا ترلاسه شوې پیسې حذف شي؟ د مشتری پور به بېرته زیات او نغدې به کمې شي."))return;
+ c.debt=Number(c.debt||0)+Number(p.amount||0);
+ db.cash=Number(db.cash||0)-Number(p.amount||0);
+ db.payments=db.payments.filter(x=>x.id!==id);
+ saveDB();refreshAll();renderCustomerDetail();
 }
 function editCustomer(id){
  const c=db.customers.find(x=>x.id===id);if(!c)return;
