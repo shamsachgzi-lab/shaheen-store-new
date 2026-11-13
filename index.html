@@ -1324,6 +1324,7 @@ function renderArchives(){
  box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>خرڅلاو: "+money(a.sales)+" | پېرود: "+money(a.purchases)+"</div><div>ګټه: "+money(a.grossProfit)+" | لګښت: "+money(a.expenses)+"</div></div>").join("")||"<p>آرشیف نشته</p>";
 }
 function makeDailyReport(){
+ show("reports");
  const d=today();
  document.getElementById("reportFrom").value=d;
  document.getElementById("reportTo").value=d;
