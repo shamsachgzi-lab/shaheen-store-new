@@ -621,7 +621,7 @@ nav button{font-size:10px;padding:5px 3px}
   <label>د پخواني پور اندازه</label><input id="cDebt" type="number" min="0" value="0">
   <label>د مشتری ډول</label>
   <select id="cType"><option value="active">اوسنی مشتری</option><option value="old">پخوانی پور لرونکی</option></select>
-  <button class="primary" onclick="addCustomer()">مشتری ثبت کړه</button>
+  <button class="primary" onclick="window.addCustomer()">مشتری ثبت کړه</button>
  </div>
  <div class="customer-list-head"><div><b id="customerListTitle">ټول مشتریان</b><small id="customerListCount">0</small></div><b id="customerListTotal">0 AFN</b></div>
  <div class="panel"><input id="customerSearch" placeholder="🔍 د مشتری نوم یا شمېره ولټوه"><div id="customersList"></div></div>
@@ -1574,6 +1574,26 @@ document.getElementById("saleProduct").addEventListener("change",()=>{
  const p=db.products.find(x=>x.id===value("saleProduct"));
  if(p)document.getElementById("salePrice").value=p.price;
 });
+
+/* د مشتری د ثبت باوري نسخه — د اپ د وروستي script له لارې */
+window.addCustomer=function(){
+ const name=(document.getElementById("cName")?.value||"").trim();
+ const phone=(document.getElementById("cPhone")?.value||"").trim();
+ const debt=Number(document.getElementById("cDebt")?.value||0);
+ const type=document.getElementById("cType")?.value||"active";
+ if(!name){alert("د مشتری نوم ولیکه");document.getElementById("cName")?.focus();return;}
+ if(!Number.isFinite(debt)||debt<0){alert("د پور اندازه سمه ولیکه");return;}
+ if(!Array.isArray(db.customers))db.customers=[];
+ if(db.customers.some(c=>String(c.name||"").trim().toLowerCase()===name.toLowerCase())){alert("دا مشتری مخکې ثبت شوی دی");return;}
+ const item={id:uid(),name,phone,debt,type,created:today()};
+ db.customers.push(item);
+ try{saveDB();}catch(e){db.customers.pop();alert("ثبت ناکام شو. د اپ بیک اپ واخله او د موبایل د زېرمتون ځای وګوره.");return;}
+ ["cName","cPhone","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ document.getElementById("customerFormPanel")?.classList.add("hidden");
+ if(typeof currentCustomerId!=="undefined")currentCustomerId="";
+ refreshAll();
+ alert("مشتری ثبت شو");
+};
 
 /* د اپلیکیشن پیل */
 saveDB();
