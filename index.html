@@ -1086,6 +1086,14 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <div style="background:#e4f8eb;border:1px solid #9bd8ad"><small>💵 نن مشتریانو بېرته راکړې پیسې</small><b id="customerReceivedToday">0 AFN</b></div>
   <div style="background:#e5f1ff;border:1px solid #a9c9f0"><small>📅 په دې میاشت کې ترلاسه شوې پیسې</small><b id="customerReceivedMonth">0 AFN</b></div>
  </div>
+ <div class="panel" style="margin-top:12px">
+  <h4 style="margin:0 0 10px">📊 د مشتریانو ورځنی راپور</h4>
+  <div id="customerDailyReport"><small>نن هېڅ مشتری پیسې نه دي راکړې</small></div>
+ </div>
+ <div class="panel" style="margin-top:12px">
+  <h4 style="margin:0 0 10px">📅 د مشتریانو میاشتنی راپور</h4>
+  <div id="customerMonthlyReport"><small>په دې میاشت کې پیسې نه دي ترلاسه شوې</small></div>
+ </div>
  <div class="customer-tabs">
   <button class="selected" id="customerTabAll" onclick="setCustomerView('all')">ټول</button>
   <button id="customerTabActive" onclick="setCustomerView('active')">اوسني</button>
@@ -1896,6 +1904,20 @@ function renderCustomers(){
   const receivedMonth=customerReceipts.filter(p=>String(p.date||"").slice(0,7)===monthKey).reduce((n,p)=>n+Number(p.amount||0),0);
   document.getElementById("customerReceivedToday").textContent=money(receivedToday);
   document.getElementById("customerReceivedMonth").textContent=money(receivedMonth);
+  const customerReport=(records,emptyText)=>{
+   const grouped=new Map();
+   records.forEach(p=>{
+    const customer=db.customers.find(c=>c.id===p.personId)||db.customers.find(c=>c.name===p.personName);
+    const key=customer?customer.id:(p.personName||"unknown");
+    const item=grouped.get(key)||{name:customer?customer.name:(p.personName||"نامعلوم مشتری"),total:0};
+    item.total+=Number(p.amount||0);
+    grouped.set(key,item);
+   });
+   const rows=[...grouped.values()].sort((a,b)=>b.total-a.total);
+   return rows.length?rows.map(x=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 2px;border-bottom:1px solid #e5e7eb"><b>${safe(x.name)}</b><strong style="color:#087f4b;white-space:nowrap">${money(x.total)}</strong></div>`).join(""):`<small>${emptyText}</small>`;
+  };
+  document.getElementById("customerDailyReport").innerHTML=customerReport(customerReceipts.filter(p=>String(p.date||"").slice(0,10)===todayKey),"نن هېڅ مشتری پیسې نه دي راکړې");
+  document.getElementById("customerMonthlyReport").innerHTML=customerReport(customerReceipts.filter(p=>String(p.date||"").slice(0,7)===monthKey),"په دې میاشت کې پیسې نه دي ترلاسه شوې");
  const base=customerView==="active"?active:customerView==="old"?old:db.customers;
  const list=base.filter(c=>String(c.name).toLowerCase().includes(q)||String(c.father||"").toLowerCase().includes(q)||String(c.phone||"").includes(q)||String(c.village||"").toLowerCase().includes(q)||String(c.area||"").toLowerCase().includes(q));
  const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي"};
