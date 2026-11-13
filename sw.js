@@ -1,4 +1,4 @@
-const CACHE_NAME = "shaheen-store-v3";
+const CACHE_NAME = "shaheen-store-v4";
 const CORE_FILES = ["./", "./index.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
