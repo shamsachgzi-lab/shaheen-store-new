@@ -2514,7 +2514,8 @@ function restoreData(){
      const paid=customerSales.reduce((a,x)=>a+Number(x.paid||0),0);
      const repayments=oldCustomerPayments.filter(x=>x.customerId===c.id)
       .reduce((a,x)=>a+Number(x.amount||0),0);
-     const legacyDebt=Number(c.opening||0)+sold-paid-repayments;
+     // په دې بیک‌اپ کې د هر مشتری اصلي پاتې پور په c.debt کې ساتل شوی؛ هماغه وساته.
+     const legacyDebt=c.debt!==undefined&&c.debt!==null&&c.debt!==""?Number(c.debt):Number(c.opening||0)+sold-paid-repayments;
      return {...c,id:customerId,debt:Math.max(0,legacyDebt),type:c.type||"active"};
     });
     const suppliers=oldSuppliers.map(v=>{
