@@ -954,9 +954,9 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   </div>
   <div class="row">
    <div><label>موجودي</label><input id="pQty" type="number" min="0" step="any"></div>
-   <div><label>اصلي واحد (د ګدام موجودي)</label><select id="pUnit"><option>کیلو</option><option>ګرام</option><option>بوجۍ</option><option>ټوټه</option><option>کارټن</option><option>بوتل</option><option>لیټر</option><option>پاکټ</option><option>ګلاس</option></select></div>
+   <div><label>اصلي واحد (د ګدام موجودي)</label><select id="pUnit"></select></div>
   </div>
-  <label>د خرڅلاو/پېرود دویم واحد</label><select id="pTradeUnit"><option>کیلو</option><option>ګرام</option><option>بوجۍ</option><option>ټوټه</option><option>کارټن</option><option>بوتل</option><option>لیټر</option><option>پاکټ</option><option>ګلاس</option></select>
+  <label>د خرڅلاو/پېرود دویم واحد</label><select id="pTradeUnit"></select>
   <label>په یوه دویم واحد کې د اصلي واحد مقدار (مثلاً یوه بوجۍ = ۵۰ کیلو)</label><input id="pUnitFactor" type="number" min="0.000001" step="any" value="1">
   <p class="notice">مثال: اصلي واحد «کیلو»، دویم واحد «بوجۍ»، مقدار «۵۰». موجودي په کیلو ساتل کېږي.</p>
   <button class="primary" onclick="addProduct()">جنس ثبت کړه</button>
@@ -2414,29 +2414,37 @@ function saveShopSettings(){
 }
 function renderSettingsUnits(){
  const box=document.getElementById("settingsUnitList");if(!box)return;
- box.innerHTML=(db.settings.units||[]).map((u,i)=>{
+ db.settings=db.settings||{};db.settings.units=Array.isArray(db.settings.units)?db.settings.units:[];
+ box.innerHTML=db.settings.units.map((u,i)=>{
   const count=(db.products||[]).filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
-  const desc=u.type==="weight"?(u.name==="kg"?"وزن · 1 kg = 1 kg":"وزن · 1 g = 0.001 kg"):u.type==="volume"?"حجم":"شمېر/بسته (اندازه په جنس کې)";
-  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(u.name)}</b><div class="notice">${desc} · ${count} جنس</div></div><div>${u.locked?'<span class="badge">اصلي</span>':`<button class="red" onclick="removeCustomUnit(${i})">🗑</button>`}</div></div>`;
+  const desc=u.type==="weight"?(u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":"وزن · د جنس په فورم کې د بدلون اندازه ټاکل کېږي"):u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه ټاکل کېږي";
+  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(u.name)}</b><div class="notice">${desc} · ${count} جنس</div></div><div>${u.locked?'<span class="badge">اصلي</span>':`<button type="button" class="red" onclick="removeCustomUnit(${i})">🗑 حذف</button>`}</div></div>`;
  }).join("")||"واحد نشته";
 }
 function addCustomUnit(){
- const name=value("newUnitName");if(!name)return alert("د واحد نوم ولیکه");
- if((db.settings.units||[]).some(u=>u.name.toLowerCase()===name.toLowerCase()))return alert("دا واحد مخکې شته");
- db.settings.units.push({name,type:value("newUnitType")||"count",locked:false});saveDB();
- document.getElementById("newUnitName").value="";updateProductUnitOptions();renderSettingsUnits();
+ db.settings=db.settings||{};db.settings.units=Array.isArray(db.settings.units)?db.settings.units:[];
+ const name=value("newUnitName").trim(),type=value("newUnitType")||"count";
+ if(!name)return alert("د واحد نوم ولیکه");
+ if(name.length>20)return alert("د واحد نوم تر ۲۰ تورو زیات مه لیکه");
+ if(db.settings.units.some(u=>String(u.name).trim().toLocaleLowerCase()===name.toLocaleLowerCase()))return alert("دا واحد مخکې شته");
+ db.settings.units.push({name,type,locked:false});
+ try{saveDB();}catch(e){db.settings.units.pop();return alert("واحد خوندي نه شو؛ معلومات مو نه دي بدل شوي.");}
+ document.getElementById("newUnitName").value="";
+ updateProductUnitOptions();fillProductSelects();renderSettingsUnits();
+ alert("نوی واحد اضافه شو؛ اوس یې د جنس په فورم کې ټاکلای شې.");
 }
 function removeCustomUnit(index){
- const u=db.settings.units[index];if(!u||u.locked)return;
+ db.settings=db.settings||{};const u=db.settings.units?.[index];if(!u||u.locked)return;
  if((db.products||[]).some(p=>p.unit===u.name||p.tradeUnit===u.name))return alert("دا واحد په جنسونو کې کارېږي؛ لومړی د هغو جنسونو واحد بدل کړه.");
  if(!confirm("دا واحد حذف شي؟"))return;
- db.settings.units.splice(index,1);saveDB();updateProductUnitOptions();renderSettingsUnits();
+ db.settings.units.splice(index,1);saveDB();updateProductUnitOptions();fillProductSelects();renderSettingsUnits();
 }
 function updateProductUnitOptions(){
+ db.settings=db.settings||{};db.settings.units=Array.isArray(db.settings.units)?db.settings.units:[];
  ["pUnit","pTradeUnit"].forEach(id=>{
   const el=document.getElementById(id);if(!el)return;const old=el.value;
-  el.innerHTML=(db.settings.units||[]).map(u=>`<option value="${safe(u.name)}">${safe(u.name)}</option>`).join("");
-  if((db.settings.units||[]).some(u=>u.name===old))el.value=old;
+  el.innerHTML=db.settings.units.map(u=>`<option value="${safe(u.name)}">${safe(u.name)}</option>`).join("");
+  if(db.settings.units.some(u=>u.name===old))el.value=old;
  });
 }
 function clearAllData(){
