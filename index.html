@@ -2502,10 +2502,12 @@ function restoreData(){
     const oldPurchases=Array.isArray(savedOld.purchases)?savedOld.purchases:[];
     const oldCustomerPayments=Array.isArray(savedOld.customerPayments)?savedOld.customerPayments:[];
     const customers=oldCustomers.map(c=>{
-     const sold=oldSales.filter(x=>x.customerId===c.id).reduce((a,x)=>a+Number(x.total||0),0);
-     const paid=oldSales.filter(x=>x.customerId===c.id).reduce((a,x)=>a+Number(x.paid||0),0);
-     const repayments=oldCustomerPayments.filter(x=>x.customerId===c.id).reduce((a,x)=>a+Number(x.amount||0),0);
-     return {...c,debt:Math.max(0,Number(c.opening||0)+sold-paid-repayments),type:c.type||"active"};
+     const customerId=c.id||uid();
+     const customerSales=oldSales.filter(x=>(x.customerId&&x.customerId===c.id)||(!x.customerId&&String(x.customer||x.customerName||"").trim()===String(c.name||"").trim()));
+     const sold=customerSales.reduce((a,x)=>a+Number(x.total||0),0);
+     const paid=customerSales.reduce((a,x)=>a+Number(x.paid||0),0);
+     const repayments=oldCustomerPayments.filter(x=>(x.customerId&&x.customerId===c.id)||(!x.customerId&&String(x.customerName||"").trim()===String(c.name||"").trim())).reduce((a,x)=>a+Number(x.amount||0),0);
+     return {...c,id:customerId,debt:Math.max(0,Number(c.opening||0)+sold-paid-repayments),type:c.type||"active"};
     });
     const suppliers=oldSuppliers.map(v=>{
      const bought=oldPurchases.filter(x=>x.supplierId===v.id).reduce((a,x)=>a+Number(x.total||0),0);
@@ -2513,6 +2515,7 @@ function restoreData(){
      return {...v,debt:Math.max(0,Number(v.opening||0)+bought-paid)};
     });
     restored={
+     ...savedOld,
      version:1,settings:{...(savedOld.settings||{}),shopName:savedOld.settings?.shopName||"شاهین فروشگاه",currency:"AFN"},
      cash:Number(savedOld.cash)||0,
      products:(savedOld.products||[]).map(p=>{
@@ -2522,10 +2525,18 @@ function restoreData(){
      }),
      customers,
      suppliers,
-     sales:oldSales.map(x=>({...x,invoice:x.invoice||("DP-"+String(x.id||"").slice(-8)),customer:x.customer||customers.find(c=>c.id===x.customerId)?.name||"نغدي مشتری",subtotal:Number(x.subtotal??x.total)||0,discount:Number(x.discount)||0,total:Number(x.total)||0,paid:Number(x.paid)||0,debt:Math.max(0,Number(x.total||0)-Number(x.paid||0)),costAtSale:Number(x.costAtSale??x.cost)||0,profit:Number(x.profit??((Number(x.price||0)-Number(x.cost||0))*Number(x.qty||0))) })),
+     sales:oldSales.map(x=>{
+      const matched=customers.find(c=>(x.customerId&&c.id===x.customerId)||String(c.name||"").trim()===String(x.customer||x.customerName||"").trim());
+      const total=Number(x.total)||0,paid=Number(x.paid)||0;
+      return {...x,customerId:x.customerId||matched?.id||"",invoice:x.invoice||("DP-"+String(x.id||"").slice(-8)),customer:x.customer||x.customerName||matched?.name||"نغدي مشتری",subtotal:Number(x.subtotal??x.total)||0,discount:Number(x.discount)||0,total,paid,debt:Math.max(0,total-paid),costAtSale:Number(x.costAtSale??x.cost)||0,profit:Number(x.profit??((Number(x.price||0)-Number(x.cost||0))*Number(x.qty||0)))};
+     }),
      purchases:oldPurchases.map(x=>({...x,supplier:x.supplier||suppliers.find(v=>v.id===x.supplierId)?.name||"",total:Number(x.total)||0,paid:Number(x.paid)||0,debt:Math.max(0,Number(x.total||0)-Number(x.paid||0))})),
      expenses:(savedOld.expenses||[]).map(x=>({...x,category:x.category||x.name||"لګښت",name:x.name||x.category||"لګښت",amount:Number(x.amount)||0})),
-     payments:oldCustomerPayments.map(p=>({id:p.id||uid(),type:"customer",personId:p.customerId||"",personName:p.customerName||customers.find(c=>c.id===p.customerId)?.name||"نامعلوم مشتری",amount:Number(p.amount)||0,date:p.date||today(),note:p.note||""})),
+     customerPayments:oldCustomerPayments,
+     payments:oldCustomerPayments.map(p=>{
+      const matched=customers.find(c=>(p.customerId&&c.id===p.customerId)||String(c.name||"").trim()===String(p.customerName||"").trim());
+      return {id:p.id||uid(),type:"customer",personId:p.customerId||matched?.id||"",personName:p.customerName||matched?.name||"نامعلوم مشتری",amount:Number(p.amount)||0,date:p.date||today(),note:p.note||""};
+     }),
      sarafAccounts:[],sarafTransactions:[],archives:[],language:"ps"
     };
    }else{
