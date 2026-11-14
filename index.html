@@ -2381,11 +2381,12 @@ function makeReport(){
  <tbody>${rows.length?rows.join(""):`<tr><td colspan="${headers.length}" class="daily-empty">${empty}</td></tr>`}</tbody></table></div>`;
  const purchaseRows=purchases.map(p=>`<tr><td>${esc(p.productName||"—")}</td><td>${esc(p.qty)} ${esc(p.unit||"")}</td><td>${money(p.total)}</td><td>${money(p.paid)}</td></tr>`);
  const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
- const saleRows=sales.map(x=>`<tr><td>${esc(x.productName||"—")}</td><td>${esc(x.qty)} ${esc(x.unit||"")}</td><td>${money(x.total)}</td></tr>`);
+ const saleRows=sales.map(x=>`<tr><td>${esc(x.productName||"—")}</td><td>${esc(x.customer||"نغدي مشتری")}</td><td>${esc(x.qty)} ${esc(x.unit||"")}</td><td>${money(x.total)}</td></tr>`);
  const customerPurchases=new Map();
- sales.filter(x=>x.customerId&&x.customerId!=="").forEach(x=>{
-  const key=x.customerId;
-  if(!customerPurchases.has(key))customerPurchases.set(key,{name:x.customer||"مشتری",items:[],total:0,count:0});
+ sales.forEach(x=>{
+  const customerName=String(x.customer||"نغدي مشتری").trim()||"نغدي مشتری";
+  const key=(x.customerId&&String(x.customerId)!=="")?"id:"+x.customerId:"name:"+customerName.toLocaleLowerCase();
+  if(!customerPurchases.has(key))customerPurchases.set(key,{name:customerName,items:[],total:0,count:0});
   const c=customerPurchases.get(key);
   c.items.push(esc(x.productName||"جنس")+" — "+esc(x.qty)+" "+esc(x.unit||"")+" · "+money(x.total));
   c.total+=Number(x.total||0);c.count++;
@@ -2418,7 +2419,7 @@ function makeReport(){
   </section>
   <section class="daily-report-section">
    <h3>🧾 پلورل شوي جنسونه — ${esc(dateLabel)}</h3>
-   ${table(["جنس","مقدار","مبلغ"],saleRows,"معلومات نشته")}
+   ${table(["جنس","مشتری","مقدار","مبلغ"],saleRows,"معلومات نشته")}
    <div class="daily-report-footer">نغدي ترلاسه: <b>${money(totalPaid)}</b> · په پور: <b>${money(totalDebt)}</b> · ناخالصه ګټه: <b>${money(gross)}</b></div>
   </section>
 
