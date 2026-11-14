@@ -2538,10 +2538,14 @@ function restoreData(){
       .map(c=>String(c.name||"(نوم نشته)")+"="+Number(c.debt||0))
       .slice(0,12).join("؛ ");
      const missingDebt=oldCustomers.filter(c=>c.debt===undefined||c.debt===null||c.debt==="").length;
+     const negativeCustomers=oldCustomers.filter(c=>Number(c.debt)<0);
+     const negativeTotal=negativeCustomers.reduce((n,c)=>n+Number(c.debt||0),0);
+     const negativeDetails=negativeCustomers.map(c=>String(c.name||"(نوم نشته)")+"="+Number(c.debt||0)).join("؛ ")||"نشته";
      throw new Error("د پورونو خوندي تشخیص؛ معلومات نه دي بدل شوي: مشتریان "+oldCustomers.length+
       "؛ د c.debt مجموعه "+importedDebtTotal+
       "؛ مثبت پور لرونکي "+oldCustomers.filter(c=>Number(c.debt||0)>0).length+
       "؛ د پور تشه ساحه "+missingDebt+
+      "؛ منفي بیلانس لرونکي "+negativeCustomers.length+"؛ د منفي بیلانس مجموعه "+negativeTotal+"؛ منفي مشتریان: "+negativeDetails+
       "؛ د status له مخې "+Object.entries(statusGroups).map(([k,v])=>k+" ("+v.count+" کسان، "+v.debt+" AFN)").join(" | ")+
       "؛ د پور لرونکو نومونه/پورونه: "+positive);
     }
