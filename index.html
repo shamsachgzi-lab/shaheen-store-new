@@ -2684,6 +2684,82 @@ function showArchiveReport(id){
  makeReport();
 }
 
+
+/* د واحدونو مدیریت — خوندي او عمومي نسخه */
+(function(){
+ const defaults=[
+  {name:"kg",type:"weight",base:"kg",factor:1,locked:true},
+  {name:"g",type:"weight",base:"kg",factor:0.001,locked:true},
+  {name:"بوجۍ",type:"count",locked:true},{name:"ټوټه",type:"count",locked:true},
+  {name:"کارټن",type:"count",locked:true},{name:"بوتل",type:"count",locked:true},
+  {name:"لیټر",type:"volume",locked:true},{name:"پاکټ",type:"count",locked:true},
+  {name:"ګلاس",type:"count",locked:true},{name:"دانه",type:"count",locked:true},
+  {name:"بسته",type:"count",locked:true}
+ ];
+ function units(){
+  db.settings=db.settings||{};
+  let arr=Array.isArray(db.settings.units)?db.settings.units:[];
+  arr=arr.map(u=>typeof u==="string"?{name:u,type:"count",locked:false}:{...u,name:String(u.name||"").trim()}).filter(u=>u.name);
+  defaults.forEach(d=>{if(!arr.some(u=>u.name.toLowerCase()===d.name.toLowerCase()))arr.push({...d});});
+  db.settings.units=arr;
+  return arr;
+ }
+ window.renderSettingsUnits=function(){
+  const box=document.getElementById("settingsUnitList");if(!box)return;
+  const arr=units();
+  box.innerHTML=arr.map((u,i)=>{
+   const count=db.products.filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
+   const desc=u.type==="weight"?(u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":"وزن · د جنس په فورم کې اندازه ټاکل کېږي"):u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه ټاکل کېږي";
+   const actions=u.locked?'<span class="badge">اصلي</span>':`<button type="button" class="gray" onclick="editCustomUnit(${i})">✏️ سمون</button> <button type="button" class="red" onclick="removeCustomUnit(${i})">🗑 حذف</button>`;
+   return `<div class="item" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b>${safe(u.name)}</b><div class="notice">${desc} · ${count} جنس</div></div><div>${actions}</div></div>`;
+  }).join("");
+ };
+ window.updateProductUnitOptions=function(){
+  const arr=units();
+  const names=[...arr.map(u=>u.name)];
+  db.products.forEach(p=>[p.unit,p.tradeUnit].forEach(n=>{if(n&&!names.includes(n))names.push(n);}));
+  ["pUnit","pTradeUnit"].forEach(id=>{
+   const el=document.getElementById(id);if(!el)return;
+   const old=el.value;
+   el.innerHTML=names.map(n=>`<option value="${safe(n)}">${safe(n)}</option>`).join("");
+   if(old&&names.includes(old))el.value=old;
+  });
+ };
+ window.addCustomUnit=function(){
+  const name=(document.getElementById("newUnitName")?.value||"").trim();
+  const type=document.getElementById("newUnitType")?.value||"count";
+  if(!name)return alert("د واحد نوم ولیکه");
+  if(name.length>20)return alert("د واحد نوم تر ۲۰ تورو زیات مه لیکه");
+  const arr=units();
+  if(arr.some(u=>u.name.toLocaleLowerCase()===name.toLocaleLowerCase()))return alert("دا واحد مخکې شته");
+  arr.push({name,type,locked:false});
+  try{saveDB();}catch(e){arr.pop();return alert("واحد خوندي نه شو؛ پخواني معلومات نه دي بدل شوي.");}
+  const input=document.getElementById("newUnitName");if(input)input.value="";
+  window.updateProductUnitOptions();
+  if(typeof fillProductSelects==="function")fillProductSelects();
+  window.renderSettingsUnits();
+  alert("واحد اضافه او خوندي شو. اوس د جنس په فورم کې یې ټاکلای شې.");
+ };
+ window.editCustomUnit=function(index){
+  const arr=units(),u=arr[index];if(!u||u.locked)return;
+  const used=db.products.some(p=>p.unit===u.name||p.tradeUnit===u.name);
+  if(used)return alert("دا واحد په جنسونو کې کارېږي؛ د پخوانیو حسابونو د ساتلو لپاره نوم یې نه بدلېږي.");
+  const name=prompt("د واحد نوی نوم",u.name);if(name===null)return;
+  const clean=name.trim();if(!clean)return alert("د واحد نوم تش نه شي پاتې کېدای");
+  if(arr.some((x,i)=>i!==index&&x.name.toLowerCase()===clean.toLowerCase()))return alert("دا نوم مخکې شته");
+  u.name=clean;
+  const type=prompt("ډول ولیکه: count / weight / volume",u.type||"count");if(type!==null&&["count","weight","volume"].includes(type.trim()))u.type=type.trim();
+  saveDB();window.updateProductUnitOptions();window.renderSettingsUnits();
+ };
+ window.removeCustomUnit=function(index){
+  const arr=units(),u=arr[index];if(!u||u.locked)return;
+  const used=db.products.some(p=>p.unit===u.name||p.tradeUnit===u.name)||db.sales.some(x=>x.unit===u.name)||db.purchases.some(x=>x.unit===u.name);
+  if(used)return alert("دا واحد په جنس یا پخوانیو معاملاتو کې کارېږي؛ حذف یې نه شو کولای.");
+  if(!confirm("دا واحد حذف شي؟"))return;
+  arr.splice(index,1);saveDB();window.updateProductUnitOptions();window.renderSettingsUnits();
+ };
+})();
+
 /* د اپلیکیشن پیل */
 saveDB();
 refreshAll();
