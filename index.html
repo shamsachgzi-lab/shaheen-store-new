@@ -2516,7 +2516,7 @@ function restoreData(){
       .reduce((a,x)=>a+Number(x.amount||0),0);
      // په دې بیک‌اپ کې د هر مشتری اصلي پاتې پور په c.debt کې ساتل شوی؛ هماغه وساته.
      const legacyDebt=c.debt!==undefined&&c.debt!==null&&c.debt!==""?Number(c.debt):Number(c.opening||0)+sold-paid-repayments;
-     return {...c,id:customerId,debt:Math.max(0,legacyDebt),type:c.type||"active"};
+     return {...c,id:customerId,debt:legacyDebt,type:c.type||(c.status==="old"?"old":"active")};
     });
     const suppliers=oldSuppliers.map(v=>{
      const bought=oldPurchases.filter(x=>x.supplierId===v.id).reduce((a,x)=>a+Number(x.total||0),0);
@@ -2524,31 +2524,8 @@ function restoreData(){
      return {...v,debt:Math.max(0,Number(v.opening||0)+bought-paid)};
     });
     const importedDebtTotal=customers.reduce((n,c)=>n+Number(c.debt||0),0);
-    // د ۷۱ مشتریانو لپاره خوندي تشخیص: تر تایید مخکې هېڅ معلومات مه نصبوه.
-    if(oldCustomers.length===71){
-     const statusGroups={};
-     oldCustomers.forEach(c=>{
-      const k=c.status===undefined?"(status نشته)":String(c.status);
-      if(!statusGroups[k])statusGroups[k]={count:0,debt:0};
-      statusGroups[k].count++;
-      statusGroups[k].debt+=Number(c.debt||0);
-     });
-     const positive=oldCustomers.filter(c=>Number(c.debt||0)>0)
-      .sort((a,b)=>Number(b.debt||0)-Number(a.debt||0))
-      .map(c=>String(c.name||"(نوم نشته)")+"="+Number(c.debt||0))
-      .slice(0,12).join("؛ ");
-     const missingDebt=oldCustomers.filter(c=>c.debt===undefined||c.debt===null||c.debt==="").length;
-     const negativeCustomers=oldCustomers.filter(c=>Number(c.debt)<0);
-     const negativeTotal=negativeCustomers.reduce((n,c)=>n+Number(c.debt||0),0);
-     const negativeDetails=negativeCustomers.map(c=>String(c.name||"(نوم نشته)")+"="+Number(c.debt||0)).join("؛ ")||"نشته";
-     throw new Error("د پورونو خوندي تشخیص؛ معلومات نه دي بدل شوي: مشتریان "+oldCustomers.length+
-      "؛ د c.debt مجموعه "+importedDebtTotal+
-      "؛ مثبت پور لرونکي "+oldCustomers.filter(c=>Number(c.debt||0)>0).length+
-      "؛ د پور تشه ساحه "+missingDebt+
-      "؛ منفي بیلانس لرونکي "+negativeCustomers.length+"؛ د منفي بیلانس مجموعه "+negativeTotal+"؛ منفي مشتریان: "+negativeDetails+
-      "؛ د status له مخې "+Object.entries(statusGroups).map(([k,v])=>k+" ("+v.count+" کسان، "+v.debt+" AFN)").join(" | ")+
-      "؛ د پور لرونکو نومونه/پورونه: "+positive);
-    }
+    // د پخواني اپ منفي بیلانس د مشتری د پیشکي پیسو په توګه وساته؛ مه یې صفر کوه.
+    // د status له مخې زاړه او فعال مشتریان جلا کړه.
     if(oldCustomers.length && importedDebtTotal===0){
      const openingTotal=oldCustomers.reduce((n,c)=>n+Number(c.opening||0),0);
       const rawDebtTotal=oldCustomers.reduce((n,c)=>n+Number(c.debt||0),0);
