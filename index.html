@@ -2524,6 +2524,27 @@ function restoreData(){
      return {...v,debt:Math.max(0,Number(v.opening||0)+bought-paid)};
     });
     const importedDebtTotal=customers.reduce((n,c)=>n+Number(c.debt||0),0);
+    // د ۷۱ مشتریانو لپاره خوندي تشخیص: تر تایید مخکې هېڅ معلومات مه نصبوه.
+    if(oldCustomers.length===71){
+     const statusGroups={};
+     oldCustomers.forEach(c=>{
+      const k=c.status===undefined?"(status نشته)":String(c.status);
+      if(!statusGroups[k])statusGroups[k]={count:0,debt:0};
+      statusGroups[k].count++;
+      statusGroups[k].debt+=Number(c.debt||0);
+     });
+     const positive=oldCustomers.filter(c=>Number(c.debt||0)>0)
+      .sort((a,b)=>Number(b.debt||0)-Number(a.debt||0))
+      .map(c=>String(c.name||"(نوم نشته)")+"="+Number(c.debt||0))
+      .slice(0,12).join("؛ ");
+     const missingDebt=oldCustomers.filter(c=>c.debt===undefined||c.debt===null||c.debt==="").length;
+     throw new Error("د پورونو خوندي تشخیص؛ معلومات نه دي بدل شوي: مشتریان "+oldCustomers.length+
+      "؛ د c.debt مجموعه "+importedDebtTotal+
+      "؛ مثبت پور لرونکي "+oldCustomers.filter(c=>Number(c.debt||0)>0).length+
+      "؛ د پور تشه ساحه "+missingDebt+
+      "؛ د status له مخې "+Object.entries(statusGroups).map(([k,v])=>k+" ("+v.count+" کسان، "+v.debt+" AFN)").join(" | ")+
+      "؛ د پور لرونکو نومونه/پورونه: "+positive);
+    }
     if(oldCustomers.length && importedDebtTotal===0){
      const openingTotal=oldCustomers.reduce((n,c)=>n+Number(c.opening||0),0);
       const rawDebtTotal=oldCustomers.reduce((n,c)=>n+Number(c.debt||0),0);
