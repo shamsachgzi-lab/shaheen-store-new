@@ -2524,7 +2524,14 @@ function restoreData(){
     });
     const importedDebtTotal=customers.reduce((n,c)=>n+Number(c.debt||0),0);
     if(oldCustomers.length && importedDebtTotal===0){
-     throw new Error("د مشتریانو نومونه وموندل شول، خو د پورونو محاسبه صفر ده. اوسني معلومات خوندي دي؛ بیک‌اپ نه دی نصب شوی. د فایل د حسابونو جوړښت باید نور وکتل شي.");
+     const openingTotal=oldCustomers.reduce((n,c)=>n+Number(c.opening||0),0);
+     const linkedSales=oldSales.filter(x=>oldCustomers.some(c=>x.customerId===c.id));
+     const salesTotal=linkedSales.reduce((n,x)=>n+Number(x.total||0),0);
+     const salesPaid=linkedSales.reduce((n,x)=>n+Number(x.paid||0),0);
+     const repaymentsTotal=oldCustomerPayments.reduce((n,p)=>n+Number(p.amount||0),0);
+     const sampleCustomer=oldCustomers[0]||{};
+     const sampleSale=oldSales.find(x=>x.customerId!=null)||{};
+     throw new Error("د پورونو د انتقال تشخیصي راپور: مشتریان "+oldCustomers.length+"؛ پرانیستی پور "+openingTotal+"؛ خرڅلاو "+oldSales.length+"؛ د ID له مخې تړلي خرڅلاو "+linkedSales.length+"؛ تړلی خرڅلاو مجموعه "+salesTotal+"؛ د خرڅلاو ورکړې "+salesPaid+"؛ د مشتری تادیات "+oldCustomerPayments.length+"؛ تادیات مجموعه "+repaymentsTotal+"؛ د مشتری ID نمونه "+String(sampleCustomer.id??"نشته")+"؛ د خرڅلاو customerId نمونه "+String(sampleSale.customerId??"نشته")+". اوسني معلومات خوندي دي؛ بیک‌اپ نه دی نصب شوی.");
     }
     restored={
      ...savedOld,
