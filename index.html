@@ -2515,7 +2515,11 @@ function restoreData(){
     restored={
      version:1,settings:{...(savedOld.settings||{}),shopName:savedOld.settings?.shopName||"شاهین فروشگاه",currency:"AFN"},
      cash:Number(savedOld.cash)||0,
-     products:(savedOld.products||[]).map(p=>({...p,cost:Number(p.cost??p.buy)||0,price:Number(p.price??p.sell)||0,qty:Number(p.qty)||0,unit:p.unit||"ټوټه",tradeUnit:p.tradeUnit||p.unit||"ټوټه",unitFactor:Number(p.unitFactor)||1,image:p.image||""})),
+     products:(savedOld.products||[]).map(p=>{
+      const rawQty=p.qty??p.quantity??p.stock??p.currentStock??p.available??p.balance??p.inventory?.qty??p.inventory?.quantity;
+      const qty=rawQty===undefined||rawQty===null||rawQty===""?0:Number(rawQty);
+      return {...p,cost:Number(p.cost??p.buy??p.purchasePrice)||0,price:Number(p.price??p.sell??p.salePrice)||0,qty:Number.isFinite(qty)?qty:0,unit:p.unit||p.measure||"ټوټه",tradeUnit:p.tradeUnit||p.unit||p.measure||"ټوټه",unitFactor:Number(p.unitFactor)||1,image:p.image||p.photo||""};
+     }),
      customers,
      suppliers,
      sales:oldSales.map(x=>({...x,invoice:x.invoice||("DP-"+String(x.id||"").slice(-8)),customer:x.customer||customers.find(c=>c.id===x.customerId)?.name||"نغدي مشتری",subtotal:Number(x.subtotal??x.total)||0,discount:Number(x.discount)||0,total:Number(x.total)||0,paid:Number(x.paid)||0,debt:Math.max(0,Number(x.total||0)-Number(x.paid||0)),costAtSale:Number(x.costAtSale??x.cost)||0,profit:Number(x.profit??((Number(x.price||0)-Number(x.cost||0))*Number(x.qty||0))) })),
