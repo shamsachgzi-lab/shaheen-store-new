@@ -2530,8 +2530,14 @@ function restoreData(){
      const salesPaid=linkedSales.reduce((n,x)=>n+Number(x.paid||0),0);
      const repaymentsTotal=oldCustomerPayments.reduce((n,p)=>n+Number(p.amount||0),0);
      const sampleCustomer=oldCustomers[0]||{};
-     const sampleSale=oldSales.find(x=>x.customerId!=null)||{};
-     throw new Error("د پورونو د انتقال تشخیصي راپور: مشتریان "+oldCustomers.length+"؛ پرانیستی پور "+openingTotal+"؛ خرڅلاو "+oldSales.length+"؛ د ID له مخې تړلي خرڅلاو "+linkedSales.length+"؛ تړلی خرڅلاو مجموعه "+salesTotal+"؛ د خرڅلاو ورکړې "+salesPaid+"؛ د مشتری تادیات "+oldCustomerPayments.length+"؛ تادیات مجموعه "+repaymentsTotal+"؛ د مشتری ID نمونه "+String(sampleCustomer.id??"نشته")+"؛ د خرڅلاو customerId نمونه "+String(sampleSale.customerId??"نشته")+". اوسني معلومات خوندي دي؛ بیک‌اپ نه دی نصب شوی.");
+     const sampleSale=oldSales[0]||{};
+     const samplePayment=oldCustomerPayments[0]||{};
+     const customerNames=new Set(oldCustomers.map(c=>String(c.name||c.customerName||"").trim()).filter(Boolean));
+     const customerRefs=["customer","customerName","client","clientName","personName","customer_name","client_name","name"];
+     const nameLinkedSales=oldSales.filter(x=>customerRefs.some(k=>x[k]!=null&&customerNames.has(String(x[k]).trim())));
+     const nameSalesTotal=nameLinkedSales.reduce((n,x)=>n+Number(x.total||0),0);
+     const nameSalesPaid=nameLinkedSales.reduce((n,x)=>n+Number(x.paid||0),0);
+     throw new Error("د پورونو د انتقال تشخیصي راپور: مشتریان "+oldCustomers.length+"؛ د مشتریانو ساحې "+Object.keys(sampleCustomer).join(",")+"؛ خرڅلاو "+oldSales.length+"؛ د خرڅلاو ساحې "+Object.keys(sampleSale).join(",")+"؛ د ID له مخې تړلي خرڅلاو "+linkedSales.length+"؛ د نوم له مخې تړلي خرڅلاو "+nameLinkedSales.length+"؛ د نوم له مخې خرڅلاو مجموعه "+nameSalesTotal+"؛ ورکړې "+nameSalesPaid+"؛ د مشتری تادیات "+oldCustomerPayments.length+"؛ د تادیاتو ساحې "+Object.keys(samplePayment).join(",")+"؛ د تادیاتو مجموعه "+repaymentsTotal+"؛ پرانیستی پور "+openingTotal+". اوسني معلومات خوندي دي؛ بیک‌اپ نه دی نصب شوی.");
     }
     restored={
      ...savedOld,
