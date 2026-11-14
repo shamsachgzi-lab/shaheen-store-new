@@ -2526,6 +2526,9 @@ function restoreData(){
     const importedDebtTotal=customers.reduce((n,c)=>n+Number(c.debt||0),0);
     if(oldCustomers.length && importedDebtTotal===0){
      const openingTotal=oldCustomers.reduce((n,c)=>n+Number(c.opening||0),0);
+      const rawDebtTotal=oldCustomers.reduce((n,c)=>n+Number(c.debt||0),0);
+      const positiveDebtCount=oldCustomers.filter(c=>Number(c.debt||0)>0).length;
+      const sampleDebt=oldCustomers[0]?.debt;
      const linkedSales=oldSales.filter(x=>oldCustomers.some(c=>x.customerId===c.id));
      const salesTotal=linkedSales.reduce((n,x)=>n+Number(x.total||0),0);
      const salesPaid=linkedSales.reduce((n,x)=>n+Number(x.paid||0),0);
@@ -2538,7 +2541,7 @@ function restoreData(){
      const nameLinkedSales=oldSales.filter(x=>customerRefs.some(k=>x[k]!=null&&customerNames.has(String(x[k]).trim())));
      const nameSalesTotal=nameLinkedSales.reduce((n,x)=>n+Number(x.total||0),0);
      const nameSalesPaid=nameLinkedSales.reduce((n,x)=>n+Number(x.paid||0),0);
-     throw new Error("د پورونو د انتقال تشخیصي راپور: مشتریان "+oldCustomers.length+"؛ د مشتریانو ساحې "+Object.keys(sampleCustomer).join(",")+"؛ خرڅلاو "+oldSales.length+"؛ د خرڅلاو ساحې "+Object.keys(sampleSale).join(",")+"؛ د ID له مخې تړلي خرڅلاو "+linkedSales.length+"؛ د نوم له مخې تړلي خرڅلاو "+nameLinkedSales.length+"؛ د نوم له مخې خرڅلاو مجموعه "+nameSalesTotal+"؛ ورکړې "+nameSalesPaid+"؛ د مشتری تادیات "+oldCustomerPayments.length+"؛ د تادیاتو ساحې "+Object.keys(samplePayment).join(",")+"؛ د تادیاتو مجموعه "+repaymentsTotal+"؛ پرانیستی پور "+openingTotal+". اوسني معلومات خوندي دي؛ بیک‌اپ نه دی نصب شوی.");
+     throw new Error("د پورونو د انتقال تشخیصي راپور: مشتریان "+oldCustomers.length+"؛ د مشتریانو ساحې "+Object.keys(sampleCustomer).join(",")+"؛ خرڅلاو "+oldSales.length+"؛ د خرڅلاو ساحې "+Object.keys(sampleSale).join(",")+"؛ د ID له مخې تړلي خرڅلاو "+linkedSales.length+"؛ د نوم له مخې تړلي خرڅلاو "+nameLinkedSales.length+"؛ د نوم له مخې خرڅلاو مجموعه "+nameSalesTotal+"؛ ورکړې "+nameSalesPaid+"؛ د مشتری تادیات "+oldCustomerPayments.length+"؛ د تادیاتو ساحې "+Object.keys(samplePayment).join(",")+"؛ د تادیاتو مجموعه "+repaymentsTotal+"؛ پرانیستی پور "+openingTotal+"؛ د debt مجموعه "+rawDebtTotal+"؛ مثبت debt لرونکي مشتریان "+positiveDebtCount+"؛ د لومړي مشتری debt "+String(sampleDebt)+" ("+typeof sampleDebt+"). اوسني معلومات خوندي دي؛ بیک‌اپ نه دی نصب شوی.");
     }
     restored={
      ...savedOld,
