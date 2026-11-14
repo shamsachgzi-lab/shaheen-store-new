@@ -1003,17 +1003,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
    </div>
   </div>
 
-  <div class="row">
-   <div>
-    <label>تعداد</label>
-    <input id="saleQty" type="number" min="0.01"
-     step="any" value="1">
-   </div>
-   <div>
-    <label>فی واحد قیمت</label>
-    <input id="salePrice" type="number" min="0">
-   </div>
-  </div>
+  <div class="notice" style="margin:8px 0">جنس وټاکه؛ مقدار، واحد او نرخ د هر جنس په کارټ کې جلا بدلولای شې.</div>
 
   <button type="button" class="primary" onclick="addSaleToCart()" style="width:100%;margin:10px 0">＋ جنس کارټ ته اضافه کړه</button>
   <section class="panel" style="margin:10px 0;padding:12px">
@@ -1434,10 +1424,7 @@ function fillProductSelects(){
  const p=db.products.find(x=>x.id===sale.value)||db.products[0];
 
  if(p){const u=document.getElementById("saleUnit");if(u){u.innerHTML=`<option>${safe(p.tradeUnit||p.unit)}</option><option>${safe(p.unit)}</option>`;u.value=p.tradeUnit||p.unit;}}
- if(p&&!document.activeElement.isSameNode(document.getElementById("salePrice"))){
-  if(!document.getElementById("salePrice").value)
-   document.getElementById("salePrice").value=p.price;
- }
+ 
 }
 </script>
 
@@ -1591,23 +1578,43 @@ let saleCart=[];
 function addSaleToCart(){
  const p=db.products.find(x=>x.id===value("saleProduct"));
  if(!p)return alert("جنس انتخاب کړه");
- const qty=number("saleQty"),price=number("salePrice");
- const unit=value("saleUnit")||p.tradeUnit||p.unit;
+ const unit=p.tradeUnit||p.unit,qty=1,price=Number(p.price)||0;
  const factor=(unit===(p.unit||""))?1:(Number(p.unitFactor)||1);
  const reserved=saleCart.filter(x=>x.productId===p.id).reduce((a,x)=>a+x.stockQty,0);
- if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<0)return alert("مقدار او نرخ سم ولیکه");
  if(reserved+qty*factor>Number(p.qty))return alert("په ګدام کې د دې جنس موجودي بسنه نه کوي");
- saleCart.push({productId:p.id,productName:p.name,qty,unit,price,factor,stockQty:qty*factor,costAtSale:Number(p.cost)||0});
- document.getElementById("saleQty").value="1";
+ saleCart.push({productId:p.id,productName:p.name,qty,unit,price,factor,stockQty:qty*factor,costAtSale:Number(p.cost)||0,baseUnit:p.unit||unit,tradeUnit:p.tradeUnit||p.unit,tradeFactor:Number(p.unitFactor)||1});
  document.getElementById("saleProductSearch").value="";
- filterSaleProducts();
+ filterSaleProducts();renderSaleCart();updateSalePreview();
+}
+function updateSaleCartLine(index,field,raw){
+ const x=saleCart[index];if(!x)return;
+ const p=db.products.find(z=>z.id===x.productId);if(!p)return;
+ if(field==="unit"){
+  const oldFactor=Number(x.factor)||1,newFactor=raw===(p.unit||"")?1:(Number(p.unitFactor)||1);
+  x.price=newFactor===1&&oldFactor!==1?x.price/(Number(p.unitFactor)||1):oldFactor===1&&newFactor!==1?x.price*(Number(p.unitFactor)||1):x.price;
+  x.unit=raw;x.factor=newFactor;
+ }else{
+  const n=Number(raw);if(!Number.isFinite(n)||n<0||(field==="qty"&&n<=0))return renderSaleCart();
+  x[field]=n;
+ }
+ x.stockQty=x.qty*x.factor;
+ const reserved=saleCart.filter(z=>z.productId===x.productId).reduce((a,z)=>a+z.stockQty,0);
+ if(reserved>Number(p.qty)){alert("د "+x.productName+" موجودي بسنه نه کوي");return renderSaleCart();}
  renderSaleCart();updateSalePreview();
 }
 function removeSaleCartItem(index){saleCart.splice(index,1);renderSaleCart();updateSalePreview();}
 function renderSaleCart(){
  const box=document.getElementById("saleCartList");if(!box)return;
  if(!saleCart.length){box.textContent="کارټ خالي دی — پورته جنس ولټوه.";return;}
- box.innerHTML=saleCart.map((x,i)=>`<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(x.productName)}</b><div>${x.qty} ${safe(x.unit)} × ${money(x.price)} = ${money(x.qty*x.price)}</div></div><button type="button" class="red" onclick="removeSaleCartItem(${i})">✕</button></div>`).join("");
+ box.innerHTML=saleCart.map((x,i)=>`<div class="item" style="margin:10px 0;padding:12px;border:1px solid #d5dfec;border-radius:12px;background:#fff">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><b>${i+1}. ${safe(x.productName)}</b><button type="button" class="red" onclick="removeSaleCartItem(${i})">✕</button></div>
+  <div class="row" style="gap:8px;align-items:end">
+   <div style="flex:1"><label>مقدار</label><input type="number" min="0.001" step="any" value="${x.qty}" onchange="updateSaleCartLine(${i},'qty',this.value)"></div>
+   <div style="flex:1"><label>واحد</label><select onchange="updateSaleCartLine(${i},'unit',this.value)"><option value="${safe(x.tradeUnit)}" ${x.unit===x.tradeUnit?"selected":""}>${safe(x.tradeUnit)}</option><option value="${safe(x.baseUnit)}" ${x.unit===x.baseUnit?"selected":""}>${safe(x.baseUnit)}</option></select></div>
+   <div style="flex:1"><label>نرخ</label><input type="number" min="0" step="any" value="${x.price}" onchange="updateSaleCartLine(${i},'price',this.value)"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:10px;font-weight:bold"><span>مجموع</span><span>${money(x.qty*x.price)}</span></div>
+ </div>`).join("");
 }
 function quickAddSaleCustomer(){
  const name=prompt("د نوي مشتری نوم ولیکه:");if(!name||!name.trim())return;
@@ -1666,7 +1673,7 @@ function addSale(){
  if(c)c.debt=Number(c.debt||0)+(total-paid);
  saveDB();
  saleCart=[];["saleCustomer","salePaid","saleDiscount","saleNote","saleProductSearch"].forEach(id=>document.getElementById(id).value="");
- document.getElementById("saleQty").value="1";selectedSaleCustomerId="";
+ selectedSaleCustomerId="";
  document.getElementById("saleDate").value=today();updateSaleDateLabel();document.getElementById("saleCustomerResults").classList.add("hidden");
  renderSaleCart();updateSalePreview();refreshAll();
  alert("خرڅلاو ثبت شو\nرسید: "+invoice+"\nجنسونه: "+db.sales.filter(x=>x.invoice===invoice).length+"\nټول: "+money(total)+"\nپور: "+money(total-paid));
