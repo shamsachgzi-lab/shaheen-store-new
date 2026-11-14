@@ -1275,9 +1275,9 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
  <div class="panel"><h3>Backup / Restore</h3>
   <p>Backup فایل خپل ځان ته خوندي کړه (میاشتني راپورونه، موجودي او د مال ارزښت هم پکې شامل دي). دا نسخه معلومات په همدې iPhone/Browser کې Offline ساتي.</p>
   <button class="primary" onclick="backupData()">⬇️ Backup</button>
-  <label>⬆️ Restore — د JSON بیک‌اف فایل</label><input type="file" id="restoreFile" accept=".json,application/json">
+  <label>⬆️ Restore — د شاهین یا Dukan Pro JSON بیک‌اف فایل</label><input type="file" id="restoreFile" accept=".json,application/json">
   <button class="green" onclick="restoreData()">⬆️ Restore</button>
-  <hr><p class="notice">Restore اوسني معلومات د Backup له معلوماتو سره بدلوي. مخکې له Restore څخه اوسنی Backup وساته.</p>
+  <hr><p class="notice">د Dukan Pro (version 2) او د شاهین فروشگاه JSON بیک‌اف مني. Restore اوسني معلومات بدلوي؛ مخکې اوسنی Backup وساته.</p>
   <button class="red" onclick="clearAllData()">⚠️ ټول معلومات پاکول</button>
  </div>
 </section>
@@ -2489,13 +2489,45 @@ function restoreData(){
  reader.onload=()=>{
   try{
    const saved=JSON.parse(reader.result);
-if(saved.app && saved.app!==DB_KEY)
-  throw new Error("دا د بل اپلیکیشن Backup دی");
-const restored=saved.database||saved;
-   if(!restored||!Array.isArray(restored.products)||!Array.isArray(restored.sales))throw new Error("دا سم Backup نه دی");
-   ["products","sales","purchases","customers","suppliers","expenses","payments"].forEach(k=>{if(!Array.isArray(restored[k]))restored[k]=[]});
-   restored.cash=Number(restored.cash)||0;
-   db=restored;saveDB();refreshAll();alert("Backup بېرته راوګرځول شو.");
+   let restored;
+   if(saved && saved.version===2 && Array.isArray(saved.products) && Array.isArray(saved.sales)){
+    const oldCustomers=Array.isArray(saved.customers)?saved.customers:[];
+    const oldSuppliers=Array.isArray(saved.suppliers)?saved.suppliers:[];
+    const oldSales=Array.isArray(saved.sales)?saved.sales:[];
+    const oldPurchases=Array.isArray(saved.purchases)?saved.purchases:[];
+    const oldCustomerPayments=Array.isArray(saved.customerPayments)?saved.customerPayments:[];
+    const customers=oldCustomers.map(c=>{
+     const sold=oldSales.filter(x=>x.customerId===c.id).reduce((a,x)=>a+Number(x.total||0),0);
+     const paid=oldSales.filter(x=>x.customerId===c.id).reduce((a,x)=>a+Number(x.paid||0),0);
+     const repayments=oldCustomerPayments.filter(x=>x.customerId===c.id).reduce((a,x)=>a+Number(x.amount||0),0);
+     return {...c,debt:Math.max(0,Number(c.opening||0)+sold-paid-repayments),type:c.type||"active"};
+    });
+    const suppliers=oldSuppliers.map(v=>{
+     const bought=oldPurchases.filter(x=>x.supplierId===v.id).reduce((a,x)=>a+Number(x.total||0),0);
+     const paid=oldPurchases.filter(x=>x.supplierId===v.id).reduce((a,x)=>a+Number(x.paid||0),0);
+     return {...v,debt:Math.max(0,Number(v.opening||0)+bought-paid)};
+    });
+    restored={
+     version:1,settings:{...(saved.settings||{}),shopName:saved.settings?.shopName||"شاهین فروشگاه",currency:"AFN"},
+     cash:Number(saved.cash)||0,
+     products:(saved.products||[]).map(p=>({...p,cost:Number(p.cost??p.buy)||0,price:Number(p.price??p.sell)||0,qty:Number(p.qty)||0,unit:p.unit||"ټوټه",tradeUnit:p.tradeUnit||p.unit||"ټوټه",unitFactor:Number(p.unitFactor)||1,image:p.image||""})),
+     customers,
+     suppliers,
+     sales:oldSales.map(x=>({...x,invoice:x.invoice||("DP-"+String(x.id||"").slice(-8)),customer:x.customer||customers.find(c=>c.id===x.customerId)?.name||"نغدي مشتری",subtotal:Number(x.subtotal??x.total)||0,discount:Number(x.discount)||0,total:Number(x.total)||0,paid:Number(x.paid)||0,debt:Math.max(0,Number(x.total||0)-Number(x.paid||0)),costAtSale:Number(x.costAtSale??x.cost)||0,profit:Number(x.profit??((Number(x.price||0)-Number(x.cost||0))*Number(x.qty||0))) })),
+     purchases:oldPurchases.map(x=>({...x,supplier:x.supplier||suppliers.find(v=>v.id===x.supplierId)?.name||"",total:Number(x.total)||0,paid:Number(x.paid)||0,debt:Math.max(0,Number(x.total||0)-Number(x.paid||0))})),
+     expenses:(saved.expenses||[]).map(x=>({...x,category:x.category||x.name||"لګښت",name:x.name||x.category||"لګښت",amount:Number(x.amount)||0})),
+     payments:oldCustomerPayments.map(p=>({id:p.id||uid(),type:"customer",personId:p.customerId||"",personName:p.customerName||customers.find(c=>c.id===p.customerId)?.name||"نامعلوم مشتری",amount:Number(p.amount)||0,date:p.date||today(),note:p.note||""})),
+     sarafAccounts:[],sarafTransactions:[],archives:[],language:"ps"
+    };
+   }else{
+    if(saved.app && saved.app!==DB_KEY)throw new Error("دا د بل اپلیکیشن Backup دی. د Dukan Pro فایل باید د version 2 وي.");
+    restored=saved.database||saved;
+    if(!restored||!Array.isArray(restored.products)||!Array.isArray(restored.sales))throw new Error("دا سم Backup نه دی");
+    ["products","sales","purchases","customers","suppliers","expenses","payments","sarafAccounts","sarafTransactions"].forEach(k=>{if(!Array.isArray(restored[k]))restored[k]=[]});
+    restored.cash=Number(restored.cash)||0;
+   }
+   if(!confirm("Backup تایید شو. د نوي شاهین فروشگاه اوسني معلومات به د دې بیک‌اف په معلوماتو بدل شي. مخکېنی Backup دې خوندي کړی؟"))return;
+   db=restored;saveDB();refreshAll();alert("Backup په بریالیتوب بېرته راوګرځول شو.");
   }catch(e){alert("فایل سم نه دی: "+e.message)}
  };
  reader.onerror=()=>alert("فایل نه لوستل کېږي");
