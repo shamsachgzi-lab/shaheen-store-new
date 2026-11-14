@@ -1,14 +1,15 @@
 
 <!DOCTYPE html>
-<html lang="ps" dir="rtl">
+<html lang="ps" dir="rtl" translate="no" class="notranslate">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1769d2">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="شاهین ستور">
-<title>شاهین فروشگاه - Dukan Pro</title>
+<title>شاهین فروشگاه</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f1f5fb;color:#172033;font-family:Arial,Tahoma,sans-serif;padding-bottom:85px}
@@ -907,7 +908,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
     <div class="brand-subtitle">عمده او پرچون · حساب او موجودي</div>
    </div>
   </div>
-  <button class="lang" onclick="toggleLang()" id="langBtn">دري</button>
+  <button class="lang" onclick="toggleLang()" id="langBtn">پښتو</button>
  </div>
  <div class="brand-rule"><span></span></div>
 </header>
@@ -978,7 +979,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 
   <label>🔍 جنس انتخاب کړه</label>
   <select id="saleProduct" onchange="updateSaleUnit()"></select>
-  <label>Sales Unit</label><select id="saleUnit" onchange="updateSaleUnit()"></select>
+  <label>د خرڅلاو واحد</label><select id="saleUnit" onchange="updateSaleUnit()"></select>
 
   <div class="row">
    <div>
@@ -1263,17 +1264,17 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <button class="green" onclick="addCustomUnit()">＋ واحد اضافه کړه</button>
  </div>
  <div class="panel"><h3>📅 میاشت بندول / نوې میاشت</h3>
-  <p class="notice">د روانې میاشتې خرڅلاو، خرید، مصارف او ګټه جلا خوندي کېږي او نوې میاشت له صفر شروع کېږي. موجودي (Stock)، جنسونه، واحدونه او د مشتریانو/تامین کوونکو پورونه نه بدلېږي.</p>
+  <p class="notice">د روانې میاشتې خرڅلاو، پېرود، لګښتونه او ګټه جلا خوندي کېږي او نوې میاشت له صفر شروع کېږي. موجودي، جنسونه، واحدونه او د مشتریانو/تامین کوونکو پورونه نه بدلېږي.</p>
   <button class="green" onclick="closeCurrentMonth()">میاشت بندول / نوې میاشت</button>
   <h3>🗂 میاشتني راپورونه</h3><label>میاشت انتخاب کړه</label><input type="month" id="archiveMonth">
   <button class="gray" onclick="archiveMonth()">د میاشتې راپور خوندي کړه</button><div id="archiveList"></div>
  </div>
- <div class="panel"><h3>Backup / Restore</h3>
+ <div class="panel"><h3>د معلوماتو بیک‌اف او بېرته راګرځول</h3>
   <p>Backup فایل خپل ځان ته خوندي کړه (میاشتني راپورونه، موجودي او د مال ارزښت هم پکې شامل دي). دا نسخه معلومات په همدې iPhone/Browser کې Offline ساتي.</p>
-  <button class="primary" onclick="backupData()">⬇️ Backup</button>
-  <label>⬆️ Restore — د شاهین یا Dukan Pro JSON بیک‌اف فایل</label><input type="file" id="restoreFile" accept=".json,application/json">
-  <button class="green" onclick="restoreData()">⬆️ Restore</button>
-  <hr><p class="notice">د Dukan Pro (version 2) او د شاهین فروشگاه JSON بیک‌اف مني. Restore اوسني معلومات بدلوي؛ مخکې اوسنی Backup وساته.</p>
+  <button class="primary" onclick="backupData()">⬇️ بیک‌اف جوړ کړه</button>
+  <label>⬆️ بیک‌اف بېرته راواخله — د شاهین فروشگاه فایل</label><input type="file" id="restoreFile" accept=".json,application/json">
+  <button class="green" onclick="restoreData()">⬆️ بېرته راګرځول</button>
+  <hr><p class="notice">د شاهین فروشگاه د معلوماتو بیک‌اف مني. Restore اوسني معلومات بدلوي؛ مخکې اوسنی Backup وساته.</p>
   <button class="red" onclick="clearAllData()">⚠️ ټول معلومات پاکول</button>
  </div>
 </section>
@@ -1372,7 +1373,7 @@ function show(id,btn){
  refreshAll();window.scrollTo(0,0);
 }
 function toggleLang(){
- alert("دري ژبه به په راتلونکې نسخه کې بشپړه فعاله شي. اوسنی حساب په پښتو کې دی.");
+ alert("دا نسخه یوازې په پښتو ژبه ده.");
 }
 
 function runGlobalSearch(){
