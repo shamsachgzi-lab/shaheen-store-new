@@ -2418,20 +2418,36 @@ function renderSettingsUnits(){
  box.innerHTML=db.settings.units.map((u,i)=>{
   const count=(db.products||[]).filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
   const desc=u.type==="weight"?(u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":"وزن · د جنس په فورم کې د بدلون اندازه ټاکل کېږي"):u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه ټاکل کېږي";
-  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(u.name)}</b><div class="notice">${desc} · ${count} جنس</div></div><div>${u.locked?'<span class="badge">اصلي</span>':`<button type="button" class="red" onclick="removeCustomUnit(${i})">🗑 حذف</button>`}</div></div>`;
+  const controls=u.locked?'<span class="badge">اصلي</span>':`<button type="button" class="gray" onclick="editCustomUnit(${i})">✏️ سمون</button> <button type="button" class="red" onclick="removeCustomUnit(${i})">🗑 حذف</button>`;
+  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(u.name)}</b><div class="notice">${desc} · ${count} جنس</div></div><div class="actions">${controls}</div></div>`;
  }).join("")||"واحد نشته";
 }
 function addCustomUnit(){
- db.settings=db.settings||{};db.settings.units=Array.isArray(db.settings.units)?db.settings.units:[];
- const name=value("newUnitName").trim(),type=value("newUnitType")||"count";
- if(!name)return alert("د واحد نوم ولیکه");
- if(name.length>20)return alert("د واحد نوم تر ۲۰ تورو زیات مه لیکه");
- if(db.settings.units.some(u=>String(u.name).trim().toLocaleLowerCase()===name.toLocaleLowerCase()))return alert("دا واحد مخکې شته");
- db.settings.units.push({name,type,locked:false});
- try{saveDB();}catch(e){db.settings.units.pop();return alert("واحد خوندي نه شو؛ معلومات مو نه دي بدل شوي.");}
- document.getElementById("newUnitName").value="";
- updateProductUnitOptions();fillProductSelects();renderSettingsUnits();
- alert("نوی واحد اضافه شو؛ اوس یې د جنس په فورم کې ټاکلای شې.");
+ try{
+  db.settings=db.settings||{};db.settings.units=Array.isArray(db.settings.units)?db.settings.units:[];
+  const input=document.getElementById("newUnitName"),typeEl=document.getElementById("newUnitType");
+  const name=String(input?.value||"").trim(),type=String(typeEl?.value||"count");
+  if(!name)return alert("د واحد نوم ولیکه");
+  if(name.length>20)return alert("د واحد نوم تر ۲۰ تورو زیات مه لیکه");
+  if(!["count","weight","volume"].includes(type))return alert("د واحد ډول سم وټاکه");
+  if(db.settings.units.some(u=>String(u.name).trim().toLocaleLowerCase()===name.toLocaleLowerCase()))return alert("دا واحد مخکې شته");
+  db.settings.units.push({name,type,locked:false});
+  try{saveDB();}catch(e){db.settings.units.pop();throw e;}
+  if(input)input.value="";
+  updateProductUnitOptions();fillProductSelects();renderSettingsUnits();
+  alert("نوی واحد اضافه شو او خوندي شو.");
+ }catch(e){console.error(e);alert("واحد خوندي نه شو: "+(e?.message||"نامعلومه ستونزه")+"؛ پخواني حسابونه نه دي بدل شوي.");}
+}
+function editCustomUnit(index){
+ const u=db.settings?.units?.[index];if(!u||u.locked)return;
+ const name=prompt("د واحد نوی نوم ولیکه:",u.name);if(name===null)return;
+ const next=String(name).trim();if(!next)return alert("د واحد نوم تش نه شي پاتې کېدای.");
+ if(next.length>20)return alert("د واحد نوم تر ۲۰ تورو زیات مه لیکه");
+ if(db.settings.units.some((x,i)=>i!==index&&String(x.name).toLowerCase()===next.toLowerCase()))return alert("دا واحد مخکې شته");
+ const previous=u.name;u.name=next;
+ (db.products||[]).forEach(p=>{if(p.unit===previous)p.unit=next;if(p.tradeUnit===previous)p.tradeUnit=next;});
+ try{saveDB();updateProductUnitOptions();fillProductSelects();renderSettingsUnits();alert("د واحد نوم او تړلي جنسونه تازه شول.");}
+ catch(e){u.name=previous;alert("سمون خوندي نه شو؛ معلومات مو نه دي بدل شوي.");}
 }
 function removeCustomUnit(index){
  db.settings=db.settings||{};const u=db.settings.units?.[index];if(!u||u.locked)return;
