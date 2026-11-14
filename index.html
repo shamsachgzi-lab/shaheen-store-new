@@ -2526,6 +2526,20 @@ function restoreData(){
     ["products","sales","purchases","customers","suppliers","expenses","payments","sarafAccounts","sarafTransactions"].forEach(k=>{if(!Array.isArray(restored[k]))restored[k]=[]});
     restored.cash=Number(restored.cash)||0;
    }
+   // د زړو Backup فایلونو لپاره د نوي اپ اړین تنظیمات برابرول
+   if(!restored.settings || typeof restored.settings!=="object")restored.settings={};
+   if(!Array.isArray(restored.settings.units))restored.settings.units=[
+    {name:"kg",type:"weight",base:"kg",factor:1,locked:true},{name:"g",type:"weight",base:"kg",factor:0.001,locked:true},
+    {name:"بوجۍ",type:"count",locked:true},{name:"ټوټه",type:"count",locked:true},{name:"کارټن",type:"count",locked:true},
+    {name:"بوتل",type:"count",locked:true},{name:"لیټر",type:"volume",locked:true},{name:"پاکټ",type:"count",locked:true},
+    {name:"ګلاس",type:"count",locked:true},{name:"دانه",type:"count",locked:true},{name:"بسته",type:"count",locked:true}
+   ];
+   if(!restored.settings.currency)restored.settings.currency="AFN";
+   if(!restored.settings.shopName)restored.settings.shopName="شاهین فروشگاه";
+   if(!Array.isArray(restored.payments))restored.payments=[];
+   if(!Array.isArray(restored.sarafAccounts))restored.sarafAccounts=[];
+   if(!Array.isArray(restored.sarafTransactions))restored.sarafTransactions=[];
+   if(!Array.isArray(restored.archives))restored.archives=[];
    if(!confirm("Backup تایید شو. د نوي شاهین فروشگاه اوسني معلومات به د دې بیک‌اف په معلوماتو بدل شي. مخکېنی Backup دې خوندي کړی؟"))return;
    db=restored;saveDB();refreshAll();alert("Backup په بریالیتوب بېرته راوګرځول شو.");
   }catch(e){alert("فایل سم نه دی: "+e.message)}
