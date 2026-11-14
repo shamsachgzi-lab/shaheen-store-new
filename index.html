@@ -2501,12 +2501,19 @@ function restoreData(){
     const oldSales=Array.isArray(savedOld.sales)?savedOld.sales:[];
     const oldPurchases=Array.isArray(savedOld.purchases)?savedOld.purchases:[];
     const oldCustomerPayments=Array.isArray(savedOld.customerPayments)?savedOld.customerPayments:[];
+    const sameCustomer=(record,c)=>(
+     (record.customerId!=null&&c.id!=null&&String(record.customerId)===String(c.id)) ||
+     String(record.customer||record.customerName||"").trim()===String(c.name||"").trim()
+    );
     const customers=oldCustomers.map(c=>{
      const customerId=c.id||uid();
-     const customerSales=oldSales.filter(x=>(x.customerId&&x.customerId===c.id)||(!x.customerId&&String(x.customer||x.customerName||"").trim()===String(c.name||"").trim()));
+     const customerSales=oldSales.filter(x=>sameCustomer(x,c));
      const sold=customerSales.reduce((a,x)=>a+Number(x.total||0),0);
      const paid=customerSales.reduce((a,x)=>a+Number(x.paid||0),0);
-     const repayments=oldCustomerPayments.filter(x=>(x.customerId&&x.customerId===c.id)||(!x.customerId&&String(x.customerName||"").trim()===String(c.name||"").trim())).reduce((a,x)=>a+Number(x.amount||0),0);
+     const repayments=oldCustomerPayments.filter(x=>(
+      (x.customerId!=null&&c.id!=null&&String(x.customerId)===String(c.id)) ||
+      String(x.customerName||"").trim()===String(c.name||"").trim()
+     )).reduce((a,x)=>a+Number(x.amount||0),0);
      return {...c,id:customerId,debt:Math.max(0,Number(c.opening||0)+sold-paid-repayments),type:c.type||"active"};
     });
     const suppliers=oldSuppliers.map(v=>{
@@ -2526,16 +2533,16 @@ function restoreData(){
      customers,
      suppliers,
      sales:oldSales.map(x=>{
-      const matched=customers.find(c=>(x.customerId&&c.id===x.customerId)||String(c.name||"").trim()===String(x.customer||x.customerName||"").trim());
+      const matched=customers.find(c=>(x.customerId!=null&&String(c.id)===String(x.customerId))||String(c.name||"").trim()===String(x.customer||x.customerName||"").trim());
       const total=Number(x.total)||0,paid=Number(x.paid)||0;
-      return {...x,customerId:x.customerId||matched?.id||"",invoice:x.invoice||("DP-"+String(x.id||"").slice(-8)),customer:x.customer||x.customerName||matched?.name||"نغدي مشتری",subtotal:Number(x.subtotal??x.total)||0,discount:Number(x.discount)||0,total,paid,debt:Math.max(0,total-paid),costAtSale:Number(x.costAtSale??x.cost)||0,profit:Number(x.profit??((Number(x.price||0)-Number(x.cost||0))*Number(x.qty||0)))};
+      return {...x,customerId:matched?.id||x.customerId||"",invoice:x.invoice||("DP-"+String(x.id||"").slice(-8)),customer:x.customer||x.customerName||matched?.name||"نغدي مشتری",subtotal:Number(x.subtotal??x.total)||0,discount:Number(x.discount)||0,total,paid,debt:Math.max(0,total-paid),costAtSale:Number(x.costAtSale??x.cost)||0,profit:Number(x.profit??((Number(x.price||0)-Number(x.cost||0))*Number(x.qty||0)))};
      }),
      purchases:oldPurchases.map(x=>({...x,supplier:x.supplier||suppliers.find(v=>v.id===x.supplierId)?.name||"",total:Number(x.total)||0,paid:Number(x.paid)||0,debt:Math.max(0,Number(x.total||0)-Number(x.paid||0))})),
      expenses:(savedOld.expenses||[]).map(x=>({...x,category:x.category||x.name||"لګښت",name:x.name||x.category||"لګښت",amount:Number(x.amount)||0})),
      customerPayments:oldCustomerPayments,
      payments:oldCustomerPayments.map(p=>{
-      const matched=customers.find(c=>(p.customerId&&c.id===p.customerId)||String(c.name||"").trim()===String(p.customerName||"").trim());
-      return {id:p.id||uid(),type:"customer",personId:p.customerId||matched?.id||"",personName:p.customerName||matched?.name||"نامعلوم مشتری",amount:Number(p.amount)||0,date:p.date||today(),note:p.note||""};
+      const matched=customers.find(c=>(p.customerId!=null&&String(c.id)===String(p.customerId))||String(c.name||"").trim()===String(p.customerName||"").trim());
+      return {id:p.id||uid(),type:"customer",personId:matched?.id||p.customerId||"",personName:p.customerName||matched?.name||"نامعلوم مشتری",amount:Number(p.amount)||0,date:p.date||today(),note:p.note||""};
      }),
      sarafAccounts:[],sarafTransactions:[],archives:[],language:"ps"
     };
