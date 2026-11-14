@@ -2505,22 +2505,27 @@ function restoreData(){
      (record.customerId!=null&&c.id!=null&&String(record.customerId)===String(c.id)) ||
      String(record.customer||record.customerName||"").trim()===String(c.name||"").trim()
     );
+    // د زاړه Dukan Pro د اصلي customerBalance(c) له فورمول سره عین محاسبه:
+    // opening + د همدې customerId خرڅلاو - د خرڅلاو ورکړه - customerPayments
     const customers=oldCustomers.map(c=>{
      const customerId=c.id||uid();
-     const customerSales=oldSales.filter(x=>sameCustomer(x,c));
+     const customerSales=oldSales.filter(x=>x.customerId===c.id);
      const sold=customerSales.reduce((a,x)=>a+Number(x.total||0),0);
      const paid=customerSales.reduce((a,x)=>a+Number(x.paid||0),0);
-     const repayments=oldCustomerPayments.filter(x=>(
-      (x.customerId!=null&&c.id!=null&&String(x.customerId)===String(c.id)) ||
-      String(x.customerName||"").trim()===String(c.name||"").trim()
-     )).reduce((a,x)=>a+Number(x.amount||0),0);
-     return {...c,id:customerId,debt:Math.max(0,Number(c.opening||0)+sold-paid-repayments),type:c.type||"active"};
+     const repayments=oldCustomerPayments.filter(x=>x.customerId===c.id)
+      .reduce((a,x)=>a+Number(x.amount||0),0);
+     const legacyDebt=Number(c.opening||0)+sold-paid-repayments;
+     return {...c,id:customerId,debt:Math.max(0,legacyDebt),type:c.type||"active"};
     });
     const suppliers=oldSuppliers.map(v=>{
      const bought=oldPurchases.filter(x=>x.supplierId===v.id).reduce((a,x)=>a+Number(x.total||0),0);
      const paid=oldPurchases.filter(x=>x.supplierId===v.id).reduce((a,x)=>a+Number(x.paid||0),0);
      return {...v,debt:Math.max(0,Number(v.opening||0)+bought-paid)};
     });
+    const importedDebtTotal=customers.reduce((n,c)=>n+Number(c.debt||0),0);
+    if(oldCustomers.length && importedDebtTotal===0){
+     throw new Error("د مشتریانو نومونه وموندل شول، خو د پورونو محاسبه صفر ده. اوسني معلومات خوندي دي؛ بیک‌اپ نه دی نصب شوی. د فایل د حسابونو جوړښت باید نور وکتل شي.");
+    }
     restored={
      ...savedOld,
      version:1,settings:{...(savedOld.settings||{}),shopName:savedOld.settings?.shopName||"شاهین فروشگاه",currency:"AFN"},
