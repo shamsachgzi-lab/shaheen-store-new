@@ -1028,6 +1028,8 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
    <label>د جنس نوم یا بارکوډ ولیکه...</label>
    <input id="saleProductSearch" type="search" autocomplete="off" placeholder="د جنس نوم یا بارکوډ ولیکه...">
    <div id="saleSearchResults" class="sale-search-results hidden"></div>
+   <select id="saleProduct" class="hidden" aria-label="جنس"></select>
+   <div class="hidden"><input id="saleQty" type="number" value="1"><select id="saleUnit"></select><input id="salePrice" type="number" value="0"></div>
   </div>
   <div class="sale-simple-grid">
    <div><label>مشتری</label><input id="saleCustomer" autocomplete="off" placeholder="د مشتری نوم" oninput="searchSaleCustomers()"><div id="saleCustomerResults" class="sale-customer-results hidden"></div></div>
