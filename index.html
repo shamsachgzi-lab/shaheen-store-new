@@ -689,6 +689,11 @@ nav button:active{background:rgba(255,255,255,.22)}
 #sales .sale-simple .sale-actions button{padding:9px;font-size:13px}
 #sales .sale-simple .sale-save-button{margin-top:4px}
 @media(max-width:360px){#sales .sale-qty-grid{grid-template-columns:1fr 1fr}#sales .sale-qty-grid>div:last-child{grid-column:1/-1}}
+
+#sales .sale-search-results{border:1px solid #cbd5e1;border-radius:9px;overflow:hidden;margin:-3px 0 9px;background:#fff;max-height:230px;overflow-y:auto}
+#sales .sale-search-result{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;text-align:right;padding:10px;border:0;border-bottom:1px solid #edf0f4;background:#fff;color:#172033;font-size:13px}
+#sales .sale-search-result span{font-size:11px;color:#64748b;white-space:nowrap}
+#sales .sale-no-result{padding:10px;color:#64748b;font-size:13px}
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -1026,7 +1031,8 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   </div>
   <label>جنس ولټوه (نوم یا بارکوډ)</label>
   <input id="saleProductSearch" class="sale-search" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off">
-  <select id="saleProduct" aria-label="د لټون پایلو څخه جنس انتخاب کړه"><option value="">لومړی جنس ولټوه</option></select>
+  <div id="saleSearchResults" class="sale-search-results hidden"></div>
+  <select id="saleProduct" aria-label="ټاکل شوی جنس" hidden><option value="">لومړی جنس ولټوه</option></select>
   <div class="sale-simple-grid sale-qty-grid">
    <div><label>مقدار</label><input id="saleQty" type="number" min="0.001" step="any" value="1"></div>
    <div><label>واحد</label><select id="saleUnit"></select></div>
@@ -1604,20 +1610,22 @@ function saleUnitPrice(p,unit){
  return tradePrice*(factor/(tradeFactor||1));
 }
 function filterSaleProducts(){
- const q=value("saleProductSearch").trim().toLowerCase(),select=document.getElementById("saleProduct");
- if(!select)return;
- if(!q){
-  select.innerHTML='<option value="">لومړی جنس ولټوه</option>';
-  select.value="";
-  const unit=document.getElementById("saleUnit");if(unit)unit.innerHTML="";
-  const price=document.getElementById("salePrice");if(price)price.value="";
-  return;
- }
- const list=(db.products||[]).filter(p=>[p.name,p.code,p.barcode,p.barCode].some(v=>String(v||"").toLowerCase().includes(q)));
- select.innerHTML='<option value="">له پایلو جنس انتخاب کړه</option>'+list.map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — موجودي: ${p.qty} ${safe(unitLabel(p.unit||""))}</option>`).join("")||'<option value="">جنس ونه موندل شو</option>';
+ const q=value("saleProductSearch").trim().toLowerCase(),select=document.getElementById("saleProduct"),box=document.getElementById("saleSearchResults");
+ if(!select||!box)return;
  select.value="";
- const unit=document.getElementById("saleUnit");if(unit)unit.innerHTML="";
- const price=document.getElementById("salePrice");if(price)price.value="";
+ if(!q){box.innerHTML="";box.classList.add("hidden");return;}
+ const list=(db.products||[]).filter(p=>[p.name,p.code,p.barcode,p.barCode].some(v=>String(v||"").toLowerCase().includes(q))).slice(0,20);
+ box.innerHTML=list.length?list.map(p=>`<button type="button" class="sale-search-result" onclick="chooseSaleSearchResult('${String(p.id).replace(/'/g,"\\'")}')"><b>${safe(p.name)}</b><span>موجودي: ${p.qty} ${safe(unitLabel(p.unit||""))} · ${money(saleUnitPrice(p,(p.tradeUnit||p.unit||"واحد")))}</span></button>`).join(""):'<div class="sale-no-result">جنس ونه موندل شو</div>';
+ box.classList.remove("hidden");
+}
+function chooseSaleSearchResult(id){
+ const select=document.getElementById("saleProduct"),p=(db.products||[]).find(x=>String(x.id)===String(id));
+ if(!p||!select)return;
+ select.innerHTML=`<option value="${safe(p.id)}">${safe(p.name)}</option>`;select.value=p.id;
+ document.getElementById("saleSearchResults")?.classList.add("hidden");
+ document.getElementById("saleProductSearch").value=p.name;
+ updateSaleUnit();
+ addSaleToCart();
 }
 function updateSaleUnit(){
  const p=db.products.find(x=>String(x.id)===String(value("saleProduct")));
