@@ -1906,13 +1906,36 @@ function addPurchase(){
 function renderPurchases(){
  const q=value("purchasesSearch").toLowerCase();
  const list=db.purchases.filter(p=>
-  String(p.productName||"").toLowerCase().includes(q)||
-  String(p.supplier||"").toLowerCase().includes(q)||
-  String(p.invoice||"").toLowerCase().includes(q)||
+  String(p.productName||p.name||"").toLowerCase().includes(q)||
+  String(p.supplier||p.supplierName||p.company||"").toLowerCase().includes(q)||
+  String(p.invoice||p.receipt||"").toLowerCase().includes(q)||
   String(p.date||"").includes(q)
  ).slice().reverse();
- document.getElementById("purchasesList").innerHTML=list.map(p=>`
- <div class="item"><b>${safe(p.productName)}</b><div>رسید: ${safe(p.invoice||"-")} | نېټه: ${safe(p.date||"-")}</div><div>عرضه کوونکی: ${safe(p.supplier)}</div><div>تعداد: ${p.qty} ${safe(unitLabel(p.unit))} | ګدام ته داخل: ${p.stockQty??p.qty} ${safe(p.productUnit||p.unit)}</div><div>فی واحد: ${money(p.price)} | ټول: ${money(p.total)}</div><div>ورکړل: ${money(p.paid)} | پور: ${money(p.debt)}</div></div>`).join("")||"<p>پېرود ونه موندل شو</p>";
+ const showNum=v=>v===undefined||v===null||v===""||!Number.isFinite(Number(v))?"نه دی ثبت شوی":Number(v).toLocaleString("en-US",{maximumFractionDigits:3});
+ document.getElementById("purchasesList").innerHTML=list.map(p=>{
+  const productName=p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"نامعلوم جنس";
+  const supplier=p.supplier||p.supplierName||p.company||"نغدي پېرود / نوم نه دی ثبت شوی";
+  const unit=p.unit||p.purchaseUnit||p.productUnit||"واحد نه دی ثبت شوی";
+  const qty=p.qty??p.quantity;
+  const stockQty=p.stockQty??p.stockAdded??p.addedQty;
+  const price=p.price??p.unitPrice??p.costPrice;
+  const total=p.total??p.amount??((Number(qty)>0&&Number(price)>0)?Number(qty)*Number(price):0);
+  const paid=p.paid??p.paidAmount??0;
+  const debt=p.debt??p.remainingDebt??Math.max(0,Number(total)-Number(paid));
+  const invoice=p.invoice||p.receipt||"نه دی ثبت شوی";
+  const date=p.date||p.purchaseDate||"نېټه نشته";
+  const stockText=stockQty===undefined||stockQty===null?"نه ده ثبت شوې":showNum(stockQty)+" "+safe(p.productUnit||p.baseUnit||unit);
+  const priceText=price===undefined||price===null||price===""?"نه دی ثبت شوی":money(price);
+  return `<div class="item purchase-history-item">
+   <b>${safe(productName)}</b>
+   <div>د رسید شمېره: ${safe(invoice)} · نېټه: ${safe(date)}</div>
+   <div>د پلورونکي نوم: ${safe(supplier)}</div>
+   <div>پېرودل شوی مقدار: ${showNum(qty)} ${safe(unitLabel(unit))}</div>
+   <div>ګدام ته داخل شوی مقدار: ${stockText}</div>
+   <div>د یوه واحد بیه: ${priceText} · ټول لګښت: ${money(total)}</div>
+   <div>ورکړل شوې پیسې: ${money(paid)} · پاتې پور: ${money(debt)}</div>
+  </div>`;
+ }).join("")||"<p>د پېرود ریکارډ ونه موندل شو</p>";
 }
 window.addCustomer=function(){
  const name=(document.getElementById("cName")?.value||"").trim();
