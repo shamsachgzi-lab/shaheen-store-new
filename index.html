@@ -1837,10 +1837,10 @@ function printSale(id){
  }
  </style></head><body><main class="invoice">
  <header class="top"><h1>${shop}</h1>${phone?`<p>د اړیکې شمېره: ${phone}</p>`:""}<p>د خرڅلاو فاکتور</p></header>
- <section class="meta"><div><b>د فاکتور شمېره</b>${safe(sale.invoice||"-")}</div><div><b>نېټه</b>${safe(sale.date||"-")}</div><div><b>مشتری</b>${safe(sale.customer||"نغدي مشتری")}</div><div><b>پیسې</b>${safe(db.settings?.currency||"AFN")}</div></section>
+ <section class="meta"><div><b>د بل شمېره</b>${safe(sale.invoice||"-")}</div><div><b>نېټه</b>${safe(sale.date||"-")}</div><div><b>مشتری</b>${safe(sale.customer||"نغدي مشتری")}</div></section>
  <table><thead><tr><th>جنس</th><th>تعداد</th><th>فی واحد</th><th>مجموعه</th></tr></thead><tbody><tr><td>${safe(sale.productName||"-")}</td><td>${safe(sale.qty)} ${safe(sale.unit||"")}</td><td>${money(sale.price)}</td><td>${money(subtotal)}</td></tr></tbody></table>
  <section class="totals"><div><span>ټول مبلغ</span><b>${money(subtotal)}</b></div><div><span>تخفیف</span><b>${money(sale.discount)}</b></div><div class="grand"><span>وروستی مبلغ</span><b>${money(sale.total)}</b></div><div class="paid"><span>💵 نغدي ورکړه</span><b>${money(sale.paid)}</b></div><div class="debt"><span>📕 پاتې پور</span><b>${money(sale.debt)}</b></div></section>
- ${sale.note?`<p class="note">یادښت: ${safe(sale.note)}</p>`:""}<footer class="thanks">له پېرود څخه مو مننه 🌿</footer></main></body></html>`);
+ </main></body></html>`);
  w.document.close();w.focus();setTimeout(()=>w.print(),300);
 }
 function filterPurchaseProducts(){
