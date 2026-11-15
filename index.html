@@ -758,6 +758,55 @@ main{height:auto!important;min-height:0!important;overflow:visible!important}
 #sales .sale-summary .sale-total{grid-column:1/-1;padding:8px;background:#eaf2ff;border-radius:8px}
 #sales .sale-save-button{position:static!important;display:block;width:100%;margin:7px 0;padding:12px;font-size:15px}
 @media(max-width:390px){#sales .sale-invoice-details{grid-template-columns:1fr 1fr}#sales .sale-invoice-details>div:first-child{grid-column:1/-1}#sales .sale-invoice-details>div:nth-child(2){grid-column:1/2}#sales .sale-invoice-details>div:nth-child(3){grid-column:2/3}}
+
+/* د پېرود او واحدونو منظم ډیزاین */
+.purchase-page-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 2px 14px}
+.purchase-page-head h3{font-size:19px;margin:3px 0;color:#174b83}
+.purchase-page-head small{color:#64748b;font-weight:700}
+.purchase-page-head p{font-size:12px;color:#64748b;margin:3px 0}
+.purchase-add-product{background:#e5f1ff;color:#1457a0;border:1px solid #a9c9f0;white-space:nowrap}
+.purchase-form{border:1px solid #cfe0f4;background:linear-gradient(180deg,#f4f9ff,#fff 180px);padding:14px}
+.purchase-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 1px 12px;margin-bottom:8px;border-bottom:1px solid #e5edf6}
+.purchase-section-title b{font-size:15px;color:#174b83}
+.purchase-section-title span{font-size:11px;color:#718096;background:#edf4fc;padding:5px 8px;border-radius:20px}
+.purchase-form label,.purchase-history label{display:block;color:#29435f;font-weight:800;margin:8px 2px 3px}
+.purchase-form input,.purchase-form select,.purchase-history input{border:1px solid #cad9ea;background:#fff;border-radius:10px;padding:11px}
+.purchase-form .purchase-search{border:2px solid #438fe0;background:#fbfdff}
+.purchase-fields{gap:9px}
+.purchase-save{margin-top:4px;border-radius:11px;padding:13px;font-size:15px}
+.purchase-hint{background:#edf7ff;border-radius:9px;padding:8px 10px;margin:10px 0 0}
+.purchase-history{border:1px solid #e0e8f1}
+.purchase-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.purchase-stats>div{background:#f1f6fc;border:1px solid #dce7f3;border-radius:11px;padding:10px;min-width:0}
+.purchase-stats small{display:block;color:#64748b;font-size:11px}
+.purchase-stats b{display:block;margin-top:5px;font-size:14px;overflow-wrap:anywhere}
+.purchase-stats>div:nth-child(2){background:#eaf4ff}
+.purchase-stats>div:nth-child(3){background:#eaf9f0}
+.purchase-stats>div:nth-child(4){background:#fff0f0}
+.purchase-history-item{border:1px solid #e1e8f0;border-radius:12px;padding:11px;margin:9px 0;background:#fff;line-height:1.7}
+.purchase-history-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;color:#174b83}
+.purchase-history-top b{font-size:14px}
+.purchase-history-top>span{font-weight:800;color:#1457a0;direction:ltr;white-space:nowrap}
+.purchase-meta{display:flex;flex-wrap:wrap;gap:5px 12px;color:#64748b;font-size:11px;padding-top:4px}
+.purchase-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px}
+.purchase-detail-grid>div{background:#f7f9fc;border-radius:8px;padding:7px;min-width:0}
+.purchase-detail-grid small{display:block;color:#718096;font-size:10px}
+.purchase-detail-grid b{display:block;font-size:12px;overflow-wrap:anywhere}
+.purchase-paid{color:#078052}.purchase-debt{color:#c43c4c}
+.purchase-legacy-note{background:#fff8e7;color:#8a5a00;border:1px solid #f0d79a;padding:7px 9px;border-radius:8px;font-size:11px;margin-top:7px}
+.purchase-empty{text-align:center;color:#8793a3;padding:18px 5px}
+.unit-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}
+.unit-card{border:1px solid #dce6f0;border-radius:12px;padding:10px;background:#fbfdff;min-width:0}
+.unit-card-top{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.unit-card-top b{font-size:15px;color:#174b83}
+.unit-type,.unit-original{font-size:10px;padding:4px 7px;border-radius:20px;background:#eaf2fc;color:#315c88;white-space:nowrap}
+.unit-card>small{display:block;color:#718096;font-size:10px;margin:7px 0;line-height:1.5}
+.unit-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:5px;border-top:1px solid #e8eef5;padding-top:7px}
+.unit-card-bottom>span{font-size:10px;color:#64748b}
+.unit-card .actions{margin:0;gap:4px}
+.unit-card .actions button{font-size:10px;padding:6px}
+@media(max-width:360px){.purchase-page-head h3{font-size:16px}.purchase-add-product{font-size:11px;padding:8px}.unit-groups{gap:6px}.unit-card{padding:8px}.unit-card-top b{font-size:13px}}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -1142,21 +1191,20 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 
  </div>
 </section>
-<section id="purchases" class="hidden">
- <div class="row" style="align-items:center;justify-content:space-between"><h3>🚚 پېرود او د جنس داخلول</h3><button type="button" class="gray" onclick="openProductFromPurchase()">＋ نوی جنس ثبت کړه</button></div>
- <div class="panel">
-  <label>🔎 د پېرود جنس د نوم یا بارکوډ له مخې ولټوه</label><input id="buyProductSearch" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off"><label>جنس انتخاب کړه</label><select id="buyProduct"></select>
-  <label>د پېرود واحد</label><select id="buyUnit"></select>
-  <label>د عرضه کوونکي نوم</label><input id="buySupplier" list="supplierOptions" autocomplete="off"><datalist id="supplierOptions"></datalist>
+<section id="purchases" class="hidden purchase-page">
+ <div class="purchase-page-head"><div><small>شاهین فروشگاه</small><h3>🚚 پېرود او ګدام ته داخلول</h3><p>نوی مال ثبت کړه او د پېرود پخواني رسیدونه وګوره</p></div><button type="button" class="purchase-add-product" onclick="openProductFromPurchase()">＋ نوی جنس</button></div>
+ <div class="purchase-form panel">
+  <div class="purchase-section-title"><b>🧾 د نوي پېرود معلومات</b><span>۱ · معلومات داخل کړه</span></div>
+  <label>🔎 جنس د نوم یا بارکوډ له مخې ولټوه</label><input class="purchase-search" id="buyProductSearch" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off">
+  <div class="row purchase-fields"><div><label>جنس انتخاب کړه</label><select id="buyProduct"></select></div><div><label>د پېرود واحد</label><select id="buyUnit"></select></div></div>
+  <label>د عرضه کوونکي نوم</label><input id="buySupplier" list="supplierOptions" autocomplete="off" placeholder="د شرکت یا پلورونکي نوم"><datalist id="supplierOptions"></datalist>
   <label>د پېرود نېټه</label><input id="buyDate" type="date">
-  <div class="row">
-   <div><label>تعداد</label><input id="buyQty" type="number" min="0.01" step="any"></div>
-   <div><label>فی واحد قیمت</label><input id="buyPrice" type="number" min="0"></div>
-  </div>
-  <label>ورکړل شوې پیسې</label><input id="buyPaid" type="number" min="0" value="0">
-  <button class="primary" onclick="addPurchase()">پېرود ثبت کړه</button>
+  <div class="row purchase-fields"><div><label>مقدار / تعداد</label><input id="buyQty" type="number" min="0.01" step="any" placeholder="مثلاً ۵"></div><div><label>فی واحد قیمت (AFN)</label><input id="buyPrice" type="number" min="0" placeholder="قیمت"></div></div>
+  <label>ورکړل شوې پیسې (AFN)</label><input id="buyPaid" type="number" min="0" value="0" placeholder="نغدي ورکړه">
+  <button class="primary purchase-save" onclick="addPurchase()">✓ پېرود ثبت کړه</button>
+  <p class="notice purchase-hint">یادونه: د جنس ټاکلو سره سم واحد او د پېرود بیه په اتومات ډول راځي. نغدي ورکړه به له صندوقه کمه او پاتې پور به عرضه کوونکي ته ثبت شي.</p>
  </div>
- <div class="panel"><label>🔍 د پېرود تاریخچه ولټوه</label><input id="purchasesSearch" placeholder="د جنس، عرضه کوونکي یا رسید شمېره..."><div id="purchasesList"></div></div>
+ <div class="purchase-history panel"><div class="purchase-section-title"><b>📚 د پېرود تاریخچه</b><span>۲ · پخواني رسیدونه</span></div><label>🔍 د جنس، عرضه کوونکي یا رسید له مخې ولټوه</label><input id="purchasesSearch" placeholder="د لټون کلمه ولیکه..."><div id="purchasesList"></div></div>
 </section>
 
 <section id="customers" class="hidden">
@@ -2093,37 +2141,46 @@ function addPurchase(){
 }
 function renderPurchases(){
  const q=value("purchasesSearch").toLowerCase();
- const list=db.purchases.filter(p=>
-  String(p.productName||p.name||"").toLowerCase().includes(q)||
+ const all=db.purchases||[];
+ const list=all.filter(p=>
+  String(p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"").toLowerCase().includes(q)||
   String(p.supplier||p.supplierName||p.company||"").toLowerCase().includes(q)||
   String(p.invoice||p.receipt||"").toLowerCase().includes(q)||
-  String(p.date||"").includes(q)
+  String(p.date||p.purchaseDate||"").includes(q)
  ).slice().reverse();
- const showNum=v=>v===undefined||v===null||v===""||!Number.isFinite(Number(v))?"نه دی ثبت شوی":Number(v).toLocaleString("en-US",{maximumFractionDigits:3});
- document.getElementById("purchasesList").innerHTML=list.map(p=>{
-  const productName=p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"نامعلوم جنس";
+ const sum=(arr,key)=>arr.reduce((n,p)=>n+Number(p[key]||0),0);
+ const total=sum(all,"total"),paid=sum(all,"paid"),debt=all.reduce((n,p)=>n+Number(p.debt??Math.max(0,Number(p.total||0)-Number(p.paid||0))),0);
+ const box=document.getElementById("purchasesList");if(!box)return;
+ const stats=`<div class="purchase-stats"><div><small>ټول رسیدونه</small><b>${all.length}</b></div><div><small>ټول پېرود</small><b>${money(total)}</b></div><div><small>ورکړل شوې پیسې</small><b>${money(paid)}</b></div><div><small>پاتې پور</small><b>${money(debt)}</b></div></div>`;
+ const showNum=v=>v===undefined||v===null||v===""||!Number.isFinite(Number(v))?"—":Number(v).toLocaleString("en-US",{maximumFractionDigits:3});
+ const cards=list.map(p=>{
+  const productName=p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"پخوانی نامکمل ریکارډ";
   const supplier=p.supplier||p.supplierName||p.company||"نغدي پېرود / نوم نه دی ثبت شوی";
-  const unit=p.unit||p.purchaseUnit||p.productUnit||"واحد نه دی ثبت شوی";
-  const qty=p.qty??p.quantity;
-  const stockQty=p.stockQty??p.stockAdded??p.addedQty;
+  const unit=p.unit||p.purchaseUnit||p.productUnit||"";
+  const qty=p.qty??p.quantity,stockQty=p.stockQty??p.stockAdded??p.addedQty;
   const price=p.price??p.unitPrice??p.costPrice;
-  const total=p.total??p.amount??((Number(qty)>0&&Number(price)>0)?Number(qty)*Number(price):0);
-  const paid=p.paid??p.paidAmount??0;
-  const debt=p.debt??p.remainingDebt??Math.max(0,Number(total)-Number(paid));
+  const totalValue=p.total??p.amount??((Number(qty)>0&&Number(price)>0)?Number(qty)*Number(price):0);
+  const paidValue=p.paid??p.paidAmount??0;
+  const debtValue=p.debt??p.remainingDebt??Math.max(0,Number(totalValue)-Number(paidValue));
   const invoice=p.invoice||p.receipt||"نه دی ثبت شوی";
   const date=displayDate(p.date||p.purchaseDate||"");
-  const stockText=stockQty===undefined||stockQty===null?"نه ده ثبت شوې":showNum(stockQty)+" "+safe(p.productUnit||p.baseUnit||unit);
-  const priceText=price===undefined||price===null||price===""?"نه دی ثبت شوی":money(price);
-  return `<div class="item purchase-history-item">
-   <b>${safe(productName)}</b>
-   <div>د رسید شمېره: ${safe(invoice)} · نېټه: ${safe(date)}</div>
-   <div>د پلورونکي نوم: ${safe(supplier)}</div>
-   <div>پېرودل شوی مقدار: ${showNum(qty)} ${safe(unitLabel(unit))}</div>
-   <div>ګدام ته داخل شوی مقدار: ${stockText}</div>
-   <div>د یوه واحد بیه: ${priceText} · ټول لګښت: ${money(total)}</div>
-   <div>ورکړل شوې پیسې: ${money(paid)} · پاتې پور: ${money(debt)}</div>
-  </div>`;
- }).join("")||"<p>د پېرود ریکارډ ونه موندل شو</p>";
+  const missing=!p.productName&&!p.name&&!db.products.some(x=>String(x.id)===String(p.productId));
+  const stockText=stockQty===undefined||stockQty===null?"—":showNum(stockQty)+" "+safe(unitLabel(p.productUnit||p.baseUnit||unit));
+  return `<article class="purchase-history-item">
+   <div class="purchase-history-top"><b>${safe(productName)}</b><span>${money(totalValue)}</span></div>
+   ${missing?'<div class="purchase-legacy-note">⚠️ د دې زوړ ریکارډ جنس او مقدار په پخوانیو معلوماتو کې نه دي ثبت شوي؛ اصلي مبلغ خوندي دی.</div>':""}
+   <div class="purchase-meta"><span>رسید: ${safe(invoice)}</span><span>نېټه: ${safe(date)}</span></div>
+   <div class="purchase-meta"><span>عرضه کوونکی: ${safe(supplier)}</span></div>
+   <div class="purchase-detail-grid">
+    <div><small>پېرودل شوی مقدار</small><b>${qty===undefined?"—":showNum(qty)+" "+safe(unitLabel(unit))}</b></div>
+    <div><small>ګدام ته داخل شوی</small><b>${stockText}</b></div>
+    <div><small>فی واحد قیمت</small><b>${price===undefined?"—":money(price)}</b></div>
+    <div><small>ورکړل شوې پیسې</small><b class="purchase-paid">${money(paidValue)}</b></div>
+    <div><small>پاتې پور</small><b class="purchase-debt">${money(debtValue)}</b></div>
+   </div>
+  </article>`;
+ }).join("");
+ box.innerHTML=stats+(cards||'<p class="purchase-empty">د پېرود ریکارډ ونه موندل شو</p>');
 }
 window.addCustomer=function(){
  const name=(document.getElementById("cName")?.value||"").trim();
@@ -2718,17 +2775,25 @@ function saveShopSettings(){
 function renderSettingsUnits(){
  const box=document.getElementById("settingsUnitList");if(!box)return;
  db.settings=db.settings||{};db.settings.units=Array.isArray(db.settings.units)?db.settings.units:[];
- // 0.5kg د وزن ثابت واحد دی؛ موجوده جنسونه او د هغوی واحدونه نه بدلېږي.
- let half=db.settings.units.find(u=>u.name==="0.5kg");
- if(!half){db.settings.units.push({name:"0.5kg",type:"weight",base:"kg",factor:0.5,locked:true});half=db.settings.units[db.settings.units.length-1];}
- else Object.assign(half,{type:"weight",base:"kg",factor:0.5});
- box.innerHTML=db.settings.units.map((u,i)=>{
+ const defaults=[
+  {name:"kg",type:"weight",base:"kg",factor:1,locked:true},
+  {name:"g",type:"weight",base:"kg",factor:0.001,locked:true},
+  {name:"بوجۍ",type:"count",locked:true},{name:"ټوټه",type:"count",locked:true},
+  {name:"کارټن",type:"count",locked:true},{name:"بوتل",type:"count",locked:true},
+  {name:"لیټر",type:"volume",locked:true},{name:"پاکټ",type:"count",locked:true},
+  {name:"دانه",type:"count",locked:true},{name:"بسته",type:"count",locked:true},
+  {name:"ګلاس",type:"count",locked:true},{name:"سیر",type:"count",locked:true},
+  {name:"0.5kg",type:"weight",base:"kg",factor:0.5,locked:true}
+ ];
+ defaults.forEach(d=>{if(!db.settings.units.some(u=>String(u.name).toLowerCase()===d.name.toLowerCase()))db.settings.units.push({...d});});
+ const units=db.settings.units;
+ box.innerHTML='<div class="unit-groups">'+units.map((u,i)=>{
   const count=(db.products||[]).filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
-  const desc=u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":u.name==="0.5kg"?"وزن · 1 واحد = 0.5 kg":u.type==="weight"?"وزن · د جنس په فورم کې د بدلون اندازه ټاکل کېږي":u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه په هر جنس کې ټاکل کېږي";
-  const controls=u.locked?'<span class="badge">اصلي</span>':`<button type="button" class="gray" onclick="editCustomUnit(${i})">✏️ سمون</button> <button type="button" class="red" onclick="removeCustomUnit(${i})">🗑 حذف</button>`;
-  const title=u.name==="0.5kg"?"0.5kg":unitLabel(u.name);
-  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(title)}</b><div class="notice">${desc} · ${count} جنس</div></div><div class="actions">${controls}</div></div>`;
- }).join("")||"واحد نشته";
+  const weight=u.type==="weight",volume=u.type==="volume";
+  const desc=u.name==="kg"?"۱ کیلوګرام":u.name==="g"?"۱ ګرام = ۰٫۰۰۱ کیلوګرام":u.name==="0.5kg"?"نیم کیلوګرام":weight?"د وزن واحد":volume?"د حجم واحد":"د شمېر او بسته بندۍ واحد";
+  const actions=u.locked?'<span class="unit-original">اصلي واحد</span>':`<div class="actions"><button type="button" class="gray" onclick="editCustomUnit(${i})">✏️ سمون</button><button type="button" class="red" onclick="removeCustomUnit(${i})">حذف</button></div>`;
+  return `<div class="unit-card"><div class="unit-card-top"><b>${safe(unitLabel(u.name))}</b><span class="unit-type">${weight?"وزن":volume?"حجم":"شمېر"}</span></div><small>${desc}</small><div class="unit-card-bottom"><span>${count} جنسونه</span>${actions}</div></div>`;
+ }).join("")+'</div>';
 }
 function addCustomUnit(){
  try{
