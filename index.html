@@ -1975,187 +1975,59 @@ function editSale(id){
  saveDB();refreshAll();alert('رسید سم شو؛ حسابونه تازه شول.');
 }
 function printSale(id){
- const sale=db.sales.find(x=>x.id===id);if(!sale)return;
+ const selected=db.sales.find(x=>x.id===id);if(!selected)return;
+ const invoice=selected.invoice||"";
+ const rows=invoice?db.sales.filter(x=>x.invoice===invoice):[selected];
  const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه");
- const shop=safe(db.settings?.shopName||"شاهین فروشگاه"),phone=db.settings?.shopPhone?safe(db.settings.shopPhone):"";
- const subtotal=Number(sale.subtotal)||Number(sale.qty||0)*Number(sale.price||0);
- w.document.write(`<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>فاکتور ${safe(sale.invoice)}</title>
- <style>
- *{box-sizing:border-box}
- @page{size:auto;margin:8mm}
- *{box-sizing:border-box}
- body{font-family:Arial,Tahoma,sans-serif;color:#111827;margin:0;padding:5px;background:#fff;font-size:12px;line-height:1.4;font-weight:600}
- .invoice{width:100%;max-width:520px;margin:0 auto;border:1px solid #64748b;border-radius:4px;overflow:hidden}
- .top{background:#145bb5;color:#fff;padding:7px 9px;text-align:center;border-bottom:1px solid #0d4388}.top h1{margin:0 0 2px;font-size:18px;font-weight:800}.top p{margin:2px 0;color:#fff;font-size:11px;font-weight:700}
- .meta{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:6px;background:#f1f5f9;border-bottom:1px solid #94a3b8}.meta div{padding:5px;background:#fff;border:1px solid #94a3b8;border-radius:3px;min-width:0;overflow-wrap:anywhere;font-size:11px;font-weight:700}
- .meta b{display:block;color:#334155;font-size:10px;margin-bottom:2px;font-weight:800}
- table{width:calc(100% - 12px);border-collapse:collapse;margin:6px;border:1px solid #475569}th,td{text-align:right;padding:5px 4px;border:1px solid #64748b;overflow-wrap:anywhere;font-size:11px;line-height:1.35;font-weight:700}th{background:#dbeafe;color:#123b70;font-size:10px;font-weight:800}
- .totals{width:min(100% - 12px,260px);margin:6px 6px 8px auto}
- .totals div{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:5px;border-bottom:1px solid #94a3b8;font-size:11px;font-weight:700}
- .totals b{font-size:11px;font-weight:800;white-space:nowrap}
- .totals .grand{font-size:18px;font-weight:800;color:#123f78;background:#e5efff;border:2px solid #6595d0;border-radius:7px;margin-bottom:8px}
- .paid{background:#d9fbe8;color:#075b32;border:2px solid #329b62!important;border-radius:7px;font-weight:800;margin-bottom:7px}
- .debt{background:#ffe1e1;color:#991b1b;border:2px solid #d45a5a!important;border-radius:7px;font-weight:800}
- .note{padding:0 14px 14px;color:#334155;overflow-wrap:anywhere;font-size:14px}
- .thanks{text-align:center;padding:15px;background:#f1f5f9;color:#334155;border-top:1px solid #94a3b8;font-weight:700}
- @media(max-width:480px){.top h1{font-size:23px}.meta{gap:6px;padding:10px}.meta div{font-size:13px;padding:8px}table{width:calc(100% - 16px);margin:10px 8px}th,td{padding:8px 5px;font-size:12px}.totals{width:calc(100% - 16px);margin:10px 8px 14px}}
- @media print{
-  html,body{width:100%;margin:0!important;padding:0!important;background:#fff!important;font-size:15px!important}
-  .invoice{width:100%;max-width:none;margin:0;border:1.5px solid #475569;border-radius:0;overflow:visible}
-  .top,.meta,.totals .grand,.paid,.debt,th,.thanks{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  tr,.meta div,.totals div{break-inside:avoid;page-break-inside:avoid}
-  th,td{border:1.5px solid #475569!important}
- }
- 
-/* Dukan Pro sales page - complete blue invoice design */
-#sales .sale-page{
-  max-width:780px!important;margin:10px auto 26px!important;padding:14px!important;
-  border:1px solid #c9dcf4!important;border-radius:20px!important;
-  background:linear-gradient(180deg,#edf5ff 0,#fff 230px)!important;
-  box-shadow:0 8px 24px rgba(24,75,135,.10)!important;
-}
-#sales .sale-page>h3{
-  display:flex;align-items:center;justify-content:center;min-height:58px;
-  margin:0 0 14px!important;padding:13px 16px!important;border-radius:15px!important;
-  color:#fff!important;font-size:21px!important;font-weight:900!important;
-  background:linear-gradient(115deg,#124f9b,#1879d4 65%,#1596a5)!important;
-  box-shadow:0 5px 13px rgba(20,91,170,.22);
-}
-#sales .sale-simple{
-  margin:9px 0!important;padding:11px!important;border:1px solid #d7e4f3!important;
-  border-radius:13px!important;background:#fff!important;box-shadow:0 2px 7px rgba(24,57,94,.045)!important;
-}
-#sales .sale-invoice-details{
-  display:grid!important;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)!important;
-  gap:9px!important;align-items:start!important;padding:11px!important;background:#f5f9ff!important;
-}
-#sales .sale-invoice-details>div:first-child{grid-column:1/-1}
-#sales .sale-invoice-details>div{min-width:0}
-#sales .sale-simple label{display:block!important;margin:3px 1px 6px!important;color:#29445f!important;font-size:13px!important;font-weight:800!important}
-#sales .sale-simple input,#sales .sale-simple select{
-  box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:42px!important;
-  margin:2px 0 4px!important;padding:9px 11px!important;border:1px solid #c8d8e9!important;
-  border-radius:10px!important;background:#fff!important;color:#172b43!important;font-size:14px!important;
-}
-#sales .sale-invoice-details input,#sales .sale-invoice-details select{min-height:39px!important}
-#sales .sale-date-top .sale-qty-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important}
-#sales .sale-date-top #saleDateJalali{
-  margin-top:4px;padding:4px 6px;border-radius:7px;background:#e8f2ff;color:#18599d;
-  text-align:center;font-size:11px;font-weight:800;white-space:normal!important;
-}
-#sales .sale-product-search{
-  border:2px solid #3986d6!important;background:#f8fbff!important;padding:12px!important;
-}
-#sales .sale-product-search label{color:#15569b!important;font-size:14px!important}
-#sales .sale-product-search input{
-  min-height:48px!important;border:1.5px solid #8db9e9!important;border-radius:11px!important;
-  background:#fff!important;font-size:15px!important;
-}
-#sales .sale-search-results,#sales .sale-customer-results{
-  max-height:230px!important;overflow-y:auto!important;border:1px solid #cbdced!important;border-radius:11px!important;
-}
-#sales .sale-search-result{padding:12px!important;font-size:14px!important}
-#sales #saleCartList{
-  min-height:58px!important;margin:10px 0!important;padding:11px!important;
-  border:1px solid #d7e3f0!important;border-radius:14px!important;background:#f2f6fb!important;
-  color:#52657b!important;font-size:13px!important;
-}
-#sales .sale-line-card{
-  margin:9px 0!important;padding:12px!important;border:1px solid #d5e1ee!important;
-  border-right:4px solid #2879c9!important;border-radius:12px!important;background:#fff!important;
-  box-shadow:0 2px 7px rgba(22,53,88,.06)!important;
-}
-#sales .sale-line-head{margin-bottom:10px!important;color:#193b61!important;font-size:14px!important}
-#sales .sale-line-fields{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
-#sales .sale-line-fields label{font-size:11px!important;color:#60758c!important}
-#sales .sale-line-fields input,#sales .sale-line-fields select{
-  box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:40px!important;
-  padding:8px 5px!important;border:1px solid #cfdae7!important;border-radius:8px!important;background:#fff!important;
-  font-size:13px!important;
-}
-#sales .sale-line-total{margin-top:10px!important;padding-top:9px!important;border-top:1px dashed #cbd8e6!important}
-#sales .sale-line-total b{color:#145ca8!important;font-size:15px!important}
-#sales .sale-remove{border-radius:8px!important;background:#fff0f0!important;color:#c33131!important}
-#sales .sale-money-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;margin:10px 0!important}
-#sales .sale-money-row>.sale-simple{min-width:0!important;margin:0!important;padding:11px!important;background:#fff!important}
-#sales .sale-money-row>.sale-simple:first-child{border-top:3px solid #e5a52d!important}
-#sales .sale-money-row>.sale-simple:nth-child(2){border-top:3px solid #159568!important}
-#sales .sale-money-row input{min-height:43px!important;font-size:15px!important;font-weight:800!important}
-#sales .sale-actions{display:flex!important;gap:7px!important;margin:8px 0 0!important}
-#sales .sale-actions button{
-  flex:1!important;min-width:0!important;min-height:39px!important;padding:8px 4px!important;
-  border:0!important;border-radius:9px!important;color:#fff!important;font-size:12px!important;font-weight:900!important;
-}
-#sales .sale-actions button.sale-cash-btn{background:linear-gradient(110deg,#087b4b,#12a66c)!important}
-#sales .sale-actions button.sale-debt-btn{background:linear-gradient(110deg,#b92c3b,#e14b55)!important}
-#sales .sale-summary{
-  display:grid!important;grid-template-columns:1fr 1fr!important;gap:5px!important;
-  margin:12px 0!important;padding:11px!important;border:1px solid #cbdced!important;
-  border-radius:14px!important;background:linear-gradient(135deg,#eef5ff,#f3fbf8)!important;
-}
-#sales .sale-summary>div{
-  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:7px!important;
-  min-width:0!important;padding:9px 7px!important;border-bottom:1px solid #dce6f0!important;
-  color:#3e536b!important;font-size:12px!important;
-}
-#sales .sale-summary>div strong{color:#193d65!important;font-size:13px!important;white-space:nowrap!important}
-#sales .sale-summary .sale-total{
-  grid-column:1/-1!important;margin:3px 0!important;padding:13px 11px!important;
-  border:1px solid #9fc5ee!important;border-radius:10px!important;
-  background:linear-gradient(100deg,#d9eaff,#e9f4ff)!important;color:#104f97!important;font-size:15px!important;font-weight:900!important;
-}
-#sales .sale-summary .sale-total strong{color:#104f97!important;font-size:19px!important}
-#sales #saleDebtPreview{color:#c33443!important}
-#sales #salePaidPreview{color:#087b4b!important}
-#sales #saleProfitPreview{color:#087b4b!important}
-#sales .sale-save-button{
-  display:block!important;position:static!important;width:100%!important;min-height:54px!important;
-  margin:13px 0 2px!important;padding:14px!important;border:0!important;border-radius:13px!important;
-  background:linear-gradient(110deg,#1256a5,#197bd5 70%,#1595a2)!important;
-  box-shadow:0 6px 15px rgba(20,91,170,.25)!important;color:#fff!important;
-  font-size:18px!important;font-weight:900!important;
-}
-#sales .sale-save-button:active{transform:scale(.99)}
-@media(min-width:600px){
- #sales .sale-invoice-details{grid-template-columns:minmax(0,1.4fr) minmax(150px,1fr) minmax(120px,.8fr)!important}
- #sales .sale-invoice-details>div:first-child{grid-column:auto}
-}
-@media(max-width:380px){
- #sales .sale-page{padding:10px 8px!important}
- #sales .sale-money-row{gap:6px!important}
- #sales .sale-money-row>.sale-simple{padding:8px!important}
- #sales .sale-summary>div{font-size:11px!important;padding:8px 4px!important}
- #sales .sale-line-fields{gap:4px!important}
-}
-
-
-/* FINAL SALES SCREEN DESIGN — blue and white reference layout */
-#sales{--area:#1768b5!important;--soft:#edf5ff!important;--line:#c8dcf3!important}
-#sales .sale-blue-header{
- display:flex!important;align-items:center!important;justify-content:space-between!important;
- gap:12px!important;margin:0 0 12px!important;padding:15px 16px!important;
- color:#fff!important;background:linear-gradient(115deg,#104f98,#1976cf 68%,#168ca8)!important;
- border:0!important;border-radius:14px!important;box-shadow:0 5px 14px rgba(18,85,155,.18)!important;
-}
-#sales .sale-blue-header small{display:block;color:#dcecff!important;font-size:10px!important;letter-spacing:1px!important;font-weight:800!important}
-#sales .sale-blue-header h3{margin:4px 0 0!important;color:#fff!important;font-size:20px!important;font-weight:900!important}
-#sales .sale-blue-header>span{display:flex;align-items:center;justify-content:center;width:43px;height:43px;border-radius:12px;background:rgba(255,255,255,.17);font-size:23px}
-#sales .sale-invoice-details{background:#f3f8ff!important;border:1px solid #cbdff5!important;border-radius:12px!important;padding:11px!important}
-#sales .sale-invoice-details label,#sales .sale-product-search label{color:#24547f!important;font-weight:800!important}
-#sales .sale-product-search{background:#f5f9ff!important;border:1.5px solid #9fc5ed!important;border-radius:13px!important}
-#sales .sale-product-search input{border:1.5px solid #a9cbed!important}
-#sales .sale-money-row>.sale-simple{background:#fff!important;border:1px solid #d5e2ef!important;border-radius:12px!important;box-shadow:0 2px 7px rgba(25,60,95,.05)!important}
-#sales .sale-summary{background:#f2f7ff!important;border:1px solid #cbdff5!important}
-#sales .sale-summary .sale-total{background:#dcecff!important;border-color:#9fc5ed!important}
-#sales .sale-save-button{background:linear-gradient(110deg,#1056a5,#197bd5 70%,#168ca8)!important}
-@media(max-width:390px){#sales .sale-blue-header{padding:12px!important}#sales .sale-blue-header h3{font-size:18px!important}}
-</style></head><body><main class="invoice">
- <header class="top"><h1>${shop}</h1>${phone?`<p>د اړیکې شمېره: ${phone}</p>`:""}<p>د خرڅلاو فاکتور</p></header>
- <section class="meta"><div><b>د بل شمېره</b>${safe(sale.invoice||"-")}</div><div><b>نېټه</b>${safe(displayDate(sale.date))}</div><div><b>مشتری</b>${safe(sale.customer||"نغدي مشتری")}</div></section>
- <table><thead><tr><th>جنس</th><th>تعداد</th><th>فی واحد</th><th>مجموعه</th></tr></thead><tbody><tr><td>${safe(sale.productName||"-")}</td><td>${safe(sale.qty)} ${safe(sale.unit||"")}</td><td>${money(sale.price)}</td><td>${money(subtotal)}</td></tr></tbody></table>
- <section class="totals"><div><span>ټول مبلغ</span><b>${money(subtotal)}</b></div><div><span>تخفیف</span><b>${money(sale.discount)}</b></div><div class="grand"><span>وروستی مبلغ</span><b>${money(sale.total)}</b></div><div class="paid"><span>💵 نغدي ورکړه</span><b>${money(sale.paid)}</b></div><div class="debt"><span>📕 پاتې پور</span><b>${money(sale.debt)}</b></div></section>
- </main></body></html>`);
- w.document.close();w.focus();setTimeout(()=>w.print(),300);
+ const shop=safe(db.settings?.shopName||"شاهین فروشگاه");
+ const phone=db.settings?.shopPhone?safe(db.settings.shopPhone):"";
+ const subtotal=rows.reduce((n,x)=>n+(Number(x.subtotal)||((Number(x.qty)||0)*(Number(x.price)||0))),0);
+ const discount=rows.reduce((n,x)=>n+(Number(x.discount)||0),0);
+ const total=rows.reduce((n,x)=>n+(Number(x.total)||0),0);
+ const paid=rows.reduce((n,x)=>n+(Number(x.paid)||0),0);
+ const debt=rows.reduce((n,x)=>n+(Number(x.debt)||0),0);
+ const date=displayDate(selected.date);
+ const customer=safe(selected.customer||"نغدي مشتری");
+ const itemRows=rows.map((x,i)=>'<tr><td class="item-name">'+safe(x.productName||"-")+'</td><td>'+safe(x.qty)+' '+safe(x.unit||"")+'</td><td>'+money(x.price)+'</td><td class="amount">'+money(Number(x.total)||0)+'</td></tr>').join("");
+ const note=selected.note?'<div class="note"><b>یادښت:</b> '+safe(selected.note)+'</div>':"";
+ w.document.write('<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>رسید '+safe(invoice||selected.id)+'</title><style>'+
+ '*{box-sizing:border-box}'+
+ '@page{size:58mm auto;margin:0}'+
+ 'html,body{width:58mm;margin:0;padding:0;background:#fff;color:#111;font-family:Arial,Tahoma,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+ 'body{font-size:9px;line-height:1.45;font-weight:600}'+
+ '.invoice{width:58mm;max-width:58mm;margin:0 auto;padding:2.5mm 2mm 3mm;border:0}'+
+ '.top{text-align:center;padding:1mm 0 2mm;border-bottom:1px dashed #333}'+
+ '.top h1{font-size:16px;line-height:1.3;margin:0 0 1mm;font-weight:900}'+
+ '.top .subtitle{font-size:9px;font-weight:800;margin:0}'+
+ '.top .phone{font-size:8px;margin-top:1mm}'+
+ '.receipt-title{display:inline-block;margin-top:1.5mm;padding:1mm 4mm;border:1px solid #222;border-radius:10px;font-size:9px;font-weight:900}'+
+ '.meta{display:grid;grid-template-columns:1fr 1fr;gap:1mm;padding:2mm 0;border-bottom:1px dashed #555}'+
+ '.meta div{min-width:0;font-size:8.5px;overflow-wrap:anywhere}'+
+ '.meta b{display:block;font-size:7.5px;color:#444;margin-bottom:.3mm}'+
+ 'table{width:100%;border-collapse:collapse;margin:2mm 0;font-size:8px;table-layout:fixed}'+
+ 'th,td{padding:1.2mm .6mm;border-bottom:1px solid #aaa;text-align:right;vertical-align:top;overflow-wrap:anywhere}'+
+ 'th{font-size:7.5px;background:#eee;border-top:1px solid #555;border-bottom:1px solid #555;font-weight:900}'+
+ 'th:nth-child(1){width:34%}th:nth-child(2){width:19%}th:nth-child(3){width:21%}th:nth-child(4){width:26%}'+
+ '.item-name{font-weight:800}.amount{font-weight:800;white-space:nowrap}'+
+ '.totals{margin:2mm 0 0;padding-top:1mm;border-top:1px dashed #555}'+
+ '.totals div{display:flex;justify-content:space-between;gap:2mm;padding:1mm .5mm;font-size:8.5px}'+
+ '.totals b{white-space:nowrap;font-size:8.5px}'+
+ '.grand{margin:1mm 0;padding:2mm 1.5mm!important;background:#eee;border:1px solid #222;border-radius:2mm;font-size:11px!important;font-weight:900}'+
+ '.grand b{font-size:12px!important}'+
+ '.paid{color:#075b32;border:1px solid #25804b;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}'+
+ '.debt{color:#991b1b;border:1px solid #b33;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}'+
+ '.note{padding:2mm 0;font-size:8px;border-bottom:1px dashed #555;overflow-wrap:anywhere}'+
+ '.thanks{text-align:center;padding:3mm 0 1mm;margin-top:2mm;border-top:1px dashed #555;font-size:8.5px;font-weight:800}'+
+ '.footer{text-align:center;font-size:7px;color:#555;margin-top:1mm}'+
+ '@media screen{body{background:#e8edf3;padding:8px 0}.invoice{background:#fff;box-shadow:0 2px 12px #0002}}'+
+ '@media print{html,body{width:58mm!important;margin:0!important;padding:0!important}.invoice{width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}.top,th,.grand{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
+ '</style></head><body><main class="invoice">'+
+ '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">د خرڅلاو رسید</div></header>'+
+ '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
+ '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
+ '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>نغدي ورکړه</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
+ note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main></body></html>');
+ w.document.close();w.focus();setTimeout(()=>w.print(),350);
 }
 function filterPurchaseProducts(){
  const q=value("buyProductSearch").toLowerCase();
