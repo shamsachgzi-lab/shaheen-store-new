@@ -1309,7 +1309,7 @@ if(!Array.isArray(db.settings.units))db.settings.units=[
  {name:"بوجۍ",type:"count",locked:true},{name:"ټوټه",type:"count",locked:true},{name:"کارټن",type:"count",locked:true},
  {name:"بوتل",type:"count",locked:true},{name:"لیټر",type:"volume",locked:true},{name:"پاکټ",type:"count",locked:true},
  {name:"دانه",type:"count",locked:true},{name:"بسته",type:"count",locked:true},{name:"پیاله",type:"count",locked:true},
- {name:"سیر",type:"count",locked:true},{name:"0.5kg",type:"count",locked:false}
+ {name:"ګلاس",type:"count",locked:true},{name:"سیر",type:"count",locked:true},{name:"0.5kg",type:"weight",base:"kg",factor:0.5,locked:true}
 ];
 if(!db.settings.currency)db.settings.currency="AFN";
 if(!db.settings.shopName)db.settings.shopName="شاهین فروشگاه";
@@ -2710,14 +2710,20 @@ function showArchiveReport(id){
   {name:"بوجۍ",type:"count",locked:true},{name:"ټوټه",type:"count",locked:true},
   {name:"کارټن",type:"count",locked:true},{name:"بوتل",type:"count",locked:true},
   {name:"لیټر",type:"volume",locked:true},{name:"پاکټ",type:"count",locked:true},
-  {name:"ګلاس",type:"count",locked:true},{name:"دانه",type:"count",locked:true},
-  {name:"بسته",type:"count",locked:true}
+  {name:"دانه",type:"count",locked:true},{name:"بسته",type:"count",locked:true},
+  {name:"پیاله",type:"count",locked:true},{name:"ګلاس",type:"count",locked:true},
+  {name:"سیر",type:"count",locked:true},
+  {name:"0.5kg",type:"weight",base:"kg",factor:0.5,locked:true}
  ];
  function units(){
   db.settings=db.settings||{};
   let arr=Array.isArray(db.settings.units)?db.settings.units:[];
   arr=arr.map(u=>typeof u==="string"?{name:u,type:"count",locked:false}:{...u,name:String(u.name||"").trim()}).filter(u=>u.name);
-  defaults.forEach(d=>{if(!arr.some(u=>u.name.toLowerCase()===d.name.toLowerCase()))arr.push({...d});});
+  defaults.forEach(d=>{
+   const existing=arr.find(u=>u.name.toLowerCase()===d.name.toLowerCase());
+   if(!existing)arr.push({...d});
+   else if(d.name==="0.5kg")Object.assign(existing,{type:"weight",base:"kg",factor:0.5,locked:true});
+  });
   db.settings.units=arr;
   return arr;
  }
@@ -2726,7 +2732,7 @@ function showArchiveReport(id){
   const arr=units();
   box.innerHTML=arr.map((u,i)=>{
    const count=db.products.filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
-   const desc=u.type==="weight"?(u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":"وزن · د جنس په فورم کې اندازه ټاکل کېږي"):u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه ټاکل کېږي";
+   const desc=u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":u.name==="0.5kg"?"وزن · 1 واحد = 0.5 kg":u.type==="weight"?"وزن · د جنس په فورم کې د بدلون اندازه ټاکل کېږي":u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه ټاکل کېږي";
    const actions=u.locked?'<span class="badge">اصلي</span>':`<button type="button" class="gray" onclick="editCustomUnit(${i})">✏️ سمون</button> <button type="button" class="red" onclick="removeCustomUnit(${i})">🗑 حذف</button>`;
    return `<div class="item" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b>${safe(u.name)}</b><div class="notice">${desc} · ${count} جنس</div></div><div>${actions}</div></div>`;
   }).join("");
