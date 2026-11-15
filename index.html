@@ -1088,7 +1088,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 
 <section id="sales" class="hidden" style="height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;position:static!important;display:block">
  <div class="panel sale-page" style="height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;position:static!important;display:block;width:100%;box-sizing:border-box">
-  <h3>نوی فروش</h3>
+  <div class="sale-blue-header"><div><small>SHAHEEN WHOLESALE STORE</small><h3>نوی خرڅلاو</h3></div><span>🧾</span></div>
   <div class="sale-simple sale-invoice-details">
    <div><label>مشتری</label><input id="saleCustomer" autocomplete="off" placeholder="د مشتری نوم" oninput="searchSaleCustomers()"><div id="saleCustomerResults" class="sale-customer-results hidden"></div></div>
    <div class="sale-date-row sale-date-top">
@@ -2091,6 +2091,27 @@ function printSale(id){
  #sales .sale-line-fields{gap:4px!important}
 }
 
+
+/* FINAL SALES SCREEN DESIGN — blue and white reference layout */
+#sales{--area:#1768b5!important;--soft:#edf5ff!important;--line:#c8dcf3!important}
+#sales .sale-blue-header{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:12px!important;margin:0 0 12px!important;padding:15px 16px!important;
+ color:#fff!important;background:linear-gradient(115deg,#104f98,#1976cf 68%,#168ca8)!important;
+ border:0!important;border-radius:14px!important;box-shadow:0 5px 14px rgba(18,85,155,.18)!important;
+}
+#sales .sale-blue-header small{display:block;color:#dcecff!important;font-size:10px!important;letter-spacing:1px!important;font-weight:800!important}
+#sales .sale-blue-header h3{margin:4px 0 0!important;color:#fff!important;font-size:20px!important;font-weight:900!important}
+#sales .sale-blue-header>span{display:flex;align-items:center;justify-content:center;width:43px;height:43px;border-radius:12px;background:rgba(255,255,255,.17);font-size:23px}
+#sales .sale-invoice-details{background:#f3f8ff!important;border:1px solid #cbdff5!important;border-radius:12px!important;padding:11px!important}
+#sales .sale-invoice-details label,#sales .sale-product-search label{color:#24547f!important;font-weight:800!important}
+#sales .sale-product-search{background:#f5f9ff!important;border:1.5px solid #9fc5ed!important;border-radius:13px!important}
+#sales .sale-product-search input{border:1.5px solid #a9cbed!important}
+#sales .sale-money-row>.sale-simple{background:#fff!important;border:1px solid #d5e2ef!important;border-radius:12px!important;box-shadow:0 2px 7px rgba(25,60,95,.05)!important}
+#sales .sale-summary{background:#f2f7ff!important;border:1px solid #cbdff5!important}
+#sales .sale-summary .sale-total{background:#dcecff!important;border-color:#9fc5ed!important}
+#sales .sale-save-button{background:linear-gradient(110deg,#1056a5,#197bd5 70%,#168ca8)!important}
+@media(max-width:390px){#sales .sale-blue-header{padding:12px!important}#sales .sale-blue-header h3{font-size:18px!important}}
 </style></head><body><main class="invoice">
  <header class="top"><h1>${shop}</h1>${phone?`<p>د اړیکې شمېره: ${phone}</p>`:""}<p>د خرڅلاو فاکتور</p></header>
  <section class="meta"><div><b>د بل شمېره</b>${safe(sale.invoice||"-")}</div><div><b>نېټه</b>${safe(sale.date||"-")}</div><div><b>مشتری</b>${safe(sale.customer||"نغدي مشتری")}</div></section>
