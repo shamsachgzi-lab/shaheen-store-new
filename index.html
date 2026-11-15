@@ -1671,7 +1671,12 @@ let saleCart=[];
 function addSaleToCart(){
  const p=db.products.find(x=>String(x.id)===String(value("saleProduct")));
  if(!p)return alert("جنس انتخاب کړه");
- const unit=value("saleUnit")||p.tradeUnit||p.unit,qty=number("saleQty"),price=number("salePrice");
+ const unit=value("saleUnit")||p.tradeUnit||p.unit,qty=number("saleQty");
+ // که د نرخ خانه تش یا صفر وي، د جنس ثبت شوی پرچون/عمده نرخ بېرته واخله
+ const typedPrice=number("salePrice");
+ const savedPrice=saleUnitPrice(p,unit);
+ const price=typedPrice>0?typedPrice:savedPrice;
+ if(!Number.isFinite(price)||price<=0)return alert("د دې جنس د خرڅلاو نرخ نه دی ثبت شوی. لومړی د جنس په برخه کې پرچون یا عمده نرخ ثبت کړه.");
  const factor=saleFactorForUnit(p,unit);
  if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<0)return alert("مقدار او نرخ سم ولیکه");
  const stockQty=qty*factor;
