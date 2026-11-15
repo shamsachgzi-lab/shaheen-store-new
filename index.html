@@ -1021,44 +1021,6 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
  <div class="panel"><input id="productSearch" placeholder="🔍 د جنس نوم ولټوه"><div id="productList"></div></div>
 </section>
 
-<section id="sales" class="hidden">
- <div class="sale-panel sale-page sale-simple">
-  <div class="sale-heading"><h3>نوی خرڅلاو</h3><span class="badge">AFN</span></div>
-  <div class="sale-invoice-bar">د بل شمېره: <b id="saleInvoicePreview">نوی بل</b></div>
-  <div class="sale-simple-grid">
-   <div><label>د خرڅلاو ډول</label><select id="salePriceType" onchange="updateSaleUnit()"><option value="retail">پرچون</option><option value="wholesale">عمده</option></select></div>
-   <div><label>نېټه</label><div class="row"><select id="saleJYear" aria-label="کال" onchange="updateSaleDateLabel()"></select><select id="saleJMonth" aria-label="میاشت" onchange="updateSaleDateLabel()"><option value="1">وری</option><option value="2">غویی</option><option value="3">غبرګولی</option><option value="4">چنګاښ</option><option value="5">زمری</option><option value="6">وږی</option><option value="7">تله</option><option value="8">لړم</option><option value="9">لیندۍ</option><option value="10">مرغومی</option><option value="11">سلواغه</option><option value="12">کب</option></select><select id="saleJDay" aria-label="ورځ" onchange="updateSaleDateLabel()"></select></div><input id="saleDate" type="date" hidden><div id="saleDateJalali" class="sale-date-jalali"></div></div>
-  </div>
-  <label>جنس ولټوه (نوم یا بارکوډ)</label>
-  <input id="saleProductSearch" class="sale-search" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off">
-  <div id="saleSearchResults" class="sale-search-results hidden"></div>
-  <select id="saleProduct" aria-label="ټاکل شوی جنس" hidden><option value="">لومړی جنس ولټوه</option></select>
-  <div class="sale-simple-grid sale-qty-grid">
-   <div><label>مقدار</label><input id="saleQty" type="number" min="0.001" step="any" value="1"></div>
-   <div><label>واحد</label><select id="saleUnit"></select></div>
-   <div><label>فی واحد نرخ</label><input id="salePrice" type="number" min="0" step="any" placeholder="اتومات نرخ"></div>
-  </div>
-  <div class="sale-simple-customer"><label>د مشتری نوم</label><div class="row"><input id="saleCustomer" placeholder="د مشتری نوم ولیکه..." autocomplete="off"><button type="button" class="gray" onclick="quickAddSaleCustomer()">＋ نوی</button></div><div id="saleCustomerResults" class="sale-customer-results hidden"></div></div>
-  <div class="sale-cart-panel"><div class="sale-cart-title"><b>د بل جنسونه</b><span id="saleCartCount">۰ جنس</span></div><div id="saleCartList">بل خالي دی؛ جنس ولټوه او انتخاب یې کړه.</div></div>
-  <div class="sale-simple-grid">
-   <div><label>تخفیف (٪)</label><input id="saleDiscount" type="number" min="0" max="100" step="any" value="0" oninput="updateSalePreview()"></div>
-   <div><label>ورکړل شوې پیسې</label><input id="salePaid" type="number" min="0" value="0" oninput="updateSalePreview()"></div>
-  </div>
-  <label>یادښت (اختیاري)</label><input id="saleNote" placeholder="یادښت">
-  <div class="sale-actions"><button class="sale-cash-btn" onclick="setSalePayment('cash')">ټول نغدي</button><button class="sale-debt-btn" onclick="setSalePayment('debt')">ټول پور</button></div>
-  <div class="sale-summary sale-summary-new">
-   <div><span>د جنسونو مجموعه</span><strong id="saleSubtotalPreview">AFN 0</strong></div>
-   <div><span>تخفیف</span><strong id="saleDiscountPreview">AFN 0</strong></div>
-   <div class="sale-total"><span>وروستی مبلغ</span><strong id="saleTotalPreview">AFN 0</strong></div>
-   <div><span>ورکړل شوې پیسې</span><strong id="salePaidPreview" class="sale-cash">AFN 0</strong></div>
-   <div class="sale-debt-row"><span>پاتې پور</span><strong id="saleDebtPreview" class="sale-debt">AFN 0</strong></div>
-   <div><span>ګټه</span><strong id="saleProfitPreview">AFN 0</strong></div>
-  </div>
-  <button class="primary sale-save-button" onclick="addSale()">خرڅلاو ثبت کړه</button>
- </div>
- <div class="panel"><label>پخواني بلونه ولټوه</label><input id="salesSearch" placeholder="د بل شمېره، جنس یا مشتری"><div id="salesList"></div></div>
-</section>
-
 <section id="purchases" class="hidden">
  <div class="row" style="align-items:center;justify-content:space-between"><h3>🚚 پېرود او د جنس داخلول</h3><button type="button" class="gray" onclick="openProductFromPurchase()">＋ نوی جنس ثبت کړه</button></div>
  <div class="panel">
@@ -1287,7 +1249,6 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 <nav>
  <button class="active" onclick="show('home',this)">🏠<br>کور</button>
  <button onclick="show('products',this)">📦<br>جنسونه</button>
- <button onclick="show('sales',this)">🛒<br>خرڅلاو</button>
  <button onclick="show('customers',this)">👥<br>مشتریان</button>
  <button onclick="show('reports',this)">📊<br>راپور</button>
 
@@ -1753,16 +1714,7 @@ function addSale(){
  renderSaleCart();updateSalePreview();refreshAll();
  alert("خرڅلاو ثبت شو\nرسید: "+invoice+"\nجنسونه: "+db.sales.filter(x=>x.invoice===invoice).length+"\nټول: "+money(total)+"\nتخفیف: "+money(discount)+"\nپور: "+money(total-paid));
 }
-function renderSales(){
- const q=value("salesSearch").toLowerCase();
- const list=db.sales.filter(s=>String(s.invoice).toLowerCase().includes(q)||String(s.customer).toLowerCase().includes(q)||String(s.productName).toLowerCase().includes(q)).slice().reverse();
- document.getElementById("salesList").innerHTML=list.map(s=>`
- <div class="item"><b>رسید: ${safe(s.invoice)}</b>
- <div>نېټه: ${safe(s.date)} | مشتری: ${safe(s.customer)}</div>
- <div>جنس: ${safe(s.productName)} — ${s.qty} ${safe(s.unit)}</div>
- <div>ټول: ${money(s.total)} | ورکړل: ${money(s.paid)} | پور: ${money(s.debt)}</div>
- <div class="actions"><button class="gray" onclick="printSale('${s.id}')">رسید چاپ</button><button class="gray" onclick="editSale('${s.id}')">رسید سمون</button></div></div>`).join("")||"<p>خرڅلاو نشته</p>";
-}
+function renderSales(){ /* د خرڅلاو پاڼه حذف شوې؛ تاریخي ریکارډونه ساتل کېږي. */ }
 function editSale(id){
  const s=db.sales.find(x=>x.id===id);if(!s)return;
  const qt=prompt("نوی تعداد ("+s.unit+")",s.qty);if(qt===null)return;
@@ -2096,9 +2048,7 @@ function deleteCustomer(id){
  if(Number(c.debt)>0)return alert("پور لرونکی مشتری مه حذفوه.");
  if(db.sales.some(s=>s.customerId===id))return alert("د خرڅلاو تاریخچه لري؛ حذف یې مه کوه.");
  if(confirm("مشتری حذف شي؟")){db.customers=db.customers.filter(x=>x.id!==id);saveDB();refreshAll()}
-}document.getElementById("saleCustomer").addEventListener("input",searchSaleCustomers);
-
-document.getElementById("saleProductSearch").addEventListener("input",filterSaleProducts);
+}document.getElementById("saleProductSearch").addEventListener("input",filterSaleProducts);
 document.getElementById("saleProduct").addEventListener("change",selectSaleProduct);
 
 ["saleQty","salePrice","saleDiscount","salePaid"].forEach(id=>{
@@ -2676,11 +2626,7 @@ function restoreData(){
 
 /* د لټون او انتخابونو فعالول */
 document.getElementById("productSearch").addEventListener("input",renderProducts);
-document.getElementById("salesSearch").addEventListener("input",renderSales);
 document.getElementById("customerSearch").addEventListener("input",renderCustomers);
-document.getElementById("saleProductSearch").addEventListener("input",filterSaleProducts);
-document.getElementById("saleProduct").addEventListener("change",selectSaleProduct);
-document.getElementById("salePriceType").addEventListener("change",updateSaleUnit);
 
 /* د مشتری د ثبت باوري نسخه — د اپ د وروستي script له لارې */
 window.addCustomer=function(){
