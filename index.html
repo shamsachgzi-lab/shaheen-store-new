@@ -1032,7 +1032,6 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
    <div><label>واحد</label><select id="saleUnit"></select></div>
    <div><label>فی واحد نرخ</label><input id="salePrice" type="number" min="0" step="any" placeholder="اتومات نرخ"></div>
   </div>
-  <button type="button" class="primary" onclick="addSaleToCart()">جنس بل ته اضافه کړه</button>
   <div class="sale-simple-customer"><label>د مشتری نوم</label><div class="row"><input id="saleCustomer" placeholder="د مشتری نوم ولیکه..." autocomplete="off"><button type="button" class="gray" onclick="quickAddSaleCustomer()">＋ نوی</button></div><div id="saleCustomerResults" class="sale-customer-results hidden"></div></div>
   <div class="sale-cart-panel"><div class="sale-cart-title"><b>د بل جنسونه</b><span id="saleCartCount">۰ جنس</span></div><div id="saleCartList">بل خالي دی؛ جنس ولټوه او انتخاب یې کړه.</div></div>
   <div class="sale-simple-grid">
@@ -2092,7 +2091,7 @@ function deleteCustomer(id){
 }document.getElementById("saleCustomer").addEventListener("input",searchSaleCustomers);
 
 document.getElementById("saleProductSearch").addEventListener("input",filterSaleProducts);
-document.getElementById("saleProduct").addEventListener("change",()=>{filterSaleProducts();updateSaleUnit()});
+document.getElementById("saleProduct").addEventListener("change",selectSaleProduct);
 
 ["saleQty","salePrice","saleDiscount","salePaid"].forEach(id=>{
  document.getElementById(id).addEventListener("input",updateSalePreview);
