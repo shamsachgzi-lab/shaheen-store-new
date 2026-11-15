@@ -1484,7 +1484,7 @@ function updateSaleDateLabel(){
  el.value=iso;
  const date=new Date(iso+"T12:00:00");
  const weekday=new Intl.DateTimeFormat("ps-AF",{weekday:"long"}).format(date);
- out.textContent=weekday+"، "+day.options[day.selectedIndex].text+" "+m.options[m.selectedIndex].text+" "+y.options[y.selectedIndex].text;
+ out.textContent=displayDate(iso);
 }
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -2726,7 +2726,7 @@ function archiveMonth(){
 }
 function renderArchives(){
   const box=document.getElementById("archiveList");if(!box)return;
-  box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>"+safe(a.start||a.month+"-01")+" → "+safe(a.end||a.month+"-31")+" · خرڅلاو "+money(a.sales)+" · خالصه ګټه "+money(a.netProfit??((Number(a.grossProfit)||0)-(Number(a.expenses)||0)))+"</div><div class=\"actions\"><button class=\"gray\" onclick=\"showArchiveReport('"+safe(a.id)+"')\">📄 راپور</button><button class=\"red\" onclick=\"deleteArchiveReport('"+safe(a.id)+"')\">🗑 راپور حذف کړه</button></div></div>").join("")||"<p>آرشیف نشته</p>";
+  box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>"+safe(displayDate(a.start||a.month+"-01"))+" → "+safe(displayDate(a.end||a.month+"-31"))+" · خرڅلاو "+money(a.sales)+" · خالصه ګټه "+money(a.netProfit??((Number(a.grossProfit)||0)-(Number(a.expenses)||0)))+"</div><div class=\"actions\"><button class=\"gray\" onclick=\"showArchiveReport('"+safe(a.id)+"')\">📄 راپور</button><button class=\"red\" onclick=\"deleteArchiveReport('"+safe(a.id)+"')\">🗑 راپور حذف کړه</button></div></div>").join("")||"<p>آرشیف نشته</p>";
  }
 function deleteArchiveReport(id){
   const a=(db.archives||[]).find(x=>x.id===id);if(!a)return;
@@ -3082,11 +3082,11 @@ function renderMonthOverview(){
  const byDay={};
  sales.forEach(x=>{const d=String(x.date||"");if(!d)return;if(!byDay[d])byDay[d]={sales:0,cash:0,credit:0,profit:0};byDay[d].sales+=Number(x.total)||0;byDay[d].cash+=Number(x.paid)||0;byDay[d].credit+=Number(x.debt)||0;byDay[d].profit+=Number(x.profit)||0;});
  const days=Object.keys(byDay).sort().reverse();
- const fmt=d=>jalaliDisplayDate(d).replace(/^[^،]+،\s*/,"");
+ const fmt=d=>jalaliDisplayDate(d);
  box.innerHTML=`
  <div class="month-overview">
   <h3>میاشت · ${safe(period.month)}</h3>
-  <p>له ${safe(period.start)} راهیسې · ${sales.length} فروش · ${purchases.length} خرید · ${expenses.length} مصرف</p>
+  <p>له ${safe(displayDate(period.start))} راهیسې · ${sales.length} فروش · ${purchases.length} خرید · ${expenses.length} مصرف</p>
   <div class="month-opening">د میاشتې په شروع کې د مال ارزښت: <b>${money(db.monthOpeningStockValue)}</b> <button class="gray" onclick="editMonthOpeningStock()">✏️</button></div>
   <div class="month-stats">
    <div><small>د دې میاشتې خرڅلاو</small><b>${money(saleTotal)}</b></div>
