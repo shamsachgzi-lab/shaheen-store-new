@@ -1566,7 +1566,7 @@ function unitLabel(name){
  const labels={kg:"کیلوګرام",g:"ګرام","0.5kg":"نیم کیلو",پیاله:"ګیلاس"};
  return labels[String(name||"")]||String(name||"واحد");
 }
-
+function unitWeightInKg(name){
  const fixed={kg:1,g:0.001,"0.5kg":0.5};
  if(Object.prototype.hasOwnProperty.call(fixed,name))return fixed[name];
  const meta=(db.settings?.units||[]).find(u=>String(u.name)===String(name));
