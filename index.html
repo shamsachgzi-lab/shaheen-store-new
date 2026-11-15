@@ -1338,7 +1338,7 @@ if(!db.settings.shopName)db.settings.shopName="شاهین فروشگاه";
 function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(db))}
 function money(n){return (Number(n)||0).toLocaleString("en-US")+" "+(db.settings?.currency||"AFN")}
 function firstSavedPrice(...values){for(const v of values){const n=Number(v);if(Number.isFinite(n)&&n>0)return n;}return 0;}
-function productRetailPrice(p){return firstSavedPrice(p?.retailPrice,p?.price,p?.salePrice);}
+function productRetailPrice(p){return firstSavedPrice(p?.retailPrice,p?.retail,p?.price,p?.salePrice);}
 function productWholesalePrice(p){return firstSavedPrice(p?.wholesalePrice,p?.wholesale,p?.bulkPrice);}
 function number(id){const el=document.getElementById(id);return el?Number(el.value||0):Number(id||0)}
 function value(id){return (document.getElementById(id)?.value||"").trim()}
