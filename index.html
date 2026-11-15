@@ -694,6 +694,11 @@ nav button:active{background:rgba(255,255,255,.22)}
 #sales .sale-search-result{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;text-align:right;padding:10px;border:0;border-bottom:1px solid #edf0f4;background:#fff;color:#172033;font-size:13px}
 #sales .sale-search-result span{font-size:11px;color:#64748b;white-space:nowrap}
 #sales .sale-no-result{padding:10px;color:#64748b;font-size:13px}
+
+/* د جنس د سمون بشپړ فورم */
+.product-edit-overlay{position:fixed;inset:0;background:#0f172a99;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:14px;overflow:auto}
+.product-edit-box{background:#fff;width:100%;max-width:620px;margin:auto;border-radius:16px;padding:16px;box-shadow:0 12px 40px #0003;max-height:calc(100dvh - 28px);overflow:auto}
+.product-edit-box h3{margin:4px 0 14px}.product-edit-box label{display:block;margin:10px 0 5px;font-weight:bold;font-size:14px}.product-edit-box input,.product-edit-box select{width:100%;min-width:0;padding:12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font-size:16px}.product-edit-box .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.product-edit-box .edit-actions{display:flex;gap:9px;margin-top:16px}.product-edit-box .edit-actions button{flex:1}@media(max-width:420px){.product-edit-box .edit-grid{grid-template-columns:1fr}}
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -1537,19 +1542,60 @@ async function saveEditedProductImage(input){
  catch(e){alert(e.message);}
  editingProductImageId="";
 }
+let editingProductId="";
 function editProduct(id){
  const p=db.products.find(x=>x.id===id);if(!p)return;
- const name=prompt("د جنس نوم",p.name);if(name===null)return;
- const qty=prompt("موجودي",p.qty);if(qty===null)return;
- const cost=prompt("د پېرود قیمت",p.cost);if(cost===null)return;
- const retailPrice=prompt("د پرچون خرڅلاو نرخ",p.retailPrice??p.price);if(retailPrice===null)return;
- const wholesalePrice=prompt("د عمده خرڅلاو نرخ",p.wholesalePrice??p.retailPrice??p.price);if(wholesalePrice===null)return;
- const code=prompt("بارکوډ / کوډ",p.code||"");if(code===null)return;
- const tradeUnit=prompt("د خرڅلاو/پېرود واحد",p.tradeUnit||p.unit);if(tradeUnit===null)return;
- const factorText=prompt("په یوه "+tradeUnit+" کې څو "+p.unit+" دي؟",p.unitFactor||1);if(factorText===null)return;const factor=Number(factorText);
- if(!name.trim()||![qty,cost,retailPrice,wholesalePrice,factor].every(x=>Number.isFinite(Number(x))&&Number(x)>=0)||factor<=0)return alert("معلومات سم نه دي");
- Object.assign(p,{name:name.trim(),qty:Number(qty),cost:Number(cost),price:Number(retailPrice),retailPrice:Number(retailPrice),wholesalePrice:Number(wholesalePrice),code:code.trim(),tradeUnit:tradeUnit.trim(),unitFactor:factor});
- saveDB();refreshAll();
+ editingProductId=id;
+ const base=p.unit||"واحد",trade=p.tradeUnit||base,factor=Math.max(0.000001,Number(p.unitFactor)||1);
+ const units=[...(db.settings?.units||[]).map(u=>typeof u==="string"?u:u.name),base,trade].filter((x,i,a)=>x&&a.indexOf(x)===i);
+ const opts=units.map(u=>'<option value="'+safe(u)+'">'+safe(unitLabel(u))+'</option>').join("");
+ let modal=document.getElementById("productEditOverlay");
+ if(!modal){modal=document.createElement("div");modal.id="productEditOverlay";document.body.appendChild(modal);}
+ modal.className="product-edit-overlay";
+ modal.innerHTML=`<div class="product-edit-box" role="dialog" aria-modal="true">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>✏️ د جنس اصلاح</h3><button type="button" class="gray" onclick="closeProductEdit()">✕</button></div>
+  <label>د جنس نوم *</label><input id="epName" value="${safe(p.name||"")}" required>
+  <div class="edit-grid"><div><label>بارکوډ</label><input id="epCode" value="${safe(p.code||"")}"></div><div><label>کټګوري</label><input id="epCategory" value="${safe(p.category||"")}" placeholder="د جنس کټګوري"></div></div>
+  <p class="notice">واحدونه او د بدلون اندازه د دې جنس لپاره ټاکل کېږي.</p>
+  <label>اصلي واحد (د ګدام د ساتلو واحد) *</label><select id="epUnit" onchange="updateProductEditLabels()">${opts}</select>
+  <label>د خرڅلاو/پېرود واحد</label><select id="epTradeUnit" onchange="updateProductEditLabels()">${opts}</select>
+  <label id="epFactorLabel">۱ واحد = څو اصلي واحده؟</label><input id="epFactor" type="number" min="0.000001" step="any" value="${factor}" oninput="updateProductEditLabels()">
+  <div class="edit-grid">
+   <div><label id="epCostLabel">د اخیستلو قیمت</label><input id="epCost" type="number" min="0" step="any" value="${Number(p.cost||0)*factor}"></div>
+   <div><label id="epWholesaleLabel">عمده قیمت</label><input id="epWholesale" type="number" min="0" step="any" value="${Number(p.wholesalePrice??p.price??0)}"></div>
+  </div>
+  <label id="epRetailLabel">پرچون قیمت</label><input id="epRetail" type="number" min="0" step="any" value="${Number(p.retailPrice??p.price??0)}">
+  <div class="edit-grid">
+   <div><label id="epQtyLabel">موجودي</label><input id="epQty" type="number" min="0" step="any" value="${Number((Number(p.qty||0)/factor).toFixed(4))}"></div>
+   <div><label id="epMinLabel">د کمې موجودۍ حد</label><input id="epMin" type="number" min="0" step="any" value="${Number((Number(p.min??5)/factor).toFixed(4))}"></div>
+  </div>
+  <p class="notice" id="epConversionNote"></p>
+  <div class="edit-actions"><button type="button" class="primary" onclick="saveProductEdit()">بدلونونه خوندي کړه</button><button type="button" class="gray" onclick="closeProductEdit()">لغوه</button></div>
+ </div>`;
+ document.getElementById("epUnit").value=base;document.getElementById("epTradeUnit").value=trade;updateProductEditLabels();
+}
+function updateProductEditLabels(){
+ const unit=document.getElementById("epUnit")?.value||"واحد",trade=document.getElementById("epTradeUnit")?.value||unit,factor=Number(document.getElementById("epFactor")?.value)||0;
+ const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
+ set("epCostLabel","د اخیستلو قیمت (فی "+unitLabel(trade)+")");
+ set("epWholesaleLabel","عمده قیمت (فی "+unitLabel(trade)+")");
+ set("epRetailLabel","پرچون قیمت (فی "+unitLabel(trade)+")");
+ set("epQtyLabel","موجودي ("+unitLabel(trade)+")");
+ set("epMinLabel","د کمې موجودۍ حد ("+unitLabel(trade)+")");
+ set("epFactorLabel","۱ "+unitLabel(trade)+" = څو "+unitLabel(unit)+"؟");
+ set("epConversionNote","موجودي او د کمې موجودۍ حد په "+unitLabel(trade)+" ولیکه؛ په ګدام کې به په "+unitLabel(unit)+" خوندي شي. د بدلون اندازه: "+factor);
+}
+function closeProductEdit(){const m=document.getElementById("productEditOverlay");if(m)m.remove();editingProductId="";}
+function saveProductEdit(){
+ const p=db.products.find(x=>x.id===editingProductId);if(!p)return closeProductEdit();
+ const name=(document.getElementById("epName").value||"").trim(),code=(document.getElementById("epCode").value||"").trim(),category=(document.getElementById("epCategory").value||"").trim();
+ const unit=document.getElementById("epUnit").value,tradeUnit=document.getElementById("epTradeUnit").value,factor=Number(document.getElementById("epFactor").value);
+ const enteredCost=Number(document.getElementById("epCost").value),retail=Number(document.getElementById("epRetail").value),wholesale=Number(document.getElementById("epWholesale").value),enteredQty=Number(document.getElementById("epQty").value),enteredMin=Number(document.getElementById("epMin").value);
+ if(!name||!unit||!tradeUnit||![factor,enteredCost,retail,wholesale,enteredQty,enteredMin].every(Number.isFinite)||factor<=0||[enteredCost,retail,wholesale,enteredQty,enteredMin].some(n=>n<0))return alert("مهرباني وکړه ټول اړین معلومات سم ولیکه.");
+ const previous={...p};
+ Object.assign(p,{name,code,category,unit,tradeUnit,unitFactor:factor,cost:enteredCost/factor,price:retail,retailPrice:retail,wholesalePrice:wholesale,qty:enteredQty*factor,min:enteredMin*factor});
+ try{saveDB();refreshAll();closeProductEdit();alert("د جنس معلومات په بریالیتوب اصلاح شول.");}
+ catch(e){Object.assign(p,previous);alert("بدلونونه خوندي نه شول؛ پخواني معلومات هماغسې پاتې دي.");}
 }
 function deleteProduct(id){
  const p=db.products.find(x=>x.id===id);if(!p)return;
