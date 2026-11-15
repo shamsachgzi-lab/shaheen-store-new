@@ -720,6 +720,15 @@ nav button:active{background:rgba(255,255,255,.22)}
 #sales .sale-date-bottom{position:static!important;margin-bottom:16px}
 #sales .sale-search-results,#sales .sale-customer-results{max-height:220px;overflow-y:auto}
 @media(max-width:520px){#sales .sale-page{margin:0;padding:12px 10px 26px;border-radius:0 0 16px 16px}#sales .sale-cart-panel{padding:9px}}
+
+/* وروستی تضمین: د خرڅلاو برخه او بیل دې د محتوا له قد سره وغځېږي */
+html,body{height:auto!important;min-height:100%!important;overflow-y:auto!important}
+body{overflow-x:hidden!important}
+main{height:auto!important;min-height:0!important;overflow:visible!important}
+#sales{display:block;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;contain:none!important}
+#sales>.panel.sale-page{display:block;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;contain:none!important;transform:none!important}
+#sales #saleCartList{display:block;height:auto!important;min-height:50px;max-height:none!important;overflow:visible!important;contain:none!important}
+#sales .sale-line-card{display:block;height:auto!important;max-height:none!important;overflow:visible!important}
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -1048,8 +1057,8 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
  <div class="panel"><input id="productSearch" placeholder="🔍 د جنس نوم ولټوه"><div id="productList"></div></div>
 </section>
 
-<section id="sales" class="hidden">
- <div class="panel sale-page">
+<section id="sales" class="hidden" style="height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;position:static!important;display:block">
+ <div class="panel sale-page" style="height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;position:static!important;display:block;width:100%;box-sizing:border-box">
   <h3>نوی فروش</h3>
   <div class="sale-simple">
    <label>د جنس نوم یا بارکوډ ولیکه...</label>
