@@ -1409,7 +1409,7 @@ function fillProductSelects(){
  const oldBuy=buy.value;
 
  const opts=db.products.map(p=>
-  `<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(p.unit)}</option>`
+  `<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(unitLabel(p.unit))}</option>`
  ).join("");
 
  sale.innerHTML=opts||'<option value="">لومړی جنس ثبت کړه</option>';
@@ -1493,7 +1493,7 @@ function renderProducts(){
  document.getElementById("productList").innerHTML=list.map(p=>`
  <div class="item product-list-item">${p.image?'<img class="product-thumb" alt="د جنس عکس" src="'+safe(p.image)+'">':'<div class="product-thumb product-no-image">📦</div>'}
  <div class="product-list-info"><b>${safe(p.name)}</b>
- <div>موجودي: ${p.qty} ${safe(p.unit)}</div>
+ <div>موجودي: ${p.qty} ${safe(unitLabel(p.unit))}</div>
  <div>پېرود: ${money(p.cost)} | خرڅلاو: ${money(p.price)}</div><div>کوډ: ${safe(p.code||"-")}</div>
  <div class="actions"><button class="gray" onclick="editProduct('${p.id}')">سمون</button><button class="gray" onclick="changeProductImage('${p.id}')">عکس بدلول</button><button class="red" onclick="deleteProduct('${p.id}')">حذف</button></div></div></div>`).join("")||"<p>جنس نشته</p>";
 }
@@ -1563,7 +1563,14 @@ function selectSaleCustomer(id){
 }
 
 function unitLabel(name){
- const labels={kg:"کیلوګرام",g:"ګرام","0.5kg":"نیم کیلو",پیاله:"ګیلاس"};
+ const labels={
+  kg:"کیلوګرام",g:"ګرام","0.5kg":"نیم کیلو",
+  bag:"بوجۍ",sack:"بوجۍ",piece:"ټوټه",carton:"کارټن",bottle:"بوتل",
+  liter:"لیټر",litre:"لیټر",packet:"پاکټ",pack:"بسته",unit:"دانه",
+  cup:"پیاله",glass:"ګلاس",seer:"سیر",
+  "کیلو":"کیلوګرام","ګرام":"ګرام","نیم کیلو":"نیم کیلو",
+  "پیاله":"پیاله","ګیلاس":"ګلاس"
+ };
  return labels[String(name||"")]||String(name||"واحد");
 }
 function unitWeightInKg(name){
@@ -1605,7 +1612,7 @@ function filterSaleProducts(){
  if(!select)return;
  const old=select.value;
  const list=(db.products||[]).filter(p=>String(p.name||"").toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q));
- select.innerHTML=list.map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — موجودي: ${p.qty} ${safe(p.unit||"")}</option>`).join("")||'<option value="">جنس ونه موندل شو</option>';
+ select.innerHTML=list.map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — موجودي: ${p.qty} ${safe(unitLabel(p.unit||""))}</option>`).join("")||'<option value="">جنس ونه موندل شو</option>';
  if(list.some(p=>String(p.id)===String(old)))select.value=old;
  updateSaleUnit();
 }
@@ -1807,7 +1814,7 @@ function filterPurchaseProducts(){
   String(p.code||"").toLowerCase().includes(q)
  );
  select.innerHTML=list.map(p=>
-  `<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(p.unit)} | کوډ: ${safe(p.code||"-")}</option>`
+  `<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(unitLabel(p.unit))} | کوډ: ${safe(p.code||"-")}</option>`
  ).join("")||'<option value="">جنس ونه موندل شو</option>';
  if(list.some(p=>p.id===old))select.value=old;
  if(!select.value&&list.length)select.value=list[0].id;
@@ -1869,7 +1876,7 @@ function renderPurchases(){
   String(p.date||"").includes(q)
  ).slice().reverse();
  document.getElementById("purchasesList").innerHTML=list.map(p=>`
- <div class="item"><b>${safe(p.productName)}</b><div>رسید: ${safe(p.invoice||"-")} | نېټه: ${safe(p.date||"-")}</div><div>عرضه کوونکی: ${safe(p.supplier)}</div><div>تعداد: ${p.qty} ${safe(p.unit)} | ګدام ته داخل: ${p.stockQty??p.qty} ${safe(p.productUnit||p.unit)}</div><div>فی واحد: ${money(p.price)} | ټول: ${money(p.total)}</div><div>ورکړل: ${money(p.paid)} | پور: ${money(p.debt)}</div></div>`).join("")||"<p>پېرود ونه موندل شو</p>";
+ <div class="item"><b>${safe(p.productName)}</b><div>رسید: ${safe(p.invoice||"-")} | نېټه: ${safe(p.date||"-")}</div><div>عرضه کوونکی: ${safe(p.supplier)}</div><div>تعداد: ${p.qty} ${safe(unitLabel(p.unit))} | ګدام ته داخل: ${p.stockQty??p.qty} ${safe(p.productUnit||p.unit)}</div><div>فی واحد: ${money(p.price)} | ټول: ${money(p.total)}</div><div>ورکړل: ${money(p.paid)} | پور: ${money(p.debt)}</div></div>`).join("")||"<p>پېرود ونه موندل شو</p>";
 }
 window.addCustomer=function(){
  const name=(document.getElementById("cName")?.value||"").trim();
@@ -2470,7 +2477,7 @@ function renderSettingsUnits(){
   const count=(db.products||[]).filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
   const desc=u.type==="weight"?(u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":"وزن · د جنس په فورم کې د بدلون اندازه ټاکل کېږي"):u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه ټاکل کېږي";
   const controls=u.locked?'<span class="badge">اصلي</span>':`<button type="button" class="gray" onclick="editCustomUnit(${i})">✏️ سمون</button> <button type="button" class="red" onclick="removeCustomUnit(${i})">🗑 حذف</button>`;
-  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(u.name)}</b><div class="notice">${desc} · ${count} جنس</div></div><div class="actions">${controls}</div></div>`;
+  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(unitLabel(u.name))}</b><div class="notice">${desc} · ${count} جنس</div></div><div class="actions">${controls}</div></div>`;
  }).join("")||"واحد نشته";
 }
 function addCustomUnit(){
