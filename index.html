@@ -1613,8 +1613,14 @@ function productUnitOptionsMarkup(p,selected){
 function saleUnitPrice(p,unit){
  const trade=p.tradeUnit||p.unit||unit;
  const factor=saleFactorForUnit(p,unit),tradeFactor=saleFactorForUnit(p,trade);
+ const retail=Number(p.retailPrice);
+ const legacy=Number(p.price);
+ const wholesale=Number(p.wholesalePrice);
  const kind=value("salePriceType")==="wholesale"?"wholesalePrice":"retailPrice";
- const tradePrice=Number(p[kind]??(kind==="retailPrice"?p.price:(p.wholesalePrice??p.price)))||0;
+ // د زړو جنسونو تش/صفر نرخونه د پخواني خوندي شوي قیمت له مخې سمبال کړه
+ let tradePrice=kind==="wholesalePrice"
+  ? (Number.isFinite(wholesale)&&wholesale>0?wholesale:(Number.isFinite(retail)&&retail>0?retail:(Number.isFinite(legacy)&&legacy>0?legacy:0)))
+  : (Number.isFinite(retail)&&retail>0?retail:(Number.isFinite(legacy)&&legacy>0?legacy:0));
  return tradePrice*(factor/(tradeFactor||1));
 }
 function filterSaleProducts(){
