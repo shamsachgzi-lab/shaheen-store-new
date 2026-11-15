@@ -1574,9 +1574,11 @@ function updateSaleUnit(){
  const p=db.products.find(x=>String(x.id)===String(value("saleProduct")));
  const unit=document.getElementById("saleUnit");
  if(!p||!unit){if(unit)unit.innerHTML="";return;}
+ const trade=p.tradeUnit||p.unit||"واحد";
  const choices=getProductUnitChoices(p).map(x=>x.name);
- unit.innerHTML=productUnitOptionsMarkup(p,choices.includes(unit.value)?unit.value:trade);
- if(!choices.includes(unit.value))unit.value=trade;
+ const selected=choices.includes(unit.value)?unit.value:trade;
+ unit.innerHTML=productUnitOptionsMarkup(p,selected);
+ unit.value=selected;
  document.getElementById("salePrice").value=saleUnitPrice(p,unit.value).toFixed(4).replace(/0+$/,"").replace(/\.$/,"");
  updateSalePreview();
 }
