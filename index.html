@@ -967,91 +967,56 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 
 <section id="sales" class="hidden">
  <div class="sale-panel">
-
-  <div class="sale-heading">
-   <h3>🧾 نوی فروش</h3>
-   <span class="badge">AFN</span>
+  <div class="sale-heading"><h3>🧾 نوی خرڅلاو</h3><span class="badge">AFN</span></div>
+  <div class="item" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+   <b>بل شمېره: <span id="saleInvoicePreview">نوی بل</span></b>
+   <span id="saleTimePreview"></span>
   </div>
-
-  <label>🔍 د جنس نوم یا بارکوډ ولټوه</label>
-  <input id="saleProductSearch" class="sale-search"
-   placeholder="د جنس نوم یا بارکوډ ولیکه...">
-
-  <label>🔍 جنس انتخاب کړه</label>
-  <select id="saleProduct" onchange="updateSaleUnit()"></select>
-  <label>د خرڅلاو واحد</label><select id="saleUnit" onchange="updateSaleUnit()"></select>
-
+  <label>🔍 جنس د نوم یا بارکوډ له مخې ولټوه</label>
+  <input id="saleProductSearch" class="sale-search" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off">
+  <label>جنس انتخاب کړه</label><select id="saleProduct" onchange="updateSaleUnit()"></select>
   <div class="row">
-   <div>
-    <label>👤 مشتری ＋</label>
-    <div class="row"><input id="saleCustomer"
-     placeholder="مشتری ولټوه..."
-     autocomplete="off"><button type="button" class="gray" onclick="quickAddSaleCustomer()">＋ نوی</button></div>
-    <div id="saleCustomerResults"
-     class="sale-customer-results hidden"></div>
-   </div>
-   <div>
-    <label>نېټه (لمریز کال)</label>
-    <div class="row">
-     <select id="saleJYear" aria-label="کال" onchange="updateSaleDateLabel()"></select>
-     <select id="saleJMonth" aria-label="میاشت" onchange="updateSaleDateLabel()">
-      <option value="1">وری</option><option value="2">غویی</option><option value="3">غبرګولی</option><option value="4">چنګاښ</option><option value="5">زمری</option><option value="6">وږی</option><option value="7">تله</option><option value="8">لړم</option><option value="9">لیندۍ</option><option value="10">مرغومی</option><option value="11">سلواغه</option><option value="12">کب</option>
-     </select>
-     <select id="saleJDay" aria-label="ورځ" onchange="updateSaleDateLabel()"></select>
-    </div>
-    <input id="saleDate" type="date" hidden>
-    <div id="saleDateJalali" class="sale-date-jalali"></div>
-   </div>
+   <div><label>مقدار</label><input id="saleQty" type="number" min="0.001" step="any" value="1"></div>
+   <div><label>د خرڅلاو واحد</label><select id="saleUnit" onchange="updateSaleUnit()"></select></div>
+   <div><label>فی واحد نرخ</label><input id="salePrice" type="number" min="0" step="any"></div>
   </div>
-
-  <div class="notice" style="margin:8px 0">جنس وټاکه؛ مقدار، واحد او نرخ د هر جنس په کارټ کې جلا بدلولای شې.</div>
-
-  <button type="button" class="primary" onclick="addSaleToCart()" style="width:100%;margin:10px 0">＋ جنس کارټ ته اضافه کړه</button>
+  <button type="button" class="primary" onclick="addSaleToCart()" style="width:100%;margin:10px 0">＋ جنس بل ته اضافه کړه</button>
+  <div class="row">
+   <div><label>👤 د مشتری نوم</label>
+    <div class="row"><input id="saleCustomer" placeholder="مشتری ولټوه..." autocomplete="off"><button type="button" class="gray" onclick="quickAddSaleCustomer()">＋ نوی</button></div>
+    <div id="saleCustomerResults" class="sale-customer-results hidden"></div>
+   </div>
+   <div><label>نېټه</label><div class="row">
+    <select id="saleJYear" aria-label="کال" onchange="updateSaleDateLabel()"></select>
+    <select id="saleJMonth" aria-label="میاشت" onchange="updateSaleDateLabel()">
+     <option value="1">وری</option><option value="2">غویی</option><option value="3">غبرګولی</option><option value="4">چنګاښ</option><option value="5">زمری</option><option value="6">وږی</option><option value="7">تله</option><option value="8">لړم</option><option value="9">لیندۍ</option><option value="10">مرغومی</option><option value="11">سلواغه</option><option value="12">کب</option>
+    </select><select id="saleJDay" aria-label="ورځ" onchange="updateSaleDateLabel()"></select>
+   </div><input id="saleDate" type="date" hidden><div id="saleDateJalali" class="sale-date-jalali"></div></div>
+  </div>
+  <label>د ټولو جنسونو تخفیف (٪)</label><input id="saleDiscount" type="number" min="0" max="100" step="any" value="0" oninput="updateSalePreview()" placeholder="مثلاً 5">
   <section class="panel" style="margin:10px 0;padding:12px">
-   <b>🛒 د خرڅلاو کارټ</b>
-   <div id="saleCartList" style="margin-top:8px">کارټ خالي دی — پورته جنس ولټوه.</div>
+   <b>🛒 د خرڅلاو جنسونه</b>
+   <div id="saleCartList" style="margin-top:8px">کارټ خالي دی — جنس ولټوه او اضافه یې کړه.</div>
   </section>
   <div class="row">
-   <div>
-    <label>تخفیف (AFN)</label>
-    <input id="saleDiscount" type="number" min="0" value="0">
-   </div>
-   <div>
-    <label>ورکړل شوې پیسې</label>
-    <input id="salePaid" type="number" min="0" value="0">
-   </div>
+   <div><label>ورکړل شوې نغدې پیسې</label><input id="salePaid" type="number" min="0" value="0" oninput="updateSalePreview()"></div>
+   <div><label>یادښت</label><input id="saleNote" placeholder="اختیاري یادښت"></div>
   </div>
-
   <div class="sale-actions">
-   <button class="sale-cash-btn" onclick="setSalePayment('cash')">
-    💵 ټول نغدي
-   </button>
-   <button class="sale-debt-btn" onclick="setSalePayment('debt')">
-    📒 ټول پور
-   </button>
+   <button class="sale-cash-btn" onclick="setSalePayment('cash')">💵 ټول نغدي</button>
+   <button class="sale-debt-btn" onclick="setSalePayment('debt')">📒 ټول پور</button>
   </div>
-
-  <label>یادښت</label>
-  <input id="saleNote" placeholder="اختیاري یادښت">
-
   <div class="sale-summary">
-   <div><span>ټول مبلغ</span><strong id="saleSubtotalPreview">AFN 0</strong></div>
+   <div><span>ټول د جنسونو مبلغ</span><strong id="saleSubtotalPreview">AFN 0</strong></div>
    <div><span>تخفیف</span><strong id="saleDiscountPreview">AFN 0</strong></div>
    <div class="sale-total"><span>وروستی مبلغ</span><strong id="saleTotalPreview">AFN 0</strong></div>
    <div><span>ورکړل شوې پیسې</span><strong id="salePaidPreview" class="sale-cash">AFN 0</strong></div>
    <div><span>پاتې پور</span><strong id="saleDebtPreview" class="sale-debt">AFN 0</strong></div>
    <div><span>ګټه</span><strong id="saleProfitPreview">AFN 0</strong></div>
   </div>
-
-  <button class="primary" onclick="addSale()" style="padding:19px;font-size:19px">
-   ✅ ثبت فروش
-  </button>
+  <button class="primary" onclick="addSale()" style="padding:19px;font-size:19px">✅ خرڅلاو ثبت کړه</button>
  </div>
-
- <div class="panel">
-  <input id="salesSearch" placeholder="د رسید، جنس یا مشتری نوم ولټوه">
-  <div id="salesList"></div>
- </div>
+ <div class="panel"><input id="salesSearch" placeholder="د بل، جنس یا مشتری نوم ولټوه"><div id="salesList"></div></div>
 </section>
 
 <section id="purchases" class="hidden">
@@ -1257,7 +1222,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <button class="primary" onclick="saveShopSettings()">💾 ذخیره</button>
  </div>
  <div class="panel"><h3>📏 واحد</h3>
-  <p class="notice">دا واحدونه د جنس، خرید، فروش او موجودي لپاره کارېږي. kg او g د وزن واحدونه دي (1 kg = 1000 g). د بوجۍ، کارټن، پاکټ او بوتل اندازه د هر جنس په فورم کې ټاکل کېږي.</p>
+  <p class="notice">دا واحدونه د جنس، پېرود، خرڅلاو او موجودۍ لپاره کارېږي. kg او g د وزن واحدونه دي (1 kg = 1000 g). د بوجۍ، کارټن، پاکټ او بوتل اندازه د هر جنس په فورم کې ټاکل کېږي. 0.5kg نیم کیلو دی.</p>
   <div id="settingsUnitList"></div><hr><h4>نوی واحد</h4>
   <label>د واحد نوم</label><input id="newUnitName" placeholder="مثلاً صندوق">
   <label>ډول</label><select id="newUnitType"><option value="count">شمېر/بسته (اندازه په جنس کې)</option><option value="weight">وزن</option><option value="volume">حجم</option></select>
@@ -1425,7 +1390,7 @@ function fillProductSelects(){
  updatePurchaseUnitOptions();
  const p=db.products.find(x=>x.id===sale.value)||db.products[0];
 
- if(p){const u=document.getElementById("saleUnit");if(u){u.innerHTML=`<option>${safe(p.tradeUnit||p.unit)}</option><option>${safe(p.unit)}</option>`;u.value=p.tradeUnit||p.unit;}}
+ if(p){const u=document.getElementById("saleUnit");if(u){u.innerHTML="";updateSaleUnit();}}
  
 }
 </script>
@@ -1546,45 +1511,51 @@ function selectSaleCustomer(id){
  document.getElementById("saleCustomerResults").classList.add("hidden");
 }
 
-function filterSaleProducts(){
- const q=value("saleProductSearch").toLowerCase();
- const select=document.getElementById("saleProduct");
- const old=select.value;
-
- const list=db.products.filter(p=>
-  String(p.name).toLowerCase().includes(q)||
-  String(p.code||"").toLowerCase().includes(q)
- );
-
- select.innerHTML=list.map(p=>
-  `<option value="${safe(p.id)}">${safe(p.name)} — ${p.qty} ${safe(p.unit)}</option>`
- ).join("")||'<option value="">جنس ونه موندل شو</option>';
-
- if(list.some(p=>p.id===old))select.value=old;
-
- const p=db.products.find(x=>x.id===select.value);
- if(p){document.getElementById("salePrice").value=p.price;const u=document.getElementById("saleUnit");u.innerHTML=`<option>${safe(p.tradeUnit||p.unit)}</option><option>${safe(p.unit)}</option>`;u.value=p.tradeUnit||p.unit;}
-
- updateSalePreview();
+function saleFactorForUnit(p,unit){
+ const base=p.unit||unit,trade=p.tradeUnit||base;
+ if(unit===base)return 1;
+ if(unit===trade)return Number(p.unitFactor)||1;
+ const kg={kg:1,g:0.001,"0.5kg":0.5};
+ if(kg[unit]&&kg[base])return kg[unit]/kg[base];
+ return 1;
 }
-
+function saleUnitPrice(p,unit){
+ const base=p.unit||unit,trade=p.tradeUnit||base;
+ const factor=saleFactorForUnit(p,unit),tradeFactor=saleFactorForUnit(p,trade);
+ return (Number(p.price)||0)*(factor/(tradeFactor||1));
+}
+function filterSaleProducts(){
+ const q=value("saleProductSearch").toLowerCase(),select=document.getElementById("saleProduct");
+ if(!select)return;
+ const old=select.value;
+ const list=(db.products||[]).filter(p=>String(p.name||"").toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q));
+ select.innerHTML=list.map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — موجودي: ${p.qty} ${safe(p.unit||"")}</option>`).join("")||'<option value="">جنس ونه موندل شو</option>';
+ if(list.some(p=>String(p.id)===String(old)))select.value=old;
+ updateSaleUnit();
+}
 function updateSaleUnit(){
- const p=db.products.find(x=>x.id===value("saleProduct"));if(!p)return;
- const factor=(value("saleUnit")===(p.unit||""))?1:(Number(p.unitFactor)||1);
- const tradeFactor=Number(p.unitFactor)||1;
- const tradePrice=Number(p.price)||0;
- document.getElementById("salePrice").value=(factor===1&&tradeFactor!==1)?(tradePrice/tradeFactor).toFixed(4):tradePrice;
+ const p=db.products.find(x=>String(x.id)===String(value("saleProduct")));
+ const unit=document.getElementById("saleUnit");
+ if(!p||!unit){if(unit)unit.innerHTML="";return;}
+ const base=p.unit||"واحد",trade=p.tradeUnit||base;
+ const choices=[...new Set([trade,base])];
+ unit.innerHTML=choices.map(u=>`<option value="${safe(u)}">${safe(u)}</option>`).join("");
+ if(!choices.includes(unit.value))unit.value=trade;
+ document.getElementById("salePrice").value=saleUnitPrice(p,unit.value).toFixed(4).replace(/0+$/,"").replace(/\.$/,"");
  updateSalePreview();
 }
 let saleCart=[];
 function addSaleToCart(){
- const p=db.products.find(x=>x.id===value("saleProduct"));
+ const p=db.products.find(x=>String(x.id)===String(value("saleProduct")));
  if(!p)return alert("جنس انتخاب کړه");
- const unit=p.tradeUnit||p.unit,qty=1,price=Number(p.price)||0;
- const factor=(unit===(p.unit||""))?1:(Number(p.unitFactor)||1);
+ const unit=value("saleUnit")||p.tradeUnit||p.unit,qty=number("saleQty"),price=number("salePrice");
+ const factor=saleFactorForUnit(p,unit);
+ if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<0)return alert("مقدار او نرخ سم ولیکه");
+ const stockQty=qty*factor;
  const reserved=saleCart.filter(x=>x.productId===p.id).reduce((a,x)=>a+x.stockQty,0);
- if(reserved+qty*factor>Number(p.qty))return alert("په ګدام کې د دې جنس موجودي بسنه نه کوي");
- saleCart.push({productId:p.id,productName:p.name,qty,unit,price,factor,stockQty:qty*factor,costAtSale:Number(p.cost)||0,baseUnit:p.unit||unit,tradeUnit:p.tradeUnit||p.unit,tradeFactor:Number(p.unitFactor)||1});
+ if(reserved+stockQty>Number(p.qty))return alert("په ګدام کې د دې جنس موجودي بسنه نه کوي. موجودي: "+p.qty+" "+p.unit);
+ saleCart.push({productId:p.id,productName:p.name,qty,unit,price,factor,stockQty,costAtSale:Number(p.cost)||0,baseUnit:p.unit||unit,tradeUnit:p.tradeUnit||p.unit,tradeFactor:Number(p.unitFactor)||1});
+ document.getElementById("saleQty").value="1";
  document.getElementById("saleProductSearch").value="";
  filterSaleProducts();renderSaleCart();updateSalePreview();
 }
@@ -1592,9 +1563,9 @@ function updateSaleCartLine(index,field,raw){
  const x=saleCart[index];if(!x)return;
  const p=db.products.find(z=>z.id===x.productId);if(!p)return;
  if(field==="unit"){
-  const oldFactor=Number(x.factor)||1,newFactor=raw===(p.unit||"")?1:(Number(p.unitFactor)||1);
-  x.price=newFactor===1&&oldFactor!==1?x.price/(Number(p.unitFactor)||1):oldFactor===1&&newFactor!==1?x.price*(Number(p.unitFactor)||1):x.price;
-  x.unit=raw;x.factor=newFactor;
+  const nextFactor=saleFactorForUnit(p,raw);
+  const baseUnitPrice=x.price/(Number(x.factor)||1);
+  x.price=baseUnitPrice*nextFactor;x.unit=raw;x.factor=nextFactor;
  }else{
   const n=Number(raw);if(!Number.isFinite(n)||n<0||(field==="qty"&&n<=0))return renderSaleCart();
   x[field]=n;
@@ -1607,16 +1578,15 @@ function updateSaleCartLine(index,field,raw){
 function removeSaleCartItem(index){saleCart.splice(index,1);renderSaleCart();updateSalePreview();}
 function renderSaleCart(){
  const box=document.getElementById("saleCartList");if(!box)return;
- if(!saleCart.length){box.textContent="کارټ خالي دی — پورته جنس ولټوه.";return;}
- box.innerHTML=saleCart.map((x,i)=>`<div class="item" style="margin:10px 0;padding:12px;border:1px solid #d5dfec;border-radius:12px;background:#fff">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><b>${i+1}. ${safe(x.productName)}</b><button type="button" class="red" onclick="removeSaleCartItem(${i})">✕</button></div>
-  <div class="row" style="gap:8px;align-items:end">
-   <div style="flex:1"><label>مقدار</label><input type="number" min="0.001" step="any" value="${x.qty}" onchange="updateSaleCartLine(${i},'qty',this.value)"></div>
-   <div style="flex:1"><label>واحد</label><select onchange="updateSaleCartLine(${i},'unit',this.value)"><option value="${safe(x.tradeUnit)}" ${x.unit===x.tradeUnit?"selected":""}>${safe(x.tradeUnit)}</option><option value="${safe(x.baseUnit)}" ${x.unit===x.baseUnit?"selected":""}>${safe(x.baseUnit)}</option></select></div>
-   <div style="flex:1"><label>نرخ</label><input type="number" min="0" step="any" value="${x.price}" onchange="updateSaleCartLine(${i},'price',this.value)"></div>
-  </div>
-  <div style="display:flex;justify-content:space-between;margin-top:10px;font-weight:bold"><span>مجموع</span><span>${money(x.qty*x.price)}</span></div>
- </div>`).join("");
+ if(!saleCart.length){box.textContent="کارټ خالي دی — جنس ولټوه او اضافه یې کړه.";return;}
+ box.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th>جنس</th><th>مقدار</th><th>واحد</th><th>نرخ</th><th>مجموع</th><th></th></tr></thead><tbody>'+
+ saleCart.map((x,i)=>`<tr style="border-top:1px solid #ddd">
+  <td>${safe(x.productName)}</td>
+  <td><input style="width:72px" type="number" min="0.001" step="any" value="${x.qty}" onchange="updateSaleCartLine(${i},'qty',this.value)"></td>
+  <td><select onchange="updateSaleCartLine(${i},'unit',this.value)"><option value="${safe(x.tradeUnit)}" ${x.unit===x.tradeUnit?"selected":""}>${safe(x.tradeUnit)}</option><option value="${safe(x.baseUnit)}" ${x.unit===x.baseUnit?"selected":""}>${safe(x.baseUnit)}</option></select></td>
+  <td><input style="width:85px" type="number" min="0" step="any" value="${x.price}" onchange="updateSaleCartLine(${i},'price',this.value)"></td>
+  <td>${money(x.qty*x.price)}</td><td><button type="button" class="red" onclick="removeSaleCartItem(${i})">✕</button></td>
+ </tr>`).join("")+'</tbody></table></div>';
 }
 function quickAddSaleCustomer(){
  const name=prompt("د نوي مشتری نوم ولیکه:");if(!name||!name.trim())return;
@@ -1625,13 +1595,14 @@ function quickAddSaleCustomer(){
  if(!c){c={id:uid(),name:name.trim(),phone,debt:0,type:"active",created:today()};db.customers.push(c);saveDB();}
  selectedSaleCustomerId=c.id;document.getElementById("saleCustomer").value=c.name;refreshAll();
 }
+function saleDiscountAmount(subtotal){
+ const percent=Math.max(0,Math.min(100,number("saleDiscount")));
+ return Math.min(subtotal,subtotal*percent/100);
+}
 function updateSalePreview(){
  const subtotal=saleCart.reduce((a,x)=>a+x.qty*x.price,0);
- const discount=number("saleDiscount");
- const total=Math.max(0,subtotal-discount);
- const paid=number("salePaid");
- const validPaid=Math.min(total,Math.max(0,paid));
- const debt=Math.max(0,total-validPaid);
+ const discount=saleDiscountAmount(subtotal),total=Math.max(0,subtotal-discount);
+ const paid=Math.max(0,number("salePaid")),validPaid=Math.min(total,paid),debt=Math.max(0,total-validPaid);
  const profit=saleCart.reduce((a,x)=>a+(x.price-x.costAtSale*x.factor)*x.qty,0)-discount;
  document.getElementById("saleSubtotalPreview").textContent=money(subtotal);
  document.getElementById("saleDiscountPreview").textContent=money(discount);
@@ -1641,17 +1612,15 @@ function updateSalePreview(){
  const old=document.getElementById("saleProfitPreview");if(old)old.textContent=money(profit);
 }
 function setSalePayment(type){
- const subtotal=saleCart.reduce((a,x)=>a+x.qty*x.price,0);
- const total=Math.max(0,subtotal-number("saleDiscount"));
+ const subtotal=saleCart.reduce((a,x)=>a+x.qty*x.price,0),total=Math.max(0,subtotal-saleDiscountAmount(subtotal));
  document.getElementById("salePaid").value=type==="cash"?total:0;
  updateSalePreview();
 }
 function addSale(){
- if(!saleCart.length)return alert("لومړی لږ تر لږه یو جنس کارټ ته اضافه کړه.");
- const customer=value("saleCustomer").trim(),discount=number("saleDiscount"),paid=number("salePaid");
- const subtotal=saleCart.reduce((a,x)=>a+x.qty*x.price,0),total=subtotal-discount;
- if(discount<0||discount>subtotal||paid<0||paid>total)return alert("تخفیف یا ورکړل شوې پیسې سمې نه دي");
- if(paid>Number(db.cash||0)+paid)return alert("د نغدو حساب کې ستونزه ده");
+ if(!saleCart.length)return alert("لومړی لږ تر لږه یو جنس بل ته اضافه کړه.");
+ const customer=value("saleCustomer").trim(),subtotal=saleCart.reduce((a,x)=>a+x.qty*x.price,0);
+ const discount=saleDiscountAmount(subtotal),paid=number("salePaid"),total=subtotal-discount;
+ if(number("saleDiscount")<0||number("saleDiscount")>100||paid<0||paid>total)return alert("د تخفیف سلنه یا ورکړل شوې پیسې سمې نه دي");
  let c=null;
  if(customer){c=db.customers.find(x=>x.id===selectedSaleCustomerId)||db.customers.find(x=>String(x.name).toLowerCase()===customer.toLowerCase());if(!c){c={id:uid(),name:customer,phone:"",debt:0,type:"active",created:today()};db.customers.push(c);}}
  else if(total-paid>0)return alert("که خرڅلاو پور وي، د مشتری نوم حتمي ولیکه.");
@@ -1659,8 +1628,7 @@ function addSale(){
  const invoice="SH-"+Date.now(),date=value("saleDate")||today();
  let paidLeft=paid,discountLeft=discount;
  saleCart.forEach((item,index)=>{
-  const p=db.products.find(x=>x.id===item.productId);
-  const lineSubtotal=item.qty*item.price;
+  const p=db.products.find(x=>x.id===item.productId),lineSubtotal=item.qty*item.price;
   const lineDiscount=index===saleCart.length-1?discountLeft:(subtotal?discount*lineSubtotal/subtotal:0);
   discountLeft-=lineDiscount;
   const lineTotal=lineSubtotal-lineDiscount;
@@ -1669,16 +1637,16 @@ function addSale(){
   const lineDebt=lineTotal-linePaid;
   p.qty=Number(p.qty)-item.stockQty;
   const lineProfit=(item.price-item.costAtSale*item.factor)*item.qty-lineDiscount;
-  db.sales.push({id:uid(),invoice,productId:p.id,productName:item.productName,qty:item.qty,unit:item.unit,stockQty:item.stockQty,unitFactor:item.factor,price:item.price,subtotal:lineSubtotal,discount:lineDiscount,total:lineTotal,costAtSale:item.costAtSale,profit:lineProfit,paid:linePaid,debt:lineDebt,customer:c?.name||"نغدي مشتری",customerId:c?.id||"",note:value("saleNote"),date});
+  db.sales.push({id:uid(),invoice,productId:p.id,productName:item.productName,qty:item.qty,unit:item.unit,stockQty:item.stockQty,unitFactor:item.factor,price:item.price,subtotal:lineSubtotal,discount:lineDiscount,discountPercent:number("saleDiscount"),total:lineTotal,costAtSale:item.costAtSale,profit:lineProfit,paid:linePaid,debt:lineDebt,customer:c?.name||"نغدي مشتری",customerId:c?.id||"",note:value("saleNote"),date});
  });
  db.cash=Number(db.cash||0)+paid;
  if(c)c.debt=Number(c.debt||0)+(total-paid);
  saveDB();
- saleCart=[];["saleCustomer","salePaid","saleDiscount","saleNote","saleProductSearch"].forEach(id=>document.getElementById(id).value="");
- selectedSaleCustomerId="";
+ saleCart=[];["saleCustomer","salePaid","saleDiscount","saleNote","saleProductSearch"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ document.getElementById("saleQty").value="1";selectedSaleCustomerId="";
  document.getElementById("saleDate").value=today();updateSaleDateLabel();document.getElementById("saleCustomerResults").classList.add("hidden");
  renderSaleCart();updateSalePreview();refreshAll();
- alert("خرڅلاو ثبت شو\nرسید: "+invoice+"\nجنسونه: "+db.sales.filter(x=>x.invoice===invoice).length+"\nټول: "+money(total)+"\nپور: "+money(total-paid));
+ alert("خرڅلاو ثبت شو\nرسید: "+invoice+"\nجنسونه: "+db.sales.filter(x=>x.invoice===invoice).length+"\nټول: "+money(total)+"\nتخفیف: "+money(discount)+"\nپور: "+money(total-paid));
 }
 function renderSales(){
  const q=value("salesSearch").toLowerCase();
@@ -1766,12 +1734,13 @@ function filterPurchaseProducts(){
  updatePurchaseUnitOptions();
 }
 function updatePurchaseUnitOptions(){
- const p=db.products.find(x=>x.id===value("buyProduct"));
+ const p=db.products.find(x=>String(x.id)===String(value("buyProduct")));
  const unit=document.getElementById("buyUnit");if(!unit)return;
- if(!p){unit.innerHTML="";return;}
- const main=p.unit||"واحد",trade=p.tradeUnit||main;
+ if(!p){unit.innerHTML='<option value="">لومړی جنس وټاکه</option>';return;}
+ const main=p.unit||"واحد",trade=p.tradeUnit||main,old=unit.value;
  unit.innerHTML=trade===main?`<option value="main">${safe(main)}</option>`:`<option value="trade">${safe(trade)}</option><option value="main">${safe(main)}</option>`;
- if(!unit.value)unit.value=trade===main?"main":"trade";
+ unit.value=old==="main"?"main":(trade===main?"main":"trade");
+ updatePurchasePriceForUnit();
 }
 function updatePurchasePriceForUnit(){
  const p=db.products.find(x=>x.id===value("buyProduct"));if(!p)return;
