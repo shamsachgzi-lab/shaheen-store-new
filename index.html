@@ -708,6 +708,18 @@ nav button:active{background:rgba(255,255,255,.22)}
 #sales .sale-date-bottom{margin-top:12px;padding:10px;background:#f8fafc;border:1px solid #dce5ef;border-radius:10px}
 #sales .sale-date-bottom label{font-weight:700}
 @media(max-width:360px){#sales .sale-money-row{grid-template-columns:1fr}}
+
+/* د خرڅلاو ټوله پاڼه په عادي عمودي سکرول کې؛ د جنسونو د زیاتېدو سره پاڼه اوږدېږي */
+#sales{position:static!important;inset:auto!important;width:100%;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;transform:none!important}
+#sales:not(.hidden){display:block!important}
+#sales .sale-page{position:static!important;width:100%;max-width:950px;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;margin:10px auto 24px;padding-bottom:24px}
+#sales .sale-cart-panel,#sales #saleCartList{height:auto!important;min-height:54px;max-height:none!important;overflow:visible!important;contain:none!important}
+#sales .sale-line-card{height:auto!important;max-height:none!important;overflow:visible!important}
+#sales .sale-summary{height:auto!important;max-height:none!important;overflow:visible!important}
+#sales .sale-save-button{display:block;position:static!important;bottom:auto!important;width:100%;margin:14px 0}
+#sales .sale-date-bottom{position:static!important;margin-bottom:16px}
+#sales .sale-search-results,#sales .sale-customer-results{max-height:220px;overflow-y:auto}
+@media(max-width:520px){#sales .sale-page{margin:0;padding:12px 10px 26px;border-radius:0 0 16px 16px}#sales .sale-cart-panel{padding:9px}}
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
