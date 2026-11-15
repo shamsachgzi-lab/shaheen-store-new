@@ -1337,6 +1337,9 @@ if(!db.settings.shopName)db.settings.shopName="شاهین فروشگاه";
 
 function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(db))}
 function money(n){return (Number(n)||0).toLocaleString("en-US")+" "+(db.settings?.currency||"AFN")}
+function firstSavedPrice(...values){for(const v of values){const n=Number(v);if(Number.isFinite(n)&&n>0)return n;}return 0;}
+function productRetailPrice(p){return firstSavedPrice(p?.retailPrice,p?.price,p?.salePrice);}
+function productWholesalePrice(p){return firstSavedPrice(p?.wholesalePrice,p?.wholesale,p?.bulkPrice);}
 function number(id){const el=document.getElementById(id);return el?Number(el.value||0):Number(id||0)}
 function value(id){return (document.getElementById(id)?.value||"").trim()}
 function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -1495,12 +1498,13 @@ function updateProductEntryLabels(){
 async function addProduct(){
  const name=value("pName"),enteredCost=number("pCost"),price=number("pPrice"),wholesalePrice=number("pWholesalePrice"),enteredQty=number("pQty"),enteredMin=number("pMinQty"),unit=value("pUnit");
  if(!name)return alert("د جنس نوم ولیکه");
- if(enteredCost<0||price<0||wholesalePrice<0||enteredQty<0||enteredMin<0)return alert("منفي شمېرې سمې نه دي");
+ if(enteredCost<=0||price<=0||wholesalePrice<=0)return alert("د پېرود، عمده او پرچون درې واړه نرخونه له صفر څخه لوړ ولیکه.");
+ if(enteredQty<0||enteredMin<0)return alert("موجودي او د کمې موجودۍ حد منفي نه شي کېدای.");
  const tradeUnit=value("pTradeUnit")||unit,factor=number("pUnitFactor")||1;if(factor<=0)return alert("د واحد د بدلون مقدار باید له صفر څخه زیات وي");
  const qty=enteredQty*factor,cost=enteredCost/factor,min=enteredMin*factor;
  let image="";
  try{const file=document.getElementById("pImage")?.files?.[0];if(file)image=await resizeProductImage(file);}catch(e){return alert(e.message);}
- db.products.push({id:uid(),name,cost,price,retailPrice:price,wholesalePrice:wholesalePrice||price,qty,unit,tradeUnit,unitFactor:factor,code:value("pCode"),image,min,created:today()});
+ db.products.push({id:uid(),name,cost,price,retailPrice:price,wholesalePrice,qty,unit,tradeUnit,unitFactor:factor,code:value("pCode"),image,min,created:today()});
  saveDB();["pName","pCode","pCost","pPrice","pWholesalePrice","pQty"].forEach(id=>document.getElementById(id).value="");document.getElementById("pMinQty").value="5";document.getElementById("pUnitFactor").value="1";updateProductEntryLabels();
  document.getElementById("pImage").value="";document.getElementById("pImagePreview").textContent="د جنس عکس دلته انتخاب کړه";
  refreshAll();
@@ -1522,7 +1526,7 @@ function renderProducts(){
  document.getElementById("productList").innerHTML=list.map(p=>{
   const base=p.unit||"واحد",trade=p.tradeUnit||base,factor=Math.max(0.000001,Number(p.unitFactor)||1);
   const shownQty=trade===base?Number(p.qty)||0:(Number(p.qty)||0)/factor;
-  const cost=Number(p.cost)||0,retail=Number(p.retailPrice??p.price)||0,wholesale=Number(p.wholesalePrice)||0;
+  const cost=Number(p.cost)||0,retail=productRetailPrice(p),wholesale=productWholesalePrice(p);
   const tradeCost=cost*factor;
   return `
  <div class="item product-list-item">${p.image?'<img class="product-thumb" alt="د جنس عکس" src="'+safe(p.image)+'">':'<div class="product-thumb product-no-image">📦</div>'}
@@ -1562,9 +1566,9 @@ function editProduct(id){
   <label id="epFactorLabel">۱ واحد = څو اصلي واحده؟</label><input id="epFactor" type="number" min="0.000001" step="any" value="${factor}" oninput="updateProductEditLabels()">
   <div class="edit-grid">
    <div><label id="epCostLabel">د اخیستلو قیمت</label><input id="epCost" type="number" min="0" step="any" value="${Number(p.cost||0)*factor}"></div>
-   <div><label id="epWholesaleLabel">عمده قیمت</label><input id="epWholesale" type="number" min="0" step="any" value="${Number(p.wholesalePrice??p.price??0)}"></div>
+   <div><label id="epWholesaleLabel">عمده قیمت</label><input id="epWholesale" type="number" min="0" step="any" value="${productWholesalePrice(p)}"></div>
   </div>
-  <label id="epRetailLabel">پرچون قیمت</label><input id="epRetail" type="number" min="0" step="any" value="${Number(p.retailPrice??p.price??0)}">
+  <label id="epRetailLabel">پرچون قیمت</label><input id="epRetail" type="number" min="0" step="any" value="${productRetailPrice(p)}">
   <div class="edit-grid">
    <div><label id="epQtyLabel">موجودي</label><input id="epQty" type="number" min="0" step="any" value="${Number((Number(p.qty||0)/factor).toFixed(4))}"></div>
    <div><label id="epMinLabel">د کمې موجودۍ حد</label><input id="epMin" type="number" min="0" step="any" value="${Number((Number(p.min??5)/factor).toFixed(4))}"></div>
@@ -1680,14 +1684,13 @@ function productUnitOptionsMarkup(p,selected){
 function saleUnitPrice(p,unit){
  const trade=p.tradeUnit||p.unit||unit;
  const factor=saleFactorForUnit(p,unit),tradeFactor=saleFactorForUnit(p,trade);
- const retail=Number(p.retailPrice);
- const legacy=Number(p.price);
- const wholesale=Number(p.wholesalePrice);
+ const retail=productRetailPrice(p);
+ const wholesale=productWholesalePrice(p);
  const kind=value("salePriceType")==="wholesale"?"wholesalePrice":"retailPrice";
  // د زړو جنسونو تش/صفر نرخونه د پخواني خوندي شوي قیمت له مخې سمبال کړه
  let tradePrice=kind==="wholesalePrice"
-  ? (Number.isFinite(wholesale)&&wholesale>0?wholesale:(Number.isFinite(retail)&&retail>0?retail:(Number.isFinite(legacy)&&legacy>0?legacy:0)))
-  : (Number.isFinite(retail)&&retail>0?retail:(Number.isFinite(legacy)&&legacy>0?legacy:0));
+  ? wholesale
+  : retail;
  return tradePrice*(factor/(tradeFactor||1));
 }
 function filterSaleProducts(){
