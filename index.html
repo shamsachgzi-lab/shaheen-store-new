@@ -1004,18 +1004,19 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
  <div class="row" style="align-items:center;justify-content:space-between"><h3>📦 موجودي او جنسونه</h3><b id="productCount">0 جنس</b></div>
  <div class="panel">
   <label>د جنس نوم</label><input id="pName" placeholder="مثلاً وریجې"><label>د جنس عکس (اختیاري)</label><input id="pImage" type="file" accept="image/*" onchange="previewProductImage(this)"><div id="pImagePreview" class="product-image-preview">د جنس عکس دلته انتخاب کړه</div><input id="editProductImage" type="file" accept="image/*" class="hidden" onchange="saveEditedProductImage(this)"><label>بارکوډ / کوډ</label><input id="pCode" placeholder="اختیاري بارکوډ یا کوډ">
+  <label>اصلي واحد (د ګدام د ساتلو واحد)</label><select id="pUnit" onchange="updateProductEntryLabels()"></select>
+  <label>د خرڅلاو/پېرود واحد</label><select id="pTradeUnit" onchange="updateProductEntryLabels()"></select>
+  <label>په یوه د خرڅلاو واحد کې د اصلي واحد مقدار (مثلاً ۱ بوجۍ = ۵۰ کیلو)</label><input id="pUnitFactor" type="number" min="0.000001" step="any" value="1" oninput="updateProductEntryLabels()">
+  <p class="notice" id="pUnitConversionNote">د واحدونو د بدلون اندازه وټاکه.</p>
   <div class="row">
-   <div><label>د پېرود قیمت</label><input id="pCost" type="number" min="0"></div>
-   <div><label>د عمده خرڅلاو نرخ</label><input id="pWholesalePrice" type="number" min="0" placeholder="عمده نرخ"></div>
+   <div><label id="pCostLabel">د اخیستلو قیمت (فی واحد)</label><input id="pCost" type="number" min="0" step="any"></div>
+   <div><label id="pWholesaleLabel">عمده قیمت (فی واحد)</label><input id="pWholesalePrice" type="number" min="0" step="any" placeholder="عمده نرخ"></div>
   </div>
-  <label>د پرچون خرڅلاو نرخ</label><input id="pPrice" type="number" min="0" placeholder="پرچون نرخ">
+  <label id="pRetailLabel">پرچون قیمت (فی واحد)</label><input id="pPrice" type="number" min="0" step="any" placeholder="پرچون نرخ">
   <div class="row">
-   <div><label>موجودي</label><input id="pQty" type="number" min="0" step="any"></div>
-   <div><label>اصلي واحد (د ګدام موجودي)</label><select id="pUnit"></select></div>
+   <div><label id="pQtyLabel">موجودي (واحد)</label><input id="pQty" type="number" min="0" step="any"></div>
+   <div><label id="pMinLabel">د کمې موجودۍ حد (واحد)</label><input id="pMinQty" type="number" min="0" step="any" value="5"></div>
   </div>
-  <label>د خرڅلاو/پېرود دویم واحد</label><select id="pTradeUnit"></select>
-  <label>په یوه دویم واحد کې د اصلي واحد مقدار (مثلاً یوه بوجۍ = ۵۰ کیلو)</label><input id="pUnitFactor" type="number" min="0.000001" step="any" value="1">
-  <p class="notice">مثال: اصلي واحد «kg»، دویم واحد «بوجۍ»، مقدار «۵۰». ګدام کې موجودي په kg ساتل کېږي؛ په موجودۍ کې د بوجیو شمېر او د kg اندازه دواړه ښکاري.</p>
   <button class="primary" onclick="addProduct()">جنس ثبت کړه</button>
  </div>
  <div class="panel"><input id="productSearch" placeholder="🔍 د جنس نوم ولټوه"><div id="productList"></div></div>
@@ -1476,15 +1477,26 @@ function openProductFromPurchase(){
  show("products");
  document.getElementById("pName")?.focus();
 }
+function updateProductEntryLabels(){
+ const unit=value("pUnit")||"واحد",trade=value("pTradeUnit")||unit,factor=Math.max(0,number("pUnitFactor"));
+ const per=" (فی "+unitLabel(trade)+")";
+ ["pCostLabel","pWholesaleLabel","pRetailLabel"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=({pCostLabel:"د اخیستلو قیمت",pWholesaleLabel:"عمده قیمت",pRetailLabel:"پرچون قیمت"}[id])+per;});
+ const q=document.getElementById("pQtyLabel"),m=document.getElementById("pMinLabel");
+ if(q)q.textContent="موجودي ("+unitLabel(trade)+")";
+ if(m)m.textContent="د کمې موجودۍ حد ("+unitLabel(trade)+")";
+ const note=document.getElementById("pUnitConversionNote");
+ if(note)note.textContent="۱ "+unitLabel(trade)+" = "+factor+" "+unitLabel(unit)+"؛ موجودي به په شالید کې په "+unitLabel(unit)+" خوندي کېږي.";
+}
 async function addProduct(){
- const name=value("pName"),cost=number("pCost"),price=number("pPrice"),wholesalePrice=number("pWholesalePrice"),qty=number("pQty"),unit=value("pUnit");
+ const name=value("pName"),enteredCost=number("pCost"),price=number("pPrice"),wholesalePrice=number("pWholesalePrice"),enteredQty=number("pQty"),enteredMin=number("pMinQty"),unit=value("pUnit");
  if(!name)return alert("د جنس نوم ولیکه");
- if(cost<0||price<0||qty<0)return alert("منفي شمېرې سمې نه دي");
+ if(enteredCost<0||price<0||wholesalePrice<0||enteredQty<0||enteredMin<0)return alert("منفي شمېرې سمې نه دي");
  const tradeUnit=value("pTradeUnit")||unit,factor=number("pUnitFactor")||1;if(factor<=0)return alert("د واحد د بدلون مقدار باید له صفر څخه زیات وي");
+ const qty=enteredQty*factor,cost=enteredCost/factor,min=enteredMin*factor;
  let image="";
  try{const file=document.getElementById("pImage")?.files?.[0];if(file)image=await resizeProductImage(file);}catch(e){return alert(e.message);}
- db.products.push({id:uid(),name,cost,price,retailPrice:price,wholesalePrice:wholesalePrice||price,qty,unit,tradeUnit,unitFactor:factor,code:value("pCode"),image,min:5,created:today()});
- saveDB();["pName","pCode","pCost","pPrice","pWholesalePrice","pQty"].forEach(id=>document.getElementById(id).value="");document.getElementById("pUnitFactor").value="1";
+ db.products.push({id:uid(),name,cost,price,retailPrice:price,wholesalePrice:wholesalePrice||price,qty,unit,tradeUnit,unitFactor:factor,code:value("pCode"),image,min,created:today()});
+ saveDB();["pName","pCode","pCost","pPrice","pWholesalePrice","pQty"].forEach(id=>document.getElementById(id).value="");document.getElementById("pMinQty").value="5";document.getElementById("pUnitFactor").value="1";updateProductEntryLabels();
  document.getElementById("pImage").value="";document.getElementById("pImagePreview").textContent="د جنس عکس دلته انتخاب کړه";
  refreshAll();
  if(returnToPurchaseAfterProduct){
@@ -2392,13 +2404,14 @@ function renderLowStock(){
  if(!box)return;
  const fmt=n=>Number((Number(n)||0).toFixed(3)).toLocaleString("en-US",{maximumFractionDigits:3});
  box.innerHTML=shown.map(p=>{
-  const qty=Number(p.qty||0),limit=Number(p.min||5),need=Math.max(0,limit-qty),unit=unitLabel(p.unit||"واحد");
+  const base=p.unit||"واحد",trade=p.tradeUnit||base,factor=Math.max(0.000001,Number(p.unitFactor)||1);
+  const qty=Number(p.qty||0),limit=Number(p.min||5),need=Math.max(0,limit-qty),shownQty=trade===base?qty:qty/factor,shownLimit=trade===base?limit:limit/factor,shownNeed=trade===base?need:need/factor,unit=unitLabel(trade);
   return `<div class="item" style="padding:12px 4px;border-bottom:1px solid #edf0f5">
    <b>${safe(p.name||"بې نومه جنس")}</b>
    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:13px">
-    <span>📦 پاتې موجودي: <b>${fmt(qty)} ${safe(unit)}</b></span>
-    <span>⚠️ د کم‌موجودۍ حد: ${fmt(limit)} ${safe(unit)}</span>
-    <span>🛒 د پېرود وړاندیز: <b>${fmt(need)} ${safe(unit)}</b></span>
+    <span>📦 پاتې موجودي: <b>${fmt(shownQty)} ${safe(unit)}</b></span>
+    <span>⚠️ د کم‌موجودۍ حد: ${fmt(shownLimit)} ${safe(unit)}</span>
+    <span>🛒 د پېرود وړاندیز: <b>${fmt(shownNeed)} ${safe(unit)}</b></span>
    </div></div>`;
  }).join("")||(q?"د لټون نتیجه ونه موندل شوه":"کم‌موجوده جنس نشته");
 }
@@ -2866,6 +2879,7 @@ function showArchiveReport(id){
    if(old&&names.includes(old))el.value=old;
   });
  };
+ window.updateProductEntryLabels();
  window.addCustomUnit=function(){
   const name=(document.getElementById("newUnitName")?.value||"").trim();
   const type=document.getElementById("newUnitType")?.value||"count";
