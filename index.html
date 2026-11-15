@@ -699,6 +699,15 @@ nav button:active{background:rgba(255,255,255,.22)}
 .product-edit-overlay{position:fixed;inset:0;background:#0f172a99;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:14px;overflow:auto}
 .product-edit-box{background:#fff;width:100%;max-width:620px;margin:auto;border-radius:16px;padding:16px;box-shadow:0 12px 40px #0003;max-height:calc(100dvh - 28px);overflow:auto}
 .product-edit-box h3{margin:4px 0 14px}.product-edit-box label{display:block;margin:10px 0 5px;font-weight:bold;font-size:14px}.product-edit-box input,.product-edit-box select{width:100%;min-width:0;padding:12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font-size:16px}.product-edit-box .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.product-edit-box .edit-actions{display:flex;gap:9px;margin-top:16px}.product-edit-box .edit-actions button{flex:1}@media(max-width:420px){.product-edit-box .edit-grid{grid-template-columns:1fr}}
+
+/* تخفیف او نغدې پیسې څنګ په څنګ، نېټه د بیل په پای کې */
+#sales .sale-money-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:start;margin:8px 0}
+#sales .sale-money-row>.sale-simple{min-width:0;background:#f8fafc;border:1px solid #dce5ef;border-radius:10px;padding:9px}
+#sales .sale-money-row label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
+#sales .sale-money-row input{width:100%;min-width:0}
+#sales .sale-date-bottom{margin-top:12px;padding:10px;background:#f8fafc;border:1px solid #dce5ef;border-radius:10px}
+#sales .sale-date-bottom label{font-weight:700}
+@media(max-width:360px){#sales .sale-money-row{grid-template-columns:1fr}}
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -1041,26 +1050,19 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
    <div><label>مشتری</label><input id="saleCustomer" autocomplete="off" placeholder="د مشتری نوم" oninput="searchSaleCustomers()"><div id="saleCustomerResults" class="sale-customer-results hidden"></div></div>
    <div><label>د نرخ ډول</label><select id="salePriceType" onchange="updateSaleCartPrices()"><option value="retail">پرچون</option><option value="wholesale">عمده</option></select></div>
   </div>
-  <div class="sale-simple">
-   <label>تخفیف ٪ (د ټولو جنسونو لپاره)</label>
-   <input id="saleDiscount" type="number" min="0" max="100" step="any" value="0" oninput="updateSalePreview()">
-  </div>
-  <div class="sale-date-row">
-   <label>نېټه</label>
-   <div class="sale-simple-grid sale-qty-grid">
-    <select id="saleJDay" aria-label="ورځ"></select>
-    <select id="saleJMonth" aria-label="میاشت"><option value="1">وری</option><option value="2">غویی</option><option value="3">غبرګولی</option><option value="4">چنګاښ</option><option value="5">زمری</option><option value="6">وږی</option><option value="7">تله</option><option value="8">لړم</option><option value="9">لیندۍ</option><option value="10">مرغومی</option><option value="11">سلواغه</option><option value="12">کب</option></select>
-    <select id="saleJYear" aria-label="کال"></select>
-   </div>
-   <div id="saleDateJalali"></div><input type="hidden" id="saleDate">
-  </div>
   <div id="saleCartList" class="sale-cart-panel">تر اوسه جنس نه دی اضافه شوی.</div>
-  <div class="sale-simple">
-   <label>ورکړل شوې پیسې (نغدي)</label>
-   <input id="salePaid" type="number" min="0" step="any" value="0" oninput="updateSalePreview()">
-   <div class="sale-actions">
-    <button type="button" class="sale-cash-btn" onclick="setSalePayment('cash')">ټول نغدي</button>
-    <button type="button" class="sale-debt-btn" onclick="setSalePayment('debt')">ټول پور</button>
+  <div class="sale-money-row">
+   <div class="sale-simple">
+    <label>تخفیف ٪ (د ټولو جنسونو لپاره)</label>
+    <input id="saleDiscount" type="number" min="0" max="100" step="any" value="0" oninput="updateSalePreview()">
+   </div>
+   <div class="sale-simple">
+    <label>ورکړل شوې پیسې (نغدي)</label>
+    <input id="salePaid" type="number" min="0" step="any" value="0" oninput="updateSalePreview()">
+    <div class="sale-actions">
+     <button type="button" class="sale-cash-btn" onclick="setSalePayment('cash')">ټول نغدي</button>
+     <button type="button" class="sale-debt-btn" onclick="setSalePayment('debt')">ټول پور</button>
+    </div>
    </div>
   </div>
   <div class="sale-summary">
@@ -1071,6 +1073,15 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
    <div><span>ټول پور</span><strong id="saleDebtPreview">AFN 0</strong></div>
   </div>
   <button type="button" class="primary sale-save-button" onclick="addSale()">خرڅلاو ثبت کړه</button>
+  <div class="sale-date-row sale-date-bottom">
+   <label>د بیل نېټه</label>
+   <div class="sale-simple-grid sale-qty-grid">
+    <select id="saleJDay" aria-label="ورځ"></select>
+    <select id="saleJMonth" aria-label="میاشت"><option value="1">وری</option><option value="2">غویی</option><option value="3">غبرګولی</option><option value="4">چنګاښ</option><option value="5">زمری</option><option value="6">وږی</option><option value="7">تله</option><option value="8">لړم</option><option value="9">لیندۍ</option><option value="10">مرغومی</option><option value="11">سلواغه</option><option value="12">کب</option></select>
+    <select id="saleJYear" aria-label="کال"></select>
+   </div>
+   <div id="saleDateJalali"></div><input type="hidden" id="saleDate">
+  </div>
  </div>
 </section>
 <section id="purchases" class="hidden">
