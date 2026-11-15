@@ -1001,7 +1001,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 
 <section id="sarafPage" class="hidden"><h3>💱 صرافي حساب</h3><div class="grid2"><div class="panel"><small>💵 زما پیسې له صراف سره</small><h2 id="sarafHeldTotal">0 AFN</h2></div><div class="panel"><small>📒 زه صراف ته پوروړی یم</small><h2 id="sarafOwedTotal">0 AFN</h2></div></div><div class="panel"><h3>➕ نوې معامله</h3><label>د معاملې ډول</label><select id="sarafType" onchange="toggleSarafCompany()"><option value="deposit">صراف ته مې پیسې ورکړې</option><option value="withdraw">له صرافه مې پیسې واخیستې</option><option value="borrow">له صرافه مې پور واخیست</option><option value="repay">صراف ته مې د پور پیسې ورکړې</option><option value="companyPayment">صراف زما له پیسو شرکت ته ورکړې</option></select><div id="sarafCompanyWrap" class="hidden"><label>کوم شرکت ته پیسې ورکړل شوې؟</label><input id="sarafCompany" placeholder="د شرکت نوم"></div><label>مبلغ (AFN)</label><input id="sarafAmount" type="number" min="0.01" step="any"><label>نېټه</label><input id="sarafDate" type="date"><label>یادښت (اختیاري)</label><input id="sarafNote"><button class="primary" onclick="addSarafTransaction()">💾 معامله ثبت کړه</button></div><div class="panel"><h3>📜 د صرافۍ معاملاتو تاریخچه</h3><div id="sarafList"></div></div></section>
 <section id="products" class="hidden">
- <h3>📦 محصولات او جنسونه</h3>
+ <div class="row" style="align-items:center;justify-content:space-between"><h3>📦 موجودي او جنسونه</h3><b id="productCount">0 جنس</b></div>
  <div class="panel">
   <label>د جنس نوم</label><input id="pName" placeholder="مثلاً وریجې"><label>د جنس عکس (اختیاري)</label><input id="pImage" type="file" accept="image/*" onchange="previewProductImage(this)"><div id="pImagePreview" class="product-image-preview">د جنس عکس دلته انتخاب کړه</div><input id="editProductImage" type="file" accept="image/*" class="hidden" onchange="saveEditedProductImage(this)"><label>بارکوډ / کوډ</label><input id="pCode" placeholder="اختیاري بارکوډ یا کوډ">
   <div class="row">
@@ -1015,7 +1015,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   </div>
   <label>د خرڅلاو/پېرود دویم واحد</label><select id="pTradeUnit"></select>
   <label>په یوه دویم واحد کې د اصلي واحد مقدار (مثلاً یوه بوجۍ = ۵۰ کیلو)</label><input id="pUnitFactor" type="number" min="0.000001" step="any" value="1">
-  <p class="notice">مثال: اصلي واحد «کیلو»، دویم واحد «بوجۍ»، مقدار «۵۰». موجودي په کیلو ساتل کېږي.</p>
+  <p class="notice">مثال: اصلي واحد «kg»، دویم واحد «بوجۍ»، مقدار «۵۰». ګدام کې موجودي په kg ساتل کېږي؛ په موجودۍ کې د بوجیو شمېر او د kg اندازه دواړه ښکاري.</p>
   <button class="primary" onclick="addProduct()">جنس ثبت کړه</button>
  </div>
  <div class="panel"><input id="productSearch" placeholder="🔍 د جنس نوم ولټوه"><div id="productList"></div></div>
@@ -1501,12 +1501,20 @@ async function addProduct(){
 function renderProducts(){
  const q=value("productSearch").toLowerCase();
  const list=db.products.filter(p=>String(p.name).toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q));
- document.getElementById("productList").innerHTML=list.map(p=>`
+ const count=document.getElementById("productCount");if(count)count.textContent=db.products.length+" جنس";
+ document.getElementById("productList").innerHTML=list.map(p=>{
+  const base=p.unit||"واحد",trade=p.tradeUnit||base,factor=Math.max(0.000001,Number(p.unitFactor)||1);
+  const shownQty=trade===base?Number(p.qty)||0:(Number(p.qty)||0)/factor;
+  const cost=Number(p.cost)||0,retail=Number(p.retailPrice??p.price)||0,wholesale=Number(p.wholesalePrice)||0;
+  const tradeCost=cost*factor;
+  return `
  <div class="item product-list-item">${p.image?'<img class="product-thumb" alt="د جنس عکس" src="'+safe(p.image)+'">':'<div class="product-thumb product-no-image">📦</div>'}
  <div class="product-list-info"><b>${safe(p.name)}</b>
- <div>موجودي: ${p.qty} ${safe(unitLabel(p.unit))}</div>
- <div>پېرود: ${money(p.cost)} | خرڅلاو: ${money(p.price)}</div><div>کوډ: ${safe(p.code||"-")}</div>
- <div class="actions"><button class="gray" onclick="editProduct('${p.id}')">سمون</button><button class="gray" onclick="changeProductImage('${p.id}')">عکس بدلول</button><button class="red" onclick="deleteProduct('${p.id}')">حذف</button></div></div></div>`).join("")||"<p>جنس نشته</p>";
+ <div>موجودي: <b>${Number(shownQty.toFixed(3))} ${safe(unitLabel(trade))}</b>${trade!==base?' <small>('+Number((Number(p.qty)||0).toFixed(3))+' '+safe(unitLabel(base))+')</small>':''}</div>
+ <div>فی ${safe(unitLabel(trade))}: پېرود ${money(tradeCost)} · عمده ${money(wholesale)} · پرچون ${money(retail)}</div>
+ <div>کوډ: ${safe(p.code||"-")}</div>
+ <div class="actions"><button class="gray" onclick="editProduct('${p.id}')">سمون</button><button class="gray" onclick="changeProductImage('${p.id}')">عکس بدلول</button><button class="red" onclick="deleteProduct('${p.id}')">حذف</button></div></div></div>`;
+ }).join("")||"<p>جنس نشته</p>";
 }
 function changeProductImage(id){
  editingProductImageId=id;const input=document.getElementById("editProductImage");input.value="";input.click();
@@ -2496,11 +2504,16 @@ function saveShopSettings(){
 function renderSettingsUnits(){
  const box=document.getElementById("settingsUnitList");if(!box)return;
  db.settings=db.settings||{};db.settings.units=Array.isArray(db.settings.units)?db.settings.units:[];
+ // 0.5kg د وزن ثابت واحد دی؛ موجوده جنسونه او د هغوی واحدونه نه بدلېږي.
+ let half=db.settings.units.find(u=>u.name==="0.5kg");
+ if(!half){db.settings.units.push({name:"0.5kg",type:"weight",base:"kg",factor:0.5,locked:true});half=db.settings.units[db.settings.units.length-1];}
+ else Object.assign(half,{type:"weight",base:"kg",factor:0.5});
  box.innerHTML=db.settings.units.map((u,i)=>{
   const count=(db.products||[]).filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
-  const desc=u.type==="weight"?(u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":"وزن · د جنس په فورم کې د بدلون اندازه ټاکل کېږي"):u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه ټاکل کېږي";
+  const desc=u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":u.name==="0.5kg"?"وزن · 1 واحد = 0.5 kg":u.type==="weight"?"وزن · د جنس په فورم کې د بدلون اندازه ټاکل کېږي":u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه په هر جنس کې ټاکل کېږي";
   const controls=u.locked?'<span class="badge">اصلي</span>':`<button type="button" class="gray" onclick="editCustomUnit(${i})">✏️ سمون</button> <button type="button" class="red" onclick="removeCustomUnit(${i})">🗑 حذف</button>`;
-  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(unitLabel(u.name))}</b><div class="notice">${desc} · ${count} جنس</div></div><div class="actions">${controls}</div></div>`;
+  const title=u.name==="0.5kg"?"0.5kg":unitLabel(u.name);
+  return `<div class="item" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div><b>${safe(title)}</b><div class="notice">${desc} · ${count} جنس</div></div><div class="actions">${controls}</div></div>`;
  }).join("")||"واحد نشته";
 }
 function addCustomUnit(){
