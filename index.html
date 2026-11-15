@@ -1609,8 +1609,14 @@ function saleUnitPrice(p,unit){
  return tradePrice*(factor/(tradeFactor||1));
 }
 function filterSaleProducts(){
- const q=value("saleProductSearch").toLowerCase(),select=document.getElementById("saleProduct");
+ const q=value("saleProductSearch").trim().toLowerCase(),select=document.getElementById("saleProduct");
  if(!select)return;
+ if(!q){
+  select.innerHTML='<option value="">د جنس نوم یا بارکوډ ولټوه</option>';
+  select.value="";
+  updateSaleUnit();
+  return;
+ }
  const old=select.value;
  const list=(db.products||[]).filter(p=>String(p.name||"").toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q));
  select.innerHTML=list.map(p=>`<option value="${safe(p.id)}">${safe(p.name)} — موجودي: ${p.qty} ${safe(unitLabel(p.unit||""))}</option>`).join("")||'<option value="">جنس ونه موندل شو</option>';
@@ -1647,7 +1653,9 @@ function addSaleToCart(){
  saleCart.push({productId:p.id,productName:p.name,qty,unit,price,factor,stockQty,costAtSale:Number(p.cost)||0,baseUnit:p.unit||unit,tradeUnit:p.tradeUnit||p.unit,tradeFactor:Number(p.unitFactor)||1});
  document.getElementById("saleQty").value="1";
  document.getElementById("saleProductSearch").value="";
- filterSaleProducts();renderSaleCart();updateSalePreview();
+ filterSaleProducts();
+ const productSelect=document.getElementById("saleProduct");if(productSelect)productSelect.value="";
+ renderSaleCart();updateSalePreview();
 }
 function updateSaleCartLine(index,field,raw){
  const x=saleCart[index];if(!x)return;
