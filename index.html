@@ -639,6 +639,36 @@ nav button:active{background:rgba(255,255,255,.22)}
 @media(min-width:700px){#sales .sale-panel{padding:24px 26px}#sales .sale-heading{padding:20px 22px}#sales .sale-panel{max-width:780px;margin:12px auto 18px}}
 @media print{body{background:#fff!important}}
 
+
+/* د خرڅلاو نوې منظم او موبایل-دوسته بڼه */
+.sale-page{padding:16px 13px 20px;border-radius:18px;margin:10px 0;background:#fff}
+.sale-invoice-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:12px;margin:0 0 14px;background:#f1f5fb;border:1px solid #dce5f0;border-radius:12px}
+.sale-customer-date{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.sale-field{min-width:0}
+.sale-field .row{gap:6px;align-items:center}
+.sale-field .row input{min-width:0}
+.sale-discount-field{margin:10px 0;padding:11px;background:#fff8e9;border:1px solid #f1d59a;border-radius:12px}
+.sale-add-grid,.sale-payment-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}
+.sale-payment-grid{grid-template-columns:1fr 1fr}
+.sale-add-grid label,.sale-line-fields label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+.sale-add-grid input,.sale-add-grid select,.sale-line-fields input,.sale-line-fields select{width:100%;min-width:0;padding:11px 7px;border:1px solid #cbd5e1;border-radius:10px;background:#fff}
+.sale-add-button{width:100%;padding:14px;font-size:16px;margin:2px 0 14px}
+.sale-cart-panel{padding:12px;background:#f7f9fc;border:1px solid #e1e7ef;border-radius:14px;margin:10px 0}
+.sale-cart-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.sale-cart-title span{font-size:12px;color:#64748b}
+.sale-line-card{background:#fff;border:1px solid #dbe3ed;border-radius:12px;padding:11px;margin:8px 0;box-shadow:0 2px 5px #14213d0b}
+.sale-line-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
+.sale-remove{padding:5px 10px!important;min-width:34px}
+.sale-line-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.sale-line-total{display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:8px;border-top:1px dashed #d6deea}
+.sale-line-total b{color:#174f9a;direction:ltr}
+.sale-summary-new{border:1px solid #dbe4ef;background:#f4f7fb}
+.sale-summary-new>div{padding:9px 5px;border-bottom:1px solid #e1e7ef}
+.sale-summary-new>div:last-child{border-bottom:0}
+.sale-summary-new .sale-total{padding:13px 9px;background:#e5efff;border:1px solid #a8c8f0;border-radius:10px;margin:5px 0}
+.sale-debt-row{color:#b42318;font-weight:800}
+.sale-save-button{width:100%;padding:16px;font-size:18px}
+@media(max-width:520px){.sale-customer-date{grid-template-columns:1fr}.sale-add-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.sale-line-fields{grid-template-columns:repeat(3,minmax(0,1fr))}.sale-page{padding:13px 10px}.sale-line-fields input,.sale-line-fields select{font-size:13px;padding:10px 4px}}
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -966,57 +996,62 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 </section>
 
 <section id="sales" class="hidden">
- <div class="sale-panel">
-  <div class="sale-heading"><h3>🧾 نوی خرڅلاو</h3><span class="badge">AFN</span></div>
-  <div class="item" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-   <b>بل شمېره: <span id="saleInvoicePreview">نوی بل</span></b>
-   <span id="saleTimePreview"></span>
-  </div>
-  <label>🔍 جنس د نوم یا بارکوډ له مخې ولټوه</label>
+ <div class="sale-panel sale-page">
+  <div class="sale-heading"><h3>🧾 نوی خرڅلاو</h3><span class="badge">افغانۍ · AFN</span></div>
+  <div class="sale-invoice-bar"><b>د بل شمېره: <span id="saleInvoicePreview">نوی بل</span></b><span id="saleTimePreview"></span></div>
+
+  <label>🔎 د جنس نوم یا بارکوډ ولټوه</label>
   <input id="saleProductSearch" class="sale-search" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off">
-  <label>جنس انتخاب کړه</label><select id="saleProduct" onchange="updateSaleUnit()"></select>
-  <div class="row">
-   <div><label>مقدار</label><input id="saleQty" type="number" min="0.001" step="any" value="1"></div>
-   <div><label>د خرڅلاو واحد</label><select id="saleUnit" onchange="updateSaleUnit()"></select></div>
-   <div><label>فی واحد نرخ</label><input id="salePrice" type="number" min="0" step="any"></div>
-  </div>
-  <button type="button" class="primary" onclick="addSaleToCart()" style="width:100%;margin:10px 0">＋ جنس بل ته اضافه کړه</button>
-  <div class="row">
-   <div><label>👤 د مشتری نوم</label>
-    <div class="row"><input id="saleCustomer" placeholder="مشتری ولټوه..." autocomplete="off"><button type="button" class="gray" onclick="quickAddSaleCustomer()">＋ نوی</button></div>
+  <label>جنس انتخاب کړه</label>
+  <select id="saleProduct" onchange="updateSaleUnit()"></select>
+
+  <div class="sale-customer-date">
+   <div class="sale-field"><label>👤 د مشتری نوم</label>
+    <div class="row"><input id="saleCustomer" placeholder="د مشتری نوم ولیکه..." autocomplete="off"><button type="button" class="gray" onclick="quickAddSaleCustomer()">＋ نوی</button></div>
     <div id="saleCustomerResults" class="sale-customer-results hidden"></div>
    </div>
-   <div><label>نېټه</label><div class="row">
-    <select id="saleJYear" aria-label="کال" onchange="updateSaleDateLabel()"></select>
-    <select id="saleJMonth" aria-label="میاشت" onchange="updateSaleDateLabel()">
-     <option value="1">وری</option><option value="2">غویی</option><option value="3">غبرګولی</option><option value="4">چنګاښ</option><option value="5">زمری</option><option value="6">وږی</option><option value="7">تله</option><option value="8">لړم</option><option value="9">لیندۍ</option><option value="10">مرغومی</option><option value="11">سلواغه</option><option value="12">کب</option>
-    </select><select id="saleJDay" aria-label="ورځ" onchange="updateSaleDateLabel()"></select>
-   </div><input id="saleDate" type="date" hidden><div id="saleDateJalali" class="sale-date-jalali"></div></div>
+   <div class="sale-field"><label>📅 د خرڅلاو نېټه</label>
+    <div class="row"><select id="saleJYear" aria-label="کال" onchange="updateSaleDateLabel()"></select>
+     <select id="saleJMonth" aria-label="میاشت" onchange="updateSaleDateLabel()">
+      <option value="1">وری</option><option value="2">غویی</option><option value="3">غبرګولی</option><option value="4">چنګاښ</option><option value="5">زمری</option><option value="6">وږی</option><option value="7">تله</option><option value="8">لړم</option><option value="9">لیندۍ</option><option value="10">مرغومی</option><option value="11">سلواغه</option><option value="12">کب</option>
+     </select><select id="saleJDay" aria-label="ورځ" onchange="updateSaleDateLabel()"></select>
+    </div><input id="saleDate" type="date" hidden><div id="saleDateJalali" class="sale-date-jalali"></div>
+   </div>
   </div>
-  <label>د ټولو جنسونو تخفیف (٪)</label><input id="saleDiscount" type="number" min="0" max="100" step="any" value="0" oninput="updateSalePreview()" placeholder="مثلاً 5">
-  <section class="panel" style="margin:10px 0;padding:12px">
-   <b>🛒 د خرڅلاو جنسونه</b>
-   <div id="saleCartList" style="margin-top:8px">کارټ خالي دی — جنس ولټوه او اضافه یې کړه.</div>
-  </section>
-  <div class="row">
-   <div><label>ورکړل شوې نغدې پیسې</label><input id="salePaid" type="number" min="0" value="0" oninput="updateSalePreview()"></div>
+
+  <div class="sale-discount-field"><label>٪ د ټولو جنسونو تخفیف</label><input id="saleDiscount" type="number" min="0" max="100" step="any" value="0" oninput="updateSalePreview()" placeholder="مثلاً ۵ سلنه"></div>
+
+  <div class="sale-add-grid">
+   <div><label>مقدار</label><input id="saleQty" type="number" min="0.001" step="any" value="1"></div>
+   <div><label>واحد</label><select id="saleUnit" onchange="updateSaleUnit()"></select></div>
+   <div><label>فی واحد نرخ</label><input id="salePrice" type="number" min="0" step="any"></div>
+  </div>
+  <button type="button" class="primary sale-add-button" onclick="addSaleToCart()">＋ جنس بل ته اضافه کړه</button>
+
+  <div class="sale-cart-panel">
+   <div class="sale-cart-title"><b>🛒 د خرڅلاو جنسونه</b><span id="saleCartCount">۰ جنس</span></div>
+   <div id="saleCartList">کارټ خالي دی — جنس ولټوه او اضافه یې کړه.</div>
+  </div>
+
+  <div class="sale-payment-grid">
+   <div><label>💵 ورکړل شوې نغدې پیسې</label><input id="salePaid" type="number" min="0" value="0" oninput="updateSalePreview()"></div>
    <div><label>یادښت</label><input id="saleNote" placeholder="اختیاري یادښت"></div>
   </div>
   <div class="sale-actions">
    <button class="sale-cash-btn" onclick="setSalePayment('cash')">💵 ټول نغدي</button>
    <button class="sale-debt-btn" onclick="setSalePayment('debt')">📒 ټول پور</button>
   </div>
-  <div class="sale-summary">
-   <div><span>ټول د جنسونو مبلغ</span><strong id="saleSubtotalPreview">AFN 0</strong></div>
-   <div><span>تخفیف</span><strong id="saleDiscountPreview">AFN 0</strong></div>
+  <div class="sale-summary sale-summary-new">
+   <div><span>د جنسونو ټول مبلغ</span><strong id="saleSubtotalPreview">AFN 0</strong></div>
+   <div><span>ټول تخفیف</span><strong id="saleDiscountPreview">AFN 0</strong></div>
    <div class="sale-total"><span>وروستی مبلغ</span><strong id="saleTotalPreview">AFN 0</strong></div>
    <div><span>ورکړل شوې پیسې</span><strong id="salePaidPreview" class="sale-cash">AFN 0</strong></div>
-   <div><span>پاتې پور</span><strong id="saleDebtPreview" class="sale-debt">AFN 0</strong></div>
+   <div class="sale-debt-row"><span>ټول پور</span><strong id="saleDebtPreview" class="sale-debt">AFN 0</strong></div>
    <div><span>ګټه</span><strong id="saleProfitPreview">AFN 0</strong></div>
   </div>
-  <button class="primary" onclick="addSale()" style="padding:19px;font-size:19px">✅ خرڅلاو ثبت کړه</button>
+  <button class="primary sale-save-button" onclick="addSale()">✅ خرڅلاو ثبت کړه</button>
  </div>
- <div class="panel"><input id="salesSearch" placeholder="د بل، جنس یا مشتری نوم ولټوه"><div id="salesList"></div></div>
+ <div class="panel"><label>د پخوانیو بلونو لټون</label><input id="salesSearch" placeholder="د بل، جنس یا مشتری نوم ولټوه"><div id="salesList"></div></div>
 </section>
 
 <section id="purchases" class="hidden">
@@ -1527,7 +1562,11 @@ function selectSaleCustomer(id){
  document.getElementById("saleCustomerResults").classList.add("hidden");
 }
 
-function unitWeightInKg(name){
+function unitLabel(name){
+ const labels={kg:"کیلوګرام",g:"ګرام","0.5kg":"نیم کیلو",پیاله:"ګیلاس"};
+ return labels[String(name||"")]||String(name||"واحد");
+}
+
  const fixed={kg:1,g:0.001,"0.5kg":0.5};
  if(Object.prototype.hasOwnProperty.call(fixed,name))return fixed[name];
  const meta=(db.settings?.units||[]).find(u=>String(u.name)===String(name));
@@ -1554,7 +1593,7 @@ function getProductUnitChoices(p){
  return choices;
 }
 function productUnitOptionsMarkup(p,selected){
- return getProductUnitChoices(p).map(u=>`<option value="${safe(u.name)}" ${u.name===selected?"selected":""}>${safe(u.name)}</option>`).join("");
+ return getProductUnitChoices(p).map(u=>`<option value="${safe(u.name)}" ${u.name===selected?"selected":""}>${safe(unitLabel(u.name))}</option>`).join("");
 }
 function saleUnitPrice(p,unit){
  const base=p.unit||unit,trade=p.tradeUnit||base;
@@ -1616,15 +1655,18 @@ function updateSaleCartLine(index,field,raw){
 function removeSaleCartItem(index){saleCart.splice(index,1);renderSaleCart();updateSalePreview();}
 function renderSaleCart(){
  const box=document.getElementById("saleCartList");if(!box)return;
+ const count=document.getElementById("saleCartCount");if(count)count.textContent=String(saleCart.length)+" جنس";
  if(!saleCart.length){box.textContent="کارټ خالي دی — جنس ولټوه او اضافه یې کړه.";return;}
- box.innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th>جنس</th><th>مقدار</th><th>واحد</th><th>نرخ</th><th>مجموع</th><th></th></tr></thead><tbody>'+
- saleCart.map((x,i)=>`<tr style="border-top:1px solid #ddd">
-  <td>${safe(x.productName)}</td>
-  <td><input style="width:72px" type="number" min="0.001" step="any" value="${x.qty}" onchange="updateSaleCartLine(${i},'qty',this.value)"></td>
-  <td><select onchange="updateSaleCartLine(${i},'unit',this.value)">${productUnitOptionsMarkup(db.products.find(p=>p.id===x.productId),x.unit)}</select></td>
-  <td><input style="width:85px" type="number" min="0" step="any" value="${x.price}" onchange="updateSaleCartLine(${i},'price',this.value)"></td>
-  <td>${money(x.qty*x.price)}</td><td><button type="button" class="red" onclick="removeSaleCartItem(${i})">✕</button></td>
- </tr>`).join("")+'</tbody></table></div>';
+ box.innerHTML=saleCart.map((x,i)=>`
+  <div class="sale-line-card">
+   <div class="sale-line-head"><b>${i+1}. ${safe(x.productName)}</b><button type="button" class="red sale-remove" onclick="removeSaleCartItem(${i})">✕</button></div>
+   <div class="sale-line-fields">
+    <div><label>مقدار</label><input type="number" min="0.001" step="any" value="${x.qty}" onchange="updateSaleCartLine(${i},'qty',this.value)"></div>
+    <div><label>واحد</label><select onchange="updateSaleCartLine(${i},'unit',this.value)">${productUnitOptionsMarkup(db.products.find(p=>p.id===x.productId),x.unit)}</select></div>
+    <div><label>فی واحد نرخ</label><input type="number" min="0" step="any" value="${x.price}" onchange="updateSaleCartLine(${i},'price',this.value)"></div>
+   </div>
+   <div class="sale-line-total"><span>د جنس مجموعه</span><b>${money(x.qty*x.price)}</b></div>
+  </div>`).join("");
 }
 function quickAddSaleCustomer(){
  const name=prompt("د نوي مشتری نوم ولیکه:");if(!name||!name.trim())return;
@@ -2742,7 +2784,7 @@ function showArchiveReport(id){
    const count=db.products.filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
    const desc=u.name==="kg"?"وزن · 1 kg = 1 kg":u.name==="g"?"وزن · 1 g = 0.001 kg":u.name==="0.5kg"?"وزن · 1 واحد = 0.5 kg":u.type==="weight"?"وزن · د جنس په فورم کې د بدلون اندازه ټاکل کېږي":u.type==="volume"?"حجم · د جنس په فورم کې اندازه ټاکل کېږي":"شمېر/بسته · د جنس په فورم کې اندازه ټاکل کېږي";
    const actions=u.locked?'<span class="badge">اصلي</span>':`<button type="button" class="gray" onclick="editCustomUnit(${i})">✏️ سمون</button> <button type="button" class="red" onclick="removeCustomUnit(${i})">🗑 حذف</button>`;
-   return `<div class="item" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b>${safe(u.name)}</b><div class="notice">${desc} · ${count} جنس</div></div><div>${actions}</div></div>`;
+   return `<div class="item" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b>${safe(unitLabel(u.name))}</b><div class="notice">${desc} · ${count} جنس</div></div><div>${actions}</div></div>`;
   }).join("");
  };
  window.updateProductUnitOptions=function(){
@@ -2752,7 +2794,7 @@ function showArchiveReport(id){
   ["pUnit","pTradeUnit"].forEach(id=>{
    const el=document.getElementById(id);if(!el)return;
    const old=el.value;
-   el.innerHTML=names.map(n=>`<option value="${safe(n)}">${safe(n)}</option>`).join("");
+   el.innerHTML=names.map(n=>`<option value="${safe(n)}">${safe(unitLabel(n))}</option>`).join("");
    if(old&&names.includes(old))el.value=old;
   });
  };
