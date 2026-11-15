@@ -699,18 +699,6 @@ nav button:active{background:rgba(255,255,255,.22)}
 .product-edit-overlay{position:fixed;inset:0;background:#0f172a99;z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:14px;overflow:auto}
 .product-edit-box{background:#fff;width:100%;max-width:620px;margin:auto;border-radius:16px;padding:16px;box-shadow:0 12px 40px #0003;max-height:calc(100dvh - 28px);overflow:auto}
 .product-edit-box h3{margin:4px 0 14px}.product-edit-box label{display:block;margin:10px 0 5px;font-weight:bold;font-size:14px}.product-edit-box input,.product-edit-box select{width:100%;min-width:0;padding:12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font-size:16px}.product-edit-box .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.product-edit-box .edit-actions{display:flex;gap:9px;margin-top:16px}.product-edit-box .edit-actions button{flex:1}@media(max-width:420px){.product-edit-box .edit-grid{grid-template-columns:1fr}}
-
-/* د خرڅلاو روښانه جنس انتخاب او جلا بیل */
-#sales .sale-product-picker{background:#f7fbff;border:1px solid #c7dcf4;border-radius:13px;padding:11px}
-#sales .sale-item-editor{margin-top:9px;padding:12px;background:#fff;border:2px solid #4b91d5;border-radius:12px;box-shadow:0 2px 8px #17487812}
-#sales .sale-picked-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px;background:#eaf3ff;border-radius:8px;margin-bottom:8px}
-#sales .sale-picked-head b{font-size:15px;color:#164f91}
-#sales .sale-picked-head span{font-size:11px;color:#52677e}
-#sales .sale-item-fields{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-#sales .sale-item-editor button{margin-top:5px}
-#sales #saleCartList{background:#fff;border:2px solid #b9d5ef;border-radius:13px;padding:10px;min-height:52px}
-#sales .sale-cart-panel:before{content:"② د خرڅلاو بیل — اضافه شوي جنسونه";display:block;font-weight:800;color:#174f88;margin-bottom:9px}
-@media(max-width:390px){#sales .sale-item-fields{grid-template-columns:1fr 1fr}#sales .sale-item-fields>div:last-child{grid-column:1/-1}}
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -1042,20 +1030,12 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 <section id="sales" class="hidden">
  <div class="panel sale-page">
   <h3>نوی فروش</h3>
-  <div class="sale-simple sale-product-picker">
-   <label>① جنس ولټوه (نوم یا بارکوډ)</label>
+  <div class="sale-simple">
+   <label>د جنس نوم یا بارکوډ ولیکه...</label>
    <input id="saleProductSearch" type="search" autocomplete="off" placeholder="د جنس نوم یا بارکوډ ولیکه...">
    <div id="saleSearchResults" class="sale-search-results hidden"></div>
    <select id="saleProduct" class="hidden" aria-label="جنس"></select>
-   <div id="saleItemEditor" class="sale-item-editor hidden">
-    <div class="sale-picked-head"><b id="salePickedName">جنس</b><span id="salePickedStock"></span></div>
-    <div class="sale-simple-grid sale-item-fields">
-     <div><label>مقدار</label><input id="saleQty" type="number" min="0.001" step="any" value="1"></div>
-     <div><label>واحد</label><select id="saleUnit"></select></div>
-     <div><label>فی واحد نرخ (AFN)</label><input id="salePrice" type="number" min="0" step="any" value="0"></div>
-    </div>
-    <button type="button" class="primary" onclick="addSaleToCart()">＋ بل ته اضافه کړه</button>
-   </div>
+   <div class="hidden"><input id="saleQty" type="number" value="1"><select id="saleUnit"></select><input id="salePrice" type="number" value="0"></div>
   </div>
   <div class="sale-simple-grid">
    <div><label>مشتری</label><input id="saleCustomer" autocomplete="off" placeholder="د مشتری نوم" oninput="searchSaleCustomers()"><div id="saleCustomerResults" class="sale-customer-results hidden"></div></div>
@@ -1719,19 +1699,17 @@ function filterSaleProducts(){
  select.value="";
  if(!q){box.innerHTML="";box.classList.add("hidden");return;}
  const list=(db.products||[]).filter(p=>[p.name,p.code,p.barcode,p.barCode].some(v=>String(v||"").toLowerCase().includes(q))).slice(0,20);
- box.innerHTML=list.length?list.map(p=>`<button type="button" class="sale-search-result" onclick="chooseSaleSearchResult('${String(p.id).replace(/'/g,"\\'")}')"><b>${safe(p.name)}</b><span>موجودي: ${p.qty} ${safe(unitLabel(p.unit||""))} · ${value("salePriceType")==="wholesale"?"عمده":"پرچون"}: ${money(saleUnitPrice(p,(p.tradeUnit||p.unit||"واحد")))}</span></button>`).join(""):'<div class="sale-no-result">جنس ونه موندل شو</div>';
+ box.innerHTML=list.length?list.map(p=>`<button type="button" class="sale-search-result" onclick="chooseSaleSearchResult('${String(p.id).replace(/'/g,"\\'")}')"><b>${safe(p.name)}</b><span>موجودي: ${p.qty} ${safe(unitLabel(p.unit||""))} · ${money(saleUnitPrice(p,(p.tradeUnit||p.unit||"واحد")))}</span></button>`).join(""):'<div class="sale-no-result">جنس ونه موندل شو</div>';
  box.classList.remove("hidden");
 }
 function chooseSaleSearchResult(id){
  const select=document.getElementById("saleProduct"),p=(db.products||[]).find(x=>String(x.id)===String(id));
  if(!p||!select)return;
- select.innerHTML=`<option value="${safe(p.id)}">${safe(p.name)}</option>`;select.value=p.id;
+ select.innerHTML=`<option value="${safe(p.id)}">${safe(p.name)}`;select.value=p.id;
  document.getElementById("saleSearchResults")?.classList.add("hidden");
  document.getElementById("saleProductSearch").value=p.name;
- document.getElementById("saleItemEditor")?.classList.remove("hidden");
- document.getElementById("saleQty").value="1";
  updateSaleUnit();
- document.getElementById("saleQty")?.focus();
+ addSaleToCart();
 }
 function updateSaleUnit(){
  const p=db.products.find(x=>String(x.id)===String(value("saleProduct")));
@@ -1743,9 +1721,6 @@ function updateSaleUnit(){
  unit.innerHTML=productUnitOptionsMarkup(p,selected);
  unit.value=selected;
  document.getElementById("salePrice").value=saleUnitPrice(p,unit.value).toFixed(4).replace(/0+$/,"").replace(/\.$/,"");
- const picked=document.getElementById("salePickedName"),stock=document.getElementById("salePickedStock");
- if(picked)picked.textContent=p.name;
- if(stock)stock.textContent="موجودي: "+p.qty+" "+unitLabel(p.unit||"");
  updateSalePreview();
 }
 function selectSaleProduct(){
@@ -1771,7 +1746,6 @@ function addSaleToCart(){
  saleCart.push({productId:p.id,productName:p.name,qty,unit,price,factor,stockQty,costAtSale:Number(p.cost)||0,baseUnit:p.unit||unit,tradeUnit:p.tradeUnit||p.unit,tradeFactor:Number(p.unitFactor)||1});
  document.getElementById("saleQty").value="1";
  document.getElementById("saleProductSearch").value="";
- document.getElementById("saleItemEditor")?.classList.add("hidden");
  filterSaleProducts();
  const productSelect=document.getElementById("saleProduct");if(productSelect)productSelect.value="";
  renderSaleCart();updateSalePreview();
