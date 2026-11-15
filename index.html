@@ -1397,6 +1397,7 @@ function runGlobalSearch(){
 
 function refreshAll(){
  updateProductUnitOptions();
+ if(typeof renderSettingsUnits==="function")renderSettingsUnits();
  fillProductSelects();renderProducts();renderSales();renderPurchases();
  renderCustomers();renderSuppliers();renderSaraf();renderExpenses();renderDebtLists();renderArchives();updateDashboard();renderMonthOverview();renderCapitalPage();
 }
