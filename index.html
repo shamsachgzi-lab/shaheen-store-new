@@ -1016,6 +1016,12 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 .product-list-info{flex:1;min-width:0}
 @media(max-width:380px){.product-thumb{width:68px;height:68px;flex-basis:68px}}
 </style>
+<style>/* د ټول شاهین فروشگاه لمریز نېټه‌اخیستونکی */
+.jalali-date-picker{width:100%;margin:4px 0 10px;padding:8px;background:#f1f7ff;border:1px solid #c9dcf4;border-radius:11px}
+.jalali-date-fields{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:6px}
+.jalali-date-fields select{width:100%;min-width:0;margin:0;padding:9px 5px;background:#fff;border:1px solid #b9cfe8;border-radius:8px;font-size:13px;color:#173b62}
+.jalali-date-label{padding-top:7px;text-align:center;font-size:12px;font-weight:800;color:#1457a0}
+</style>
 </head>
 <body>
 <header class="brand-header">
@@ -1409,6 +1415,37 @@ function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&
 function today(){
  const d=new Date();
  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function displayDate(iso){return iso?jalaliDisplayDate(String(iso).slice(0,10)):"—";}
+function jalaliDigits(v){return String(v).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]);}
+function initAllJalaliDatePickers(root=document){
+ root.querySelectorAll('input[type="date"]').forEach(input=>{
+  if(input.dataset.jalaliReady==="1")return;
+  input.dataset.jalaliReady="1";
+  if(!input.value&&!["reportFrom","reportTo"].includes(input.id))input.value=today();
+  input.style.display="none";
+  const wrap=document.createElement("div");wrap.className="jalali-date-picker";
+  const iso=input.value||"";let jy="",jm="",jd="";
+  if(iso){const parts=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",day:"numeric"}).formatToParts(new Date(iso+"T12:00:00"));const get=k=>parts.find(p=>p.type===k)?.value||"";jy=get("year");jm=get("month");jd=get("day");}
+  const nowYear=Number(new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric"}).format(new Date()));
+  const years=Array.from({length:31},(_,i)=>nowYear-15+i).map(y=>'<option value="'+y+'" '+(String(y)===String(jy)?"selected":"")+'>'+jalaliDigits(y)+'</option>').join("");
+  const months=["وری","غویی","غبرګولی","چنګاښ","زمری","وږی","تله","لړم","لیندۍ","مرغومی","سلواغه","کب"];
+  wrap.innerHTML='<div class="jalali-date-fields"><select class="jalali-day" aria-label="ورځ"><option value="">ورځ</option>'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'" '+(String(i+1)===String(jd)?"selected":"")+'>'+jalaliDigits(i+1)+'</option>').join("")+'</select><select class="jalali-month" aria-label="میاشت"><option value="">میاشت</option>'+months.map((m,i)=>'<option value="'+(i+1)+'" '+(String(i+1)===String(jm)?"selected":"")+'>'+m+'</option>').join("")+'</select><select class="jalali-year" aria-label="کال"><option value="">کال</option>'+years+'</select></div><div class="jalali-date-label">'+(iso?displayDate(iso):"لمریز کال / میاشت / ورځ وټاکه")+'</div>';
+  input.insertAdjacentElement("afterend",wrap);
+  const update=()=>{const day=wrap.querySelector(".jalali-day").value,month=wrap.querySelector(".jalali-month").value,year=wrap.querySelector(".jalali-year").value,label=wrap.querySelector(".jalali-date-label");if(!day||!month||!year){input.value="";label.textContent="لمریز کال / میاشت / ورځ وټاکه";return;}const value=jalaliToISO(Number(year),Number(month),Number(day));if(!value){input.value="";label.textContent="دا لمریزه نېټه سمه نه ده";return;}input.value=value;label.textContent=displayDate(value);};
+  wrap.querySelectorAll("select").forEach(el=>el.addEventListener("change",update));
+ });
+}
+function watchJalaliDatePickers(){
+ initAllJalaliDatePickers();
+ if(window.__jalaliDateObserver)return;
+ window.__jalaliDateObserver=new MutationObserver(records=>records.forEach(record=>record.addedNodes.forEach(node=>{if(node.nodeType===1)initAllJalaliDatePickers(node.matches?.('input[type="date"]')?node.parentNode:node);})));
+ window.__jalaliDateObserver.observe(document.body,{childList:true,subtree:true});
+}
+function syncJalaliDatePicker(id){
+ const input=document.getElementById(id);if(!input)return;const wrap=input.nextElementSibling;if(!wrap?.classList.contains("jalali-date-picker"))return;
+ const value=input.value||"",parts=value?new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",day:"numeric"}).formatToParts(new Date(value+"T12:00:00")):[],get=k=>parts.find(p=>p.type===k)?.value||"";
+ wrap.querySelector(".jalali-day").value=get("day");wrap.querySelector(".jalali-month").value=get("month");wrap.querySelector(".jalali-year").value=get("year");wrap.querySelector(".jalali-date-label").textContent=value?displayDate(value):"لمریز کال / میاشت / ورځ وټاکه";
 }
 
 function jalaliToISO(jy,jm,jd){
@@ -2114,7 +2151,7 @@ function printSale(id){
 @media(max-width:390px){#sales .sale-blue-header{padding:12px!important}#sales .sale-blue-header h3{font-size:18px!important}}
 </style></head><body><main class="invoice">
  <header class="top"><h1>${shop}</h1>${phone?`<p>د اړیکې شمېره: ${phone}</p>`:""}<p>د خرڅلاو فاکتور</p></header>
- <section class="meta"><div><b>د بل شمېره</b>${safe(sale.invoice||"-")}</div><div><b>نېټه</b>${safe(sale.date||"-")}</div><div><b>مشتری</b>${safe(sale.customer||"نغدي مشتری")}</div></section>
+ <section class="meta"><div><b>د بل شمېره</b>${safe(sale.invoice||"-")}</div><div><b>نېټه</b>${safe(displayDate(sale.date))}</div><div><b>مشتری</b>${safe(sale.customer||"نغدي مشتری")}</div></section>
  <table><thead><tr><th>جنس</th><th>تعداد</th><th>فی واحد</th><th>مجموعه</th></tr></thead><tbody><tr><td>${safe(sale.productName||"-")}</td><td>${safe(sale.qty)} ${safe(sale.unit||"")}</td><td>${money(sale.price)}</td><td>${money(subtotal)}</td></tr></tbody></table>
  <section class="totals"><div><span>ټول مبلغ</span><b>${money(subtotal)}</b></div><div><span>تخفیف</span><b>${money(sale.discount)}</b></div><div class="grand"><span>وروستی مبلغ</span><b>${money(sale.total)}</b></div><div class="paid"><span>💵 نغدي ورکړه</span><b>${money(sale.paid)}</b></div><div class="debt"><span>📕 پاتې پور</span><b>${money(sale.debt)}</b></div></section>
  </main></body></html>`);
@@ -2202,7 +2239,7 @@ function renderPurchases(){
   const paid=p.paid??p.paidAmount??0;
   const debt=p.debt??p.remainingDebt??Math.max(0,Number(total)-Number(paid));
   const invoice=p.invoice||p.receipt||"نه دی ثبت شوی";
-  const date=p.date||p.purchaseDate||"نېټه نشته";
+  const date=displayDate(p.date||p.purchaseDate||"");
   const stockText=stockQty===undefined||stockQty===null?"نه ده ثبت شوې":showNum(stockQty)+" "+safe(p.productUnit||p.baseUnit||unit);
   const priceText=price===undefined||price===null||price===""?"نه دی ثبت شوی":money(price);
   return `<div class="item purchase-history-item">
@@ -2549,7 +2586,7 @@ function renderExpenses(){
  const q=(value("expenseSearch")||"").trim().toLowerCase();
  const list=(db.expenses||[]).filter(e=>[e.name,e.category,e.note,e.productName,e.date].some(v=>String(v||"").toLowerCase().includes(q))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  document.getElementById("expensesList").innerHTML=list.map(e=>`
- <div class="item"><b>${safe(e.name)}</b><div>مبلغ: ${money(e.amount)}</div><div>نېټه: ${safe(e.date)}</div><div>ډول: ${safe(e.category)}</div>${e.productName?'<div>مصرف شوی جنس: '+safe(e.productName)+' · مقدار: '+safe(e.qty)+' '+safe(e.unit||"")+'</div>':""}<div>یادښت: ${safe(e.note||"-")}</div><button class="red" onclick="deleteExpense('${e.id}')">حذف</button></div>`).join("")||(q?"د لټون نتیجه ونه موندل شوه":"لګښت نشته");
+ <div class="item"><b>${safe(e.name)}</b><div>مبلغ: ${money(e.amount)}</div><div>نېټه: ${safe(displayDate(e.date))}</div><div>ډول: ${safe(e.category)}</div>${e.productName?'<div>مصرف شوی جنس: '+safe(e.productName)+' · مقدار: '+safe(e.qty)+' '+safe(e.unit||"")+'</div>':""}<div>یادښت: ${safe(e.note||"-")}</div><button class="red" onclick="deleteExpense('${e.id}')">حذف</button></div>`).join("")||(q?"د لټون نتیجه ونه موندل شوه":"لګښت نشته");
 }
 function deleteExpense(id){
  const e=db.expenses.find(x=>x.id===id);if(!e)return;
@@ -2703,6 +2740,7 @@ function makeDailyReport(){
  const d=today();
  document.getElementById("reportFrom").value=d;
  document.getElementById("reportTo").value=d;
+ syncJalaliDatePicker("reportFrom");syncJalaliDatePicker("reportTo");
  makeReport();
 }
 function jalaliDisplayDate(iso){
@@ -3090,6 +3128,7 @@ function showArchiveReport(id){
  const a=(db.archives||[]).find(x=>x.id===id);if(!a)return;
  const start=a.start||String(a.month)+"-01",end=a.end||String(a.month)+"-31";
  document.getElementById("reportFrom").value=start;document.getElementById("reportTo").value=end;
+ syncJalaliDatePicker("reportFrom");syncJalaliDatePicker("reportTo");
  makeReport();
 }
 
@@ -3178,6 +3217,7 @@ function showArchiveReport(id){
 
 /* د اپلیکیشن پیل */
 refreshAll();
+watchJalaliDatePickers();
 saveDB();
 </script>
 <script>
