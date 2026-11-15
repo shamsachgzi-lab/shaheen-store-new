@@ -1751,6 +1751,12 @@ function addSaleToCart(){
  renderSaleCart();updateSalePreview();
 }
 function updateSaleCartPrices(){
+ // د نرخ ډول بدلولو سره د ټاکل شوي جنس د نرخ خانه هم تازه کړه
+ const selected=db.products.find(p=>String(p.id)===String(value("saleProduct")));
+ const unit=value("saleUnit")||(selected?.tradeUnit||selected?.unit||"واحد");
+ const priceInput=document.getElementById("salePrice");
+ if(selected&&priceInput)priceInput.value=saleUnitPrice(selected,unit).toFixed(4).replace(/0+$/,"").replace(/\.$/,"");
+ // په کارټ کې مخکې اضافه شوي جنسونه هم د نوي نرخ ډول ته واړوه
  saleCart.forEach(x=>{const p=db.products.find(z=>z.id===x.productId);if(p)x.price=saleUnitPrice(p,x.unit);});
  renderSaleCart();updateSalePreview();
 }
