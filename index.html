@@ -1535,6 +1535,8 @@ function runStorageDiagnostic(){
  }
  const runtimeProducts=Array.isArray(db?.products)?db.products.length:"ناسم";
  const runtimeCustomers=Array.isArray(db?.customers)?db.customers.length:"ناسم";
+ const activePage=[...document.querySelectorAll("main section")].find(x=>!x.classList.contains("hidden"))?.id||"نه ده معلوم";
+ try{if(activePage==="products")renderProducts();if(activePage==="customers")renderCustomers();}catch(e){console.error("Safe list render diagnostic:",e);}
  const currentRaw=localStorage.getItem(DB_KEY);
  let storedProducts="—",storedCustomers="—",storageError=false;
  try{const parsed=JSON.parse(currentRaw||"null");const root=parsed?.database&&typeof parsed.database==="object"?parsed.database:parsed;storedProducts=Array.isArray(root?.products)?root.products.length:"—";storedCustomers=Array.isArray(root?.customers)?root.customers.length:"—";}catch(e){storageError=true;}
@@ -1819,7 +1821,7 @@ async function addProduct(){
 }
 function renderProducts(){
  const q=value("productSearch").toLowerCase();
- const list=db.products.filter(p=>String(p.name).toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q));
+ const list=(Array.isArray(db.products)?db.products:[]).filter(p=>p&&typeof p==="object"&&(String(p.name??"").toLowerCase().includes(q)||String(p.code??"").toLowerCase().includes(q)));
  const count=document.getElementById("productCount");if(count)count.textContent=db.products.length+" جنس";
  document.getElementById("productList").innerHTML=list.map(p=>{
   const base=p.unit||"واحد",trade=p.tradeUnit||base,factor=Math.max(0.000001,Number(p.unitFactor)||1);
@@ -2497,9 +2499,10 @@ function renderCustomers(){
  if(customerRoot?.classList.contains("customer-form-open"))return;
  customerRoot?.classList.remove("customer-ledger-open");
  const q=value("customerSearch").toLowerCase();
- const active=db.customers.filter(c=>(c.type||"active")!=="old");
- const old=db.customers.filter(c=>c.type==="old");
- const debtOf=list=>list.reduce((n,c)=>n+Number(c.debt||0),0);
+ const customerRecords=Array.isArray(db.customers)?db.customers.filter(c=>c&&typeof c==="object"):[];
+ const active=customerRecords.filter(c=>(c.type||"active")!=="old");
+ const old=customerRecords.filter(c=>c.type==="old");
+ const debtOf=list=>list.reduce((n,c)=>n+Number(c?.debt||0),0);
  document.getElementById("activeCustomerDebt").textContent=money(debtOf(active));
  document.getElementById("oldCustomerDebt").textContent=money(debtOf(old));
  document.getElementById("allCustomerDebt").textContent=money(debtOf(db.customers));
@@ -2525,7 +2528,7 @@ function renderCustomers(){
   };
   document.getElementById("customerDailyReport").innerHTML=customerReport(customerReceipts.filter(p=>String(p.date||"").slice(0,10)===todayKey),"نن هېڅ مشتری پیسې نه دي راکړې");
   document.getElementById("customerMonthlyReport").innerHTML=customerReport(customerReceipts.filter(p=>String(p.date||"").slice(0,7)===monthKey),"په دې میاشت کې پیسې نه دي ترلاسه شوې");
- const base=customerView==="active"?active:customerView==="old"?old:db.customers;
+ const base=customerView==="active"?active:customerView==="old"?old:customerRecords;
  const list=base.filter(c=>String(c.name).toLowerCase().includes(q)||String(c.father||"").toLowerCase().includes(q)||String(c.phone||"").includes(q)||String(c.village||"").toLowerCase().includes(q)||String(c.area||"").toLowerCase().includes(q));
  const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي"};
  document.getElementById("customerListTitle").textContent=titles[customerView];
