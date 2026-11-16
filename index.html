@@ -2915,7 +2915,7 @@ function makeReport(){
   const key=(x.customerId&&String(x.customerId)!=="")?"id:"+x.customerId:"name:"+customerName.toLocaleLowerCase();
   if(!customerPurchases.has(key))customerPurchases.set(key,{name:customerName,items:[],total:0,count:0});
   const c=customerPurchases.get(key);
-  c.items.push(esc(x.productName||"جنس")+" — "+esc(x.qty)+" "+esc(x.unit||"")+" · "+money(x.total));
+  c.items.push(esc(x.productName||"جنس")+" — "+esc(x.qty)+" "+esc(unitLabel(x.unit||""))+" · "+money(x.total));
   c.total+=Number(x.total||0);c.count++;
  });
  const customerRows=[...customerPurchases.values()].map(c=>`<tr><td>${esc(c.name)}</td><td>${c.items.join("<br>")}</td><td>${c.count}</td><td>${money(c.total)}</td></tr>`);
