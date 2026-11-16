@@ -1188,7 +1188,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 
 <section id="sarafPage" class="hidden"><h3>💱 صرافي حساب</h3><div class="grid2"><div class="panel"><small>💵 زما پیسې له صراف سره</small><h2 id="sarafHeldTotal">0 AFN</h2></div><div class="panel"><small>📒 زه صراف ته پوروړی یم</small><h2 id="sarafOwedTotal">0 AFN</h2></div></div><div class="panel"><h3>➕ نوې معامله</h3><label>د معاملې ډول</label><select id="sarafType" onchange="toggleSarafCompany()"><option value="deposit">صراف ته مې پیسې ورکړې</option><option value="withdraw">له صرافه مې پیسې واخیستې</option><option value="borrow">له صرافه مې پور واخیست</option><option value="repay">صراف ته مې د پور پیسې ورکړې</option><option value="companyPayment">صراف زما له پیسو شرکت ته ورکړې</option></select><div id="sarafCompanyWrap" class="hidden"><label>کوم شرکت ته پیسې ورکړل شوې؟</label><input id="sarafCompany" placeholder="د شرکت نوم"></div><label>مبلغ (AFN)</label><input id="sarafAmount" type="number" min="0.01" step="any"><label>نېټه</label><input id="sarafDate" type="date"><label>یادښت (اختیاري)</label><input id="sarafNote"><button class="primary" onclick="addSarafTransaction()">💾 معامله ثبت کړه</button></div><div class="panel"><h3>📜 د صرافۍ معاملاتو تاریخچه</h3><div id="sarafList"></div></div></section>
 <section id="products" class="hidden">
- <div class="row" style="align-items:center;justify-content:space-between"><h3>📦 موجودي او جنسونه</h3><b id="productCount">0 جنس</b></div>
+ <div class="row" style="align-items:center;justify-content:space-between;flex-wrap:wrap"><h3>📦 موجودي او جنسونه</h3><b id="productCount">0 جنس</b><button type="button" class="gray" onclick="runStorageDiagnostic()">🔎 د معلوماتو تشخیص</button></div>
  <div class="panel">
   <label>د جنس نوم</label><input id="pName" placeholder="مثلاً وریجې"><label>د جنس عکس (اختیاري)</label><input id="pImage" type="file" accept="image/*" onchange="previewProductImage(this)"><div id="pImagePreview" class="product-image-preview">د جنس عکس دلته انتخاب کړه</div><input id="editProductImage" type="file" accept="image/*" class="hidden" onchange="saveEditedProductImage(this)"><label>بارکوډ / کوډ</label><input id="pCode" placeholder="اختیاري بارکوډ یا کوډ">
   <label>اصلي واحد (د ګدام د ساتلو واحد)</label><select id="pUnit" onchange="updateProductEntryLabels()"></select>
@@ -1278,7 +1278,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 
 <section id="customers" class="hidden">
  <div class="customer-top"><div><small>Dukan Pro</small><h3>شاهین فروشگاه</h3></div><span>فارسي</span></div>
- <div class="customer-addbar"><button class="primary" onclick="toggleCustomerForm()">＋</button><b>مشتریان او پورونه</b></div>
+ <div class="customer-addbar"><button class="primary" onclick="toggleCustomerForm()">＋</button><b>مشتریان او پورونه</b><button type="button" class="gray" onclick="runStorageDiagnostic()">🔎 تشخیص</button></div>
  <div class="customer-summary">
   <div><small>اوسني مشتریان</small><b id="activeCustomerDebt">0 AFN</b></div>
   <div><small>زاړه پوروړي</small><b id="oldCustomerDebt">0 AFN</b></div>
@@ -1522,6 +1522,25 @@ if(!db.settings.shopName)db.settings.shopName="شاهین فروشگاه";
 
 
 function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(db))}
+function runStorageDiagnostic(){
+ const keys=[];
+ for(let i=0;i<localStorage.length;i++){
+  const key=localStorage.key(i);
+  if(key && /(SHAHEEN|DUKAN|DUK|STORE)/i.test(key)){
+   let parsed=null,parseError=false;
+   try{parsed=JSON.parse(localStorage.getItem(key)||"null")}catch(e){parseError=true}
+   const root=parsed?.database&&typeof parsed.database==="object"?parsed.database:parsed;
+   keys.push({key,products:Array.isArray(root?.products)?root.products.length:"—",customers:Array.isArray(root?.customers)?root.customers.length:"—",parseError});
+  }
+ }
+ const runtimeProducts=Array.isArray(db?.products)?db.products.length:"ناسم";
+ const runtimeCustomers=Array.isArray(db?.customers)?db.customers.length:"ناسم";
+ const currentRaw=localStorage.getItem(DB_KEY);
+ let storedProducts="—",storedCustomers="—",storageError=false;
+ try{const parsed=JSON.parse(currentRaw||"null");const root=parsed?.database&&typeof parsed.database==="object"?parsed.database:parsed;storedProducts=Array.isArray(root?.products)?root.products.length:"—";storedCustomers=Array.isArray(root?.customers)?root.customers.length:"—";}catch(e){storageError=true;}
+ alert("د معلوماتو خوندي تشخیص — هېڅ معلومات نه بدلوي\n\nاوسنی ادرس: "+location.origin+"\nد اپلیکیشن ذخیره: "+DB_KEY+"\n\nد اپلیکیشن روان معلومات:\nجنسونه: "+runtimeProducts+"\nمشتریان: "+runtimeCustomers+"\n\nپه همدې ذخیره کې ثبت معلومات:\nجنسونه: "+storedProducts+"\nمشتریان: "+storedCustomers+"\nد لوستلو تېروتنه: "+(storageError?"هو":"نه")+"\n\nموندل شوې ذخیرې:\n"+(keys.length?keys.map(x=>x.key+" — جنسونه: "+x.products+"، مشتریان: "+x.customers+(x.parseError?" (لوستلو تېروتنه)":"")).join("\n"):"هیڅ بله ورته ذخیره ونه موندل شوه"));
+}
+
 // د کارن په تایید د پېرود پخوانۍ تاریخچه یو ځل پاکول؛ نور حسابونه او موجودي نه بدلېږي
 if(db.settings.purchaseHistoryClearedV1!==true){
  db.purchases=[];
