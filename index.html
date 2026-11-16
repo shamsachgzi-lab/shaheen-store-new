@@ -3587,18 +3587,33 @@ if ("serviceWorker" in navigator) {
 #sales .sale-summary .sale-balance-equation strong{font-size:13px!important;color:#174b83!important;direction:ltr;white-space:normal}
 </style>
 
+
 <style>
 html,body,main,main section{overflow-anchor:none}
+input,select,textarea{scroll-margin-block:12px}
 </style>
 <script>
+/* په آیفون کې د کیبورډ د خلاصېدو پر مهال د پاڼې ناڅاپي پورته کېدل مه پرېږده */
 (function(){
- const names=["renderProducts","renderCustomers","renderCustomerDetail","renderSuppliers","renderPurchases","renderSales","renderSaleCart","renderExpenses","renderArchives","renderMonthOverview","renderCapitalPage","renderDebtLists","renderSaraf"];
- names.forEach(function(name){
-  const original=window[name];
-  if(typeof original!=="function"||original.__keepsPagePosition)return;
-  const wrapped=function(){const y=window.scrollY;const result=original.apply(this,arguments);requestAnimationFrame(function(){window.scrollTo(0,y);});return result;};
-  wrapped.__keepsPagePosition=true;window[name]=wrapped;
- });
+ let touchScrollY=null,lastTouchAt=0;
+ function rememberTouch(e){
+  const t=e.target;
+  if(t&&t.closest&&t.closest('input,select,textarea,[contenteditable="true"]')){
+   touchScrollY=window.scrollY;
+   lastTouchAt=Date.now();
+  }
+ }
+ document.addEventListener("touchstart",rememberTouch,{capture:true,passive:true});
+ document.addEventListener("pointerdown",rememberTouch,true);
+ document.addEventListener("focusin",function(e){
+  const t=e.target;
+  if(!t||!t.matches||!t.matches('input,select,textarea,[contenteditable="true"]'))return;
+  const y=(touchScrollY!==null&&Date.now()-lastTouchAt<1200)?touchScrollY:window.scrollY;
+  touchScrollY=null;
+  requestAnimationFrame(function(){window.scrollTo(0,y);});
+  setTimeout(function(){window.scrollTo(0,y);},80);
+  setTimeout(function(){window.scrollTo(0,y);},220);
+ },true);
 })();
 </script>
 </body>
