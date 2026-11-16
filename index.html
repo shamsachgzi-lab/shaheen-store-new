@@ -2418,7 +2418,8 @@ function renderCustomerDetail(){
  const payouts=(db.payments||[]).filter(p=>p.type==="customer_out"&&(p.personId===c.id||(!p.personId&&p.personName===c.name))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const sum=(a,k)=>a.reduce((n,x)=>n+Number(x[k]||0),0);
  const creditSales=sum(sales,"debt"),received=sum(receipts,"amount"),paidToCustomer=sum(payouts,"amount"),profit=sum(sales,"profit");
- const opening=Math.max(0,Number(c.debt||0)-creditSales+received);
+ const debtAddedPayouts=sum(payouts.filter(x=>x.debtAdded===true),"amount");
+ const opening=Math.max(0,Number(c.debt||0)-creditSales+received-debtAddedPayouts);
  const history=[
   ...Object.values(sales.reduce((groups,x)=>{const key=x.invoice||x.id;(groups[key]||(groups[key]={kind:"sale",date:x.date||"",id:x.id,record:{invoice:x.invoice||x.id,customer:x.customer,date:x.date,rows:[],total:0,paid:0,debt:0,profit:0}})).record.rows.push(x);const g=groups[key].record;g.total+=Number(x.total||0);g.paid+=Number(x.paid||0);g.debt+=Number(x.debt||0);g.profit+=Number(x.profit||0);return groups;},{})),
   ...receipts.map(x=>({kind:"payment",date:x.date||"",id:x.id,record:x})),
@@ -2478,13 +2479,18 @@ function saveCustomerPayout(id){
  if(amount<=0)return alert("مبلغ په سمه توګه ولیکه");
  if(amount>Number(db.cash||0))return alert("په صندوق کې دومره نغدې پیسې نشته");
  db.cash=Number(db.cash||0)-amount;
- db.payments.push({id:uid(),type:"customer_out",personId:c.id,personName:c.name,amount,date,note});
+ c.debt=Number(c.debt||0)+amount;
+ db.payments.push({id:uid(),type:"customer_out",personId:c.id,personName:c.name,amount,date,note,debtAdded:true});
  saveDB();refreshAll();renderCustomerDetail();
 }
 function deleteCustomerPayout(id){
  const p=(db.payments||[]).find(x=>x.id===id&&x.type==="customer_out");if(!p)return;
  if(!confirm("دا ورکړل شوې پیسې حذف شي؟ نغدې به بېرته صندوق ته زیاتې شي."))return;
  db.cash=Number(db.cash||0)+Number(p.amount||0);
+ if(p.debtAdded===true){
+  const c=db.customers.find(x=>x.id===p.personId)||db.customers.find(x=>x.name===p.personName);
+  if(c)c.debt=Math.max(0,Number(c.debt||0)-Number(p.amount||0));
+ }
  db.payments=db.payments.filter(x=>x.id!==id);
  saveDB();refreshAll();renderCustomerDetail();
 }
