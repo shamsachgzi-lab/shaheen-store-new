@@ -1596,10 +1596,38 @@ function runGlobalSearch(){
 }
 
 function refreshAll(){
- updateProductUnitOptions();
- if(typeof renderSettingsUnits==="function")renderSettingsUnits();
- fillProductSelects();renderProducts();renderSales();renderPurchases();
- renderCustomers();renderSuppliers();renderSaraf();renderExpenses();renderDebtLists();renderArchives();updateDashboard();renderMonthOverview();renderCapitalPage();
+ // یوازې ښکاره پاڼه تازه کړه؛ د ټولو پټو پاڼو بیا رسمول موبایل ورو کوي.
+ const active=document.querySelector("main section:not(.hidden)")?.id||"home";
+ updateDashboard();
+ if(active==="products"){
+  updateProductUnitOptions();
+  fillProductSelects();
+  renderProducts();
+ }else if(active==="sales"){
+  renderSales();
+ }else if(active==="purchases"){
+  fillProductSelects();
+  renderPurchases();
+ }else if(active==="customers"){
+  renderCustomers();
+ }else if(active==="suppliers"){
+  renderSuppliers();
+ }else if(active==="sarafPage"){
+  renderSaraf();
+ }else if(active==="expenses"){
+  fillProductSelects();
+  renderExpenses();
+ }else if(active==="debts"){
+  renderDebtLists();
+ }else if(active==="reports"){
+  renderArchives();
+  renderMonthOverview();
+ }else if(active==="capitalPage"){
+  renderCapitalPage();
+ }else if(active==="settings"){
+  updateProductUnitOptions();
+  if(typeof renderSettingsUnits==="function")renderSettingsUnits();
+ }
 }
 function fillProductSelects(){
  const sale=document.getElementById("saleProduct");
