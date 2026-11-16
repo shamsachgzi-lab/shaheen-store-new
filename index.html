@@ -2274,7 +2274,7 @@ function printSale(id){
  '.footer{text-align:center;font-size:7px;color:#555;margin-top:1mm}'+
  '@media screen{body{background:#e8edf3;padding:8px 0}.invoice{background:#fff;box-shadow:0 2px 12px #0002}}'+
  '@media print{html,body{width:58mm!important;margin:0!important;padding:0!important}.invoice{width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}.top,th,.grand{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
- '</style></head><body><main class="invoice">'+
+ '</style>\n<style id="customer-ledger-fullscreen-style">\n/* د مشتری حساب جلا صفحه: د لېست نورې برخې پټېږي */\n#customers.customer-ledger-open>.customer-top,\n#customers.customer-ledger-open>.customer-addbar,\n#customers.customer-ledger-open>.customer-summary,\n#customers.customer-ledger-open>.customer-reports,\n#customers.customer-ledger-open>.customer-tabs,\n#customers.customer-ledger-open>#customerFormPanel,\n#customers.customer-ledger-open>.customer-list-head{display:none!important}\n#customers.customer-ledger-open>.panel:last-child{display:block!important;margin:0;padding:10px;border-radius:14px;min-height:65vh}\n#customers.customer-ledger-open #customerSearch,\n#customers.customer-ledger-open #invoiceEditModal{display:none!important}\n#customers.customer-ledger-open .customer-detail{max-width:760px;margin:0 auto}\n#customers.customer-ledger-open .customer-detail>button:first-child{position:sticky;top:5px;z-index:5;box-shadow:0 2px 8px #00000012}\n</style>\n</head><body><main class="invoice">'+
  '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
@@ -2438,6 +2438,7 @@ function openCustomerLedger(id){
  renderCustomers();
 }
 function renderCustomers(){
+ document.getElementById("customers")?.classList.remove("customer-ledger-open");
  if(currentCustomerId){renderCustomerDetail();return;}
  const q=value("customerSearch").toLowerCase();
  const active=db.customers.filter(c=>(c.type||"active")!=="old");
@@ -2482,6 +2483,7 @@ function renderCustomers(){
  </div>`).join("")||"<p>مشتری نشته</p>";
 }
 function renderCustomerDetail(){
+ document.getElementById("customers")?.classList.add("customer-ledger-open");
  const c=db.customers.find(x=>x.id===currentCustomerId);
  if(!c){currentCustomerId="";renderCustomers();return;}
  const sales=db.sales.filter(x=>x.customerId===c.id||(!x.customerId&&x.customer===c.name)).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
