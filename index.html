@@ -2580,11 +2580,10 @@ function saveCustomerReceipt(id){
  const c=db.customers.find(x=>x.id===id);if(!c)return;
  const amount=number("customerReceiptAmount"),date=value("customerReceiptDate")||today(),note=value("customerReceiptNote");
  if(amount<=0)return alert("مبلغ په سمه توګه ولیکه");
- const debtBefore=Math.max(0,Number(c.debt||0));
- const appliedToDebt=Math.min(amount,debtBefore);
- c.debt=debtBefore-appliedToDebt;
+ const debtBefore=Number(c.debt||0);
+ c.debt=debtBefore-amount;
  db.cash=Number(db.cash||0)+amount;
- db.payments.push({id:uid(),type:"customer",personId:c.id,personName:c.name,amount,appliedToDebt,date,note});
+ db.payments.push({id:uid(),type:"customer",personId:c.id,personName:c.name,amount,appliedToDebt:amount,date,note});
  saveDB();refreshAll();renderCustomerDetail();
 }
 function deleteCustomerReceipt(id){
@@ -2780,10 +2779,10 @@ function deleteExpense(id){
 }
 
 function renderDebtLists(){
- const cs=db.customers.filter(c=>Number(c.debt)>0);
+ const cs=db.customers.filter(c=>Number(c.debt)!==0);
  const ss=db.suppliers.filter(s=>Number(s.debt)>0);
  document.getElementById("customerDebtList").innerHTML=cs.map(c=>`
- <div class="item"><b>${safe(c.name)}</b><div>پور: ${money(c.debt)}</div><div>${c.type==="old"?"پخوانی پوروړی":"فعال مشتری"}</div></div>`).join("")||"<p>د مشتریانو پور نشته</p>";
+ <div class="item"><b>${safe(c.name)}</b><div>${Number(c.debt)<0?"اضافي ورکړې پیسې / د مشتری طلب: ":"پاتې پور: "}${money(c.debt)}</div><div>${c.type==="old"?"پخوانی پوروړی":"فعال مشتری"}</div></div>`).join("")||"<p>د مشتریانو پور نشته</p>";
  document.getElementById("supplierDebtList").innerHTML=ss.map(s=>`
  <div class="item"><b>${safe(s.name)}</b><div>پور: ${money(s.debt)}</div></div>`).join("")||"<p>د شرکتونو پور نشته</p>";
  const pc=document.getElementById("payCustomer"),ps=document.getElementById("paySupplier");
