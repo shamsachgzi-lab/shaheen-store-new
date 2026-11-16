@@ -2596,8 +2596,9 @@ function filterExpenseProducts(){
  const el=document.getElementById("eProduct");if(!el)return;
  const old=el.value;
  const list=(db.products||[]).filter(p=>String(p.name||"").toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q));
- el.innerHTML=list.map(p=>'<option value="'+safe(p.id)+'">'+safe(p.name)+' — موجودي '+safe(p.qty)+' '+safe(p.unit||"")+'</option>').join("")||'<option value="">جنس ونه موندل شو</option>';
+ el.innerHTML=list.map(p=>'<option value="'+safe(p.id)+'">'+safe(p.name)+' — موجودي '+safe(p.qty)+' '+safe(unitLabel(p.unit||"واحد"))+'</option>').join("")||'<option value="">جنس ونه موندل شو</option>';
  if(list.some(p=>String(p.id)===String(old)))el.value=old;
+ else if(list.length)el.value=String(list[0].id);
  updateExpenseProductInfo();
 }
 function updateExpenseProductInfo(){
@@ -2607,10 +2608,10 @@ function updateExpenseProductInfo(){
  const main=p.unit||"واحد",trade=p.tradeUnit||main;
  if(unit){
   const old=unit.value;
-  unit.innerHTML='<option value="main">'+safe(main)+'</option>'+(trade!==main?'<option value="trade">'+safe(trade)+'</option>':"");
+  unit.innerHTML='<option value="main">'+safe(unitLabel(main))+'</option>'+(trade!==main?'<option value="trade">'+safe(unitLabel(trade))+'</option>':"");
   unit.value=old==="trade"&&trade!==main?"trade":"main";
  }
- if(info)info.textContent="موجودي: "+p.qty+" "+main+" · د پېرود قیمت: "+money(p.cost)+" د "+main+" پر واحد";
+ if(info)info.textContent="موجودي: "+p.qty+" "+unitLabel(main)+" · د پېرود قیمت: "+money(p.cost)+" افغانۍ د "+unitLabel(main)+" پر واحد";
 }
 function addExpense(){
  const date=value("eDate")||today(),category=value("eCategory"),note=value("eNote");
