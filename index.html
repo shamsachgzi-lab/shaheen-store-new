@@ -2043,8 +2043,8 @@ function editSale(id){
   <div class="invoice-edit-items-title"><b>د رسید جنسونه</b><span>هر جنس جلا سمولای شې</span></div>
   <div id="editInvoiceLines"></div>
   <div class="invoice-edit-add"><select id="editInvoiceAddProduct"><option value="">نوی جنس انتخاب کړه</option>${db.products.map(p=>`<option value="${safe(p.id)}">${safe(p.name)}</option>`).join("")}</select><button type="button" class="gray" onclick="addInvoiceEditLine()">＋ جنس اضافه کړه</button></div>
-  <label>تخفیف (AFN)</label><input id="editInvoiceDiscount" type="number" min="0" step="any" value="${discount}">
-  <label>ورکړل شوې پیسې (نغدي)</label><input id="editInvoicePaid" type="number" min="0" step="any" value="${paid}">
+  <label>تخفیف (AFN)</label><input id="editInvoiceDiscount" type="number" min="0" step="any" value="${discount}" oninput="updateInvoiceEditSummary()">
+  <label>ورکړل شوې پیسې (نغدي)</label><input id="editInvoicePaid" type="number" min="0" step="any" value="${paid}" oninput="updateInvoiceEditSummary()">
   <div class="invoice-edit-summary" id="editInvoiceSummary"></div>
   <div class="invoice-edit-actions"><button type="button" class="primary" onclick="saveInvoiceEdit()">💾 اصلاح ذخیره کړه</button><button type="button" class="gray" onclick="printSale('${safe(selected.id)}')">🖨 چاپ</button></div>
  </div></div>`;
