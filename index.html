@@ -1303,7 +1303,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <select id="eCategory" onchange="toggleStockExpenseFields()"><option value="cash">نغدي لګښت (له ګټې کمېږي)</option><option value="cash_nonprofit">نغدي فیس (یوازې له نغدو کمېږي)</option><option value="stock">د دکان له موجودۍ مصرف</option></select>
   <div id="stockExpenseFields" class="hidden">
    <label>🔎 د موجودۍ جنس ولټوه</label><input id="eProductSearch" type="search" placeholder="د جنس نوم یا کوډ ولیکه..." oninput="filterExpenseProducts()">
-   <label>جنس انتخاب کړه</label><select id="eProduct" onchange="updateExpenseProductInfo()"></select>
+   <label>جنس انتخاب کړه</label><select id="eProduct" class="hidden" onchange="updateExpenseProductInfo()"></select><div id="eProductResults" class="expense-product-results"></div>
    <div id="eProductInfo" class="notice"></div>
    <div class="row"><div><label>مصرف شوی مقدار</label><input id="eQty" type="number" min="0.01" step="any" value="1"></div><div><label>واحد</label><select id="eUnit" onchange="updateExpenseProductInfo()"></select></div></div>
   </div>
@@ -2208,7 +2208,7 @@ function printSale(id){
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
- note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main></body></html>');
+ note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main>\n<style>.expense-product-results{display:grid;grid-template-columns:1fr;gap:7px;margin:8px 0 12px}.expense-product-option{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#172033;text-align:right;font:inherit;cursor:pointer}.expense-product-option span{font-size:12px;color:#475569;white-space:nowrap}.expense-product-option.selected{border:2px solid #16834a;background:#eefbf3}.expense-product-option:active{background:#e0f2fe}</style>\n</body></html>');
  w.document.close();w.focus();setTimeout(()=>w.print(),350);
 }
 function filterPurchaseProducts(){
@@ -2593,13 +2593,26 @@ function toggleStockExpenseFields(){
 }
 function filterExpenseProducts(){
  const q=(value("eProductSearch")||"").trim().toLowerCase();
- const el=document.getElementById("eProduct");if(!el)return;
+ const el=document.getElementById("eProduct"),box=document.getElementById("eProductResults");
+ if(!el||!box)return;
  const old=el.value;
- const list=(db.products||[]).filter(p=>String(p.name||"").toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q));
- el.innerHTML=list.map(p=>'<option value="'+safe(p.id)+'">'+safe(p.name)+' — موجودي '+safe(p.qty)+' '+safe(unitLabel(p.unit||"واحد"))+'</option>').join("")||'<option value="">جنس ونه موندل شو</option>';
- if(list.some(p=>String(p.id)===String(old)))el.value=old;
- else if(list.length)el.value=String(list[0].id);
+ const list=(db.products||[]).filter(p=>
+  String(p.name||"").toLowerCase().includes(q)||
+  String(p.code||"").toLowerCase().includes(q)||
+  String(p.barcode||p.barCode||"").toLowerCase().includes(q)
+ );
+ el.innerHTML=list.map(p=>'<option value="'+safe(p.id)+'">'+safe(p.name)+'</option>').join("")||'<option value="">جنس ونه موندل شو</option>';
+ const selected=list.find(p=>String(p.id)===String(old))||list[0];
+ if(selected)el.value=String(selected.id);
+ box.innerHTML=list.length?list.slice(0,40).map(p=>'<button type="button" class="expense-product-option '+(selected&&String(selected.id)===String(p.id)?'selected':'')+'" onclick="chooseExpenseProduct(\''+String(p.id).replace(/'/g,"\\\\'")+'\')"><b>'+safe(p.name)+'</b><span>موجودي: '+safe(p.qty)+' '+safe(unitLabel(p.unit||"واحد"))+'</span></button>').join(""):'<div class="notice">جنس ونه موندل شو</div>';
  updateExpenseProductInfo();
+}
+function chooseExpenseProduct(id){
+ const el=document.getElementById("eProduct");
+ if(!el)return;
+ el.value=String(id);
+ updateExpenseProductInfo();
+ filterExpenseProducts();
 }
 function updateExpenseProductInfo(){
  const p=(db.products||[]).find(x=>String(x.id)===String(value("eProduct")));
