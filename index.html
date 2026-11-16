@@ -1209,9 +1209,9 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
  <div class="panel"><input id="productSearch" placeholder="🔍 د جنس نوم ولټوه"><div id="productList"></div></div>
 </section>
 
-<section id="sales" class="hidden" style="height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;position:static!important;display:block">
- <div class="panel sale-page" style="height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;position:static!important;display:block;width:100%;box-sizing:border-box">
-  <div class="sale-blue-header"><div><small>SHAHEEN WHOLESALE STORE</small><h3>نوی خرڅلاو</h3></div><span>🧾</span></div>
+<section id="sales" class="hidden sale-overlay">
+ <div class="panel sale-page">
+  <div class="sale-blue-header"><div><small>SHAHEEN WHOLESALE STORE</small><h3>نوی خرڅلاو</h3></div><button type="button" class="sale-modal-close" onclick="show(&quot;home&quot;)">✕</button></div>
   <div class="sale-simple sale-invoice-details">
    <div><label>مشتری</label><input id="saleCustomer" autocomplete="off" placeholder="د مشتری نوم" oninput="searchSaleCustomers()"><div id="saleCustomerResults" class="sale-customer-results hidden"></div></div>
    <div class="sale-date-row sale-date-top">
@@ -1611,26 +1611,12 @@ function updateSaleDateLabel(){
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function show(id,btn){
- document.querySelectorAll("main section").forEach(s=>{s.classList.add("hidden");s.style.removeProperty("position");s.style.removeProperty("inset");s.style.removeProperty("width");s.style.removeProperty("height");s.style.removeProperty("max-height");s.style.removeProperty("overflow-y");s.style.removeProperty("z-index");s.style.removeProperty("background");s.style.removeProperty("padding-bottom");});
- const active=document.getElementById(id);
- active?.classList.remove("hidden");
- if(active&&id!=="home"){
-  active.style.setProperty("position","fixed","important");
-  active.style.setProperty("inset","0","important");
-  active.style.setProperty("width","100%","important");
-  active.style.setProperty("height","100dvh","important");
-  active.style.setProperty("max-height","100dvh","important");
-  active.style.setProperty("overflow-y","auto","important");
-  active.style.setProperty("-webkit-overflow-scrolling","touch","important");
-  active.style.setProperty("overscroll-behavior","contain","important");
-  active.style.setProperty("z-index","25","important");
-  active.style.setProperty("background","#f4f6fa","important");
-  active.style.setProperty("padding-bottom","calc(100px + env(safe-area-inset-bottom))","important");
- }
- document.body.classList.toggle("screen-open",!!active&&id!=="home");
+ document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+ const active=document.getElementById(id);active?.classList.remove("hidden");
+ document.body.classList.toggle("sale-modal-open",id==="sales");
  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
  if(btn)btn.classList.add("active");
- refreshAll();window.scrollTo(0,0);
+ refreshAll();if(id!=="sales")window.scrollTo(0,0);
 }
 function toggleLang(){
  alert("دا نسخه یوازې په پښتو ژبه ده.");
@@ -3613,6 +3599,12 @@ body.screen-open .brand-header{display:none!important}
 body.screen-open nav{z-index:60!important}
 body.screen-open main{overflow:visible!important}
 body.screen-open main>section:not(.hidden){overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+#sales.sale-overlay:not(.hidden){display:flex!important;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;z-index:55!important;background:#17203370!important;align-items:flex-end!important;justify-content:center!important;overflow:hidden!important;padding:0!important;margin:0!important}
+#sales.sale-overlay .sale-page{position:relative!important;width:100%!important;max-width:620px!important;height:auto!important;max-height:92dvh!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;box-sizing:border-box!important;margin:0 auto!important;border-radius:22px 22px 0 0!important;padding:14px 12px calc(24px + env(safe-area-inset-bottom))!important}
+.sale-modal-close{background:#ffffff30;color:white;border:1px solid #ffffff55;border-radius:50%;width:38px;height:38px;font-size:20px;flex:0 0 38px;padding:0}
+#sales .sale-blue-header{position:sticky!important;top:-14px!important;z-index:5!important;margin:-14px -12px 14px!important;padding:14px 12px!important}
+body.sale-modal-open{overflow:hidden!important;height:100%!important}
 </style>
 <script>
 /* په آیفون کې د کیبورډ د خلاصېدو پر مهال د پاڼې ناڅاپي پورته کېدل مه پرېږده */
