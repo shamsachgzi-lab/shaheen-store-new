@@ -1203,7 +1203,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <div class="sale-summary">
    <div><span>مجموع</span><strong id="saleSubtotalPreview">AFN 0</strong></div>
    <div><span>تخفیف</span><strong id="saleDiscountPreview">AFN 0</strong></div>
-   <div class="sale-total"><span>وروستی مبلغ</span><strong id="saleTotalPreview">AFN 0</strong></div>
+   <div class="sale-total"><span>ټول مبلغ</span><strong id="saleTotalPreview">AFN 0</strong></div>
    <div class="sale-cash-line"><span>💵 نغدې ترلاسه شوې (د همدې رسید)</span><strong id="salePaidPreview">AFN 0</strong></div>
    <div class="sale-debt-line"><span>📕 پاتې پور (د همدې رسید)</span><strong id="saleDebtPreview">AFN 0</strong></div>
    <div class="sale-balance-equation"><span>د حساب تصدیق</span><strong id="saleBalanceCheck">وروستی مبلغ = نغدې + پاتې پور</strong></div>
@@ -2204,10 +2204,10 @@ function printSale(id){
  '@media screen{body{background:#e8edf3;padding:8px 0}.invoice{background:#fff;box-shadow:0 2px 12px #0002}}'+
  '@media print{html,body{width:58mm!important;margin:0!important;padding:0!important}.invoice{width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}.top,th,.grand{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
  '</style></head><body><main class="invoice">'+
- '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">د خرڅلاو رسید</div></header>'+
+ '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
- '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>نغدي ورکړه</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
+ '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main></body></html>');
  w.document.close();w.focus();setTimeout(()=>w.print(),350);
 }
