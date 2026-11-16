@@ -2549,8 +2549,8 @@ function renderCustomers(){
   </div>
   <div class="customer-row-debt">${money(c.debt)}</div>
  </div>`).join("")||"<p>مشتری نشته</p>";
-window.renderCustomers=renderCustomers;
 }
+window.renderCustomers=renderCustomers;
 function renderCustomerDetail(){
  document.getElementById("customers")?.classList.add("customer-ledger-open");
  const c=db.customers.find(x=>x.id===currentCustomerId);
