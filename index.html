@@ -1265,7 +1265,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <label>د پخواني پور اندازه</label><input id="cDebt" type="number" min="0" value="0">
   <label>د مشتری ډول</label>
   <select id="cType"><option value="active">اوسنی مشتری</option><option value="old">پخوانی پور لرونکی</option></select>
-  <button class="primary" onclick="window.addCustomer()">مشتری ثبت کړه</button>
+  <button type="button" id="addCustomerBtn" class="primary">مشتری ثبت کړه</button>
  </div>
  <div class="customer-list-head"><div><b id="customerListTitle">ټول مشتریان</b><small id="customerListCount">0</small></div><b id="customerListTotal">0 AFN</b></div>
  <div class="panel"><input id="customerSearch" placeholder="🔍 د مشتری نوم یا شمېره ولټوه"><div id="customersList"></div>
@@ -3129,6 +3129,14 @@ function restoreData(){
 /* د لټون او انتخابونو فعالول */
 document.getElementById("productSearch").addEventListener("input",renderProducts);
 document.getElementById("customerSearch").addEventListener("input",renderCustomers);
+
+/* د مشتری د ثبت تڼۍ: مستقیم event او د تېروتنې ښکاره کول */
+document.getElementById("addCustomerBtn")?.addEventListener("click",function(){
+ try{
+  if(typeof window.addCustomer!=="function"){alert("د مشتری د ثبت برخه فعاله نه ده؛ پاڼه یو ځل تازه کړه.");return;}
+  window.addCustomer();
+ }catch(e){alert("د مشتری ثبت کې ستونزه: "+(e&&e.message?e.message:"ناڅرګنده تېروتنه"));}
+});
 
 /* د مشتری د ثبت باوري نسخه — د اپ د وروستي script له لارې */
 window.addCustomer=function(){
