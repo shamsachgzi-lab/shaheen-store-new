@@ -2132,8 +2132,10 @@ function editSale(id){
   <div class="invoice-edit-summary" id="editInvoiceSummary"></div>
   <div class="invoice-edit-actions"><button type="button" class="primary" onclick="saveInvoiceEdit()">💾 اصلاح ذخیره کړه</button><button type="button" class="gray" onclick="printSale('${safe(selected.id)}')">🖨 چاپ</button></div>
  </div></div>`;
+ const pageScroll=window.scrollY;
  box.classList.remove("hidden");
  renderInvoiceEditLines();
+ requestAnimationFrame(()=>window.scrollTo(0,pageScroll));
 }
 function closeInvoiceEdit(){const box=document.getElementById("invoiceEditModal");if(box){box.classList.add("hidden");box.innerHTML="";}invoiceEditRows=[];invoiceEditId="";}
 function renderInvoiceEditLines(){
@@ -2433,7 +2435,7 @@ function setCustomerView(view){
  ["all","active","old"].forEach(k=>document.getElementById("customerTab"+(k==="all"?"All":k==="active"?"Active":"Old"))?.classList.toggle("selected",k===view));
  renderCustomers();
 }
-function toggleCustomerForm(){const root=document.getElementById("customers"),panel=document.getElementById("customerFormPanel");if(!root||!panel)return;const opening=!root.classList.contains("customer-form-open");root.classList.remove("customer-ledger-open");root.classList.toggle("customer-form-open",opening);panel.classList.toggle("hidden",!opening);if(opening){currentCustomerId="";setTimeout(()=>document.getElementById("cName")?.focus(),50);} }
+function toggleCustomerForm(){const root=document.getElementById("customers"),panel=document.getElementById("customerFormPanel");if(!root||!panel)return;const opening=!root.classList.contains("customer-form-open");root.classList.remove("customer-ledger-open");root.classList.toggle("customer-form-open",opening);panel.classList.toggle("hidden",!opening);if(opening){currentCustomerId="";const y=window.scrollY;setTimeout(()=>{const el=document.getElementById("cName");if(el)el.focus({preventScroll:true});requestAnimationFrame(()=>window.scrollTo(0,y));},50);} }
 function openCustomerLedger(id){
  if(!db.customers.some(x=>x.id===id))return;
  currentCustomerId=id;
@@ -3228,7 +3230,7 @@ function restoreData(){
 
 /* د لټون او انتخابونو فعالول */
 document.getElementById("productSearch").addEventListener("input",renderProducts);
-document.getElementById("customerSearch").addEventListener("input",renderCustomers);
+document.getElementById("customerSearch").addEventListener("input",()=>{const y=window.scrollY;renderCustomers();requestAnimationFrame(()=>window.scrollTo(0,y));});
 
 /* د مشتری د ثبت تڼۍ: مستقیم event او د تېروتنې ښکاره کول */
 document.getElementById("addCustomerBtn")?.addEventListener("click",function(){
