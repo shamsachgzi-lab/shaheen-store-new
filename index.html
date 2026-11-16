@@ -1598,7 +1598,7 @@ function runGlobalSearch(){
 function refreshAll(){
  // یوازې ښکاره پاڼه تازه کړه؛ د ټولو پټو پاڼو بیا رسمول موبایل ورو کوي.
  const active=document.querySelector("main section:not(.hidden)")?.id||"home";
- updateDashboard();
+ if(active==="home")updateDashboard();
  if(active==="products"){
   updateProductUnitOptions();
   fillProductSelects();
@@ -1952,7 +1952,7 @@ function addSaleToCart(){
  saleCart.push({productId:p.id,productName:p.name,qty,unit,price,factor,stockQty,costAtSale:Number(p.cost)||0,baseUnit:p.unit||unit,tradeUnit:p.tradeUnit||p.unit,tradeFactor:Number(p.unitFactor)||1});
  document.getElementById("saleQty").value="1";
  document.getElementById("saleProductSearch").value="";
- filterSaleProducts();
+ document.getElementById("saleSearchResults")?.classList.add("hidden");
  const productSelect=document.getElementById("saleProduct");if(productSelect)productSelect.value="";
  renderSaleCart();updateSalePreview();
 }
@@ -2059,7 +2059,7 @@ function addSale(){
  saleCart=[];["saleCustomer","salePaid","saleDiscount","saleNote","saleProductSearch"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
  document.getElementById("saleQty").value="1";selectedSaleCustomerId="";
  document.getElementById("saleDate").value=today();updateSaleDateLabel();document.getElementById("saleCustomerResults").classList.add("hidden");
- renderSaleCart();updateSalePreview();refreshAll();
+ refreshAll();
  alert("خرڅلاو ثبت شو\nرسید: "+invoice+"\nجنسونه: "+db.sales.filter(x=>x.invoice===invoice).length+"\nټول: "+money(total)+"\nتخفیف: "+money(discount)+"\nپور: "+money(total-paid));
 }
 function renderSales(){ renderSaleCart(); updateSalePreview(); }
@@ -2557,7 +2557,11 @@ function deleteCustomer(id){
  if(Number(c.debt)>0)return alert("پور لرونکی مشتری مه حذفوه.");
  if(db.sales.some(s=>s.customerId===id))return alert("د خرڅلاو تاریخچه لري؛ حذف یې مه کوه.");
  if(confirm("مشتری حذف شي؟")){db.customers=db.customers.filter(x=>x.id!==id);saveDB();refreshAll()}
-}document.getElementById("saleProductSearch")?.addEventListener("input",filterSaleProducts);
+}let saleSearchTimer=null;
+ document.getElementById("saleProductSearch")?.addEventListener("input",()=>{
+  clearTimeout(saleSearchTimer);
+  saleSearchTimer=setTimeout(filterSaleProducts,100);
+ });
 document.getElementById("salePriceType")?.addEventListener("change",updateSaleCartPrices);
 ["salePaid","saleDiscount"].forEach(id=>document.getElementById(id)?.addEventListener("input",updateSalePreview));
 ["saleJDay","saleJMonth","saleJYear"].forEach(id=>document.getElementById(id)?.addEventListener("change",updateSaleDateLabel));
