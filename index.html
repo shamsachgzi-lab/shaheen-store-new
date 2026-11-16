@@ -1204,7 +1204,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <button class="primary purchase-save" onclick="addPurchase()">✓ پېرود ثبت کړه</button>
   <p class="notice purchase-hint">یادونه: د جنس ټاکلو سره سم واحد او د پېرود بیه په اتومات ډول راځي. نغدي ورکړه به له صندوقه کمه او پاتې پور به عرضه کوونکي ته ثبت شي.</p>
  </div>
- <div class="purchase-history panel"><div class="purchase-section-title"><b>📚 د پېرود تاریخچه</b><span>۲ · پخواني رسیدونه</span></div><label>🔍 د جنس، عرضه کوونکي یا رسید له مخې ولټوه</label><input id="purchasesSearch" placeholder="د لټون کلمه ولیکه..."><div id="purchasesList"></div></div>
+ <div class="purchase-history panel"><div class="purchase-section-title"><b>📚 د پېرود تاریخچه</b><button type="button" class="red" onclick="clearPurchaseHistory()">🗑️ ټوله تاریخچه پاکه کړه</button></div><label>🔍 د جنس، عرضه کوونکي یا رسید له مخې ولټوه</label><input id="purchasesSearch" placeholder="د لټون کلمه ولیکه..."><div id="purchasesList"></div></div>
 </section>
 
 <section id="customers" class="hidden">
@@ -1795,9 +1795,9 @@ function selectSaleCustomer(id){
 function unitLabel(name){
  name=String(name||"").trim();
  const key=name.toLowerCase();
- const aliases={bori:"بوجۍ",bory:"بوجۍ",bor:"بوجۍ",bora:"بوجۍ",sack:"بوجۍ",bag:"بوجۍ","بوري":"بوجۍ","بوری":"بوجۍ","بوجي":"بوجۍ",dana:"دانه",daana:"دانه",danah:"دانه",basta:"بسته",bastah:"بسته",cartons:"کارټن",carton:"کارټن",kg:"کیلوګرام",kilo:"کیلوګرام",kilogram:"کیلوګرام",g:"ګرام",gram:"ګرام",piece:"ټوټه",pcs:"ټوټه",bottle:"بوتل",liter:"لیټر",litre:"لیټر",packet:"پاکټ",pack:"بسته",unit:"دانه",cup:"پیاله",glass:"ګلاس",seer:"سیر"};
+ const aliases={bori:"بوجۍ",bory:"بوجۍ",bor:"بوجۍ",bora:"بوجۍ",sack:"بوجۍ",bag:"بوجۍ","بوري":"بوجۍ","بوری":"بوجۍ","بوجي":"بوجۍ",dana:"دانه",daana:"دانه",danah:"دانه",basta:"بسته",bastah:"بسته",cartons:"کارټن",carton:"کارټن",kg:"کیلو",kilo:"کیلو",kilogram:"کیلو",g:"ګرام",gram:"ګرام",piece:"ټوټه",pcs:"ټوټه",bottle:"بوتل",liter:"لیټر",litre:"لیټر",packet:"پاکټ",pack:"بسته",unit:"دانه",cup:"ګیلاس",glass:"ګیلاس",seer:"سیر"};
  const normalized=aliases[key]||name;
- const labels={"0.5kg":"نیم کیلو","کیلو":"کیلوګرام","کیلوګرام":"کیلوګرام","ګرام":"ګرام","نیم کیلو":"نیم کیلو","پیاله":"پیاله","ګیلاس":"ګلاس","دانه":"دانه","بوجۍ":"بوجۍ","کارټن":"کارټن","بسته":"بسته","ټوټه":"ټوټه","بوتل":"بوتل","لیټر":"لیټر","پاکټ":"پاکټ","سیر":"سیر"};
+ const labels={"0.5kg":"نیم کیلو","کیلو":"کیلو","کیلوګرام":"کیلو","ګرام":"ګرام","نیم کیلو":"نیم کیلو","پیاله":"ګیلاس","ګیلاس":"ګیلاس","دانه":"دانه","بوجۍ":"بوجۍ","کارټن":"کارټن","بسته":"بسته","ټوټه":"ټوټه","بوتل":"بوتل","لیټر":"لیټر","پاکټ":"پاکټ","سیر":"سیر"};
  return labels[normalized]||normalized||"واحد";
 }
 function unitWeightInKg(name){
@@ -2138,6 +2138,13 @@ function addPurchase(){
  document.getElementById("buyProductSearch").value="";
  document.getElementById("buyDate").value=today();
  refreshAll();alert("پېرود ثبت شو\nرسید: "+purchase.invoice+"\nټول: "+money(total));
+}
+function clearPurchaseHistory(){
+ if(!confirm("ایا د پېرود ټول پخواني ریکارډونه پاک کړې؟ موجودي، نغدې پیسې، د عرضه کوونکو پورونه او نور حسابونه به نه بدلېږي."))return;
+ const previous=db.purchases;
+ db.purchases=[];
+ try{saveDB();const search=document.getElementById("purchasesSearch");if(search)search.value="";renderPurchases();updateDashboard();renderCapitalPage();alert("د پېرود تاریخچه پاکه شوه. نور حسابونه هماغسې پاتې دي.");}
+ catch(e){db.purchases=previous;alert("تاریخچه پاکه نه شوه؛ معلومات خوندي پاتې دي.");}
 }
 function renderPurchases(){
  const q=value("purchasesSearch").toLowerCase();
@@ -2790,7 +2797,7 @@ function renderSettingsUnits(){
  box.innerHTML='<div class="unit-groups">'+units.map((u,i)=>{
   const count=(db.products||[]).filter(p=>p.unit===u.name||p.tradeUnit===u.name).length;
   const weight=u.type==="weight",volume=u.type==="volume";
-  const desc=u.name==="kg"?"۱ کیلوګرام":u.name==="g"?"۱ ګرام = ۰٫۰۰۱ کیلوګرام":u.name==="0.5kg"?"نیم کیلوګرام":weight?"د وزن واحد":volume?"د حجم واحد":"د شمېر او بسته بندۍ واحد";
+  const desc=u.name==="kg"?"۱ کیلو":u.name==="g"?"۱ ګرام = ۰٫۰۰۱ کیلو":u.name==="0.5kg"?"نیم کیلو":weight?"د وزن واحد":volume?"د حجم واحد":"د شمېر او بسته بندۍ واحد";
   const actions=u.locked?'<span class="unit-original">اصلي واحد</span>':`<div class="actions"><button type="button" class="gray" onclick="editCustomUnit(${i})">✏️ سمون</button><button type="button" class="red" onclick="removeCustomUnit(${i})">حذف</button></div>`;
   return `<div class="unit-card"><div class="unit-card-top"><b>${safe(unitLabel(u.name))}</b><span class="unit-type">${weight?"وزن":volume?"حجم":"شمېر"}</span></div><small>${desc}</small><div class="unit-card-bottom"><span>${count} جنسونه</span>${actions}</div></div>`;
  }).join("")+'</div>';
