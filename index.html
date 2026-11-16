@@ -1536,11 +1536,17 @@ function runStorageDiagnostic(){
  const runtimeProducts=Array.isArray(db?.products)?db.products.length:"ناسم";
  const runtimeCustomers=Array.isArray(db?.customers)?db.customers.length:"ناسم";
  const activePage=[...document.querySelectorAll("main section")].find(x=>!x.classList.contains("hidden"))?.id||"نه ده معلوم";
- try{if(activePage==="products")renderProducts();if(activePage==="customers")renderCustomers();}catch(e){console.error("Safe list render diagnostic:",e);}
+ let renderStatus="پاڼه بیا رسم نه شوه";
+ try{
+  if(activePage==="products"){renderProducts();renderStatus="د جنسونو پاڼه بیا رسم شوه";}
+  else if(activePage==="customers"){renderCustomers();renderStatus="د مشتریانو پاڼه بیا رسم شوه";}
+ }catch(e){renderStatus="د بیا رسم تېروتنه: "+String(e?.message||e);console.error("Safe list render diagnostic:",e);}
+ const visibleProductCount=document.getElementById("productCount")?.textContent||"نه شته";
+ const visibleProductRows=document.getElementById("productList")?.children?.length??"نه شته";
  const currentRaw=localStorage.getItem(DB_KEY);
  let storedProducts="—",storedCustomers="—",storageError=false;
  try{const parsed=JSON.parse(currentRaw||"null");const root=parsed?.database&&typeof parsed.database==="object"?parsed.database:parsed;storedProducts=Array.isArray(root?.products)?root.products.length:"—";storedCustomers=Array.isArray(root?.customers)?root.customers.length:"—";}catch(e){storageError=true;}
- alert("د معلوماتو خوندي تشخیص — هېڅ معلومات نه بدلوي\n\nاوسنی ادرس: "+location.origin+"\nد اپلیکیشن ذخیره: "+DB_KEY+"\n\nد اپلیکیشن روان معلومات:\nجنسونه: "+runtimeProducts+"\nمشتریان: "+runtimeCustomers+"\n\nپه همدې ذخیره کې ثبت معلومات:\nجنسونه: "+storedProducts+"\nمشتریان: "+storedCustomers+"\nد لوستلو تېروتنه: "+(storageError?"هو":"نه")+"\n\nموندل شوې ذخیرې:\n"+(keys.length?keys.map(x=>x.key+" — جنسونه: "+x.products+"، مشتریان: "+x.customers+(x.parseError?" (لوستلو تېروتنه)":"")).join("\n"):"هیڅ بله ورته ذخیره ونه موندل شوه"));
+ alert("د معلوماتو خوندي تشخیص — هېڅ معلومات نه بدلوي\n\nاوسنی ادرس: "+location.origin+"\nد اپلیکیشن ذخیره: "+DB_KEY+"\n\nد اپلیکیشن روان معلومات:\nجنسونه: "+runtimeProducts+"\nمشتریان: "+runtimeCustomers+"\n\nد پاڼې حالت:\nاوسنۍ پاڼه: "+activePage+"\nد بیا رسم نتیجه: "+renderStatus+"\nپه سکرین کې شمېر: "+visibleProductCount+"\nد جنسونو د لېست قطارونه: "+visibleProductRows+"\n\nپه همدې ذخیره کې ثبت معلومات:\nجنسونه: "+storedProducts+"\nمشتریان: "+storedCustomers+"\nد لوستلو تېروتنه: "+(storageError?"هو":"نه")+"\n\nموندل شوې ذخیرې:\n"+(keys.length?keys.map(x=>x.key+" — جنسونه: "+x.products+"، مشتریان: "+x.customers+(x.parseError?" (لوستلو تېروتنه)":"")).join("\n"):"هیڅ بله ورته ذخیره ونه موندل شوه"));
 }
 
 // د کارن په تایید د پېرود پخوانۍ تاریخچه یو ځل پاکول؛ نور حسابونه او موجودي نه بدلېږي
