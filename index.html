@@ -2342,38 +2342,7 @@ function printSale(id){
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main>\n<style>.expense-product-results{display:grid;grid-template-columns:1fr;gap:7px;margin:8px 0 12px}.expense-product-option{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#172033;text-align:right;font:inherit;cursor:pointer}.expense-product-option span{font-size:12px;color:#475569;white-space:nowrap}.expense-product-option.selected{border:2px solid #16834a;background:#eefbf3}.expense-product-option:active{background:#e0f2fe}</style>\n
 
-<script>
-/* SAFE_RENDER_PRODUCTS_FALLBACK_V1: د جنسونو د لېست خوندي رسمول؛ هېڅ ذخیره نه بدلوي. */
-window.renderProducts = function(){
-  const search=document.getElementById("productSearch");
-  const q=String(search?.value||"").toLowerCase();
-  const records=Array.isArray(db?.products)?db.products:[];
-  const list=records.filter(p=>p&&typeof p==="object"&&
-    (String(p.name??"").toLowerCase().includes(q)||String(p.code??"").toLowerCase().includes(q)));
-  const count=document.getElementById("productCount");
-  const target=document.getElementById("productList");
-  if(count)count.textContent=records.length+" جنس";
-  if(!target)return;
-  target.innerHTML=list.map(p=>{
-    const base=p.unit||"واحد",trade=p.tradeUnit||base;
-    const factor=Math.max(0.000001,Number(p.unitFactor)||1);
-    const shownQty=trade===base?Number(p.qty)||0:(Number(p.qty)||0)/factor;
-    const cost=Number(p.cost)||0;
-    const retail=productRetailPrice(p),wholesale=productWholesalePrice(p);
-    const tradeCost=cost*factor;
-    return '<div class="item product-list-item">'+
-      (p.image?'<img class="product-thumb" alt="د جنس عکس" src="'+safe(p.image)+'">':'<div class="product-thumb product-no-image">📦</div>')+
-      '<div class="product-list-info"><b>'+safe(p.name)+'</b>'+
-      '<div>موجودي: <b>'+Number(shownQty.toFixed(3))+' '+safe(unitLabel(trade))+'</b>'+
-      (trade!==base?' <small>('+Number((Number(p.qty)||0).toFixed(3))+' '+safe(unitLabel(base))+')</small>':'')+'</div>'+
-      '<div>فی '+safe(unitLabel(trade))+': پېرود '+money(tradeCost)+' · عمده '+money(wholesale)+' · پرچون '+money(retail)+'</div>'+
-      '<div>کوډ: '+safe(p.code||"-")+'</div>'+
-      '<div class="actions"><button class="gray" onclick="editProduct(\''+p.id+'\')">سمون</button>'+
-      '<button class="gray" onclick="changeProductImage(\''+p.id+'\')">عکس بدلول</button>'+
-      '<button class="red" onclick="deleteProduct(\''+p.id+'\')">حذف</button></div></div></div>';
-  }).join("")||"<p>جنس نشته</p>";
-};
-</script>
+
 
 </body></html>');
  w.document.close();w.focus();setTimeout(()=>w.print(),350);
