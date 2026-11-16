@@ -1611,8 +1611,23 @@ function updateSaleDateLabel(){
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function show(id,btn){
- document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
- document.getElementById(id)?.classList.remove("hidden");
+ document.querySelectorAll("main section").forEach(s=>{s.classList.add("hidden");s.style.removeProperty("position");s.style.removeProperty("inset");s.style.removeProperty("width");s.style.removeProperty("height");s.style.removeProperty("max-height");s.style.removeProperty("overflow-y");s.style.removeProperty("z-index");s.style.removeProperty("background");s.style.removeProperty("padding-bottom");});
+ const active=document.getElementById(id);
+ active?.classList.remove("hidden");
+ if(active&&id!=="home"){
+  active.style.setProperty("position","fixed","important");
+  active.style.setProperty("inset","0","important");
+  active.style.setProperty("width","100%","important");
+  active.style.setProperty("height","100dvh","important");
+  active.style.setProperty("max-height","100dvh","important");
+  active.style.setProperty("overflow-y","auto","important");
+  active.style.setProperty("-webkit-overflow-scrolling","touch","important");
+  active.style.setProperty("overscroll-behavior","contain","important");
+  active.style.setProperty("z-index","25","important");
+  active.style.setProperty("background","#f4f6fa","important");
+  active.style.setProperty("padding-bottom","calc(100px + env(safe-area-inset-bottom))","important");
+ }
+ document.body.classList.toggle("screen-open",!!active&&id!=="home");
  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
  if(btn)btn.classList.add("active");
  refreshAll();window.scrollTo(0,0);
@@ -3591,6 +3606,13 @@ if ("serviceWorker" in navigator) {
 <style>
 html,body,main,main section{overflow-anchor:none}
 input,select,textarea{scroll-margin-block:12px}
+
+/* د موبایل هره برخه په خپل ثابت سکرین کې سکرول کېږي؛ د کیبورډ پر مهال اصلي پاڼه نه خوځېږي */
+body.screen-open{overflow:hidden!important;height:100%!important}
+body.screen-open .brand-header{display:none!important}
+body.screen-open nav{z-index:60!important}
+body.screen-open main{overflow:visible!important}
+body.screen-open main>section:not(.hidden){overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 </style>
 <script>
 /* په آیفون کې د کیبورډ د خلاصېدو پر مهال د پاڼې ناڅاپي پورته کېدل مه پرېږده */
