@@ -1538,8 +1538,8 @@ function runStorageDiagnostic(){
  const activePage=[...document.querySelectorAll("main section")].find(x=>!x.classList.contains("hidden"))?.id||"نه ده معلوم";
  let renderStatus="پاڼه بیا رسم نه شوه";
  try{
-  if(activePage==="products"){renderProducts();renderStatus="د جنسونو پاڼه بیا رسم شوه";}
-  else if(activePage==="customers"){renderCustomers();renderStatus="د مشتریانو پاڼه بیا رسم شوه";}
+  if(activePage==="products"){if(typeof window.renderProducts!=="function")throw new Error("window.renderProducts لا نه دی فعال");window.renderProducts();renderStatus="د جنسونو پاڼه بیا رسم شوه";}
+  else if(activePage==="customers"){if(typeof window.renderCustomers!=="function")throw new Error("window.renderCustomers لا نه دی فعال");window.renderCustomers();renderStatus="د مشتریانو پاڼه بیا رسم شوه";}
  }catch(e){renderStatus="د بیا رسم تېروتنه: "+String(e?.message||e);console.error("Safe list render diagnostic:",e);}
  const visibleProductCount=document.getElementById("productCount")?.textContent||"نه شته";
  const visibleProductRows=document.getElementById("productList")?.children?.length??"نه شته";
@@ -1703,14 +1703,14 @@ function refreshAll(){
  if(active==="products"){
   updateProductUnitOptions();
   fillProductSelects();
-  renderProducts();
+  if(typeof window.renderProducts==="function")window.renderProducts();
  }else if(active==="sales"){
   renderSales();
  }else if(active==="purchases"){
   fillProductSelects();
   renderPurchases();
  }else if(active==="customers"){
-  renderCustomers();
+  if(typeof window.renderCustomers==="function")window.renderCustomers();
  }else if(active==="suppliers"){
   renderSuppliers();
  }else if(active==="sarafPage"){
@@ -1843,6 +1843,7 @@ function renderProducts(){
  <div class="actions"><button class="gray" onclick="editProduct('${p.id}')">سمون</button><button class="gray" onclick="changeProductImage('${p.id}')">عکس بدلول</button><button class="red" onclick="deleteProduct('${p.id}')">حذف</button></div></div></div>`;
  }).join("")||"<p>جنس نشته</p>";
 }
+window.renderProducts=renderProducts;
 function changeProductImage(id){
  editingProductImageId=id;const input=document.getElementById("editProductImage");input.value="";input.click();
 }
@@ -2548,6 +2549,7 @@ function renderCustomers(){
   </div>
   <div class="customer-row-debt">${money(c.debt)}</div>
  </div>`).join("")||"<p>مشتری نشته</p>";
+window.renderCustomers=renderCustomers;
 }
 function renderCustomerDetail(){
  document.getElementById("customers")?.classList.add("customer-ledger-open");
