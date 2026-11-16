@@ -2830,7 +2830,10 @@ function renderCapitalPage(){
  const customerPayouts=sum(payments.filter(p=>p.type==="customer_out"),"amount");
  const cashExpenses=sum(expenses.filter(e=>e.paymentType!=="stock"),"amount");
  const openingCash=cash-salesCash-customerReceipts+purchaseCash+supplierPayments+cashExpenses+customerPayouts;
- const grossProfit=sum(sales,"profit"),allExpenses=sum(expenses.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),netProfit=grossProfit-allExpenses;
+ const excludedMonths=new Set(Array.isArray(db.deletedProfitMonths)?db.deletedProfitMonths:[]);
+ const countedSales=sales.filter(x=>!excludedMonths.has(String(x.date||"").slice(0,7)));
+ const countedExpenses=expenses.filter(e=>e.paymentType!=="cash_nonprofit"&&!excludedMonths.has(String(e.date||"").slice(0,7)));
+ const grossProfit=sum(countedSales,"profit"),allExpenses=sum(countedExpenses,"amount"),netProfit=grossProfit-allExpenses;
  const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
  put("capitalPageTotal",total);put("capitalCash",cash);put("capitalStock",stock);
  put("capitalActiveDebt",activeDebt);put("capitalOldDebt",oldDebt);put("capitalReceivables",receivables);put("capitalPayables",payables);
@@ -2909,10 +2912,12 @@ function renderArchives(){
  }
 function deleteArchiveReport(id){
   const a=(db.archives||[]).find(x=>x.id===id);if(!a)return;
-  if(!confirm("ایا د "+a.month+" میاشتنی آرشیف راپور په بشپړ ډول حذف کړې؟ یوازې د راپور آرشیف حذف کېږي؛ خرڅلاو، پېرود، مصارف، مشتریانو پورونه، عرضه‌کوونکي پورونه او موجودي نه حذف کېږي."))return;
+  if(!confirm("ایا د "+a.month+" میاشتنی آرشیف حذف کړې؟ د دې میاشتې ناخالصه ګټه، خالصه ګټه او مصارف به د ټول وخت له مجموعې هم وایستل شي. اصلي خرڅلاو، پېرود، لګښتونو ریکارډونه، مشتریانو او عرضه‌کوونکو پورونه، نغدې پیسې او موجودي به خوندي پاتې وي."))return;
   db.archives=db.archives.filter(x=>x.id!==id);
-  saveDB();renderArchives();renderMonthOverview();
-  alert("د "+a.month+" میاشتنی آرشیف راپور حذف شو؛ اصلي معاملې او حسابونه خوندي پاتې دي.");
+  db.deletedProfitMonths=Array.isArray(db.deletedProfitMonths)?db.deletedProfitMonths:[];
+  if(!db.deletedProfitMonths.includes(a.month))db.deletedProfitMonths.push(a.month);
+  saveDB();renderArchives();renderMonthOverview();renderCapitalPage();
+  alert("د "+a.month+" آرشیف حذف شو؛ د دې میاشتې ګټه او مصارف د ټول وخت له مجموعې وایستل شول. اصلي حسابونه خوندي دي.");
 }
 function makeDailyReport(){
  show("reports");
