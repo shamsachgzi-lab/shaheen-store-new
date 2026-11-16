@@ -823,6 +823,11 @@ main{height:auto!important;min-height:0!important;overflow:visible!important}
 .invoice-edit-actions{display:grid;grid-template-columns:1fr 1fr;margin-top:12px}
 .invoice-edit-actions button{padding:13px}
 @media(max-width:380px){.invoice-edit-line-fields{gap:4px}.invoice-edit-line-fields input,.invoice-edit-line-fields select{padding:8px 4px;font-size:13px}}
+
+.invoice-edit-product-picker{min-width:0;position:relative}
+.invoice-edit-product-picker .sale-search-results{position:relative;max-height:210px;overflow:auto;z-index:2;margin-top:5px}
+.invoice-edit-add{grid-template-columns:minmax(0,1fr) auto;align-items:end}
+.invoice-edit-add>button{min-height:43px;white-space:nowrap}
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -2042,7 +2047,7 @@ function editSale(id){
   <label>نېټه</label><input id="editInvoiceDate" type="date" value="${safe(selected.date||today())}">
   <div class="invoice-edit-items-title"><b>د رسید جنسونه</b><span>هر جنس جلا سمولای شې</span></div>
   <div id="editInvoiceLines"></div>
-  <div class="invoice-edit-add"><select id="editInvoiceAddProduct"><option value="">نوی جنس انتخاب کړه</option>${db.products.map(p=>`<option value="${safe(p.id)}">${safe(p.name)}</option>`).join("")}</select><button type="button" class="gray" onclick="addInvoiceEditLine()">＋ جنس اضافه کړه</button></div>
+  <div class="invoice-edit-add"><div class="invoice-edit-product-picker"><label>🔍 د نوي جنس نوم یا بارکوډ ولټوه</label><input id="editInvoiceProductSearch" type="search" autocomplete="off" placeholder="د جنس نوم ولیکه..." oninput="filterInvoiceEditProducts()"><div id="editInvoiceProductResults" class="sale-search-results hidden"></div><select id="editInvoiceAddProduct" class="hidden"><option value="">نوی جنس انتخاب کړه</option></select></div><button type="button" class="primary" onclick="addInvoiceEditLine()">＋ جنس اضافه کړه</button></div>
   <label>تخفیف (AFN)</label><input id="editInvoiceDiscount" type="number" min="0" step="any" value="${discount}" oninput="updateInvoiceEditSummary()">
   <label>ورکړل شوې پیسې (نغدي)</label><input id="editInvoicePaid" type="number" min="0" step="any" value="${paid}" oninput="updateInvoiceEditSummary()">
   <div class="invoice-edit-summary" id="editInvoiceSummary"></div>
@@ -2075,11 +2080,30 @@ function updateInvoiceEditLine(i,field,v){
  renderInvoiceEditLines();
 }
 function removeInvoiceEditLine(i){invoiceEditRows.splice(i,1);renderInvoiceEditLines();}
+function filterInvoiceEditProducts(){
+ const q=String(document.getElementById("editInvoiceProductSearch")?.value||"").trim().toLowerCase();
+ const box=document.getElementById("editInvoiceProductResults"),select=document.getElementById("editInvoiceAddProduct");
+ if(!box||!select)return;
+ select.value="";
+ if(!q){box.innerHTML="";box.classList.add("hidden");return;}
+ const list=(db.products||[]).filter(p=>[p.name,p.code,p.barcode,p.barCode].some(v=>String(v||"").toLowerCase().includes(q))).slice(0,20);
+ box.innerHTML=list.length?list.map(p=>`<button type="button" class="sale-search-result" onclick="chooseInvoiceEditProduct('${String(p.id).replace(/'/g,"\\'")}')"><b>${safe(p.name)}</b><span>موجودي: ${Number(p.qty||0)} ${safe(unitLabel(p.unit||""))} · نرخ: ${money(productRetailPrice(p)||Number(p.wholesalePrice)||Number(p.cost)||0)}</span></button>`).join(""):'<div class="sale-no-result">جنس ونه موندل شو</div>';
+ box.classList.remove("hidden");
+}
+function chooseInvoiceEditProduct(id){
+ const p=(db.products||[]).find(x=>String(x.id)===String(id)),select=document.getElementById("editInvoiceAddProduct"),search=document.getElementById("editInvoiceProductSearch"),box=document.getElementById("editInvoiceProductResults");
+ if(!p||!select)return;
+ select.innerHTML=`<option value="${safe(p.id)}">${safe(p.name)}</option>`;select.value=p.id;
+ if(search)search.value=p.name;
+ if(box)box.classList.add("hidden");
+}
 function addInvoiceEditLine(){
  const id=document.getElementById("editInvoiceAddProduct")?.value,p=db.products.find(x=>String(x.id)===String(id));if(!p)return;
  const unit=p.tradeUnit||p.unit||"واحد",factor=saleFactorForUnit(p,unit);
  invoiceEditRows.push({id:uid(),invoice:invoiceEditId,productId:p.id,productName:p.name,qty:1,unit,unitFactor:factor,stockQty:factor,price:productRetailPrice(p)||Number(p.wholesalePrice)||Number(p.cost)||0,costAtSale:Number(p.cost)||0,subtotal:0,discount:0,total:0,paid:0,debt:0,profit:0});
  document.getElementById("editInvoiceAddProduct").value="";
+ const search=document.getElementById("editInvoiceProductSearch");if(search)search.value="";
+ const results=document.getElementById("editInvoiceProductResults");if(results){results.innerHTML="";results.classList.add("hidden");}
  renderInvoiceEditLines();
 }
 function updateInvoiceEditSummary(){
