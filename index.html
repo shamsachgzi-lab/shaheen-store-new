@@ -3267,7 +3267,7 @@ function restoreData(mergeOnly=false){
      if(customerKeys.has(key)||(name&&customerNames.has(name)))return false;
      customerKeys.add(key);if(name)customerNames.add(name);return true;
     });
-    if(!newProducts.length&&!newCustomers.length)return alert("په دې بیک‌اف کې داسې نوي جنسونه یا مشتریان ونه موندل شول چې اوسني حسابونو کې نه وي. اوسني معلومات نه دي بدل شوي.");
+    if(!newProducts.length&&!newCustomers.length)return alert("د بیک‌اف د شمېر تشخیص:\nپه زاړه فایل کې جنسونه: "+(restored.products||[]).length+"؛ اوسني جنسونه: "+(db.products||[]).length+"؛ نوي موندل شوي جنسونه: 0.\nپه زاړه فایل کې مشتریان: "+(restored.customers||[]).length+"؛ اوسني مشتریان: "+(db.customers||[]).length+"؛ نوي موندل شوي مشتریان: 0.\nاوسني معلومات نه دي بدل شوي. دا پیغام راته ولیږه.");
     if(!confirm("د زاړه بیک‌اف څخه "+newProducts.length+" نوي جنسونه او "+newCustomers.length+" نوي مشتریان به ورزیات شي. د دغو نویو مشتریانو ثبت شوی پاتې پور به هم ورسره راشي. اوسني خرڅلاو، نوي پورونه، ورکړې، نغدې پیسې، مصارف، راپورونه او موجود مشتریان به نه بدلېږي. د زړو بلونو او ورکړو جلا تاریخچه نه انتقالېږي. دوام ورکړو؟"))return;
     db.products=[...(db.products||[]),...newProducts];
     db.customers=[...(db.customers||[]),...newCustomers];
