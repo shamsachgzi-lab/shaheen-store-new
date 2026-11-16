@@ -3143,7 +3143,8 @@ function backupData(){
 function restoreData(mergeOnly=false){
  const input=document.getElementById("restoreFile");
  if(!input.files||!input.files[0])return alert("لومړی JSON فایل انتخاب کړه");
- if(!confirm("اوسني معلومات به د Backup په معلوماتو بدل شي. ډاډه یې؟"))return;
+ // د خوندي یوځای کولو په حالت کې اوسني معلومات نه بدلېږي؛ یوازې ورکې جنسونه او مشتریان ورزیاتېږي.
+ if(!mergeOnly&&!confirm("اوسني معلومات به د Backup په معلوماتو بدل شي. ډاډه یې؟"))return;
  const reader=new FileReader();
  reader.onload=()=>{
   try{
@@ -3267,7 +3268,7 @@ function restoreData(mergeOnly=false){
      customerKeys.add(key);if(name)customerNames.add(name);return true;
     });
     if(!newProducts.length&&!newCustomers.length)return alert("په دې بیک‌اف کې داسې نوي جنسونه یا مشتریان ونه موندل شول چې اوسني حسابونو کې نه وي. اوسني معلومات نه دي بدل شوي.");
-    if(!confirm("د بیک‌اف له معلوماتو څخه "+newProducts.length+" جنسونه او "+newCustomers.length+" مشتریان به ورزیات شي. اوسني خرڅلاو، راپورونه، نغدې، موجود حسابونه او نور معلومات به هماغسې پاتې وي. دوام ورکړو؟"))return;
+    if(!confirm("د زاړه بیک‌اف څخه "+newProducts.length+" نوي جنسونه او "+newCustomers.length+" نوي مشتریان به ورزیات شي. د دغو نویو مشتریانو ثبت شوی پاتې پور به هم ورسره راشي. اوسني خرڅلاو، نوي پورونه، ورکړې، نغدې پیسې، مصارف، راپورونه او موجود مشتریان به نه بدلېږي. د زړو بلونو او ورکړو جلا تاریخچه نه انتقالېږي. دوام ورکړو؟"))return;
     db.products=[...(db.products||[]),...newProducts];
     db.customers=[...(db.customers||[]),...newCustomers];
     saveDB();refreshAll();
