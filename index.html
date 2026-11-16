@@ -1204,8 +1204,9 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
    <div><span>مجموع</span><strong id="saleSubtotalPreview">AFN 0</strong></div>
    <div><span>تخفیف</span><strong id="saleDiscountPreview">AFN 0</strong></div>
    <div class="sale-total"><span>وروستی مبلغ</span><strong id="saleTotalPreview">AFN 0</strong></div>
-   <div><span>ورکړل شوې پیسې (نغدي)</span><strong id="salePaidPreview">AFN 0</strong></div>
-   <div><span>ټول پور</span><strong id="saleDebtPreview">AFN 0</strong></div>
+   <div class="sale-cash-line"><span>💵 نغدې ترلاسه شوې (د همدې رسید)</span><strong id="salePaidPreview">AFN 0</strong></div>
+   <div class="sale-debt-line"><span>📕 پاتې پور (د همدې رسید)</span><strong id="saleDebtPreview">AFN 0</strong></div>
+   <div class="sale-balance-equation"><span>د حساب تصدیق</span><strong id="saleBalanceCheck">وروستی مبلغ = نغدې + پاتې پور</strong></div>
    <div><span>ګټه</span><strong id="saleProfitPreview">AFN 0</strong></div>
   </div>
   <button type="button" class="primary sale-save-button" onclick="addSale()">خرڅلاو ثبت کړه</button>
@@ -1993,6 +1994,7 @@ function updateSalePreview(){
  document.getElementById("saleTotalPreview").textContent=money(total);
  document.getElementById("salePaidPreview").textContent=money(validPaid);
  document.getElementById("saleDebtPreview").textContent=money(debt);
+ const check=document.getElementById("saleBalanceCheck");if(check)check.textContent=money(total)+" = "+money(validPaid)+" + "+money(debt);
  const old=document.getElementById("saleProfitPreview");if(old)old.textContent=money(profit);
 }
 function setSalePayment(type){
@@ -3447,5 +3449,15 @@ if ("serviceWorker" in navigator) {
 }
 </style>
 
+
+<style>
+/* د رسید د نغدو او پاتې پور څرګند حساب */
+#sales .sale-summary .sale-cash-line{background:#eafaf1;border:1px solid #b8e7cb;border-radius:10px;margin-top:5px;padding:11px 9px!important}
+#sales .sale-summary .sale-cash-line strong{color:#087747!important;font-size:15px!important}
+#sales .sale-summary .sale-debt-line{background:#fff1f1;border:1px solid #f1c3c3;border-radius:10px;margin-top:5px;padding:11px 9px!important}
+#sales .sale-summary .sale-debt-line strong{color:#b42332!important;font-size:15px!important}
+#sales .sale-summary .sale-balance-equation{grid-column:1/-1;display:flex;flex-direction:column;align-items:flex-start;gap:5px;background:#f0f5fb;border:1px dashed #9bb5d3;border-radius:10px;padding:10px!important;color:#34516f;font-size:11px!important}
+#sales .sale-summary .sale-balance-equation strong{font-size:13px!important;color:#174b83!important;direction:ltr;white-space:normal}
+</style>
 </body>
 </html>
