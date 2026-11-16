@@ -2458,15 +2458,17 @@ function renderCustomers(){
   const receivedMonth=customerReceipts.filter(p=>String(p.date||"").slice(0,7)===monthKey).reduce((n,p)=>n+Number(p.amount||0),0);
   document.getElementById("customerReceivedToday").textContent=money(receivedToday);
   document.getElementById("customerReceivedMonth").textContent=money(receivedMonth);
+  const customerById=new Map(db.customers.map(c=>[String(c.id),c]));
+  const customerByName=new Map(db.customers.map(c=>[String(c.name),c]));
   const customerReport=(records,emptyText)=>{
    const grouped=new Map();
-   records.forEach(p=>{
-    const customer=db.customers.find(c=>c.id===p.personId)||db.customers.find(c=>c.name===p.personName);
-    const key=customer?customer.id:(p.personName||"unknown");
-    const item=grouped.get(key)||{name:customer?customer.name:(p.personName||"نامعلوم مشتری"),total:0};
+   for(const p of records){
+    const customer=(p.personId!=null?customerById.get(String(p.personId)):null)||customerByName.get(String(p.personName));
+    const key=customer?String(customer.id):(p.personName||"unknown");
+    let item=grouped.get(key);
+    if(!item){item={name:customer?customer.name:(p.personName||"نامعلوم مشتری"),total:0};grouped.set(key,item);}
     item.total+=Number(p.amount||0);
-    grouped.set(key,item);
-   });
+   }
    const rows=[...grouped.values()].sort((a,b)=>b.total-a.total);
    return rows.length?rows.map(x=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 2px;border-bottom:1px solid #e5e7eb"><b>${safe(x.name)}</b><strong style="color:#087f4b;white-space:nowrap">${money(x.total)}</strong></div>`).join(""):`<small>${emptyText}</small>`;
   };
