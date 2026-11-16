@@ -1442,10 +1442,10 @@ if(!Number.isFinite(Number(db.cash)))db.cash=0;
 if(!db.language)db.language="ps";
 if(!db.settings||typeof db.settings!=="object")db.settings={};
 if(!Array.isArray(db.settings.units))db.settings.units=[
- {name:"kg",type:"weight",base:"kg",factor:1,locked:true},{name:"g",type:"weight",base:"kg",factor:0.001,locked:true},
+ {name:"کیلو",type:"weight",base:"kg",factor:1,locked:true},{name:"ګرام",type:"weight",base:"kg",factor:0.001,locked:true},
  {name:"بوجۍ",type:"count",locked:true},{name:"ټوټه",type:"count",locked:true},{name:"کارټن",type:"count",locked:true},
  {name:"بوتل",type:"count",locked:true},{name:"لیټر",type:"volume",locked:true},{name:"پاکټ",type:"count",locked:true},
- {name:"دانه",type:"count",locked:true},{name:"بسته",type:"count",locked:true},{name:"پیاله",type:"count",locked:true},
+ {name:"دانه",type:"count",locked:true},{name:"بسته",type:"count",locked:true},{name:"ګیلاس",type:"count",locked:true},
  {name:"ګلاس",type:"count",locked:true},{name:"سیر",type:"count",locked:true},{name:"0.5kg",type:"weight",base:"kg",factor:0.5,locked:true}
 ];
 if(!db.settings.currency)db.settings.currency="AFN";
@@ -1453,6 +1453,12 @@ if(!db.settings.shopName)db.settings.shopName="شاهین فروشگاه";
 
 
 function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(db))}
+// د کارن په تایید د پېرود پخوانۍ تاریخچه یو ځل پاکول؛ نور حسابونه او موجودي نه بدلېږي
+if(db.settings.purchaseHistoryClearedV1!==true){
+ db.purchases=[];
+ db.settings.purchaseHistoryClearedV1=true;
+ saveDB();
+}
 function money(n){return (Number(n)||0).toLocaleString("en-US")+" "+(db.settings?.currency||"AFN")}
 function firstSavedPrice(...values){for(const v of values){const n=Number(v);if(Number.isFinite(n)&&n>0)return n;}return 0;}
 function productRetailPrice(p){return firstSavedPrice(p?.retailPrice,p?.retail,p?.price,p?.salePrice);}
@@ -2097,7 +2103,7 @@ function updatePurchaseUnitOptions(){
  const unit=document.getElementById("buyUnit");if(!unit)return;
  if(!p){unit.innerHTML='<option value="">لومړی جنس وټاکه</option>';return;}
  const choices=getProductUnitChoices(p),old=unit.value;
- unit.innerHTML=choices.map(x=>`<option value="${safe(x.name)}">${safe(x.name)}</option>`).join("");
+ unit.innerHTML=choices.map(x=>`<option value="${safe(x.name)}">${safe(unitLabel(x.name))}</option>`).join("");
  unit.value=choices.some(x=>x.name===old)?old:(p.tradeUnit||p.unit);
  updatePurchasePriceForUnit();
 }
@@ -2839,7 +2845,7 @@ function updateProductUnitOptions(){
  db.settings=db.settings||{};db.settings.units=Array.isArray(db.settings.units)?db.settings.units:[];
  ["pUnit","pTradeUnit"].forEach(id=>{
   const el=document.getElementById(id);if(!el)return;const old=el.value;
-  el.innerHTML=db.settings.units.map(u=>`<option value="${safe(u.name)}">${safe(u.name)}</option>`).join("");
+  el.innerHTML=db.settings.units.map(u=>`<option value="${safe(u.name)}">${safe(unitLabel(u.name))}</option>`).join("");
   if(db.settings.units.some(u=>u.name===old))el.value=old;
  });
 }
