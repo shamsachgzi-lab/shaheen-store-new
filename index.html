@@ -2906,9 +2906,9 @@ function makeReport(){
  const table=(headers,rows,empty)=>`
  <div class="daily-table-wrap"><table class="daily-report-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
  <tbody>${rows.length?rows.join(""):`<tr><td colspan="${headers.length}" class="daily-empty">${empty}</td></tr>`}</tbody></table></div>`;
- const purchaseRows=purchases.map(p=>`<tr><td>${esc(p.productName||"—")}</td><td>${esc(p.qty)} ${esc(p.unit||"")}</td><td>${money(p.total)}</td><td>${money(p.paid)}</td></tr>`);
+ const purchaseRows=purchases.map(p=>`<tr><td>${esc(p.productName||"—")}</td><td>${esc(p.qty)} ${esc(unitLabel(p.unit||""))}</td><td>${money(p.total)}</td><td>${money(p.paid)}</td></tr>`);
  const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
- const saleRows=sales.map(x=>`<tr><td>${esc(x.productName||"—")}</td><td>${esc(x.customer||"نغدي مشتری")}</td><td>${esc(x.qty)} ${esc(x.unit||"")}</td><td>${money(x.total)}</td></tr>`);
+ const saleRows=sales.map(x=>`<tr><td>${esc(x.productName||"—")}</td><td>${esc(x.customer||"نغدي مشتری")}</td><td>${esc(x.qty)} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
  const customerPurchases=new Map();
  sales.forEach(x=>{
   const customerName=String(x.customer||"نغدي مشتری").trim()||"نغدي مشتری";
