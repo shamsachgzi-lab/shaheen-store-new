@@ -807,6 +807,22 @@ main{height:auto!important;min-height:0!important;overflow:visible!important}
 .unit-card .actions button{font-size:10px;padding:6px}
 @media(max-width:360px){.purchase-page-head h3{font-size:16px}.purchase-add-product{font-size:11px;padding:8px}.unit-groups{gap:6px}.unit-card{padding:8px}.unit-card-top b{font-size:13px}}
 
+
+#invoiceEditModal{position:fixed;inset:0;z-index:9999}
+.invoice-edit-shade{position:absolute;inset:0;background:#0f172a99;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:14px 8px}
+.invoice-edit-window{width:min(100%,680px);background:#fff;border-radius:16px;padding:15px;box-shadow:0 15px 50px #0004;margin:auto;max-height:none}
+.invoice-edit-head,.invoice-edit-line-head,.invoice-edit-items-title,.invoice-edit-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.invoice-edit-head h3{margin:4px 0 12px;color:#145bb5}
+.invoice-edit-window label{display:block;font-weight:700;margin:9px 0 4px}
+.invoice-edit-window input,.invoice-edit-window select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;background:#fff}
+.invoice-edit-line{border:1px solid #dbe3ed;border-radius:11px;padding:10px;margin:9px 0;background:#f8fafc}
+.invoice-edit-line-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.invoice-edit-line small{display:block;text-align:left;margin-top:8px}
+.invoice-edit-add{display:grid;grid-template-columns:1fr auto;gap:8px;margin:12px 0}
+.invoice-edit-summary{background:#edf4ff;padding:12px;border-radius:10px;line-height:2;margin:12px 0}
+.invoice-edit-actions{display:grid;grid-template-columns:1fr 1fr;margin-top:12px}
+.invoice-edit-actions button{padding:13px}
+@media(max-width:380px){.invoice-edit-line-fields{gap:4px}.invoice-edit-line-fields input,.invoice-edit-line-fields select{padding:8px 4px;font-size:13px}}
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -1246,7 +1262,8 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <button class="primary" onclick="window.addCustomer()">مشتری ثبت کړه</button>
  </div>
  <div class="customer-list-head"><div><b id="customerListTitle">ټول مشتریان</b><small id="customerListCount">0</small></div><b id="customerListTotal">0 AFN</b></div>
- <div class="panel"><input id="customerSearch" placeholder="🔍 د مشتری نوم یا شمېره ولټوه"><div id="customersList"></div></div>
+ <div class="panel"><input id="customerSearch" placeholder="🔍 د مشتری نوم یا شمېره ولټوه"><div id="customersList"></div>
+ <div id="invoiceEditModal" class="hidden"></div></div>
 </section>
 
 <section id="suppliers" class="hidden">
@@ -2008,25 +2025,106 @@ function addSale(){
 }
 function renderSales(){ renderSaleCart(); updateSalePreview(); }
 
+let invoiceEditRows=[];
+let invoiceEditId="";
 function editSale(id){
- const s=db.sales.find(x=>x.id===id);if(!s)return;
- const qt=prompt("نوی تعداد ("+s.unit+")",s.qty);if(qt===null)return;
- const pt=prompt("نوی فی واحد قیمت",s.price);if(pt===null)return;
- const dt=prompt("نوی تخفیف",s.discount||0);if(dt===null)return;
- const pay=prompt("نوې ورکړل شوې پیسې",s.paid||0);if(pay===null)return;
- const cn=prompt("د مشتری نوم (تش = نغدي)",s.customer==="نغدي مشتری"?"":s.customer);if(cn===null)return;
- const qty=Number(qt),price=Number(pt),discount=Number(dt),paid=Number(pay),total=qty*price-discount;
- if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<0||!Number.isFinite(discount)||discount<0||discount>qty*price||!Number.isFinite(paid)||paid<0||paid>total)return alert("شمېرې سمې نه دي");
- const p=db.products.find(x=>x.id===s.productId);if(!p)return alert('جنس ونه موندل شو');
- const oldQty=Number(s.stockQty)||((Number(s.qty)||0)*(Number(s.unitFactor)||1)),factor=Number(s.unitFactor)||Number(p.unitFactor)||1,oldPaid=Number(s.paid)||0,available=Number(p.qty)+oldQty;
- if(qty*factor>available)return alert("موجودي بسنه نه کوي");
- if(Number(db.cash)+paid-oldPaid<0)return alert("صندوق کې د سمون لپاره کافي نغدې نشته");
- const oldC=db.customers.find(c=>c.id===s.customerId);if(oldC)oldC.debt=Math.max(0,Number(oldC.debt||0)-Number(s.debt||0));
- let c=null;if(cn.trim()){c=db.customers.find(x=>x.name.toLowerCase()===cn.trim().toLowerCase());if(!c){c={id:uid(),name:cn.trim(),phone:'',debt:0,type:'active',created:today()};db.customers.push(c)}}
- const debt=total-paid;if(debt>0&&!c){if(oldC)oldC.debt+=Number(s.debt||0);return alert('د پور لپاره مشتری حتمي دی')}
- p.qty=available-qty*factor;db.cash=Number(db.cash)+paid-oldPaid;if(c)c.debt=Number(c.debt||0)+debt;
- Object.assign(s,{qty,price,subtotal:qty*price,discount,total,paid,debt,customer:c?c.name:'نغدي مشتری',customerId:c?c.id:'',stockQty:qty*factor,unitFactor:factor,profit:(price-Number(s.costAtSale||p.cost||0)*factor)*qty-discount,editedAt:new Date().toISOString()});
- saveDB();refreshAll();alert('رسید سم شو؛ حسابونه تازه شول.');
+ const selected=db.sales.find(x=>x.id===id);if(!selected)return;
+ invoiceEditId=selected.invoice||selected.id;
+ const rows=selected.invoice?db.sales.filter(x=>x.invoice===selected.invoice):[selected];
+ invoiceEditRows=rows.map(x=>({...x}));
+ const box=document.getElementById("invoiceEditModal");if(!box)return;
+ const subtotal=rows.reduce((n,x)=>n+Number(x.subtotal??(Number(x.qty)*Number(x.price))),0);
+ const discount=rows.reduce((n,x)=>n+Number(x.discount||0),0);
+ const paid=rows.reduce((n,x)=>n+Number(x.paid||0),0);
+ box.innerHTML=`<div class="invoice-edit-shade" onclick="if(event.target===this)closeInvoiceEdit()"><div class="invoice-edit-window">
+  <div class="invoice-edit-head"><h3>✏️ د رسید اصلاح #${safe(invoiceEditId)}</h3><button type="button" class="red" onclick="closeInvoiceEdit()">✕</button></div>
+  <label>مشتری</label><input id="editInvoiceCustomer" list="editInvoiceCustomerOptions" value="${safe(selected.customer==="نغدي مشتری"?"":selected.customer||"")}" placeholder="د مشتری نوم"><datalist id="editInvoiceCustomerOptions">${db.customers.map(c=>`<option value="${safe(c.name)}"></option>`).join("")}</datalist>
+  <label>نېټه</label><input id="editInvoiceDate" type="date" value="${safe(selected.date||today())}">
+  <div class="invoice-edit-items-title"><b>د رسید جنسونه</b><span>هر جنس جلا سمولای شې</span></div>
+  <div id="editInvoiceLines"></div>
+  <div class="invoice-edit-add"><select id="editInvoiceAddProduct"><option value="">نوی جنس انتخاب کړه</option>${db.products.map(p=>`<option value="${safe(p.id)}">${safe(p.name)}</option>`).join("")}</select><button type="button" class="gray" onclick="addInvoiceEditLine()">＋ جنس اضافه کړه</button></div>
+  <label>تخفیف (AFN)</label><input id="editInvoiceDiscount" type="number" min="0" step="any" value="${discount}">
+  <label>ورکړل شوې پیسې (نغدي)</label><input id="editInvoicePaid" type="number" min="0" step="any" value="${paid}">
+  <div class="invoice-edit-summary" id="editInvoiceSummary"></div>
+  <div class="invoice-edit-actions"><button type="button" class="primary" onclick="saveInvoiceEdit()">💾 اصلاح ذخیره کړه</button><button type="button" class="gray" onclick="printSale('${safe(selected.id)}')">🖨 چاپ</button></div>
+ </div></div>`;
+ box.classList.remove("hidden");
+ renderInvoiceEditLines();
+}
+function closeInvoiceEdit(){const box=document.getElementById("invoiceEditModal");if(box){box.classList.add("hidden");box.innerHTML="";}invoiceEditRows=[];invoiceEditId="";}
+function renderInvoiceEditLines(){
+ const box=document.getElementById("editInvoiceLines");if(!box)return;
+ box.innerHTML=invoiceEditRows.map((x,i)=>{
+  const p=db.products.find(z=>String(z.id)===String(x.productId));
+  const units=p?productUnitOptionsMarkup(p,x.unit):`<option value="${safe(x.unit||"واحد")}">${safe(unitLabel(x.unit||"واحد"))}</option>`;
+  return `<div class="invoice-edit-line">
+   <div class="invoice-edit-line-head"><b>${i+1}. ${safe(x.productName||p?.name||"جنس")}</b><button type="button" class="red" onclick="removeInvoiceEditLine(${i})">✕</button></div>
+   <div class="invoice-edit-line-fields"><div><label>مقدار</label><input type="number" min="0.001" step="any" value="${Number(x.qty)||1}" onchange="updateInvoiceEditLine(${i},'qty',this.value)"></div>
+   <div><label>واحد</label><select onchange="updateInvoiceEditLine(${i},'unit',this.value)">${units}</select></div>
+   <div><label>نرخ</label><input type="number" min="0" step="any" value="${Number(x.price)||0}" onchange="updateInvoiceEditLine(${i},'price',this.value)"></div></div>
+   <small>مجموعه: <b>${money(Number(x.qty||0)*Number(x.price||0))}</b></small>
+  </div>`;
+ }).join("")||"<p>د رسید جنسونه نشته.</p>";
+ updateInvoiceEditSummary();
+}
+function updateInvoiceEditLine(i,field,v){
+ const x=invoiceEditRows[i];if(!x)return;
+ if(field==="unit"){x.unit=v;const p=db.products.find(z=>String(z.id)===String(x.productId));if(p){x.unitFactor=saleFactorForUnit(p,v);x.stockQty=Number(x.qty||0)*x.unitFactor;}}
+ else{x[field]=Number(v);}
+ if(field==="qty"){const p=db.products.find(z=>String(z.id)===String(x.productId));if(p){x.unitFactor=saleFactorForUnit(p,x.unit);x.stockQty=Number(x.qty||0)*x.unitFactor;}}
+ renderInvoiceEditLines();
+}
+function removeInvoiceEditLine(i){invoiceEditRows.splice(i,1);renderInvoiceEditLines();}
+function addInvoiceEditLine(){
+ const id=document.getElementById("editInvoiceAddProduct")?.value,p=db.products.find(x=>String(x.id)===String(id));if(!p)return;
+ const unit=p.tradeUnit||p.unit||"واحد",factor=saleFactorForUnit(p,unit);
+ invoiceEditRows.push({id:uid(),invoice:invoiceEditId,productId:p.id,productName:p.name,qty:1,unit,unitFactor:factor,stockQty:factor,price:productRetailPrice(p)||Number(p.wholesalePrice)||Number(p.cost)||0,costAtSale:Number(p.cost)||0,subtotal:0,discount:0,total:0,paid:0,debt:0,profit:0});
+ document.getElementById("editInvoiceAddProduct").value="";
+ renderInvoiceEditLines();
+}
+function updateInvoiceEditSummary(){
+ const subtotal=invoiceEditRows.reduce((n,x)=>n+Number(x.qty||0)*Number(x.price||0),0);
+ const discount=Math.max(0,Number(document.getElementById("editInvoiceDiscount")?.value)||0);
+ const total=Math.max(0,subtotal-discount),paid=Math.max(0,Number(document.getElementById("editInvoicePaid")?.value)||0);
+ const box=document.getElementById("editInvoiceSummary");if(box)box.innerHTML=`مجموعه: <b>${money(subtotal)}</b> · تخفیف: <b>${money(discount)}</b><br>وروستی مبلغ: <b>${money(total)}</b> · ورکړل شوي: <b>${money(paid)}</b> · پاتې پور: <b>${money(Math.max(0,total-paid))}</b>`;
+}
+function saveInvoiceEdit(){
+ const oldRows=db.sales.filter(x=>(x.invoice||x.id)===invoiceEditId);
+ if(!oldRows.length||!invoiceEditRows.length)return alert("لږ تر لږه یو جنس باید په رسید کې وي.");
+ const subtotal=invoiceEditRows.reduce((n,x)=>n+Number(x.qty||0)*Number(x.price||0),0);
+ const discount=Number(document.getElementById("editInvoiceDiscount")?.value||0),paid=Number(document.getElementById("editInvoicePaid")?.value||0);
+ const total=subtotal-discount;
+ if(!Number.isFinite(discount)||discount<0||discount>subtotal||!Number.isFinite(paid)||paid<0||paid>total)return alert("تخفیف یا ورکړل شوې پیسې سمې نه دي.");
+ for(const x of invoiceEditRows){const p=db.products.find(z=>String(z.id)===String(x.productId));if(!p||!Number.isFinite(Number(x.qty))||Number(x.qty)<=0||!Number.isFinite(Number(x.price))||Number(x.price)<0)return alert("د جنس، مقدار یا نرخ معلومات سم نه دي.");}
+ const oldPaid=oldRows.reduce((n,x)=>n+Number(x.paid||0),0),oldDebt=oldRows.reduce((n,x)=>n+Number(x.debt||0),0);
+ if(Number(db.cash||0)-oldPaid+paid<0)return alert("په صندوق کې د رسید د سمون لپاره کافي نغدې نشته.");
+ const oldCustomer=db.customers.find(c=>c.id===oldRows[0].customerId);
+ const customerName=String(document.getElementById("editInvoiceCustomer")?.value||"").trim();
+ let customer=null;
+ if(customerName){customer=db.customers.find(c=>String(c.name).toLowerCase()===customerName.toLowerCase());if(!customer)customer={id:uid(),name:customerName,phone:"",debt:0,type:"active",created:today()};}
+ if(total-paid>0&&!customer)return alert("که رسید پور ولري، د مشتری نوم حتمي دی.");
+ const newDebt=total-paid;
+ if(oldCustomer)oldCustomer.debt=Math.max(0,Number(oldCustomer.debt||0)-oldDebt);
+ if(customer&&!db.customers.some(c=>c.id===customer.id))db.customers.push(customer);
+ if(customer)customer.debt=Number(customer.debt||0)+newDebt;
+ // پخوانۍ موجودي بېرته ورزیاته کړه، بیا نوی رسید ترې منفي کړه
+ oldRows.forEach(x=>{const p=db.products.find(z=>String(z.id)===String(x.productId));if(p)p.qty=Number(p.qty||0)+Number(x.stockQty??(Number(x.qty||0)*Number(x.unitFactor||1)));});
+ const required={};invoiceEditRows.forEach(x=>{const p=db.products.find(z=>String(z.id)===String(x.productId));const factor=saleFactorForUnit(p,x.unit);x.unitFactor=factor;x.stockQty=Number(x.qty)*factor;required[x.productId]=(required[x.productId]||0)+x.stockQty;});
+ for(const [id,qty] of Object.entries(required)){const p=db.products.find(z=>String(z.id)===String(id));if(!p||Number(p.qty)<qty){oldRows.forEach(x=>{const p0=db.products.find(z=>String(z.id)===String(x.productId));if(p0)p0.qty=Number(p0.qty||0)-Number(x.stockQty??(Number(x.qty||0)*Number(x.unitFactor||1)));});if(oldCustomer)oldCustomer.debt=Number(oldCustomer.debt||0)+oldDebt;if(customer)customer.debt=Math.max(0,Number(customer.debt||0)-newDebt);return alert("د "+(p?.name||"جنس")+" موجودي د دې اصلاح لپاره بسنه نه کوي.");}}
+ Object.entries(required).forEach(([id,qty])=>{const p=db.products.find(z=>String(z.id)===String(id));p.qty=Number(p.qty)-qty;});
+ db.cash=Number(db.cash||0)-oldPaid+paid;
+ const date=document.getElementById("editInvoiceDate")?.value||oldRows[0].date;
+ let discountLeft=discount,paidLeft=paid;
+ invoiceEditRows.forEach((x,i)=>{
+  const lineSub=Number(x.qty)*Number(x.price),lineDiscount=i===invoiceEditRows.length-1?discountLeft:(subtotal?discount*lineSub/subtotal:0);
+  discountLeft-=lineDiscount;
+  const lineTotal=lineSub-lineDiscount,linePaid=i===invoiceEditRows.length-1?paidLeft:(total?paid*lineTotal/total:0);
+  paidLeft-=linePaid;
+  const p=db.products.find(z=>String(z.id)===String(x.productId));
+  Object.assign(x,{invoice:invoiceEditId,productName:p.name,customer:customer?.name||"نغدي مشتری",customerId:customer?.id||"",date,subtotal:lineSub,discount:lineDiscount,total:lineTotal,paid:linePaid,debt:lineTotal-linePaid,costAtSale:Number(x.costAtSale??p.cost)||0,profit:(Number(x.price)-(Number(x.costAtSale??p.cost)||0)*Number(x.unitFactor||1))*Number(x.qty)-lineDiscount,editedAt:new Date().toISOString()});
+ });
+ db.sales=db.sales.filter(x=>(x.invoice||x.id)!==invoiceEditId).concat(invoiceEditRows);
+ saveDB();closeInvoiceEdit();refreshAll();if(currentCustomerId)renderCustomerDetail();alert("بشپړ رسید اصلاح او حسابونه تازه شول.");
 }
 function printSale(id){
  const selected=db.sales.find(x=>x.id===id);if(!selected)return;
@@ -2292,7 +2390,7 @@ function renderCustomerDetail(){
  const creditSales=sum(sales,"debt"),received=sum(receipts,"amount"),paidToCustomer=sum(payouts,"amount"),profit=sum(sales,"profit");
  const opening=Math.max(0,Number(c.debt||0)-creditSales+received);
  const history=[
-  ...sales.map(x=>({kind:"sale",date:x.date||"",id:x.id,record:x})),
+  ...Object.values(sales.reduce((groups,x)=>{const key=x.invoice||x.id;(groups[key]||(groups[key]={kind:"sale",date:x.date||"",id:x.id,record:{invoice:x.invoice||x.id,customer:x.customer,date:x.date,rows:[],total:0,paid:0,debt:0,profit:0}})).record.rows.push(x);const g=groups[key].record;g.total+=Number(x.total||0);g.paid+=Number(x.paid||0);g.debt+=Number(x.debt||0);g.profit+=Number(x.profit||0);return groups;},{})),
   ...receipts.map(x=>({kind:"payment",date:x.date||"",id:x.id,record:x})),
   ...payouts.map(x=>({kind:"payout",date:x.date||"",id:x.id,record:x}))
  ].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
@@ -2337,9 +2435,9 @@ function renderCustomerDetail(){
    </div>`:`
    <div class="item customer-history-sale">
     <b>🧾 #${safe(h.record.invoice||"—")} · ${safe(dateText(h.record.date))} · ${Number(h.record.debt)>0?(Number(h.record.paid)>0?"نیم نغدي / نیم پور":"پور"):"نغدي"}</b>
-    <div>${safe(h.record.productName||"جنس")} ${safe(h.record.qty)} ${safe(h.record.unit||"")}</div>
+    <div class="customer-history-items">${h.record.rows.map(x=>`<div>• ${safe(x.productName||"جنس")} ${safe(x.qty)} ${safe(unitLabel(x.unit||""))} — ${money(x.total)}</div>`).join("")}</div>
     <div>ټول ${money(h.record.total)} · ورکړل شوي ${money(h.record.paid)} · پور ${money(h.record.debt)} · ګټه ${money(h.record.profit)}</div>
-    <div class="actions"><button class="gray" onclick="printSale('${h.id}')">🖨</button><button class="gray" onclick="editSale('${h.id}')">✏️</button></div>
+    <div class="actions"><button class="gray" onclick="printSale('${h.id}')">🖨</button><button class="gray" onclick="editSale('${h.id}')">✏️ اصلاح</button></div>
    </div>`).join("")||"<p>تاریخچه نشته</p>"}
   <div class="item customer-opening-debt"><b>📝 پخوانی / لاسي ثبت شوی پور</b><div>${money(opening)}</div></div>
  </div>`;
