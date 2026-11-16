@@ -1879,13 +1879,14 @@ function filterSaleProducts(){
  box.classList.remove("hidden");
 }
 function chooseSaleSearchResult(id){
- const select=document.getElementById("saleProduct"),p=(db.products||[]).find(x=>String(x.id)===String(id));
+ const scrollTop=window.scrollY,select=document.getElementById("saleProduct"),p=(db.products||[]).find(x=>String(x.id)===String(id));
  if(!p||!select)return;
  select.innerHTML=`<option value="${safe(p.id)}">${safe(p.name)}`;select.value=p.id;
  document.getElementById("saleSearchResults")?.classList.add("hidden");
- document.getElementById("saleProductSearch").value=p.name;
+ document.getElementById("saleProductSearch").value="";
  updateSaleUnit();
  addSaleToCart();
+ requestAnimationFrame(()=>window.scrollTo(0,scrollTop));
 }
 function updateSaleUnit(){
  const p=db.products.find(x=>String(x.id)===String(value("saleProduct")));
@@ -1955,18 +1956,21 @@ function updateSaleCartLine(index,field,raw){
 function removeSaleCartItem(index){saleCart.splice(index,1);renderSaleCart();updateSalePreview();}
 function renderSaleCart(){
  const box=document.getElementById("saleCartList");if(!box)return;
+ const active=document.activeElement,keepIndex=active?.getAttribute("data-sale-index"),keepField=active?.getAttribute("data-sale-field"),scrollTop=window.scrollY;
  const count=document.getElementById("saleCartCount");if(count)count.textContent=String(saleCart.length)+" جنس";
  if(!saleCart.length){box.textContent="کارټ خالي دی — جنس ولټوه او اضافه یې کړه.";return;}
  box.innerHTML=saleCart.map((x,i)=>`
   <div class="sale-line-card">
    <div class="sale-line-head"><b>${i+1}. ${safe(x.productName)}</b><button type="button" class="red sale-remove" onclick="removeSaleCartItem(${i})">✕</button></div>
    <div class="sale-line-fields">
-    <div><label>مقدار</label><input type="number" min="0.001" step="any" value="${x.qty}" onchange="updateSaleCartLine(${i},'qty',this.value)"></div>
-    <div><label>واحد</label><select onchange="updateSaleCartLine(${i},'unit',this.value)">${productUnitOptionsMarkup(db.products.find(p=>p.id===x.productId),x.unit)}</select></div>
-    <div><label>فی واحد نرخ</label><input type="number" min="0" step="any" value="${x.price}" onchange="updateSaleCartLine(${i},'price',this.value)"></div>
+    <div><label>مقدار</label><input data-sale-index="${i}" data-sale-field="qty" type="number" min="0.001" step="any" value="${x.qty}" onchange="updateSaleCartLine(${i},'qty',this.value)"></div>
+    <div><label>واحد</label><select data-sale-index="${i}" data-sale-field="unit" onchange="updateSaleCartLine(${i},'unit',this.value)">${productUnitOptionsMarkup(db.products.find(p=>p.id===x.productId),x.unit)}</select></div>
+    <div><label>فی واحد نرخ</label><input data-sale-index="${i}" data-sale-field="price" type="number" min="0" step="any" value="${x.price}" onchange="updateSaleCartLine(${i},'price',this.value)"></div>
    </div>
    <div class="sale-line-total"><span>د جنس مجموعه</span><b>${money(x.qty*x.price)}</b></div>
   </div>`).join("");
+ if(keepIndex!==null&&keepField){const next=box.querySelector('[data-sale-index="'+keepIndex+'"][data-sale-field="'+keepField+'"]');if(next)next.focus({preventScroll:true});}
+ window.scrollTo(0,scrollTop);
 }
 function quickAddSaleCustomer(){
  const name=prompt("د نوي مشتری نوم ولیکه:");if(!name||!name.trim())return;
