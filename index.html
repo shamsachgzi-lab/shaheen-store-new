@@ -3141,6 +3141,7 @@ document.getElementById("addCustomerBtn")?.addEventListener("click",function(){
 /* د مشتری د ثبت باوري نسخه — د اپ د وروستي script له لارې */
 window.addCustomer=function(){
  const name=(document.getElementById("cName")?.value||"").trim();
+ const father=(document.getElementById("cFather")?.value||"").trim();
  const phone=(document.getElementById("cPhone")?.value||"").trim();
  const village=(document.getElementById("cVillage")?.value||"").trim();
  const area=(document.getElementById("cArea")?.value||"").trim();
@@ -3153,7 +3154,7 @@ window.addCustomer=function(){
  const item={id:uid(),name,father,phone,village,area,debt,type,created:today()};
  db.customers.push(item);
  try{saveDB();}catch(e){db.customers.pop();alert("ثبت ناکام شو. د اپ بیک اپ واخله او د موبایل د زېرمتون ځای وګوره.");return;}
- ["cName","cPhone","cVillage","cArea","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ ["cName","cFather","cPhone","cVillage","cArea","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
  document.getElementById("customerFormPanel")?.classList.add("hidden");
  if(typeof currentCustomerId!=="undefined")currentCustomerId="";
  refreshAll();
