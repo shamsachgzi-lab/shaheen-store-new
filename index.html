@@ -1477,8 +1477,9 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <p>Backup فایل خپل ځان ته خوندي کړه (میاشتني راپورونه، موجودي او د مال ارزښت هم پکې شامل دي). دا نسخه معلومات په همدې iPhone/Browser کې Offline ساتي.</p>
   <button class="primary" onclick="backupData()">⬇️ بیک‌اف جوړ کړه</button>
   <label>⬆️ بیک‌اف بېرته راواخله — د شاهین فروشگاه فایل</label><input type="file" id="restoreFile" accept=".json,application/json">
-  <button class="green" onclick="restoreData()">⬆️ بېرته راګرځول</button>
-  <hr><p class="notice">د شاهین فروشگاه د معلوماتو بیک‌اف مني. Restore اوسني معلومات بدلوي؛ مخکې اوسنی Backup وساته.</p>
+  <button class="green" onclick="restoreData()">⬆️ بشپړ بیک‌اف بېرته راګرځول (اوسني معلومات بدلوي)</button>
+  <button class="primary" style="margin-top:8px" onclick="restoreData(true)">🛡️ یوازې ورکې جنسونه او مشتریان خوندي ورزیات کړه</button>
+  <hr><p class="notice">خوندي ورزیاتول یوازې له بیک‌اف څخه نوي جنسونه او مشتریان زیاتوي؛ موجود خرڅلاو، راپورونه، نغدې او نور حسابونه نه بدلوي. د ورته نوم جنس/مشتری تکراري نه زیاتوي. بشپړ Restore اوسني معلومات بدلوي.</p>
   <button class="red" onclick="clearAllData()">⚠️ ټول معلومات پاکول</button>
  </div>
 </section>
@@ -3138,7 +3139,7 @@ function backupData(){
   alert("Backup جوړ شو؛ فایل په Files کې خوندي کړه.");
  }catch(e){alert("Backup جوړ نه شو: "+e.message)}
 }
-function restoreData(){
+function restoreData(mergeOnly=false){
  const input=document.getElementById("restoreFile");
  if(!input.files||!input.files[0])return alert("لومړی JSON فایل انتخاب کړه");
  if(!confirm("اوسني معلومات به د Backup په معلوماتو بدل شي. ډاډه یې؟"))return;
@@ -3248,6 +3249,30 @@ function restoreData(){
    if(!Array.isArray(restored.sarafAccounts))restored.sarafAccounts=[];
    if(!Array.isArray(restored.sarafTransactions))restored.sarafTransactions=[];
    if(!Array.isArray(restored.archives))restored.archives=[];
+   if(mergeOnly){
+    // خوندي یوځای کول: د اوسني DB نورې برخې مه بدلوه؛ یوازې ورک جنسونه او مشتریان ورزیات کړه.
+    const productKeys=new Set((db.products||[]).map(p=>String(p.id||"")+"|"+String(p.name||"").trim().toLowerCase()));
+    const productNames=new Set((db.products||[]).map(p=>String(p.name||"").trim().toLowerCase()).filter(Boolean));
+    const newProducts=(restored.products||[]).filter(p=>{
+     const key=String(p.id||"")+"|"+String(p.name||"").trim().toLowerCase(),name=String(p.name||"").trim().toLowerCase();
+     if(productKeys.has(key)||(name&&productNames.has(name)))return false;
+     productKeys.add(key);if(name)productNames.add(name);return true;
+    });
+    const customerKeys=new Set((db.customers||[]).map(c=>String(c.id||"")+"|"+String(c.name||"").trim().toLowerCase()));
+    const customerNames=new Set((db.customers||[]).map(c=>String(c.name||"").trim().toLowerCase()).filter(Boolean));
+    const newCustomers=(restored.customers||[]).filter(c=>{
+     const key=String(c.id||"")+"|"+String(c.name||"").trim().toLowerCase(),name=String(c.name||"").trim().toLowerCase();
+     if(customerKeys.has(key)||(name&&customerNames.has(name)))return false;
+     customerKeys.add(key);if(name)customerNames.add(name);return true;
+    });
+    if(!newProducts.length&&!newCustomers.length)return alert("په دې بیک‌اف کې داسې نوي جنسونه یا مشتریان ونه موندل شول چې اوسني حسابونو کې نه وي. اوسني معلومات نه دي بدل شوي.");
+    if(!confirm("د بیک‌اف له معلوماتو څخه "+newProducts.length+" جنسونه او "+newCustomers.length+" مشتریان به ورزیات شي. اوسني خرڅلاو، راپورونه، نغدې، موجود حسابونه او نور معلومات به هماغسې پاتې وي. دوام ورکړو؟"))return;
+    db.products=[...(db.products||[]),...newProducts];
+    db.customers=[...(db.customers||[]),...newCustomers];
+    saveDB();refreshAll();
+    alert("خوندي یوځای کول بشپړ شول: "+newProducts.length+" جنسونه او "+newCustomers.length+" مشتریان ورزیات شول. اوسني نور حسابونه بدل نه شول.");
+    return;
+   }
    if(!confirm("Backup تایید شو. د نوي شاهین فروشگاه اوسني معلومات به د دې بیک‌اف په معلوماتو بدل شي. مخکېنی Backup دې خوندي کړی؟"))return;
    db=restored;saveDB();refreshAll();alert("Backup په بریالیتوب بېرته راوګرځول شو.");
   }catch(e){alert("فایل سم نه دی: "+e.message)}
