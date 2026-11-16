@@ -1092,6 +1092,52 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 .jalali-date-fields select{width:100%;min-width:0;margin:0;padding:9px 5px;background:#fff;border:1px solid #b9cfe8;border-radius:8px;font-size:13px;color:#173b62}
 .jalali-date-label{padding-top:7px;text-align:center;font-size:12px;font-weight:800;color:#1457a0}
 </style>
+<style>
+/* Customer area: clean, simple mobile-first layout */
+#customers{padding-bottom:24px}
+#customers .customer-top{padding:14px 15px;margin:0 -2px 12px;background:linear-gradient(130deg,#102f50,#1769a6);color:#fff;border-radius:0 0 18px 18px}
+#customers .customer-top small,#customers .customer-top span{color:#d9eafa}
+#customers .customer-top h3{color:#fff;font-size:21px}
+#customers .customer-addbar{background:#f4f8fc;border:1px solid #e0e8f1;border-radius:13px;padding:10px 12px}
+#customers .customer-addbar b{font-size:16px}
+#customers .customer-addbar button{border-radius:10px;min-width:44px}
+#customers .customer-summary{gap:8px}
+#customers .customer-summary>div{background:#fff;border:1px solid #e2e8f0;border-radius:13px;padding:12px 8px;box-shadow:0 2px 8px rgba(15,40,70,.04)}
+#customers .customer-summary>div:nth-child(1){background:#f0f7ff}
+#customers .customer-summary>div:nth-child(2){background:#fff8ed}
+#customers .customer-summary>div:nth-child(3){background:#eefaf2}
+#customers .customer-summary small{font-size:11px;line-height:1.5}
+#customers .customer-summary b{font-size:14px;color:#15324d}
+#customers .customer-reports{margin:10px 0 13px;background:#f7f9fc;border:1px solid #e1e7ef;border-radius:12px;padding:11px}
+#customers .customer-reports summary{font-weight:700;color:#24415e;cursor:pointer}
+#customers .customer-report-block{padding:10px 2px 2px}
+#customers .customer-report-block h4{font-size:13px;margin:5px 0}
+#customers .customer-tabs{position:sticky;top:0;z-index:3;background:#fff;padding:7px;border:1px solid #e3eaf2;border-radius:12px}
+#customers .customer-tabs button{font-weight:700}
+#customers .customer-list-head{background:#f5f8fc;border-radius:10px;padding:11px;margin:10px 0 7px}
+#customers #customerSearch{border-radius:11px;border:1px solid #cfd9e5;padding:12px;margin-bottom:8px}
+#customers .customer-row{background:#fff;border:1px solid #e7edf4;border-radius:12px;margin:7px 0;padding:12px;box-shadow:0 2px 7px rgba(15,40,70,.035)}
+#customers .customer-row-main b{font-size:14px;color:#17324d}
+#customers .customer-row-debt{font-size:14px;color:#14532d;background:#effaf2;padding:7px 9px;border-radius:9px}
+#customers .customer-row-actions button{border-radius:8px}
+#customers #customerFormPanel{border:1px solid #b8d3ef;border-radius:14px;padding:13px;background:#f7fbff}
+#customers .customer-detail-head{background:linear-gradient(130deg,#102f50,#1769a6);color:#fff;padding:15px;border-radius:15px;margin:10px 0}
+#customers .customer-detail-head h3{color:#fff;margin:8px 0}
+#customers .customer-detail-head .customer-contact{font-size:12px;color:#e2edf8;line-height:1.8}
+#customers .customer-detail-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+#customers .customer-detail-summary>div{background:#f6f9fc!important}
+#customers .customer-detail-summary>div:first-child{background:#fff4e8!important;border-color:#f2d2a8}
+#customers .customer-detail-summary>div:first-child b{color:#9a4b08}
+#customers .customer-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+#customers .customer-action-card{border:1px solid #dce6ef;border-radius:13px;padding:11px;background:#fff}
+#customers .customer-action-card h4{font-size:14px;margin:0 0 8px}
+#customers .customer-action-card input{margin:4px 0 8px;padding:10px}
+#customers .customer-action-card button{width:100%;font-size:13px;padding:11px 5px}
+#customers .customer-history-title{margin:17px 0 8px;padding-bottom:7px;border-bottom:1px solid #e3eaf2}
+#customers .customer-history-payment,#customers .customer-history-sale{border:1px solid #e4eaf1;border-radius:12px;padding:12px;background:#fff}
+#customers .customer-opening-debt{border:1px dashed #d8a85e;border-radius:12px;padding:12px}
+@media(max-width:420px){#customers .customer-action-grid{grid-template-columns:1fr}#customers .customer-summary b{font-size:12px}}
+</style>
 </head>
 <body>
 <header class="brand-header">
@@ -1241,14 +1287,11 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <div style="background:#e4f8eb;border:1px solid #9bd8ad"><small>💵 نن مشتریانو بېرته راکړې پیسې</small><b id="customerReceivedToday">0 AFN</b></div>
   <div style="background:#e5f1ff;border:1px solid #a9c9f0"><small>📅 په دې میاشت کې ترلاسه شوې پیسې</small><b id="customerReceivedMonth">0 AFN</b></div>
  </div>
- <div class="panel" style="margin-top:12px">
-  <h4 style="margin:0 0 10px">📊 د مشتریانو ورځنی راپور</h4>
-  <div id="customerDailyReport"><small>نن هېڅ مشتری پیسې نه دي راکړې</small></div>
- </div>
- <div class="panel" style="margin-top:12px">
-  <h4 style="margin:0 0 10px">📅 د مشتریانو میاشتنی راپور</h4>
-  <div id="customerMonthlyReport"><small>په دې میاشت کې پیسې نه دي ترلاسه شوې</small></div>
- </div>
+ <details class="customer-reports">
+  <summary>📊 د پیسو ورځنی او میاشتنی راپور</summary>
+  <div class="customer-report-block"><h4>نن ترلاسه شوې پیسې</h4><div id="customerDailyReport"><small>نن هېڅ مشتری پیسې نه دي راکړې</small></div></div>
+  <div class="customer-report-block"><h4>د دې میاشتې ترلاسه شوې پیسې</h4><div id="customerMonthlyReport"><small>په دې میاشت کې پیسې نه دي ترلاسه شوې</small></div></div>
+ </details>
  <div class="customer-tabs">
   <button class="selected" id="customerTabAll" onclick="setCustomerView('all')">ټول</button>
   <button id="customerTabActive" onclick="setCustomerView('active')">اوسني</button>
@@ -2459,31 +2502,35 @@ function renderCustomerDetail(){
  document.getElementById("customerListTotal").textContent=money(c.debt);
  document.getElementById("customersList").innerHTML=`
  <div class="customer-detail">
-  <button class="gray" onclick="currentCustomerId='';renderCustomers()">← بېرته د مشتریانو لېست ته</button>
-  <h3>${safe(c.name)}</h3>
-  <div class="item">د پلار نوم: ${safe(c.father||"—")} · کلی: ${safe(c.village||"—")} · سیمه: ${safe(c.area||"—")} · شمېره: ${safe(c.phone||"—")}</div>
+  <button class="gray" onclick="currentCustomerId='';renderCustomers()">← د مشتریانو لېست ته بېرته</button>
+  <div class="customer-detail-head">
+   <small>د مشتری حساب</small><h3>${safe(c.name)}</h3>
+   <div class="customer-contact">د پلار نوم: ${safe(c.father||"—")} · شمېره: ${safe(c.phone||"—")}<br>کلی: ${safe(c.village||"—")} · سیمه: ${safe(c.area||"—")}</div>
+  </div>
   <div class="customer-summary customer-detail-summary">
    <div><small>پاتې پور</small><b>${money(c.debt)}</b></div>
    <div><small>ترلاسه شوې پیسې</small><b>${money(received)}</b></div>
-   <div><small>مشتری ته ورکړل شوې نغدې</small><b>${money(paidToCustomer)}</b></div>
    <div><small>په پور اخیستل</small><b>${money(creditSales)}</b></div>
+   <div><small>مشتری ته ورکړل شوې نغدې</small><b>${money(paidToCustomer)}</b></div>
    <div><small>له دې مشتری ګټه</small><b>${money(profit)}</b></div>
   </div>
-  <div class="panel customer-payment-panel">
-   <h3>💸 مشتری ته نغدې پیسې ورکړه</h3>
-   <label>مبلغ</label><input id="customerPayoutAmount" type="number" min="0.01" step="any" placeholder="د ورکړل شوو پیسو اندازه">
-   <label>نېټه</label><input id="customerPayoutDate" type="date" value="${today()}">
-   <label>یادښت</label><input id="customerPayoutNote" placeholder="د پیسو د ورکړې دلیل">
-   <button class="primary" onclick="saveCustomerPayout('${c.id}')">نغدې ورکړه ثبت کړه</button>
+  <div class="customer-action-grid">
+   <div class="customer-action-card">
+    <h4>💵 له مشتری پیسې ترلاسه کړه</h4>
+    <input id="customerReceiptAmount" type="number" min="0.01" step="any" placeholder="مبلغ">
+    <input id="customerReceiptDate" type="date" value="${today()}">
+    <input id="customerReceiptNote" placeholder="یادښت (اختیاري)">
+    <button class="green" onclick="saveCustomerReceipt('${c.id}')">پیسې ترلاسه او ثبت کړه</button>
+   </div>
+   <div class="customer-action-card">
+    <h4>💸 مشتری ته نغدې ورکړه</h4>
+    <input id="customerPayoutAmount" type="number" min="0.01" step="any" placeholder="مبلغ">
+    <input id="customerPayoutDate" type="date" value="${today()}">
+    <input id="customerPayoutNote" placeholder="د ورکړې یادښت">
+    <button class="primary" onclick="saveCustomerPayout('${c.id}')">نغدې ورکړه ثبت کړه</button>
+   </div>
   </div>
-  <div class="panel customer-payment-panel">
-   <h3>💵 پیسې ترلاسه کړه</h3>
-   <label>مبلغ</label><input id="customerReceiptAmount" type="number" min="0.01" step="any" placeholder="د پیسو اندازه">
-   <label>نېټه</label><input id="customerReceiptDate" type="date" value="${today()}">
-   <label>یادښت</label><input id="customerReceiptNote" placeholder="اختیاري یادښت">
-   <button class="green" onclick="saveCustomerReceipt('${c.id}')">ثبت</button>
-  </div>
-  <h3>تاریخچه</h3>
+  <h3 class="customer-history-title">📚 د مشتری د معاملاتو تاریخچه</h3>
   ${history.map(h=>h.kind==="payout"?`
    <div class="item customer-history-payment"><b>💸 مشتری ته نغدې ورکړل شوې · ${safe(dateText(h.record.date))}</b><div class="customer-history-amount">− ${money(h.record.amount)}</div>${h.record.note?`<small>${safe(h.record.note)}</small>`:""}<button class="red" onclick="deleteCustomerPayout('${h.id}')">🗑</button></div>`:h.kind==="payment"?`
    <div class="item customer-history-payment">
