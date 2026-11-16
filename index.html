@@ -2495,7 +2495,7 @@ function renderCustomerDetail(){
  const receipts=(db.payments||[]).filter(p=>p.type==="customer"&&(p.personId===c.id||(!p.personId&&p.personName===c.name))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const payouts=(db.payments||[]).filter(p=>p.type==="customer_out"&&(p.personId===c.id||(!p.personId&&p.personName===c.name))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const sum=(a,k)=>a.reduce((n,x)=>n+Number(x[k]||0),0);
- const creditSales=sum(sales,"debt"),received=sum(receipts,"amount"),receivedForDebt=receipts.reduce((n,p)=>n+Number(p.appliedToDebt??p.amount??0),0),advance=sum(receipts,"advanceAmount"),paidToCustomer=sum(payouts,"amount"),profit=sum(sales,"profit");
+ const creditSales=sum(sales,"debt"),received=sum(receipts,"amount"),receivedForDebt=receipts.reduce((n,p)=>n+Number(p.appliedToDebt??p.amount??0),0),paidToCustomer=sum(payouts,"amount"),profit=sum(sales,"profit");
  const debtAddedPayouts=sum(payouts.filter(x=>x.debtAdded===true),"amount");
  const opening=Math.max(0,Number(c.debt||0)-creditSales+receivedForDebt-debtAddedPayouts);
  const history=[
@@ -2517,7 +2517,6 @@ function renderCustomerDetail(){
   <div class="customer-summary customer-detail-summary">
    <div><small>پاتې پور</small><b>${money(c.debt)}</b></div>
    <div><small>ترلاسه شوې پیسې</small><b>${money(received)}</b></div>
-   <div><small>د مشتری امانت / اضافي پیسې</small><b>${money(advance)}</b></div>
    <div><small>په پور اخیستل</small><b>${money(creditSales)}</b></div>
    <div><small>مشتری ته ورکړل شوې نغدې</small><b>${money(paidToCustomer)}</b></div>
    <div><small>له دې مشتری ګټه</small><b>${money(profit)}</b></div>
@@ -2544,7 +2543,6 @@ function renderCustomerDetail(){
    <div class="item customer-history-payment">
     <b>💵 پیسې ترلاسه شوې · ${safe(dateText(h.record.date))}</b>
     <div class="customer-history-amount">− ${money(h.record.amount)}</div>
-    ${Number(h.record.advanceAmount||0)>0?`<small>د پور لپاره: ${money(h.record.appliedToDebt||0)} · د مشتری امانت: ${money(h.record.advanceAmount)}</small>`:""}
     ${h.record.note?`<small>${safe(h.record.note)}</small>`:""}
     <button class="red" onclick="deleteCustomerReceipt('${h.id}')">🗑</button>
    </div>`:`
@@ -2584,12 +2582,10 @@ function saveCustomerReceipt(id){
  if(amount<=0)return alert("مبلغ په سمه توګه ولیکه");
  const debtBefore=Math.max(0,Number(c.debt||0));
  const appliedToDebt=Math.min(amount,debtBefore);
- const advanceAmount=Math.max(0,amount-appliedToDebt);
  c.debt=debtBefore-appliedToDebt;
  db.cash=Number(db.cash||0)+amount;
- db.payments.push({id:uid(),type:"customer",personId:c.id,personName:c.name,amount,appliedToDebt,advanceAmount,date,note});
+ db.payments.push({id:uid(),type:"customer",personId:c.id,personName:c.name,amount,appliedToDebt,date,note});
  saveDB();refreshAll();renderCustomerDetail();
- if(advanceAmount>0)alert("پور صفر شو. اضافي "+money(advanceAmount)+" د مشتری د امانت په حساب کې ثبت شوې.");
 }
 function deleteCustomerReceipt(id){
  const p=(db.payments||[]).find(x=>x.id===id&&x.type==="customer");if(!p)return;
