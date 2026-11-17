@@ -4665,5 +4665,46 @@ body.sale-modal-open{position:fixed!important;top:var(--sale-lock-top,0px)!impor
 #home #lowStock>div>div>span b{color:inherit!important;font-weight:900!important}
 @media(min-width:650px){#home #lowStock{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-height:650px!important}}
 @media(max-width:380px){#home .panel:has(#lowStock){padding:12px!important}#home #lowStock>div{padding:10px!important}#home #lowStock>div>div{grid-template-columns:1fr!important}#home #lowStock>div>div>span:last-child{grid-column:auto!important}}
+
+/* DUKAN PRO — unified modern design across every page; visual-only, business logic and stored data untouched */
+:root{--dp-ink:#172b45;--dp-muted:#64748b;--dp-line:#e3eaf3;--dp-blue:#1769d2;--dp-soft:#f5f8fc}
+body{background:linear-gradient(180deg,#edf4fc 0,#f6f8fc 260px,#f4f7fb 100%)!important;color:var(--dp-ink)!important}
+header{background:linear-gradient(125deg,#123f78 0%,#1769d2 58%,#168b9a 100%)!important;box-shadow:0 8px 24px #123f7824!important}
+main{max-width:1040px!important}
+main>section:not(.hidden){animation:dpPageIn .22s ease-out}
+@keyframes dpPageIn{from{opacity:.75;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+main>section>h3,.section-title h3{color:#183b63!important;font-weight:900!important;letter-spacing:-.2px}
+main>section>h3{padding:5px 2px 9px}
+.panel{border:1px solid var(--dp-line)!important;border-radius:17px!important;background:linear-gradient(155deg,#fff 0%,#fcfdff 100%)!important;box-shadow:0 5px 18px rgba(28,55,90,.055)!important}
+.panel>h3{color:#23466e!important;font-weight:900!important}
+.badge{font-weight:800!important}
+button{transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+button:active{transform:scale(.98)}
+button.primary,.primary{background:linear-gradient(115deg,#1769d2,#1554a5)!important;color:#fff!important;box-shadow:0 4px 11px #1769d226!important}
+button.green,.green{background:linear-gradient(115deg,#0b9b68,#07845a)!important;color:#fff!important}
+button.red,.red{background:linear-gradient(115deg,#df4c54,#c93643)!important;color:#fff!important}
+input,select,textarea{border:1px solid #d8e3ef!important;border-radius:11px!important;background:#fbfdff!important;color:#1e334c!important;min-height:42px}
+input:focus,select:focus,textarea:focus{outline:none!important;border-color:#69a5e8!important;box-shadow:0 0 0 3px #3b82f61b!important;background:#fff!important}
+label{color:#405875!important;font-weight:800!important}
+.item{border-bottom:1px solid #edf1f6!important}
+table{border-radius:12px;overflow:hidden}
+th{background:#edf4fc!important;color:#355574!important;font-weight:900!important}
+td,th{border-bottom:1px solid #e9eff6!important}
+.actions button{border-radius:9px!important}
+#products .product-form-panel,#products .product-list-panel,#purchases .purchase-form,#purchases .purchase-history,#customers .customer-form,#customers .customer-list-panel,#expenses .panel,#debts .panel,#settings .panel,#capitalPage .panel,#sarafPage .panel{border-radius:17px!important}
+#products .product-page-head{padding:8px 2px 12px!important}
+#expenses>h3,#debts>h3,#capitalPage>h3,#settings>h3,#sarafPage>h3{font-size:19px!important}
+#expenses .panel>h3,#debts .panel>h3,#settings .panel>h3{padding-bottom:9px!important;border-bottom:1px solid #edf1f6!important}
+#customers .customer-summary>div,#sarafPage .grid2>.panel{box-shadow:0 3px 10px #1b3b5d0b!important;border-radius:13px!important}
+#capitalPage .capital-total{border-radius:16px!important}
+#reports .reports-block{border-radius:17px!important}
+#suppliers .supplier-hero{border-radius:19px!important;box-shadow:0 7px 20px #123f7818!important}
+#purchases .purchase-history-item,#customers .customer-row,#suppliers .item{border-radius:12px}
+nav{background:rgba(255,255,255,.97)!important;backdrop-filter:blur(14px)!important;border-top:1px solid #e5ebf3!important;box-shadow:0 -5px 22px rgba(25,50,80,.09)!important}
+nav button{border-radius:10px!important;min-width:0!important}
+nav button.active{background:#eaf3ff!important;color:#145bb5!important;font-weight:900!important}
+@media(min-width:760px){main{padding:18px 22px!important}main>section:not(.hidden){padding-bottom:22px}.panel{padding:16px!important}}
+@media(max-width:430px){.panel{border-radius:14px!important}main>section>h3{font-size:16px!important}input,select,textarea{font-size:16px!important}nav{overflow-x:auto!important;justify-content:flex-start!important;gap:2px!important}nav button{flex:1 0 auto!important;min-width:54px!important}}
+@media(prefers-reduced-motion:reduce){main>section:not(.hidden){animation:none!important}button{transition:none!important}}
 </style>
 </html>
