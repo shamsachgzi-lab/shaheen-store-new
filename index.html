@@ -3692,6 +3692,29 @@ body.sale-modal-open{overflow:hidden!important;height:100%!important}
 body.sale-modal-open{position:fixed!important;overflow:hidden!important;width:100%!important;left:0!important;right:0!important;touch-action:none!important}
 body.sale-modal-open #sales.sale-overlay:not(.hidden){position:fixed!important;inset:0!important;height:100vh!important;height:100dvh!important;overflow:hidden!important}
 body.sale-modal-open #sales .sale-page{overflow-y:auto!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+
+/* د Dukan Pro په شان ساده، منظم او موبایل-دوسته بڼه */
+html{scroll-padding-top:12px}
+.panel{border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 2px 8px rgba(23,32,51,.07)}
+input,select,textarea{min-height:46px;padding:10px 12px;border:1px solid #d9e1ec;border-radius:11px;font-size:16px}
+label{font-size:13px;font-weight:700}
+button{border-radius:10px}
+section:not(.hidden){scroll-margin-top:10px}
+#sales .sale-product-search{padding:8px 10px;margin:6px 0;border-radius:12px}
+#sales .sale-product-search label{font-size:12px;margin:0 0 3px}
+#sales .sale-product-search input#saleProductSearch{
+ min-height:44px!important;height:44px!important;padding:8px 11px!important;
+ margin:3px 0 5px!important;border:2px solid #1769d2!important;
+ border-radius:12px!important;font-size:15px!important;line-height:1.3!important;
+ scroll-margin-block:10px;overscroll-behavior:contain
+}
+#sales .sale-search-results{max-height:190px;margin:3px 0 6px;border-radius:10px}
+#sales .sale-search-result{padding:9px 10px;font-size:13px}
+@media(max-width:600px){
+ .panel{padding:12px;margin:8px 0}
+ input,select,textarea{min-height:44px;font-size:16px}
+}
+
 </style>
 <script>
 /* په آیفون کې د کیبورډ د خلاصېدو پر مهال د پاڼې ناڅاپي پورته کېدل مه پرېږده */
