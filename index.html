@@ -3972,51 +3972,47 @@ body.sale-modal-open #sales.sale-overlay:not(.hidden){
 #sales #saleProductSearch,#sales #saleCustomer{scroll-margin-block:8px!important}
 </style>
 <style id="SHAHEEN_SALE_NO_JUMP_V7">
-/* Stable sale form: keep the modal anchored to the layout viewport, not the shrinking keyboard viewport. */
-html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-behavior:none!important}
-body.sale-modal-open{position:static!important;inset:auto!important;width:100%!important;height:auto!important;touch-action:pan-x pan-y!important}
-#sales.sale-overlay:not(.hidden){
- display:block!important;position:fixed!important;
- top:0!important;left:0!important;right:0!important;bottom:0!important;
- width:100vw!important;height:100vh!important;max-height:100vh!important;min-height:0!important;
- margin:0!important;padding:0!important;overflow:hidden!important;transform:none!important;
- align-items:initial!important;justify-content:initial!important;
-}
-#sales.sale-overlay:not(.hidden)>.sale-page{
- position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:0!important;
- width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;
- margin:0!important;border-radius:0!important;box-sizing:border-box!important;
- overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;
- -webkit-overflow-scrolling:touch!important;scroll-behavior:auto!important;touch-action:pan-y!important;
-}
+/* Keep the sale modal pinned to the layout viewport; keyboard must not move the page. */
+html.sale-modal-open{height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
+body.sale-modal-open{position:fixed!important;top:var(--sale-lock-top,0px)!important;left:0!important;right:0!important;width:100%!important;height:100%!important;overflow:hidden!important;overscroll-behavior:none!important;touch-action:none!important}
+#sales.sale-overlay:not(.hidden){display:block!important;position:fixed!important;inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;max-height:none!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;transform:none!important;align-items:initial!important;justify-content:initial!important}
+#sales.sale-overlay:not(.hidden)>.sale-page{position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important;max-height:none!important;min-height:0!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important}
 </style>
 <script id="SHAHEEN_SALE_NO_JUMP_V7">
 (function(){
- let focused=false, heldScroll=0, panel=null, restoreToken=0;
- function getPanel(){return document.querySelector("#sales .sale-page");}
+ let focused=false,heldScroll=0,restoreToken=0;
+ function panel(){return document.querySelector("#sales .sale-page");}
  function restore(){
   if(!focused||!document.body.classList.contains("sale-modal-open"))return;
-  panel=getPanel();if(panel)panel.scrollTop=heldScroll;
+  const p=panel();if(p)p.scrollTop=heldScroll;
   window.scrollTo(0,0);
+ }
+ function lockBody(){
+  const y=window.scrollY||window.pageYOffset||0;
+  document.body.style.setProperty("--sale-lock-top",(-y)+"px");
+ }
+ const originalLock=window.__lockSalePage;
+ if(typeof originalLock==="function"&&!window.__saleLockWrapped){
+  window.__saleLockWrapped=true;
+  window.__lockSalePage=function(){originalLock();lockBody();};
  }
  document.addEventListener("focusin",function(e){
   if(!e.target||!e.target.closest||!e.target.closest("#sales"))return;
-  panel=getPanel();heldScroll=panel?panel.scrollTop:0;focused=true;
+  const p=panel();heldScroll=p?p.scrollTop:0;focused=true;lockBody();
   const token=++restoreToken;
   requestAnimationFrame(restore);
   setTimeout(function(){if(token===restoreToken)restore();},80);
   setTimeout(function(){if(token===restoreToken)restore();},260);
+  setTimeout(function(){if(token===restoreToken)restore();},500);
  },true);
  document.addEventListener("focusout",function(e){
-  if(e.target&&e.target.closest&&e.target.closest("#sales")){
-   focused=false;restoreToken++;
-  }
+  if(e.target&&e.target.closest&&e.target.closest("#sales")){focused=false;restoreToken++;}
  },true);
  if(window.visualViewport)window.visualViewport.addEventListener("resize",function(){
   if(!focused)return;
   const token=++restoreToken;
   requestAnimationFrame(restore);
-  setTimeout(function(){if(token===restoreToken)restore();},100);
+  setTimeout(function(){if(token===restoreToken)restore();},120);
  },{passive:true});
 })();
 </script>
