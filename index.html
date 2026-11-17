@@ -1599,6 +1599,35 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 @media(max-width:390px){#reports .daily-summary{gap:7px;padding:9px}#reports .daily-stat{min-height:76px;padding:10px}#reports .daily-stat b{font-size:13px}#reports .daily-report-section{margin-inline:10px}}
 @media print{#reports .daily-report{border:0;box-shadow:none}#reports .daily-report-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}#reports .daily-report-section{break-inside:avoid}#reports .daily-table-wrap{overflow:visible}#reports .daily-report-table{min-width:0;font-size:9px}}
 </style>
+<style>
+/* Expenses page — visual clarity only; preserve all expense logic and records */
+#expenses{padding-bottom:24px}
+#expenses>h3{margin:0 0 16px;padding:17px 18px;border-radius:19px;background:linear-gradient(120deg,#17334d,#176c75);color:#fff;font-size:20px;font-weight:900;box-shadow:0 9px 22px rgba(22,61,77,.13)}
+#expenses>.panel{margin:0 0 15px;padding:17px;border:1px solid #e1e9ed;border-radius:19px;background:#fff;box-shadow:0 6px 20px rgba(22,49,64,.055)}
+#expenses>.panel:first-of-type{border-top:4px solid #287bb0}
+#expenses>.panel:nth-of-type(2){border:1px solid #ead9ae!important;border-top:4px solid #d49a32!important;background:linear-gradient(180deg,#fffaf0,#fff 45%)}
+#expenses>.panel:nth-of-type(2)>h3{margin:0 0 10px;color:#82520d;font-size:16px;font-weight:900;line-height:1.8}
+#expenses>.panel:nth-of-type(2) .notice{padding:11px 12px;border:1px solid #f0dfb8;border-radius:12px;background:#fff5dc;color:#76551e;font-size:11px;line-height:1.9}
+#expenses>.panel:nth-of-type(3){border-top:4px solid #159779}
+#expenses label{display:block;margin:13px 0 6px;color:#344d5c;font-size:12px;font-weight:800;line-height:1.8}
+#expenses input:not([type=checkbox]),#expenses select,#expenses textarea{width:100%;min-height:46px;padding:11px 12px;border:1px solid #d9e3e8;border-radius:12px;background:#fbfdfe;color:#213b4a;font-size:14px;outline:none;box-sizing:border-box}
+#expenses textarea{min-height:78px;resize:vertical}
+#expenses input:focus,#expenses select:focus,#expenses textarea:focus{border-color:#3b91ad;box-shadow:0 0 0 3px rgba(59,145,173,.12);background:#fff}
+#expenses .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;align-items:end}
+#expenses button.primary{width:100%;min-height:48px;margin-top:15px;border:0;border-radius:13px;background:linear-gradient(110deg,#176c91,#138b79);color:#fff;font-size:14px;font-weight:900;box-shadow:0 5px 12px rgba(24,111,132,.16)}
+#expenses>.panel:nth-of-type(2) button.primary{background:linear-gradient(110deg,#a66a17,#d59a32);box-shadow:0 5px 12px rgba(171,117,30,.16)}
+#expenses .expense-product-results{margin-top:8px;border-radius:12px}
+#expenses #eProductInfo{margin-top:9px;padding:10px 12px;border-radius:12px;background:#eef6fa;color:#31576b;font-size:11px;line-height:1.9}
+#expenses #expensesList{display:grid;gap:10px;margin-top:13px}
+#expenses #expensesList .item{position:relative;margin:0;padding:14px;border:1px solid #e4ebef;border-radius:15px;background:#fbfdfe;box-shadow:0 3px 10px rgba(23,53,69,.035);line-height:1.9;overflow-wrap:anywhere}
+#expenses #expensesList .item b{display:block;margin-bottom:5px;color:#1e4357;font-size:14px;font-weight:900}
+#expenses #expensesList .item div{color:#586e7b;font-size:11px}
+#expenses #expensesList .item div:nth-of-type(1){color:#183f55;font-size:13px;font-weight:900}
+#expenses #expensesList .item button.red{min-height:36px;margin-top:9px;padding:0 15px;border:1px solid #f0cccc;border-radius:10px;background:#fff3f3;color:#a53c3c;font-size:11px;font-weight:800}
+#expenses #expenseSearch{background:#f7fafb}
+@media(max-width:390px){#expenses>.panel{padding:13px}#expenses .row{gap:8px}#expenses input:not([type=checkbox]),#expenses select{font-size:13px}}
+@media(min-width:760px){#expenses{max-width:980px;margin-inline:auto}#expenses>.panel{padding:21px}#expenses #expensesList{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
 </head>
 <body>
 <header class="brand-header">
