@@ -4645,5 +4645,25 @@ body.sale-modal-open{position:fixed!important;top:var(--sale-lock-top,0px)!impor
 #purchases #purchasesSearch{margin-bottom:10px!important;background:#fbfdff!important}
 #purchases #purchasesList{overflow-x:auto!important;border-radius:9px!important}
 @media(max-width:360px){#purchases.purchase-page{padding:7px!important}#purchases .purchase-page-head{padding:12px!important}#purchases .purchase-add-product{padding:9px!important;font-size:12px!important}#purchases .purchase-form,#purchases .purchase-history{padding:11px!important}#purchases .purchase-section-title{margin:-11px -11px 11px!important;padding:11px!important}}
+
+/* Low-stock inventory — modern visual refresh; data, thresholds and calculations unchanged */
+#home .panel:has(#lowStock){position:relative!important;overflow:hidden!important;padding:16px!important;border:1px solid #dce8f5!important;border-radius:20px!important;background:linear-gradient(145deg,#fff 0%,#f7fbff 100%)!important;box-shadow:0 8px 24px rgba(28,65,110,.07)!important}
+#home .panel:has(#lowStock)>h3{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:9px!important;margin:0 0 13px!important;padding:0 0 12px!important;border-bottom:1px solid #e8eff7!important;color:#20334d!important;font-size:16px!important;font-weight:900!important}
+#home #lowStockCount{padding:6px 10px!important;border:1px solid #fed7aa!important;border-radius:30px!important;background:#fff7ed!important;color:#c2410c!important;font-size:12px!important;font-weight:900!important;white-space:nowrap!important}
+#home #lowStockSearch{width:100%!important;min-height:45px!important;margin:0 0 11px!important;padding:11px 13px!important;border:1px solid #dce7f3!important;border-radius:13px!important;background:#f8fbff!important;color:#24364b!important;font-size:14px!important;outline:none!important}
+#home #lowStockSearch:focus{border-color:#60a5fa!important;box-shadow:0 0 0 3px #3b82f61c!important}
+#home #lowStock{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;max-height:560px!important;overflow:auto!important;padding:2px 2px 5px!important}
+#home #lowStock>div{display:block!important;margin:0!important;padding:13px!important;border:1px solid #e4ebf4!important;border-right:4px solid #f59e0b!important;border-radius:15px!important;background:#fff!important;box-shadow:0 3px 10px rgba(30,55,90,.035)!important;transition:box-shadow .18s ease,border-color .18s ease!important}
+#home #lowStock>div:nth-child(3n+2){border-right-color:#3b82f6!important}
+#home #lowStock>div:nth-child(3n){border-right-color:#ef4444!important}
+#home #lowStock>div>b{display:block!important;margin-bottom:9px!important;color:#1d3553!important;font-size:15px!important;font-weight:900!important;line-height:1.65!important}
+#home #lowStock>div>div{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-top:0!important;font-size:12px!important;line-height:1.65!important}
+#home #lowStock>div>div>span{display:block!important;min-width:0!important;padding:8px 9px!important;border:1px solid #edf1f6!important;border-radius:10px!important;background:#f8fafc!important;color:#52647a!important}
+#home #lowStock>div>div>span:first-child{background:#eff6ff!important;border-color:#dbeafe!important;color:#1d4ed8!important}
+#home #lowStock>div>div>span:nth-child(2){background:#fff7ed!important;border-color:#ffedd5!important;color:#c2410c!important}
+#home #lowStock>div>div>span:last-child{grid-column:1/-1!important;background:#ecfdf5!important;border-color:#d1fae5!important;color:#047857!important}
+#home #lowStock>div>div>span b{color:inherit!important;font-weight:900!important}
+@media(min-width:650px){#home #lowStock{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-height:650px!important}}
+@media(max-width:380px){#home .panel:has(#lowStock){padding:12px!important}#home #lowStock>div{padding:10px!important}#home #lowStock>div>div{grid-template-columns:1fr!important}#home #lowStock>div>div>span:last-child{grid-column:auto!important}}
 </style>
 </html>
