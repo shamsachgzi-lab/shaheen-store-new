@@ -1337,6 +1337,52 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 
 
 
+<style>
+#suppliers.supplier-page{padding:4px 0 28px}
+#suppliers .supplier-hero{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:22px 20px;margin:0 0 14px;border-radius:22px;background:linear-gradient(135deg,#102f46,#1d5870 68%,#287c82);color:#fff;box-shadow:0 12px 28px rgba(16,47,70,.16);overflow:hidden}
+#suppliers .supplier-eyebrow{font-size:10px;letter-spacing:1.2px;color:#b8d9e4;font-weight:800}
+#suppliers .supplier-hero h3{margin:8px 0 6px;color:#fff;font-size:20px}
+#suppliers .supplier-hero p{margin:0;color:#d4e7ed;font-size:12px;line-height:1.8}
+#suppliers .supplier-hero-icon{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:18px;background:rgba(255,255,255,.13);font-size:29px}
+#suppliers .supplier-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;margin-bottom:16px;border:1px solid #e3ebef;border-radius:18px;background:#fff;box-shadow:0 5px 18px rgba(20,50,65,.05)}
+#suppliers .supplier-toolbar>div{display:flex;flex-direction:column;gap:4px}
+#suppliers .supplier-toolbar small{color:#647985;font-size:12px}
+#suppliers .supplier-toolbar strong{font-size:23px;color:#b45309;direction:ltr;text-align:right}
+#suppliers .supplier-toolbar span:not(.supplier-new-btn span){font-size:10px;color:#91a0a8}
+#suppliers .supplier-new-btn{border:0;border-radius:13px;padding:11px 13px;background:#087f70;color:white;font-weight:800;font-size:12px;white-space:nowrap;box-shadow:0 5px 12px rgba(8,127,112,.18)}
+#suppliers .supplier-new-btn span{font-size:19px;vertical-align:middle;margin-left:3px}
+#suppliers .supplier-form-card{border:1px solid #dce8ed;border-radius:18px;padding:16px;margin-bottom:16px;background:#fafdff}
+#suppliers .supplier-form-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+#suppliers .supplier-form-title>div{display:flex;flex-direction:column;gap:4px}
+#suppliers .supplier-form-title small{font-size:10px;color:#7c909b}
+#suppliers .supplier-form-title b{font-size:15px}
+#suppliers .supplier-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#suppliers .supplier-fields>div:last-child{grid-column:1/-1}
+#suppliers .supplier-save-btn{width:100%;margin-top:12px}
+#suppliers .supplier-list-panel{padding:16px;border:1px solid #e3ebef;border-radius:19px;background:#fff;box-shadow:0 5px 18px rgba(20,50,65,.045)}
+#suppliers .supplier-list-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+#suppliers .supplier-list-heading small{font-size:9px;letter-spacing:1px;color:#91a1aa;font-weight:800}
+#suppliers .supplier-list-heading h4{margin:4px 0 0;font-size:16px;color:#203b4a}
+#suppliers .supplier-list-mark{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:#edf5f6;color:#176b70;font-size:21px}
+#suppliers .supplier-search-wrap{display:flex;align-items:center;gap:9px;padding:0 12px;border:1px solid #dfe8ec;border-radius:13px;background:#f8fbfc}
+#suppliers .supplier-search-wrap>span{font-size:23px;color:#66828e}
+#suppliers .supplier-search-wrap input{border:0!important;background:transparent!important;box-shadow:none!important;margin:0!important;min-width:0}
+#suppliers .supplier-results{padding-top:12px}
+#suppliers .supplier-results .supplier-empty{padding:26px 12px;text-align:center;border:1px dashed #d7e2e7;border-radius:14px;color:#758891;font-size:13px}
+#suppliers .supplier-results .supplier-empty span{display:block;font-size:30px;margin-bottom:8px}
+#suppliers .supplier-results .supplier-record{padding:14px;margin:0 0 10px;border:1px solid #e4ecef;border-radius:15px;background:linear-gradient(180deg,#fff,#fbfdfe)}
+#suppliers .supplier-record:last-child{margin-bottom:0}
+#suppliers .supplier-record-head{display:flex;align-items:center;gap:10px}
+#suppliers .supplier-record-icon{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:12px;background:#edf5f6;font-size:20px}
+#suppliers .supplier-record-name{font-weight:800;color:#203b4a;overflow-wrap:anywhere}
+#suppliers .supplier-record-phone{font-size:11px;color:#82939b;margin-top:3px}
+#suppliers .supplier-record-debt{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:12px 0;padding:10px 12px;border-radius:11px;background:#fff7ed}
+#suppliers .supplier-record-debt small{font-size:11px;color:#94602d}
+#suppliers .supplier-record-debt b{font-size:14px;color:#b45309;direction:ltr}
+#suppliers .supplier-record-actions{display:flex;gap:8px}
+#suppliers .supplier-record-actions button{flex:1;min-height:36px;border-radius:10px}
+@media(max-width:420px){#suppliers .supplier-hero{padding:18px 15px}#suppliers .supplier-hero h3{font-size:17px}#suppliers .supplier-hero-icon{width:48px;height:48px;flex-basis:48px;font-size:24px}#suppliers .supplier-toolbar{padding:13px}#suppliers .supplier-new-btn{padding:10px;font-size:11px}#suppliers .supplier-fields{grid-template-columns:1fr}#suppliers .supplier-fields>div:last-child{grid-column:auto}}
+</style>
 </head>
 <body>
 <header class="brand-header">
@@ -1516,22 +1562,14 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <div id="invoiceEditModal" class="hidden"></div></div>
 </section>
 
-<section id="suppliers" class="hidden">
- <div class="supplier-top"><div><small>Dukan Pro</small><h3>🏢 تامین کوونکي او شرکتونه</h3></div><span>فارسي</span></div>
- <div class="supplier-addbar"><button class="primary" onclick="toggleSupplierForm()">＋</button><b>تامین کوونکی</b></div>
- <div class="supplier-summary"><small>د عرضه کوونکو ټول پور / بدهی</small><b id="supplierDebtTotal">0 AFN</b></div>
- <div class="panel hidden" id="supplierFormPanel">
-  <div class="supplier-form-title"><b>➕ تامین کوونکی</b><button class="gray" onclick="toggleSupplierForm()">✕</button></div>
-  <label>نوم</label><input id="sName" placeholder="د شرکت یا تامین کوونکي نوم">
-  <label>شمېره</label><input id="sPhone" type="tel" placeholder="د موبایل شمېره">
-  <label>اوسنی پور/بدهی (لاسي سمون)</label><input id="sDebt" type="number" min="0" value="0">
-  <button class="primary" onclick="window.addSupplier()">💾 ذخیره</button>
- </div>
- <div class="panel">
-  <label for="supplierSearch">🔎 د تامین کوونکي لټون</label>
-  <input id="supplierSearch" type="search" placeholder="نوم یا د موبایل شمېره ولیکه..." oninput="renderSuppliers()">
-  <div id="suppliersList"></div>
- </div>
+<section id="suppliers" class="hidden supplier-page">
+ <div class="supplier-hero"><div class="supplier-hero-copy"><span class="supplier-eyebrow">DUKAN PRO · BUSINESS PARTNERS</span><h3>🏢 تامین کوونکي او شرکتونه</h3><p>د شرکتونو معلومات، اړیکې او پاتې پورونه په یوه ځای کې</p></div><div class="supplier-hero-icon">🏬</div></div>
+ <div class="supplier-toolbar"><div><small>د عرضه کوونکو ټول پور</small><strong id="supplierDebtTotal">0 AFN</strong><span>د ټولو شرکتونو پاتې حساب</span></div><button type="button" class="supplier-new-btn" onclick="toggleSupplierForm()"><span>＋</span> نوی تامین کوونکی</button></div>
+ <div class="panel supplier-form-card hidden" id="supplierFormPanel"><div class="supplier-form-title"><div><small>نوی ریکارډ</small><b>➕ تامین کوونکی ثبت کړه</b></div><button type="button" class="gray" onclick="toggleSupplierForm()">✕</button></div>
+ <div class="supplier-fields"><div><label for="sName">د شرکت / تامین کوونکي نوم</label><input id="sName" placeholder="د شرکت نوم ولیکه..."></div><div><label for="sPhone">د اړیکې شمېره</label><input id="sPhone" type="tel" placeholder="07xxxxxxxx"></div><div><label for="sDebt">اوسنی پور (AFN)</label><input id="sDebt" type="number" min="0" value="0"></div></div>
+ <button class="primary supplier-save-btn" onclick="window.addSupplier()">💾 معلومات خوندي کړه</button></div>
+ <div class="supplier-list-panel"><div class="supplier-list-heading"><div><small>PARTNERS DIRECTORY</small><h4>د تامین کوونکو لېست</h4></div><span class="supplier-list-mark">☷</span></div>
+ <div class="supplier-search-wrap"><span>⌕</span><input id="supplierSearch" type="search" placeholder="د نوم یا موبایل شمېرې له مخې لټون..." oninput="renderSuppliers()"></div><div id="suppliersList" class="supplier-results"></div></div>
 </section>
 
 
@@ -2923,9 +2961,11 @@ function renderSuppliers(){
  const total=all.reduce((n,x)=>n+(Number(x.debt)||0),0);
  const filtered=all.filter(x=>String(x.name||"").toLowerCase().includes(q)||String(x.phone||"").toLowerCase().includes(q));
  const totalEl=document.getElementById("supplierDebtTotal");if(totalEl)totalEl.textContent=money(total);
- document.getElementById("suppliersList").innerHTML=filtered.map(s=>`
- <div class="item"><b>${safe(s.name)}</b><div>شمېره: ${safe(s.phone||"-")}</div><div>اوسنی پور/بدهی: ${money(s.debt)}</div>
- <button class="gray" onclick="editSupplier('${s.id}')">✏️ سمون</button><button class="red" onclick="deleteSupplier('${s.id}')">حذف</button></div>`).join("")||(q?"د لټون نتیجه ونه موندل شوه":"تامین کوونکی نشته");
+ const list=document.getElementById("suppliersList");if(!list)return;
+ list.innerHTML=filtered.map(s=>`
+ <article class="supplier-record"><div class="supplier-record-head"><div class="supplier-record-icon">🏢</div><div><div class="supplier-record-name">${safe(s.name)}</div><div class="supplier-record-phone">📞 ${safe(s.phone||"شمېره نه ده ثبت شوې")}</div></div></div>
+ <div class="supplier-record-debt"><small>اوسنی پاتې پور / بدهی</small><b>${money(s.debt)}</b></div>
+ <div class="supplier-record-actions"><button type="button" class="gray" onclick="editSupplier('${s.id}')">✏️ سمون</button><button type="button" class="red" onclick="deleteSupplier('${s.id}')">🗑 حذف</button></div></article>`).join("")||(q?`<div class="supplier-empty"><span>🔎</span>د لټون نتیجه ونه موندل شوه</div>`:`<div class="supplier-empty"><span>🏢</span>تر اوسه تامین کوونکی نه دی ثبت شوی<br><small>د «نوی تامین کوونکی» تڼۍ وکاروه</small></div>`);
 }
 function editSupplier(id){
  const s=db.suppliers.find(x=>x.id===id);if(!s)return;
