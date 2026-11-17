@@ -828,6 +828,46 @@ main{height:auto!important;min-height:0!important;overflow:visible!important}
 .invoice-edit-product-picker .sale-search-results{position:relative;max-height:210px;overflow:auto;z-index:2;margin-top:5px}
 .invoice-edit-add{grid-template-columns:minmax(0,1fr) auto;align-items:end}
 .invoice-edit-add>button{min-height:43px;white-space:nowrap}
+
+/* Shaheen colorful dashboard style inspired by the user's reference; CSS only */
+:root{--shaheen-blue:#1748b5;--shaheen-navy:#101f72;--shaheen-teal:#16b7b2;--shaheen-line:#dce5fa}
+body{background:linear-gradient(145deg,#eaf0ff 0%,#f8f9ff 48%,#edf5ff 100%)!important;color:#15224b!important}
+header{position:relative!important;overflow:hidden!important;padding:22px 16px 26px!important;border-radius:0 0 28px 28px!important;background:linear-gradient(112deg,#111b70 0%,#173bb2 48%,#087bd1 78%,#15a8bd 100%)!important;box-shadow:0 12px 28px #142d8840!important}
+header:after{content:"";position:absolute;left:-35px;top:-60px;width:190px;height:150px;border-radius:50%;background:linear-gradient(135deg,#ffffff24,#ffffff00);pointer-events:none}
+header h2{font-size:24px!important;font-weight:950!important;letter-spacing:.1px!important}
+header small{font-weight:700!important}
+main{max-width:1120px!important}
+#home .cards{gap:10px!important}
+#home .card{border:1px solid #ffffffa8!important;border-radius:17px!important;min-height:104px!important;padding:13px 11px!important;box-shadow:0 6px 15px #152e7519!important}
+#home .card:nth-child(4n+1){background:linear-gradient(145deg,#bff2c9,#e8ffe9)!important;color:#087d3e!important}
+#home .card:nth-child(4n+2){background:linear-gradient(145deg,#b9d9ff,#e9f3ff)!important;color:#1254b7!important}
+#home .card:nth-child(4n+3){background:linear-gradient(145deg,#ffd59c,#fff0d8)!important;color:#a94c05!important}
+#home .card:nth-child(4n){background:linear-gradient(145deg,#dfbaff,#f5eaff)!important;color:#7122b6!important}
+#home .card span{color:#26365e!important;font-weight:850!important}
+#home .card strong{font-size:clamp(17px,4.6vw,23px)!important;font-weight:950!important}
+#home .shortcuts{gap:9px!important}
+#home .shortcut{min-height:91px!important;border:0!important;border-radius:17px!important;color:white!important;padding:11px 5px!important;box-shadow:0 7px 15px #172e7530!important;background:linear-gradient(145deg,#1d9a54,#087a3d)!important}
+#home .shortcut b{width:39px!important;height:39px!important;border-radius:12px!important;background:#ffffff25!important;color:#fff!important;font-size:22px!important}
+#home .shortcuts .shortcut:nth-child(6n+2){background:linear-gradient(145deg,#1596ed,#0754c7)!important}
+#home .shortcuts .shortcut:nth-child(6n+3){background:linear-gradient(145deg,#a947e9,#6d19b5)!important}
+#home .shortcuts .shortcut:nth-child(6n+4){background:linear-gradient(145deg,#ffbd20,#f07808)!important}
+#home .shortcuts .shortcut:nth-child(6n+5){background:linear-gradient(145deg,#25c8c6,#07969c)!important}
+#home .shortcuts .shortcut:nth-child(6n){background:linear-gradient(145deg,#2859c8,#142d88)!important}
+#home .shortcuts .shortcut span{color:#fff!important;font-size:12px!important;font-weight:950!important}
+.panel{border:1px solid #dce5f8!important;border-radius:18px!important;background:linear-gradient(155deg,#fff,#f8faff)!important;box-shadow:0 7px 19px #18357514!important}
+.panel>h3{color:#172f83!important}
+main>section:not(#home):not(.hidden)>h3, #expenses>h3,#debts>h3,#capitalPage>h3,#settings>h3,#sarafPage>h3{border:0!important;border-right:5px solid #1c73df!important;border-radius:14px!important;background:linear-gradient(105deg,#102b87,#176bd0 70%,#14a6b5)!important;color:white!important;box-shadow:0 7px 18px #123d9630!important}
+#sales .sale-blue-header{background:linear-gradient(110deg,#122a91,#087cda 65%,#12a9b4)!important;color:white!important}
+#capitalPage .capital-total{background:linear-gradient(120deg,#103a91,#146bd0 60%,#11a89b)!important}
+#reports .reports-hero{background:linear-gradient(120deg,#132a8d,#245bd0 65%,#15a4ad)!important;color:white!important}
+#suppliers .supplier-hero{background:linear-gradient(120deg,#12318c,#187bd1 65%,#13a8a3)!important;color:white!important}
+#customers .customer-top{background:linear-gradient(120deg,#13308c,#256bd0 65%,#16a4b3)!important;color:white!important}
+button.primary,.primary{background:linear-gradient(120deg,#176fe0,#123aab)!important}
+button.green,.green{background:linear-gradient(120deg,#19ae70,#08784f)!important}
+nav{border-radius:24px 24px 0 0!important;background:#fffffffa!important;box-shadow:0 -8px 25px #132d771c!important}
+nav button.active{background:linear-gradient(145deg,#e3efff,#f6f9ff)!important;color:#1458ca!important}
+@media(max-width:430px){#home .card{min-height:98px!important;padding:11px 9px!important}#home .shortcut{min-height:83px!important}header h2{font-size:22px!important}}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
