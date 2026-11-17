@@ -1322,6 +1322,38 @@ body.invoice-edit-open{position:fixed!important;top:var(--invoice-edit-page-top,
 #invoiceEditModal #editInvoiceProductSearch{height:36px!important;min-height:36px!important;padding:4px 9px!important}
 #invoiceEditModal .invoice-edit-actions{position:sticky!important;bottom:0!important;background:#fff!important;padding:8px 0 calc(8px + env(safe-area-inset-bottom))!important;z-index:3!important}
 </style>
+<style id="SHAHEEN_INVOICE_EDIT_IOS_SCROLL_FIX_V2">
+html.invoice-edit-open{overflow:hidden!important;height:100%!important;overscroll-behavior:none!important}
+body.invoice-edit-open{position:static!important;top:auto!important;left:auto!important;right:auto!important;width:100%!important;overflow:hidden!important;touch-action:auto!important}
+#invoiceEditModal:not(.hidden){position:fixed!important;inset:var(--sale-vv-top,0px) 0 auto 0!important;height:var(--sale-vv-height,100dvh)!important;max-height:var(--sale-vv-height,100dvh)!important;width:100%!important;overflow:hidden!important;z-index:10050!important}
+#invoiceEditModal .invoice-edit-shade{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:100%!important;box-sizing:border-box!important;display:block!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important;padding:12px 8px calc(20px + env(safe-area-inset-bottom))!important}
+#invoiceEditModal .invoice-edit-window{width:min(100%,680px)!important;max-height:none!important;min-height:0!important;margin:0 auto!important;box-sizing:border-box!important;overflow:visible!important}
+#invoiceEditModal input,#invoiceEditModal select,#invoiceEditModal textarea{font-size:16px!important;min-height:36px!important;box-sizing:border-box!important;scroll-margin:12px!important}
+#invoiceEditModal .invoice-edit-actions{position:sticky!important;bottom:0!important;background:#fff!important;padding:8px 0 calc(8px + env(safe-area-inset-bottom))!important;z-index:3!important}
+</style>
+<script id="SHAHEEN_INVOICE_EDIT_IOS_FOCUS_V2">
+(function(){
+ function fitField(target){
+  const box=document.getElementById("invoiceEditModal");
+  if(!box||box.classList.contains("hidden")||!target||!box.contains(target))return;
+  const shade=box.querySelector(".invoice-edit-shade");
+  if(!shade)return;
+  const r=target.getBoundingClientRect(),v=window.visualViewport;
+  const bottom=v?Math.min(window.innerHeight,v.height+v.offsetTop):window.innerHeight;
+  if(r.bottom>bottom-20)shade.scrollTop+=r.bottom-bottom+32;
+  else if(r.top<(v?v.offsetTop:0)+12)shade.scrollTop-=((v?v.offsetTop:0)+12-r.top);
+ }
+ document.addEventListener("focusin",function(e){
+  const t=e.target;
+  if(!t||!t.matches||!t.matches("#invoiceEditModal input,#invoiceEditModal textarea,#invoiceEditModal select"))return;
+  requestAnimationFrame(function(){fitField(t);setTimeout(function(){fitField(t);},220);});
+ },true);
+ if(window.visualViewport)window.visualViewport.addEventListener("resize",function(){
+  const t=document.activeElement;
+  if(t&&t.closest&&t.closest("#invoiceEditModal"))setTimeout(function(){fitField(t);},100);
+ },{passive:true});
+})();
+</script>
 </head>
 <body>
 <header class="brand-header">
@@ -2373,6 +2405,8 @@ function editSale(id){
  document.body.classList.add("invoice-edit-open");
  box.classList.remove("hidden");
  renderInvoiceEditLines();
+ const shade=box.querySelector(".invoice-edit-shade");
+ if(shade)shade.scrollTop=0;
 }
 let invoiceEditPageScroll=0;
 function closeInvoiceEdit(){
