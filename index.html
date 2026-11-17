@@ -1383,6 +1383,59 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 #suppliers .supplier-record-actions button{flex:1;min-height:36px;border-radius:10px}
 @media(max-width:420px){#suppliers .supplier-hero{padding:18px 15px}#suppliers .supplier-hero h3{font-size:17px}#suppliers .supplier-hero-icon{width:48px;height:48px;flex-basis:48px;font-size:24px}#suppliers .supplier-toolbar{padding:13px}#suppliers .supplier-new-btn{padding:10px;font-size:11px}#suppliers .supplier-fields{grid-template-columns:1fr}#suppliers .supplier-fields>div:last-child{grid-column:auto}}
 </style>
+<style>
+#reports.reports-page{padding:4px 0 28px}
+#reports .reports-hero{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:21px 18px;margin-bottom:15px;border-radius:22px;background:linear-gradient(135deg,#142f4a,#245b73 65%,#258477);color:#fff;box-shadow:0 12px 26px rgba(20,47,74,.15)}
+#reports .reports-kicker{font-size:9px;letter-spacing:1.3px;color:#c0dce7;font-weight:800}
+#reports .reports-hero h3{font-size:19px;color:#fff;margin:8px 0 6px}
+#reports .reports-hero p{font-size:11px;color:#d9e9ee;line-height:1.8;margin:0}
+#reports .reports-hero-icon{width:52px;height:52px;flex:0 0 52px;border-radius:16px;background:#ffffff20;display:grid;place-items:center;font-size:27px}
+#reports .reports-block{padding:15px;margin-bottom:14px;border:1px solid #e3ebef;border-radius:19px;background:#fff;box-shadow:0 5px 18px rgba(20,50,65,.045)}
+#reports .reports-block-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+#reports .reports-block-title small{font-size:9px;letter-spacing:1px;color:#8b9da6;font-weight:800}
+#reports .reports-block-title h4{font-size:15px;color:#203b4a;margin:4px 0 0}
+#reports .reports-block-title>span{width:35px;height:35px;border-radius:11px;background:#edf5f6;display:grid;place-items:center;font-size:18px}
+#reports .reports-close-month{width:100%;margin-top:14px;border-radius:12px;min-height:43px}
+#reports .reports-today-btn,#reports .reports-run-btn{width:100%;min-height:43px;border-radius:12px}
+#reports .reports-date-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:13px 0}
+#reports .reports-date-grid>div{min-width:0}
+#reports .reports-date-grid label,#reports .reports-archive-block>label{display:block;font-size:11px;color:#607681;margin-bottom:6px}
+#reports .reports-date-grid input,#reports .reports-archive-action input{width:100%;min-width:0;box-sizing:border-box}
+#reports .reports-archive-action{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+#reports .reports-archive-action button{white-space:nowrap;min-height:41px;border-radius:11px}
+#reports #archiveList>.item{padding:13px;margin:10px 0;border:1px solid #e4ecef;border-radius:14px;background:#fafdfe}
+#reports #archiveList>.item>b{display:block;color:#24495a;font-size:14px;margin-bottom:6px}
+#reports #archiveList>.item>div:not(.actions){font-size:11px;color:#6d808a;line-height:1.8}
+#reports #archiveList .actions{display:flex;gap:8px;margin-top:10px}
+#reports #archiveList .actions button{flex:1;min-height:36px;border-radius:10px}
+#reports #monthOverview .month-overview>h3{font-size:16px;color:#1e4558;margin:0 0 6px}
+#reports #monthOverview .month-overview>p{font-size:11px;color:#82939b;margin:0 0 12px}
+#reports #monthOverview .month-opening{padding:11px 12px;border-radius:12px;background:#f2f7f8;color:#506b77;font-size:11px;line-height:1.8;margin-bottom:12px}
+#reports #monthOverview .month-opening b{color:#1d5264;direction:ltr;display:inline-block}
+#reports #monthOverview .month-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+#reports #monthOverview .month-stats>div{display:flex;flex-direction:column;gap:6px;min-width:0;padding:12px;border:1px solid #e7eef1;border-radius:13px;background:#fbfdfe}
+#reports #monthOverview .month-stats small{font-size:10px;line-height:1.6;color:#71848d}
+#reports #monthOverview .month-stats b{font-size:14px;color:#244b5b;direction:ltr;text-align:right;overflow-wrap:anywhere}
+#reports #monthOverview .month-stats>div:nth-child(4) b{color:#07836e}
+#reports #monthOverview .month-overview>h4{font-size:14px;color:#24495a;margin:18px 0 10px}
+#reports .daily-table-wrap{overflow-x:auto;border:1px solid #e4ecef;border-radius:12px}
+#reports .daily-report-table{width:100%;border-collapse:collapse;min-width:540px;font-size:11px}
+#reports .daily-report-table th{background:#edf4f6;color:#45616d;font-weight:800}
+#reports .daily-report-table th,#reports .daily-report-table td{padding:10px 8px;border-bottom:1px solid #edf1f3;white-space:nowrap}
+#reports .reports-result{margin-top:14px}
+#reports .reports-result .daily-report{padding:14px;border:1px solid #e1e9ed;border-radius:18px;background:#fff}
+#reports .reports-result .daily-report-head{padding:14px;border-radius:13px;background:#eff6f7;margin-bottom:12px}
+#reports .reports-result .daily-report-head h3{font-size:15px;color:#24495a;margin:0 0 7px}
+#reports .reports-result .daily-report-head div{font-size:11px;color:#72858e}
+#reports .reports-result .daily-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+#reports .reports-result .daily-stat{padding:11px;border:1px solid #e5ecef;border-radius:12px;display:flex;flex-direction:column;gap:6px}
+#reports .reports-result .daily-stat span{font-size:10px;color:#71838b}
+#reports .reports-result .daily-stat b{font-size:13px;text-align:right;direction:ltr;color:#244b5b}
+#reports .reports-result .daily-report-section{margin-top:15px}
+#reports .reports-result .daily-report-section h3{font-size:13px;color:#24495a;margin-bottom:9px}
+#reports .reports-result .daily-report-total,#reports .reports-result .daily-report-footer{font-size:11px;padding:10px 2px;color:#536d78;line-height:1.9}
+@media(max-width:420px){#reports .reports-hero{padding:18px 14px}#reports .reports-hero h3{font-size:17px}#reports .reports-block{padding:12px}#reports .reports-date-grid{gap:7px}#reports .reports-archive-action{align-items:stretch;flex-direction:column}#reports .reports-archive-action button{width:100%}}
+</style>
 </head>
 <body>
 <header class="brand-header">
@@ -1631,21 +1684,17 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  </div>
 </section>
 
-<section id="reports" class="hidden">
- <h3>📊 میاشتني او ورځني راپورونه</h3>
- <div class="panel">
-  <div id="monthOverview"></div>
-  <button class="green" onclick="closeCurrentMonth()">🔒 میاشت بندول / نوې میاشت</button>
-  <hr>
-  <button class="primary" onclick="makeDailyReport()">📅 د نن ورځې بشپړ راپور</button>
-  <label>له نېټې</label><input type="date" id="reportFrom">
-  <label>تر نېټې</label><input type="date" id="reportTo">
-  <button class="primary" onclick="makeReport()">د ټاکلې مودې راپور ښکاره کړه</button>
-  <hr><h3>🗂 میاشتني راپورونه</h3>
-  <label>میاشت انتخاب کړه</label><input type="month" id="archiveMonth"><button class="gray" onclick="archiveMonth()">د میاشتې راپور خوندي کړه</button>
-  <div id="archiveList"></div>
-  <div id="reportContent"></div>
- </div>
+<section id="reports" class="hidden reports-page">
+ <div class="reports-hero"><div><span class="reports-kicker">DUKAN PRO · ANALYTICS</span><h3>📊 میاشتني او ورځني راپورونه</h3><p>د خرڅلاو، ګټې، لګښتونو او موجودۍ روښانه مالي انځور</p></div><div class="reports-hero-icon">📈</div></div>
+ <div class="reports-block reports-overview-block"><div class="reports-block-title"><div><small>MONTHLY OVERVIEW</small><h4>د روانې میاشتې لنډیز</h4></div><span>📅</span></div><div id="monthOverview"></div>
+ <button class="green reports-close-month" onclick="closeCurrentMonth()">🔒 میاشت بندول / نوې میاشت</button></div>
+ <div class="reports-block reports-filter-block"><div class="reports-block-title"><div><small>DATE RANGE</small><h4>د ټاکلې مودې راپور</h4></div><span>🗓️</span></div>
+ <button class="primary reports-today-btn" onclick="makeDailyReport()">📅 د نن ورځې بشپړ راپور</button>
+ <div class="reports-date-grid"><div><label for="reportFrom">له نېټې</label><input type="date" id="reportFrom"></div><div><label for="reportTo">تر نېټې</label><input type="date" id="reportTo"></div></div>
+ <button class="primary reports-run-btn" onclick="makeReport()">📊 راپور ښکاره کړه</button></div>
+ <div class="reports-block reports-archive-block"><div class="reports-block-title"><div><small>SAVED REPORTS</small><h4>🗂 میاشتني خوندي شوي راپورونه</h4></div><span>🗃️</span></div>
+ <label for="archiveMonth">میاشت انتخاب کړه</label><div class="reports-archive-action"><input type="month" id="archiveMonth"><button class="gray" onclick="archiveMonth()">＋ راپور خوندي کړه</button></div><div id="archiveList"></div></div>
+ <div id="reportContent" class="reports-result"></div>
 </section>
 
 <section id="capitalPage" class="hidden">
