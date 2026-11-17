@@ -1682,6 +1682,30 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 @media(min-width:760px){#expenses .expense-day-items{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:370px){#expenses .expense-day-group{padding:8px}#expenses .expense-day-heading{padding:11px 10px;gap:6px}#expenses .expense-day-heading>div:first-child b{font-size:12px}#expenses .expense-day-total strong{font-size:13px}}
 </style>
+<style>
+/* Daily expense report panel — date-specific summary */
+#expenses .expense-daily-report-panel{border:1px solid #cfe1e7!important;background:linear-gradient(160deg,#f1f8fa,#fff 60%)!important}
+#expenses .expense-daily-title{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+#expenses .expense-daily-title>span{display:grid;place-items:center;width:46px;height:46px;flex:0 0 46px;border-radius:14px;background:#dceff0;font-size:22px}
+#expenses .expense-daily-title h3{margin:0;color:#183e53;font-size:17px;font-weight:950}
+#expenses .expense-daily-title p{margin:4px 0 0;color:#71838e;font-size:11px;line-height:1.8}
+#expenses .expense-daily-report-panel>button.primary{margin-bottom:15px}
+#expenses .expense-daily-summary{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0}
+#expenses .expense-daily-total{display:flex;flex-direction:column;gap:5px;padding:17px;border-radius:16px;background:linear-gradient(115deg,#15364e,#16756f);color:#fff}
+#expenses .expense-daily-total small{color:#d0e9e6;font-size:11px}
+#expenses .expense-daily-total strong{font-size:24px;font-weight:950;font-variant-numeric:tabular-nums}
+#expenses .expense-daily-breakdown{display:grid;gap:7px}
+#expenses .expense-daily-breakdown>div{display:flex;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid #e2eaee;border-radius:12px;background:#fff;color:#526977;font-size:12px}
+#expenses .expense-daily-breakdown b{color:#183e53;font-weight:900;font-variant-numeric:tabular-nums}
+#expenses .expense-daily-list-title{margin:15px 0 8px;color:#24475b;font-size:13px;font-weight:950}
+#expenses .expense-daily-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 10px;border-top:1px solid #e6edf0;background:#fff}
+#expenses .expense-daily-row-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+#expenses .expense-daily-row-main b{color:#23475b;font-size:13px;overflow-wrap:anywhere}
+#expenses .expense-daily-row-main small{color:#71828c;font-size:10px;line-height:1.7}
+#expenses .expense-daily-row>strong{flex-shrink:0;color:#167466;font-size:13px;font-weight:950;font-variant-numeric:tabular-nums}
+#expenses .expense-daily-empty{padding:20px 12px;border:1px dashed #cbdce2;border-radius:13px;background:#fff;color:#7b8d97;text-align:center;font-size:12px}
+@media(min-width:700px){#expenses .expense-daily-summary{grid-template-columns:1fr 1fr;align-items:stretch}#expenses .expense-daily-total{justify-content:center}}
+</style>
 </head>
 <body>
 <header class="brand-header">
@@ -1904,6 +1928,12 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <button class="primary" onclick="addCashFee()">💾 نغدي فیس ثبت کړه</button>
  </div>
 
+ <div class="panel expense-daily-report-panel">
+  <div class="expense-daily-title"><span>📅</span><div><h3>د ورځې د مصارفو راپور</h3><p>یوازې د ټاکلې ورځې مصرفونه او د هماغې ورځې مجموعه</p></div></div>
+  <label>د راپور ورځ وټاکه</label><input id="expenseReportDate" type="date">
+  <button type="button" class="primary" onclick="renderExpenseDailyReport()">د دې ورځې راپور ښکاره کړه</button>
+  <div id="expenseDailyReport" aria-live="polite"></div>
+ </div>
  <div class="panel">
   <label>🔎 لګښتونه ولټوه</label><input id="expenseSearch" type="search" placeholder="د لګښت، جنس، ډول یا یادښت لټون..." oninput="renderExpenses()">
   <div id="expensesList"></div>
@@ -3367,6 +3397,21 @@ function addCashFee(){
  refreshAll();alert("نغدي فیس ثبت شو؛ له نغدو کم شو، ګټه بدله نه شوه");
 }
 
+function renderExpenseDailyReport(){
+ const date=value("expenseReportDate")||today();
+ const items=(db.expenses||[]).filter(e=>String(e.date||"").slice(0,10)===date).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
+ const total=items.reduce((sum,e)=>sum+Number(e.amount||0),0);
+ const cash=items.filter(e=>e.paymentType==="cash").reduce((sum,e)=>sum+Number(e.amount||0),0);
+ const fees=items.filter(e=>e.paymentType==="cash_nonprofit").reduce((sum,e)=>sum+Number(e.amount||0),0);
+ const stock=items.filter(e=>e.paymentType==="stock").reduce((sum,e)=>sum+Number(e.amount||0),0);
+ const rows=items.map(e=>`<div class="expense-daily-row"><div class="expense-daily-row-main"><b>${safe(e.name)}</b><small>${safe(e.category||"لګښت")}${e.productName?" · "+safe(e.productName):""}</small>${e.note?'<small>یادښت: '+safe(e.note)+'</small>':""}</div><strong>${money(e.amount)}</strong></div>`).join("");
+ document.getElementById("expenseDailyReport").innerHTML=`
+  <div class="expense-daily-summary"><div class="expense-daily-total"><small>د دې ورځې ټول مصرف</small><strong>${money(total)}</strong><small>AFN · ${items.length} ثبتونه</small></div>
+   <div class="expense-daily-breakdown"><div><span>نغدي لګښت</span><b>${money(cash)}</b></div><div><span>نغدي فیس</span><b>${money(fees)}</b></div><div><span>د موجودۍ مصرف</span><b>${money(stock)}</b></div></div>
+  </div>
+  <div class="expense-daily-list-title">د ${safe(displayDate(date))} د مصرفونو تفصیل</div>
+  ${rows||'<div class="expense-daily-empty">په دې ورځ هېڅ مصرف نه دی ثبت شوی.</div>'}`;
+}
 function renderExpenses(){
  const q=(value("expenseSearch")||"").trim().toLowerCase();
  const list=(db.expenses||[]).filter(e=>[e.name,e.category,e.note,e.productName,e.date].some(v=>String(v||"").toLowerCase().includes(q))).slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
@@ -3379,6 +3424,7 @@ function renderExpenses(){
   return `<section class="expense-day-group"><header class="expense-day-heading"><div><small>د ورځې مصارف</small><b>${safe(date?displayDate(date):"بې نېټې ثبتونه")}</b></div><div class="expense-day-total"><small>${items.length} ثبتونه</small><strong>${money(total)}</strong><small>د ورځې مجموعه · AFN</small></div></header><div class="expense-day-items">${cards}</div></section>`;
  }).join("");
  document.getElementById("expensesList").innerHTML=html||(q?"د لټون نتیجه ونه موندل شوه":"لګښت نشته");
+ renderExpenseDailyReport();
 }
 function deleteExpense(id){
  const e=db.expenses.find(x=>x.id===id);if(!e)return;
