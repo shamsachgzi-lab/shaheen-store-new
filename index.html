@@ -1666,6 +1666,22 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 @media(min-width:760px){#expenses>.panel{padding:25px 27px}#expenses #expensesList{grid-template-columns:repeat(2,minmax(0,1fr))}#expenses>.panel:first-of-type .row,#expenses>.panel:nth-of-type(2) .row{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){#expenses *{transition:none!important}}
 </style>
+<style>
+/* Daily expense grouping — display only */
+#expenses #expensesList{display:flex!important;flex-direction:column;gap:15px}
+#expenses .expense-day-group{width:100%;min-width:0;padding:13px;border:1px solid #dce7ec;border-radius:19px;background:#f5f9fb;box-sizing:border-box}
+#expenses .expense-day-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:13px 14px;border-radius:14px;background:linear-gradient(110deg,#17374f,#176b70);color:#fff}
+#expenses .expense-day-heading>div:first-child{display:flex;flex-direction:column;gap:5px;min-width:0}
+#expenses .expense-day-heading>div:first-child small{color:#c6e3e5;font-size:10px}
+#expenses .expense-day-heading>div:first-child b{color:#fff;font-size:14px;line-height:1.7}
+#expenses .expense-day-total{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+#expenses .expense-day-total small{color:#d2e9e7;font-size:9px}
+#expenses .expense-day-total strong{color:#fff;font-size:16px;font-weight:950;font-variant-numeric:tabular-nums}
+#expenses .expense-day-items{display:grid;grid-template-columns:1fr;gap:10px}
+#expenses .expense-day-items .item{background:#fff}
+@media(min-width:760px){#expenses .expense-day-items{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:370px){#expenses .expense-day-group{padding:8px}#expenses .expense-day-heading{padding:11px 10px;gap:6px}#expenses .expense-day-heading>div:first-child b{font-size:12px}#expenses .expense-day-total strong{font-size:13px}}
+</style>
 </head>
 <body>
 <header class="brand-header">
@@ -3353,9 +3369,16 @@ function addCashFee(){
 
 function renderExpenses(){
  const q=(value("expenseSearch")||"").trim().toLowerCase();
- const list=(db.expenses||[]).filter(e=>[e.name,e.category,e.note,e.productName,e.date].some(v=>String(v||"").toLowerCase().includes(q))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
- document.getElementById("expensesList").innerHTML=list.map(e=>`
- <div class="item"><b>${safe(e.name)}</b><div>مبلغ: ${money(e.amount)}</div><div>نېټه: ${safe(displayDate(e.date))}</div><div>ډول: ${safe(e.category)}</div>${e.productName?'<div>مصرف شوی جنس: '+safe(e.productName)+' · مقدار: '+safe(e.qty)+' '+safe(e.unit||"")+'</div>':""}<div>یادښت: ${safe(e.note||"-")}</div><button class="red" onclick="deleteExpense('${e.id}')">حذف</button></div>`).join("")||(q?"د لټون نتیجه ونه موندل شوه":"لګښت نشته");
+ const list=(db.expenses||[]).filter(e=>[e.name,e.category,e.note,e.productName,e.date].some(v=>String(v||"").toLowerCase().includes(q))).slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+ const groups=new Map();
+ list.forEach(e=>{const key=String(e.date||"");if(!groups.has(key))groups.set(key,[]);groups.get(key).push(e);});
+ const html=[...groups.entries()].map(([date,items])=>{
+  const total=items.reduce((sum,e)=>sum+Number(e.amount||0),0);
+  const cards=items.map(e=>`
+   <div class="item"><b>${safe(e.name)}</b><div>مبلغ: ${money(e.amount)}</div><div>نېټه: ${safe(displayDate(e.date))}</div><div>ډول: ${safe(e.category)}</div>${e.productName?'<div>مصرف شوی جنس: '+safe(e.productName)+' · مقدار: '+safe(e.qty)+' '+safe(e.unit||"")+'</div>':""}<div>یادښت: ${safe(e.note||"-")}</div><button class="red" onclick="deleteExpense('${e.id}')">حذف</button></div>`).join("");
+  return `<section class="expense-day-group"><header class="expense-day-heading"><div><small>د ورځې مصارف</small><b>${safe(date?displayDate(date):"بې نېټې ثبتونه")}</b></div><div class="expense-day-total"><small>${items.length} ثبتونه</small><strong>${money(total)}</strong><small>د ورځې مجموعه · AFN</small></div></header><div class="expense-day-items">${cards}</div></section>`;
+ }).join("");
+ document.getElementById("expensesList").innerHTML=html||(q?"د لټون نتیجه ونه موندل شوه":"لګښت نشته");
 }
 function deleteExpense(id){
  const e=db.expenses.find(x=>x.id===id);if(!e)return;
