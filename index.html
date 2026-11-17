@@ -1214,6 +1214,41 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 #sales .sale-summary .sale-cash-line,#sales .sale-summary .sale-debt-line{padding:6px!important}
 #sales .sale-save-button{padding:9px!important;margin:6px 5px!important;width:calc(100% - 10px)!important;font-size:14px!important}
 </style>
+<style id="shaheen-sale-keyboard-lock-v1">
+#sales.sale-overlay:not(.hidden){height:var(--sale-visual-height,100dvh)!important;max-height:var(--sale-visual-height,100dvh)!important}
+#sales.sale-overlay .sale-page{max-height:var(--sale-visual-height,100dvh)!important;overscroll-behavior:contain!important}
+#sales #saleProductSearch,#sales #saleCustomer{scroll-margin-top:12px!important;scroll-margin-bottom:12px!important}
+</style>
+<script id="SHAHEEN_SALE_KEYBOARD_LOCK_V1">
+(function(){
+ const root=document.documentElement;
+ function setSaleViewport(){
+  if(window.visualViewport)root.style.setProperty("--sale-visual-height",Math.max(260,window.visualViewport.height)+"px");
+ }
+ setSaleViewport();
+ if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",setSaleViewport,{passive:true});
+  window.visualViewport.addEventListener("scroll",setSaleViewport,{passive:true});
+ }
+ let savedTop=0;
+ document.addEventListener("touchstart",function(e){
+  const t=e.target;
+  if(t&&t.closest&&t.closest("#sales #saleProductSearch,#sales #saleCustomer")){
+   const page=document.querySelector("#sales .sale-page");savedTop=page?page.scrollTop:0;
+  }
+ },{capture:true,passive:true});
+ document.addEventListener("focusin",function(e){
+  const t=e.target;
+  if(!t||!t.matches||!t.matches("#sales #saleProductSearch,#sales #saleCustomer"))return;
+  const page=document.querySelector("#sales .sale-page"),y=savedTop;
+  requestAnimationFrame(function(){if(page)page.scrollTop=y;window.scrollTo(0,0);});
+ },true);
+ document.addEventListener("keydown",function(e){
+  const t=e.target;
+  if((e.key==="Enter"||e.key==="Escape")&&t&&t.matches&&t.matches("#sales #saleProductSearch,#sales #saleCustomer")){e.preventDefault();t.blur();}
+ },true);
+})();
+</script>
 </head>
 <body>
 <header class="brand-header">
