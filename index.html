@@ -1214,52 +1214,8 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 #sales .sale-summary .sale-cash-line,#sales .sale-summary .sale-debt-line{padding:6px!important}
 #sales .sale-save-button{padding:9px!important;margin:6px 5px!important;width:calc(100% - 10px)!important;font-size:14px!important}
 </style>
-<style id="shaheen-sale-keyboard-lock-v1">
-#sales.sale-overlay:not(.hidden){position:fixed!important;left:0!important;right:0!important;top:var(--sale-vv-top,0px)!important;bottom:auto!important;height:var(--sale-vv-height,100dvh)!important;max-height:var(--sale-vv-height,100dvh)!important;overflow:hidden!important}
-#sales.sale-overlay .sale-page{height:100%!important;max-height:100%!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
-#sales #saleProductSearch,#sales #saleCustomer,#sales #saleDiscount,#sales #salePaid{scroll-margin-top:12px!important;scroll-margin-bottom:12px!important}
-</style>
-<script id="SHAHEEN_SALE_KEYBOARD_LOCK_V1">
-(function(){
- const root=document.documentElement;
- function setSaleViewport(){
-  const vv=window.visualViewport;
-  const h=vv?vv.height:window.innerHeight;
-  const top=vv?Math.max(0,vv.offsetTop):0;
-  root.style.setProperty("--sale-vv-height",Math.max(240,h)+"px");
-  root.style.setProperty("--sale-vv-top",top+"px");
-  root.style.setProperty("--sale-visual-height",Math.max(240,h)+"px");
- }
- function keepSaleFieldVisible(target){
-  const panel=document.querySelector("#sales .sale-page");
-  if(!panel||!target)return;
-  const pr=panel.getBoundingClientRect(),ir=target.getBoundingClientRect();
-  if(ir.bottom>pr.bottom-12)panel.scrollTop+=ir.bottom-pr.bottom+18;
-  else if(ir.top<pr.top+12)panel.scrollTop-=pr.top+12-ir.top;
- }
- setSaleViewport();
- if(window.visualViewport){
-  window.visualViewport.addEventListener("resize",function(){
-   setSaleViewport();
-   /* Keyboard open: keep the sale form at its current scroll position. */
-  },{passive:true});
-  window.visualViewport.addEventListener("scroll",setSaleViewport,{passive:true});
- }
- window.addEventListener("orientationchange",function(){setTimeout(setSaleViewport,150);},{passive:true});
- document.addEventListener("focusin",function(e){
-  const target=e.target;
-  if(!target||!target.closest||!target.closest("#sales"))return;
-  requestAnimationFrame(function(){
-   if(document.body.classList.contains("sale-modal-open"))window.scrollTo(0,__salePageLockY);
-   /* Do not auto-scroll the invoice when any field receives focus. */
-  });
- },true);
- document.addEventListener("keydown",function(e){
-  const t=e.target;
-  if((e.key==="Enter"||e.key==="Escape")&&t&&t.matches&&t.matches("#sales input,#sales textarea")){e.preventDefault();t.blur();}
- },true);
-})();
-</script>
+
+
 <style id="shaheen-sale-keyboard-done-v2">
 #sales .sale-keyboard-done{display:block;width:100%;min-height:34px!important;height:34px;padding:5px 8px;margin:3px 0 5px;border:1px solid #b8c9df;border-radius:9px;background:#edf4ff;color:#174d91;font-size:12px}
 #sales .sale-keyboard-done[hidden]{display:none!important}
@@ -1375,61 +1331,9 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 #sales.sale-overlay .sale-page{height:100%!important;max-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:auto!important;touch-action:pan-y!important}
 #sales.sale-overlay .sale-page *{scroll-behavior:auto!important}
 </style>
-<style id="SHAHEEN_SALE_STABLE_VIEWPORT_V5">
-/* Keep the sale modal at a stable layout-viewport size; the iOS keyboard must not resize/reposition it. */
-html.sale-modal-open,body.sale-modal-open{height:100%!important;min-height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
-body.sale-modal-open{position:fixed!important;inset:0!important;width:100%!important;height:100%!important;max-height:100%!important;touch-action:none!important}
-#sales.sale-overlay:not(.hidden){position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;min-height:100%!important;max-height:none!important;overflow:hidden!important;transform:none!important}
-#sales.sale-overlay .sale-page{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:100%!important;max-height:none!important;margin:0 auto!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:auto!important;touch-action:pan-y!important}
-</style>
-<script id="SHAHEEN_SALE_STABLE_VIEWPORT_V5">
-(function(){
- const root=document.documentElement;
- function stableSaleViewport(){
-  if(!document.body.classList.contains("sale-modal-open"))return;
-  const modal=document.getElementById("sales");
-  if(!modal||modal.classList.contains("hidden"))return;
-  modal.style.setProperty("top","0","important");
-  modal.style.setProperty("bottom","0","important");
-  modal.style.setProperty("height","100dvh","important");
-  modal.style.setProperty("max-height","none","important");
-  if(window.scrollY||window.pageYOffset)window.scrollTo(0,0);
- }
- document.addEventListener("focusin",function(e){
-  if(e.target&&e.target.closest&&e.target.closest("#sales"))requestAnimationFrame(stableSaleViewport);
- },true);
- document.addEventListener("focusout",function(e){
-  if(e.target&&e.target.closest&&e.target.closest("#sales"))requestAnimationFrame(stableSaleViewport);
- },true);
- window.addEventListener("orientationchange",function(){setTimeout(stableSaleViewport,250);},{passive:true});
- if(window.visualViewport)window.visualViewport.addEventListener("resize",function(){
-  /* Intentionally do not resize the sale modal to the keyboard's visual viewport. */
-  stableSaleViewport();
- },{passive:true});
-})();
-</script>
-<style id="SHAHEEN_SALE_TOP_ANCHOR_V6">
-/* Final iPhone sale dialog layout: disable flex centering so the blue header always starts at the top. */
-#sales.sale-overlay:not(.hidden){
- display:block!important;
- position:fixed!important;
- top:0!important;left:0!important;right:0!important;bottom:0!important;
- width:100vw!important;height:100vh!important;height:100dvh!important;
- min-height:0!important;max-height:none!important;
- margin:0!important;padding:0!important;
- overflow:hidden!important;transform:none!important;
- align-items:initial!important;justify-content:initial!important;
-}
-#sales.sale-overlay:not(.hidden)>.sale-page{
- position:absolute!important;
- top:0!important;left:0!important;right:0!important;bottom:0!important;
- width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;
- margin:0!important;border-radius:0!important;
- box-sizing:border-box!important;
- overflow-x:hidden!important;overflow-y:auto!important;
- overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
-}
-</style>
+
+
+
 </head>
 <body>
 <header class="brand-header">
@@ -4067,5 +3971,54 @@ body.sale-modal-open #sales.sale-overlay:not(.hidden){
 }
 #sales #saleProductSearch,#sales #saleCustomer{scroll-margin-block:8px!important}
 </style>
+<style id="SHAHEEN_SALE_NO_JUMP_V7">
+/* Stable sale form: keep the modal anchored to the layout viewport, not the shrinking keyboard viewport. */
+html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-behavior:none!important}
+body.sale-modal-open{position:static!important;inset:auto!important;width:100%!important;height:auto!important;touch-action:pan-x pan-y!important}
+#sales.sale-overlay:not(.hidden){
+ display:block!important;position:fixed!important;
+ top:0!important;left:0!important;right:0!important;bottom:0!important;
+ width:100vw!important;height:100vh!important;max-height:100vh!important;min-height:0!important;
+ margin:0!important;padding:0!important;overflow:hidden!important;transform:none!important;
+ align-items:initial!important;justify-content:initial!important;
+}
+#sales.sale-overlay:not(.hidden)>.sale-page{
+ position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:0!important;
+ width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;
+ margin:0!important;border-radius:0!important;box-sizing:border-box!important;
+ overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+ -webkit-overflow-scrolling:touch!important;scroll-behavior:auto!important;touch-action:pan-y!important;
+}
+</style>
+<script id="SHAHEEN_SALE_NO_JUMP_V7">
+(function(){
+ let focused=false, heldScroll=0, panel=null, restoreToken=0;
+ function getPanel(){return document.querySelector("#sales .sale-page");}
+ function restore(){
+  if(!focused||!document.body.classList.contains("sale-modal-open"))return;
+  panel=getPanel();if(panel)panel.scrollTop=heldScroll;
+  window.scrollTo(0,0);
+ }
+ document.addEventListener("focusin",function(e){
+  if(!e.target||!e.target.closest||!e.target.closest("#sales"))return;
+  panel=getPanel();heldScroll=panel?panel.scrollTop:0;focused=true;
+  const token=++restoreToken;
+  requestAnimationFrame(restore);
+  setTimeout(function(){if(token===restoreToken)restore();},80);
+  setTimeout(function(){if(token===restoreToken)restore();},260);
+ },true);
+ document.addEventListener("focusout",function(e){
+  if(e.target&&e.target.closest&&e.target.closest("#sales")){
+   focused=false;restoreToken++;
+  }
+ },true);
+ if(window.visualViewport)window.visualViewport.addEventListener("resize",function(){
+  if(!focused)return;
+  const token=++restoreToken;
+  requestAnimationFrame(restore);
+  setTimeout(function(){if(token===restoreToken)restore();},100);
+ },{passive:true});
+})();
+</script>
 </body>
 </html>
