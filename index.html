@@ -1241,8 +1241,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
  if(window.visualViewport){
   window.visualViewport.addEventListener("resize",function(){
    setSaleViewport();
-   const active=document.activeElement;
-   if(active&&active.closest&&active.closest("#sales"))setTimeout(()=>keepSaleFieldVisible(active),80);
+   /* Keyboard open: keep the sale form at its current scroll position. */
   },{passive:true});
   window.visualViewport.addEventListener("scroll",setSaleViewport,{passive:true});
  }
@@ -1252,7 +1251,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   if(!target||!target.closest||!target.closest("#sales"))return;
   requestAnimationFrame(function(){
    if(document.body.classList.contains("sale-modal-open"))window.scrollTo(0,__salePageLockY);
-   keepSaleFieldVisible(target);
+   /* Do not auto-scroll the invoice when any field receives focus. */
   });
  },true);
  document.addEventListener("keydown",function(e){
@@ -1367,6 +1366,14 @@ body.invoice-edit-open{position:fixed!important;top:var(--invoice-edit-page-top,
 #invoiceEditModal:not(.hidden){position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;z-index:2147483000!important;background:transparent!important}
 #invoiceEditModal .invoice-edit-shade{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:100%!important;display:block!important;overflow-x:hidden!important;overflow-y:auto!important;box-sizing:border-box!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important;padding:12px 8px calc(24px + env(safe-area-inset-bottom))!important}
 #invoiceEditModal .invoice-edit-window{position:relative!important;width:min(100%,680px)!important;min-height:0!important;max-height:none!important;margin:0 auto!important;overflow:visible!important;box-sizing:border-box!important}
+</style>
+<style id="SHAHEEN_SALE_MODAL_NO_AUTO_JUMP_V4">
+/* Keep the sales/invoice screen stationary when the iPhone keyboard opens.
+   The form can still be moved manually inside its own panel. */
+html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-behavior:none!important}
+#sales.sale-overlay:not(.hidden){position:fixed!important;inset:0!important;height:100vh!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;transform:none!important}
+#sales.sale-overlay .sale-page{height:100%!important;max-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:auto!important;touch-action:pan-y!important}
+#sales.sale-overlay .sale-page *{scroll-behavior:auto!important}
 </style>
 </head>
 <body>
