@@ -1490,6 +1490,82 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 @media(max-width:390px){#reports .reports-hero{padding:18px 14px}#reports .reports-hero-icon{width:49px;height:49px;flex-basis:49px}#reports #monthOverview .month-stats>div{padding:11px;min-height:72px}#reports #monthOverview .month-stats b{font-size:13px}}
 @media print{#reports .reports-hero,#reports .reports-block-title>span{box-shadow:none}#reports .reports-block{break-inside:avoid}}
 </style>
+
+<style>
+/* Reports dashboard v3 — premium responsive visual-only refresh */
+#reports.reports-page{padding:8px 0 34px;max-width:1120px;margin-inline:auto}
+#reports .reports-hero{min-height:132px;overflow:hidden;border-radius:25px;padding:24px 22px;margin-bottom:18px;background:linear-gradient(115deg,#101d35 0%,#174c67 52%,#087f78 100%);box-shadow:0 18px 38px rgba(13,49,69,.19)}
+#reports .reports-hero:after{right:48px;top:-64px;width:150px;height:150px;border-color:#ffffff26;box-shadow:0 0 0 20px #ffffff09,0 0 0 42px #ffffff06}
+#reports .reports-hero h3{font-size:21px;letter-spacing:-.35px;margin:10px 0 7px}
+#reports .reports-hero p{max-width:440px;font-size:12px;line-height:1.9;opacity:.9}
+#reports .reports-hero-icon{width:66px;height:66px;flex-basis:66px;border-radius:21px;font-size:30px}
+#reports .reports-block{border-radius:23px;padding:18px;margin-bottom:17px;box-shadow:0 9px 28px rgba(20,55,72,.065);transition:box-shadow .2s,border-color .2s}
+#reports .reports-block-title{align-items:center;margin-bottom:16px;padding-bottom:13px}
+#reports .reports-block-title small{font-size:9px;letter-spacing:1.25px;color:#78909b}
+#reports .reports-block-title h4{font-size:16px;letter-spacing:-.2px}
+#reports .reports-block-title>span{width:41px;height:41px;border-radius:14px;font-size:20px}
+#reports #monthOverview .month-overview{padding:17px;border-radius:19px;background:linear-gradient(150deg,#f6fafb,#fff 62%);border-color:#e0ebee}
+#reports #monthOverview .month-overview>h3{font-size:18px;font-weight:850}
+#reports #monthOverview .month-overview>p{font-size:11px;line-height:1.8;border:1px solid #e2ecef;background:#f2f7f8}
+#reports #monthOverview .month-opening{border-radius:15px;padding:13px 14px;font-size:11px}
+#reports #monthOverview .month-stats{gap:11px}
+#reports #monthOverview .month-stats>div{min-height:86px;padding:14px;border-radius:17px;box-shadow:0 4px 13px rgba(25,65,80,.045)}
+#reports #monthOverview .month-stats small{font-size:10px;line-height:1.8;color:#718691}
+#reports #monthOverview .month-stats b{font-size:15px;font-weight:900;letter-spacing:-.2px}
+#reports #monthOverview .month-stats>div:nth-child(4){box-shadow:0 5px 15px rgba(8,124,102,.07)}
+#reports #monthOverview .month-overview>h4{font-size:14px;margin-top:23px}
+#reports .reports-today-btn,#reports .reports-run-btn,#reports .reports-close-month{min-height:47px;border-radius:14px;font-size:12px;font-weight:800;letter-spacing:.05px}
+#reports .reports-date-grid{gap:12px;margin:15px 0}
+#reports .reports-date-grid label,#reports .reports-archive-block>label{font-weight:750;color:#526d79;margin-bottom:8px}
+#reports .reports-date-grid input,#reports .reports-archive-action input{min-height:47px;border-radius:13px;background:#f8fbfc;border-color:#dce8ec;font-size:13px}
+#reports .reports-archive-action{gap:10px}
+#reports .reports-archive-action button{min-height:45px;border-radius:13px;font-weight:750}
+#reports #archiveList>.item{padding:16px;border-radius:17px;margin:11px 0;background:linear-gradient(145deg,#fff,#f7fafb)}
+#reports #archiveList>.item>b{font-size:14px;margin-bottom:8px}
+#reports #archiveList>.item>div:not(.actions){line-height:2}
+#reports #archiveList .actions button{min-height:40px;border-radius:12px}
+#reports .reports-result .daily-report{padding:17px;border-radius:21px}
+#reports .reports-result .daily-report-head{padding:18px;border-radius:17px}
+#reports .reports-result .daily-report-head h3{font-size:16px;color:#fff}
+#reports .reports-result .daily-report-head div{color:#d7e9ed;line-height:1.9}
+#reports .reports-result .daily-summary{gap:10px}
+#reports .reports-result .daily-stat{min-height:72px;padding:13px;border-radius:15px;background:linear-gradient(145deg,#fff,#f8fbfc)}
+#reports .reports-result .daily-stat span{font-size:10px;line-height:1.7}
+#reports .reports-result .daily-stat b{font-size:14px;font-weight:850}
+#reports .reports-result .daily-report-section h3{font-size:14px;padding-bottom:8px;border-bottom:1px solid #edf2f4}
+#reports .daily-table-wrap{border-radius:16px}
+#reports .daily-report-table{min-width:600px}
+#reports .daily-report-table th{font-size:10px;letter-spacing:.1px}
+#reports .daily-report-table td{font-variant-numeric:tabular-nums}
+@media(min-width:700px){
+ #reports .reports-hero{padding:28px 30px}
+ #reports .reports-block{padding:22px}
+ #reports #monthOverview .month-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #reports .reports-result .daily-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #reports .reports-filter-block{display:block}
+ #reports .reports-date-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:430px){
+ #reports .reports-hero{min-height:112px;padding:18px 15px;border-radius:20px}
+ #reports .reports-hero h3{font-size:17px}
+ #reports .reports-hero p{font-size:10px}
+ #reports .reports-hero-icon{width:49px;height:49px;flex-basis:49px;border-radius:15px;font-size:23px}
+ #reports .reports-block{padding:13px;border-radius:18px}
+ #reports .reports-block-title h4{font-size:14px}
+ #reports #monthOverview .month-overview{padding:12px}
+ #reports #monthOverview .month-stats{gap:8px}
+ #reports #monthOverview .month-stats>div{min-height:76px;padding:11px;border-radius:14px}
+ #reports #monthOverview .month-stats b{font-size:13px}
+ #reports .reports-date-grid{gap:8px}
+ #reports .reports-result .daily-report{padding:11px}
+}
+@media(prefers-reduced-motion:reduce){#reports .reports-block{transition:none}}
+@media print{
+ #reports .reports-hero{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ #reports .reports-block{box-shadow:none;border-color:#d8e1e5}
+}
+</style>
+
 </head>
 <body>
 <header class="brand-header">
