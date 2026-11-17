@@ -4706,5 +4706,58 @@ nav button.active{background:#eaf3ff!important;color:#145bb5!important;font-weig
 @media(min-width:760px){main{padding:18px 22px!important}main>section:not(.hidden){padding-bottom:22px}.panel{padding:16px!important}}
 @media(max-width:430px){.panel{border-radius:14px!important}main>section>h3{font-size:16px!important}input,select,textarea{font-size:16px!important}nav{overflow-x:auto!important;justify-content:flex-start!important;gap:2px!important}nav button{flex:1 0 auto!important;min-width:54px!important}}
 @media(prefers-reduced-motion:reduce){main>section:not(.hidden){animation:none!important}button{transition:none!important}}
+
+/* Screenshot-matched page system: consistent premium headers, cards and navigation on every screen */
+:root{--screen-blue:#1769d2;--screen-navy:#173e68;--screen-border:#d9e6f4;--screen-bg:#f4f8fd}
+body{background:radial-gradient(ellipse at 90% 0%,#e3efff 0,transparent 36%),linear-gradient(180deg,#f2f7fd,#f7f9fc)!important}
+header{position:relative;overflow:hidden;background:linear-gradient(115deg,#164b98 0%,#1769bd 62%,#118b9b 100%)!important;box-shadow:0 9px 26px #174d8728!important}
+header:after{content:"";position:absolute;left:-38px;top:-76px;width:220px;height:220px;border:1px solid #ffffff24;border-radius:50%;pointer-events:none}
+main>section:not(#home):not(.hidden)>h3,
+#expenses>h3,#debts>h3,#capitalPage>h3,#settings>h3,#sarafPage>h3{
+ color:#183f6b!important;font-size:19px!important;font-weight:900!important;
+ padding:12px 13px!important;margin:7px 0 12px!important;
+ border:1px solid #dce8f6!important;border-radius:14px!important;
+ background:linear-gradient(110deg,#fff,#edf5ff)!important;
+ box-shadow:0 3px 12px #234d7410!important
+}
+#products .product-page-head{padding:12px!important;margin:7px 0 12px!important;border:1px solid #dce8f6!important;border-radius:15px!important;background:linear-gradient(110deg,#fff,#edf5ff)!important}
+#products .product-page-head h3{margin:0!important;color:#183f6b!important;font-size:18px!important}
+#products .product-page-head b{background:#eaf3ff!important;color:#1559a6!important;padding:7px 10px!important;border-radius:25px!important}
+#customers .customer-top{padding:13px!important;margin:7px 0 12px!important;border:1px solid #dce8f6!important;border-radius:15px!important;background:linear-gradient(110deg,#fff,#edf5ff)!important}
+#customers .customer-top h3{color:#183f6b!important;font-size:18px!important}
+#customers .customer-addbar{padding:10px 12px!important;border:1px solid #e0e9f4!important;border-radius:14px!important;background:#fff!important;box-shadow:0 3px 12px #234d740c!important}
+#expenses .panel,#debts .panel,#capitalPage .panel,#settings .panel,#sarafPage .panel,#products .panel,#customers .panel{margin-bottom:12px!important}
+#expenses .panel>h3,#debts .panel>h3,#capitalPage .panel>h3,#settings .panel>h3,#sarafPage .panel>h3{font-size:15px!important}
+#products .product-form-panel,#products .product-list-panel{border-top:3px solid #4b91d8!important}
+#expenses .panel:first-of-type{border-top:3px solid #d99b37!important}
+#debts .panel{border-top:3px solid #8a63ca!important}
+#capitalPage .panel{border-top:3px solid #269a76!important}
+#settings .panel{border-top:3px solid #4b91d8!important}
+#sarafPage .panel{border-top:3px solid #5594c7!important}
+#products .product-list-item,#expenses .item,#debts .item,#capitalPage .item{padding:12px!important;margin:7px 0!important;border:1px solid #e5edf6!important;border-radius:12px!important;background:#fff!important}
+#customers .customer-row{background:#fff!important;border:1px solid #e5edf6!important;margin:7px 0!important;border-radius:12px!important;padding:12px!important}
+#suppliers .supplier-list-panel,#reports .reports-result{border-radius:17px!important}
+#suppliers .supplier-list-heading,#reports .reports-block-title{color:#1d4774!important;font-weight:900!important}
+#reports .reports-hero,#suppliers .supplier-hero,#sales .sale-blue-header{box-shadow:0 7px 18px #174d871c!important}
+#sales .sale-blue-header{border-radius:15px!important;background:linear-gradient(115deg,#164b98,#1769bd 65%,#128a98)!important}
+#sales .sale-simple,#sales .sale-cart-panel{border-radius:13px!important}
+#purchases .purchase-page-head{border:1px solid #dce8f6!important;border-radius:15px!important;background:linear-gradient(110deg,#fff,#edf5ff)!important;padding:13px!important;margin:7px 0 12px!important}
+#purchases .purchase-page-head h3{margin:3px 0!important}
+#purchases .purchase-history-item{box-shadow:0 3px 12px #234d740b!important}
+#home .section-title{margin:8px 0 12px!important}
+#home .section-title h3{font-size:19px!important;color:#183f6b!important}
+#home .section-title .badge{background:#eaf3ff!important;color:#1769c7!important;padding:8px 12px!important;font-size:12px!important}
+#home .card{box-shadow:0 4px 13px #234d7410!important}
+#home .shortcut{background:#fff!important;border:1px solid #d9e5f2!important;border-top:4px solid #5594c7!important;box-shadow:0 4px 12px #234d7410!important}
+#home .shortcuts .shortcut:nth-child(3n+2){border-top-color:#45a58b!important}
+#home .shortcuts .shortcut:nth-child(3n){border-top-color:#d99b37!important}
+nav{padding-top:9px!important}
+nav button.active{box-shadow:inset 0 0 0 1px #d9e8fb!important}
+@media(max-width:430px){
+ main{padding:9px!important}
+ main>section:not(#home):not(.hidden)>h3,#expenses>h3,#debts>h3,#capitalPage>h3,#settings>h3,#sarafPage>h3{font-size:16px!important;padding:10px!important}
+ #home .section-title h3{font-size:17px!important}
+ #home .shortcut{min-height:86px!important}
+}
 </style>
 </html>
