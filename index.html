@@ -1249,6 +1249,19 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
  },true);
 })();
 </script>
+<style id="shaheen-sale-keyboard-done-v2">
+#sales .sale-keyboard-done{display:block;width:100%;min-height:34px!important;height:34px;padding:5px 8px;margin:3px 0 5px;border:1px solid #b8c9df;border-radius:9px;background:#edf4ff;color:#174d91;font-size:12px}
+#sales .sale-keyboard-done[hidden]{display:none!important}
+</style>
+<script id="SHAHEEN_SALE_KEYBOARD_DONE_V2">
+(function(){
+ const input=document.getElementById("saleProductSearch");
+ const done=document.getElementById("saleKeyboardDone");
+ if(!input||!done)return;
+ input.addEventListener("focus",function(){done.hidden=false;});
+ input.addEventListener("blur",function(){done.hidden=true;});
+})();
+</script>
 </head>
 <body>
 <header class="brand-header">
@@ -1338,6 +1351,7 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   <div class="sale-simple sale-product-search">
    <label>د جنس نوم یا بارکوډ ولټوه</label>
    <input id="saleProductSearch" type="search" autocomplete="off" placeholder="د جنس نوم یا بارکوډ ولیکه...">
+   <button type="button" id="saleKeyboardDone" class="sale-keyboard-done" onclick="document.getElementById('saleProductSearch').blur();this.hidden=true" hidden>کیبورډ بند کړه ✓</button>
    <div id="saleSearchResults" class="sale-search-results hidden"></div>
    <select id="saleProduct" class="hidden" aria-label="جنس"></select>
    <div class="hidden"><input id="saleQty" type="number" value="1"><select id="saleUnit"></select><input id="salePrice" type="number" value="0"></div>
@@ -3800,7 +3814,7 @@ body.sale-modal-open{overflow:hidden!important;height:100%!important}
 
 /* iOS Safari: د خرڅلاو کړکۍ پر مهال د شالید document په بشپړ ډول قلف کړه */
 body.sale-modal-open{position:fixed!important;overflow:hidden!important;width:100%!important;left:0!important;right:0!important;touch-action:none!important}
-body.sale-modal-open #sales.sale-overlay:not(.hidden){position:fixed!important;inset:0!important;height:100vh!important;height:100dvh!important;overflow:hidden!important}
+body.sale-modal-open #sales.sale-overlay:not(.hidden){position:fixed!important;inset:0!important;height:var(--sale-visual-height,100dvh)!important;max-height:var(--sale-visual-height,100dvh)!important;overflow:hidden!important}
 body.sale-modal-open #sales .sale-page{overflow-y:auto!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
 
 /* د Dukan Pro په شان ساده، منظم او موبایل-دوسته بڼه */
@@ -3842,6 +3856,7 @@ section:not(.hidden){scroll-margin-top:10px}
  document.addEventListener("focusin",function(e){
   const t=e.target;
   if(!t||!t.matches||!t.matches('input,select,textarea,[contenteditable="true"]'))return;
+  if(t.closest&&t.closest("#sales"))return;
   const y=(touchScrollY!==null&&Date.now()-lastTouchAt<1200)?touchScrollY:window.scrollY;
   touchScrollY=null;
   requestAnimationFrame(function(){window.scrollTo(0,y);});
