@@ -3973,41 +3973,45 @@ body.sale-modal-open #sales.sale-overlay:not(.hidden){
 }
 #sales #saleProductSearch,#sales #saleCustomer{scroll-margin-block:8px!important}
 </style>
-<style id="SHAHEEN_SALE_FIXED_NO_MOVEMENT_V12">
-/* د رسید له سر څخه تر پایه ټولې برخې په یوه ثابت viewport کې ساتل */
-html.sale-modal-open{position:relative!important;height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
-body.sale-modal-open{position:fixed!important;top:var(--sale-lock-top,0px)!important;left:0!important;right:0!important;width:100%!important;height:100%!important;min-height:100%!important;margin:0!important;overflow:hidden!important;overscroll-behavior:none!important;touch-action:none!important}
-#sales.sale-overlay:not(.hidden){display:block!important;position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:auto!important;width:100vw!important;height:100vh!important;max-height:100vh!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;transform:none!important;align-items:stretch!important;justify-content:flex-start!important;overscroll-behavior:none!important;touch-action:none!important}
-#sales.sale-overlay:not(.hidden)>.sale-page{position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;overflow:hidden!important;overflow-y:hidden!important;overscroll-behavior:none!important;touch-action:none!important;-webkit-overflow-scrolling:auto!important;scroll-behavior:auto!important}
-#sales .sale-blue-header,#sales .sale-invoice-details,#sales .sale-product-search,#sales .sale-cart-panel,#sales .sale-money-row,#sales .sale-summary,#sales .sale-save-button{position:relative!important;transform:none!important;scroll-margin:0!important}
-#sales .sale-blue-header{position:relative!important;top:auto!important}
-#sales .sale-page input,#sales .sale-page select,#sales .sale-page textarea{scroll-margin:0!important;touch-action:manipulation!important}
+<style id="SHAHEEN_SALE_FIXED_KEYBOARD_VIEWPORT_V13">
+/* د iPhone کیبورډ پر مهال د خرڅلاو کړکۍ د visual viewport دننه ثابته ساتل */
+html.sale-modal-open{height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
+body.sale-modal-open{position:fixed!important;top:var(--sale-lock-top,0px)!important;left:0!important;right:0!important;width:100%!important;height:100%!important;overflow:hidden!important;overscroll-behavior:none!important;touch-action:pan-x pan-y!important}
+#sales.sale-overlay:not(.hidden){display:block!important;position:fixed!important;left:0!important;right:0!important;top:var(--sale-vv-top,0px)!important;bottom:auto!important;width:100vw!important;height:var(--sale-vv-height,100dvh)!important;max-height:var(--sale-vv-height,100dvh)!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;transform:none!important;align-items:stretch!important;justify-content:flex-start!important}
+#sales.sale-overlay:not(.hidden)>.sale-page{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:100%!important;min-height:0!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;padding-bottom:calc(16px + env(safe-area-inset-bottom))!important}
+#sales .sale-page input,#sales .sale-page select,#sales .sale-page textarea{font-size:16px!important;scroll-margin:12px!important}
 #sales .sale-page *{scroll-behavior:auto!important}
 </style>
-<script id="SHAHEEN_SALE_FIXED_NO_MOVEMENT_V11">
+<script id="SHAHEEN_SALE_FIXED_KEYBOARD_VIEWPORT_V13">
 (function(){
- let restoring=false;
- function keepSaleStill(){
+ function updateSaleViewport(){
   if(!document.body.classList.contains("sale-modal-open"))return;
-  if(restoring)return;
-  restoring=true;
-  requestAnimationFrame(function(){
-   window.scrollTo(0,0);
-   const panel=document.querySelector("#sales>.sale-page");
-   if(panel)panel.scrollTop=0;
-   restoring=false;
-  });
+  var vv=window.visualViewport;
+  var top=vv?Math.max(0,vv.offsetTop):0;
+  var height=vv?vv.height:window.innerHeight;
+  document.documentElement.style.setProperty("--sale-vv-top",top+"px");
+  document.documentElement.style.setProperty("--sale-vv-height",height+"px");
  }
+ updateSaleViewport();
+ if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",updateSaleViewport,{passive:true});
+  window.visualViewport.addEventListener("scroll",updateSaleViewport,{passive:true});
+ }
+ window.addEventListener("resize",updateSaleViewport,{passive:true});
  document.addEventListener("focusin",function(e){
-  if(e.target&&e.target.closest&&e.target.closest("#sales"))keepSaleStill();
+  var field=e.target;
+  if(!field||!field.matches||!field.matches("#sales input,#sales select,#sales textarea"))return;
+  requestAnimationFrame(function(){
+   if(!document.body.classList.contains("sale-modal-open"))return;
+   var panel=document.querySelector("#sales>.sale-page");
+   if(!panel)return;
+   var rect=field.getBoundingClientRect();
+   var visibleBottom=(window.visualViewport?window.visualViewport.height+window.visualViewport.offsetTop:window.innerHeight)-12;
+   var visibleTop=window.visualViewport?window.visualViewport.offsetTop+12:12;
+   if(rect.bottom>visibleBottom)panel.scrollTop+=rect.bottom-visibleBottom;
+   else if(rect.top<visibleTop)panel.scrollTop-=visibleTop-rect.top;
+  });
  },true);
- window.addEventListener("scroll",keepSaleStill,{passive:true});
- document.addEventListener("touchmove",function(e){
-  if(document.body.classList.contains("sale-modal-open")&&e.target&&e.target.closest&&e.target.closest("#sales")){
-   if(!e.target.closest("input,select,textarea,button"))e.preventDefault();
-  }
- },{passive:false,capture:true});
 })();
 </script>
-</body>
 </html>
