@@ -1566,20 +1566,38 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 }
 </style>
 
+
 <style>
-/* Reports v4 — clear analytics additions; presentation only */
-#reports .report-analysis-section{margin-top:16px}
-#reports .report-help{margin:0 0 12px;color:#6c7f8b;font-size:11px;line-height:1.9}
-#reports .report-trend-row{display:grid;grid-template-columns:minmax(95px,135px) minmax(55px,1fr) minmax(95px,auto);gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #edf1f4;font-size:11px}
-#reports .report-trend-row>span{color:#536976}
-#reports .report-trend-row>b{text-align:left;font-size:11px;font-variant-numeric:tabular-nums}
-#reports .report-trend-track{height:10px;border-radius:20px;background:#edf3f5;overflow:hidden}
-#reports .report-trend-track i{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#1b6b9c,#0d9b86)}
-#reports .report-print-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:16px;margin:14px 0 4px;border:1px solid #dce8eb;border-radius:18px;background:#f6fafb}
-#reports .report-print-actions button{min-height:45px;border-radius:13px;padding:0 20px;font-weight:800}
-#reports .report-print-actions small{font-size:10px;color:#687e89}
-@media(max-width:430px){#reports .report-trend-row{grid-template-columns:88px minmax(35px,1fr);gap:7px}#reports .report-trend-row>b{grid-column:2;text-align:left}#reports .report-print-actions{align-items:stretch;flex-direction:column;text-align:center}}
-@media print{body *{visibility:hidden!important}#reports,#reports *{visibility:visible!important}#reports{position:absolute!important;inset:0!important;width:100%!important;max-width:none!important;padding:0!important}#reports .reports-hero,#reports .reports-overview-block,#reports .reports-filter-block,#reports .reports-archive-block,.report-print-actions{display:none!important}#reports .reports-result{display:block!important}#reports .daily-report{box-shadow:none!important;border:0!important}#reports .daily-report-section{break-inside:avoid}#reports .daily-table-wrap{overflow:visible!important}#reports table{font-size:9px!important}}
+/* Reports visual-only refinement — no data or report logic changes */
+#reports .reports-result{min-width:0}
+#reports .daily-report{overflow:hidden;border:1px solid #dce7ec;border-radius:22px;background:#fff;box-shadow:0 12px 32px rgba(20,55,72,.07)}
+#reports .daily-report-head{padding:20px 18px;background:linear-gradient(120deg,#122b45,#17647a);color:#fff;border-radius:0}
+#reports .daily-report-head h3{margin:0 0 8px;color:#fff;font-size:19px;font-weight:900;line-height:1.6}
+#reports .daily-report-head>div{display:inline-flex;align-items:center;padding:5px 10px;border:1px solid #ffffff38;border-radius:20px;background:#ffffff14;color:#effbff;font-size:11px}
+#reports .daily-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px;background:#f5f8fa}
+#reports .daily-stat{min-width:0;min-height:84px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding:13px;border:1px solid #e4ebef;border-radius:16px;background:#fff;box-shadow:0 3px 10px rgba(20,55,72,.035)}
+#reports .daily-stat span{font-size:11px;line-height:1.7;color:#637987;font-weight:700}
+#reports .daily-stat b{font-size:15px;line-height:1.4;color:#203747;font-weight:900;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#reports .daily-stat.sales{border-top:3px solid #2677b8}
+#reports .daily-stat.purchase{border-top:3px solid #788b9b}
+#reports .daily-stat.expense{border-top:3px solid #d18a42}
+#reports .daily-stat.profit{border-top:3px solid #159779;background:#f4fbf8}
+#reports .daily-report-section{margin:0 14px;padding:18px 0;border-bottom:1px solid #e9eff2}
+#reports .daily-report-section:last-child{border-bottom:0}
+#reports .daily-report-section h3{display:flex;align-items:center;gap:8px;margin:0 0 13px;color:#203b4c;font-size:14px;font-weight:900;line-height:1.8}
+#reports .daily-table-wrap{width:100%;overflow-x:auto;border:1px solid #e5edf0;border-radius:14px;background:#fff}
+#reports .daily-report-table{width:100%;min-width:440px;border-collapse:separate;border-spacing:0;font-size:11px}
+#reports .daily-report-table th{padding:11px 9px;background:#eff5f7;color:#496170;font-weight:900;white-space:nowrap;text-align:right}
+#reports .daily-report-table td{padding:11px 9px;border-top:1px solid #edf1f3;color:#344b59;line-height:1.7;vertical-align:top}
+#reports .daily-report-table tbody tr:nth-child(even){background:#fafcfd}
+#reports .daily-report-total{display:flex;justify-content:space-between;gap:12px;margin-top:9px;padding:11px 12px;border-radius:12px;background:#f3f7f8;color:#435b68;font-size:12px}
+#reports .daily-report-total b,#reports .daily-report-footer b{color:#173f55;font-weight:900;font-variant-numeric:tabular-nums}
+#reports .daily-report-footer{margin-top:10px;padding:12px;border-radius:13px;background:#eef8f4;color:#28634f;font-size:12px;line-height:2}
+#reports .daily-empty{padding:20px!important;color:#8797a1;text-align:center}
+@media(min-width:560px){#reports .daily-summary{grid-template-columns:repeat(3,minmax(0,1fr));padding:18px}#reports .daily-report-section{margin-inline:20px;padding-block:21px}#reports .daily-report-head{padding:24px}}
+@media(min-width:900px){#reports .daily-summary{grid-template-columns:repeat(3,minmax(0,1fr))}#reports .daily-report-table{font-size:12px}}
+@media(max-width:390px){#reports .daily-summary{gap:7px;padding:9px}#reports .daily-stat{min-height:76px;padding:10px}#reports .daily-stat b{font-size:13px}#reports .daily-report-section{margin-inline:10px}}
+@media print{#reports .daily-report{border:0;box-shadow:none}#reports .daily-report-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}#reports .daily-report-section{break-inside:avoid}#reports .daily-table-wrap{overflow:visible}#reports .daily-report-table{min-width:0;font-size:9px}}
 </style>
 </head>
 <body>
@@ -3486,20 +3504,6 @@ function makeReport(){
   c.total+=Number(x.total||0);c.count++;
  });
  const customerRows=[...customerPurchases.values()].map(c=>`<tr><td>${esc(c.name)}</td><td>${c.items.join("<br>")}</td><td>${c.count}</td><td>${money(c.total)}</td></tr>`);
- const productSales=new Map(),dailySales=new Map();
- sales.forEach(x=>{
-  const name=String(x.productName||"نامعلوم جنس").trim()||"نامعلوم جنس";
-  if(!productSales.has(name))productSales.set(name,{name,qty:0,total:0,profit:0,count:0});
-  const p=productSales.get(name);p.qty+=Number(x.qty||0);p.total+=Number(x.total||0);p.profit+=Number(x.profit||0);p.count++;
-  const day=String(x.date||"");if(day){if(!dailySales.has(day))dailySales.set(day,{total:0,profit:0,count:0});const d=dailySales.get(day);d.total+=Number(x.total||0);d.profit+=Number(x.profit||0);d.count++;}
- });
- const topProducts=[...productSales.values()].sort((a,b)=>b.total-a.total).slice(0,10);
- const productRows=topProducts.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.qty)}</td><td>${p.count}</td><td>${money(p.total)}</td><td>${money(p.profit)}</td></tr>`);
- const topCustomers=[...customerPurchases.values()].sort((a,b)=>b.total-a.total).slice(0,10);
- const topCustomerRows=topCustomers.map(c=>`<tr><td>${esc(c.name)}</td><td>${c.count}</td><td>${money(c.total)}</td></tr>`);
- const trend=[...dailySales.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
- const maxDay=Math.max(1,...trend.map(x=>x[1].total));
- const trendRows=trend.map(([d,v])=>`<div class="report-trend-row"><span>${esc(jalaliDisplayDate(d))}</span><div class="report-trend-track"><i style="width:${Math.max(2,v.total/maxDay*100)}%"></i></div><b>${money(v.total)}</b></div>`).join("");
  document.getElementById("reportContent").innerHTML=`
  <div class="daily-report">
   <div class="daily-report-head"><h3>📊 د شاهین فروشگاه ورځنی راپور</h3><div>📍 ${esc(dateLabel)}</div></div>
@@ -3530,19 +3534,7 @@ function makeReport(){
    ${table(["جنس","مشتری","مقدار","مبلغ"],saleRows,"معلومات نشته")}
    <div class="daily-report-footer">نغدي ترلاسه: <b>${money(totalPaid)}</b> · په پور: <b>${money(totalDebt)}</b> · ناخالصه ګټه: <b>${money(gross)}</b></div>
   </section>
-  <section class="daily-report-section report-analysis-section">
-   <h3>📈 د خرڅلاو ورځنی بهیر</h3><p class="report-help">هره کرښه د یوې ورځې ټول خرڅلاو ښيي؛ اوږده کرښه د ډېر خرڅلاو معنا لري.</p>
-   ${trendRows||'<div class="daily-empty">په ټاکلې موده کې د خرڅلاو معلومات نشته</div>'}
-  </section>
-  <section class="daily-report-section report-analysis-section">
-   <h3>🏆 ډېر خرڅېدونکي جنسونه — تر ۱۰ پورې</h3><p class="report-help">د مبلغ له مخې ترتیب؛ د هر جنس خرڅلاو، د رسیدونو شمېر او ثبت شوې ګټه ښکاري.</p>
-   ${table(["د جنس نوم","مقدار","د پلور شمېر","ټول خرڅلاو","ګټه"],productRows,"په ټاکلې موده کې د جنسونو خرڅلاو نشته")}
-  </section>
-  <section class="daily-report-section report-analysis-section">
-   <h3>👥 ډېر پېرودونکي مشتریان — تر ۱۰ پورې</h3><p class="report-help">دا د ټاکلې مودې د اخیستلو راپور دی، د اوسني پاتې پور اندازه نه ده.</p>
-   ${table(["د مشتری نوم","د اخیستلو شمېر","ټول پېرود"],topCustomerRows,"په ټاکلې موده کې مشتریان نشته")}
-  </section>
-  <div class="report-print-actions"><button type="button" class="primary" onclick="window.print()">🖨️ چاپ / PDF خوندي کول</button><small>د چاپ په کړکۍ کې “Save as PDF” انتخاب کړه.</small></div>
+
  </div>`;
 }
 function renderSettings(){
