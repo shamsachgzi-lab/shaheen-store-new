@@ -1436,6 +1436,60 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 #reports .reports-result .daily-report-total,#reports .reports-result .daily-report-footer{font-size:11px;padding:10px 2px;color:#536d78;line-height:1.9}
 @media(max-width:420px){#reports .reports-hero{padding:18px 14px}#reports .reports-hero h3{font-size:17px}#reports .reports-block{padding:12px}#reports .reports-date-grid{gap:7px}#reports .reports-archive-action{align-items:stretch;flex-direction:column}#reports .reports-archive-action button{width:100%}}
 </style>
+<style>
+/* Reports dashboard polish v2 — visual styling only */
+#reports.reports-page{max-width:100%;isolation:isolate}
+#reports .reports-hero{position:relative;min-height:116px;padding:23px 20px;border:1px solid #ffffff24;background:radial-gradient(circle at 12% 15%,#ffffff25,transparent 35%),linear-gradient(125deg,#101f39 0%,#164b68 54%,#087f78 100%);box-shadow:0 16px 34px #153b5226}
+#reports .reports-hero:after{content:"";position:absolute;width:118px;height:118px;border:1px solid #ffffff20;border-radius:50%;right:35px;top:-55px;box-shadow:0 0 0 16px #ffffff08,0 0 0 34px #ffffff06;pointer-events:none}
+#reports .reports-hero>div{position:relative;z-index:1}
+#reports .reports-hero-icon{width:60px;height:60px;border:1px solid #ffffff35;border-radius:19px;background:linear-gradient(145deg,#ffffff30,#ffffff0c);box-shadow:inset 0 1px #ffffff30,0 8px 18px #061c2b30}
+#reports .reports-kicker{display:inline-flex;padding:5px 8px;border-radius:7px;background:#ffffff14;color:#d8edf2;font-size:9px}
+#reports .reports-block{position:relative;border:1px solid #e5edf1;border-radius:21px;padding:16px;background:linear-gradient(160deg,#fff 0%,#fbfdfe 100%);box-shadow:0 8px 24px #17384a0b}
+#reports .reports-block-title{padding-bottom:11px;border-bottom:1px solid #edf2f4;margin-bottom:14px}
+#reports .reports-block-title>span{border:1px solid #dcebed;background:linear-gradient(145deg,#eaf5f5,#f5f9fb);color:#176b70}
+#reports #monthOverview .month-overview{padding:14px;border:1px solid #e5edf0;border-radius:17px;background:linear-gradient(160deg,#f8fbfc,#fff 70%)}
+#reports #monthOverview .month-overview>h3{font-size:17px;letter-spacing:-.2px}
+#reports #monthOverview .month-overview>p{display:inline-flex;padding:6px 9px;border-radius:8px;background:#edf4f6;color:#5d7580}
+#reports #monthOverview .month-opening{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 13px;border:1px solid #dce9ed;background:linear-gradient(100deg,#edf7f6,#f7fafb);border-radius:13px}
+#reports #monthOverview .month-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#reports #monthOverview .month-stats>div{position:relative;min-height:76px;justify-content:space-between;padding:13px;border:1px solid #e5edf0;border-radius:15px;background:#fff;box-shadow:0 3px 10px #17384a08;overflow:hidden}
+#reports #monthOverview .month-stats>div:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:#91aeb8}
+#reports #monthOverview .month-stats>div:nth-child(1):before{background:#168b82}
+#reports #monthOverview .month-stats>div:nth-child(2):before{background:#2c91b8}
+#reports #monthOverview .month-stats>div:nth-child(3):before{background:#b88936}
+#reports #monthOverview .month-stats>div:nth-child(4):before{background:#0b9879}
+#reports #monthOverview .month-stats>div:nth-child(5):before{background:#6476b8}
+#reports #monthOverview .month-stats>div:nth-child(6):before{background:#d18b47}
+#reports #monthOverview .month-stats>div:nth-child(7):before{background:#9a83b9}
+#reports #monthOverview .month-stats>div:nth-child(8):before{background:#218c9b}
+#reports #monthOverview .month-stats>div:nth-child(9):before{background:#526d7c}
+#reports #monthOverview .month-stats b{font-size:15px;font-weight:850;color:#1e3d4c}
+#reports #monthOverview .month-stats>div:nth-child(4){background:linear-gradient(145deg,#effaf6,#fff);border-color:#cfe9df}
+#reports #monthOverview .month-stats>div:nth-child(4) b{color:#087c66}
+#reports #monthOverview .month-overview>h4{display:flex;align-items:center;gap:8px;margin:20px 0 11px}
+#reports #monthOverview .month-overview>h4:before{content:"";width:4px;height:17px;border-radius:4px;background:#168b82}
+#reports .daily-table-wrap{border:1px solid #e2eaee;border-radius:14px;background:#fff;box-shadow:0 3px 10px #17384a08}
+#reports .daily-report-table{min-width:580px;font-variant-numeric:tabular-nums}
+#reports .daily-report-table th{position:sticky;top:0;background:#eaf2f4;color:#365866;padding:12px 10px}
+#reports .daily-report-table td{padding:11px 10px;color:#405b67}
+#reports .daily-report-table tbody tr:nth-child(even){background:#f8fbfc}
+#reports .daily-report-table tbody tr:last-child td{border-bottom:0}
+#reports .reports-date-grid input,#reports .reports-archive-action input{min-height:44px;border:1px solid #dce6ea;border-radius:12px;background:#f9fbfc;padding:9px 10px;color:#284654}
+#reports .reports-today-btn{background:linear-gradient(100deg,#176b83,#14877d);box-shadow:0 6px 14px #176b8320}
+#reports .reports-run-btn{background:linear-gradient(100deg,#1b5273,#236d8a);box-shadow:0 6px 14px #1b527320}
+#reports .reports-close-month{box-shadow:0 6px 14px #13836b1c}
+#reports #archiveList>.item{position:relative;padding:14px;border:1px solid #e3ecef;border-radius:15px;background:linear-gradient(145deg,#fbfdfe,#f5f9fa);box-shadow:0 3px 10px #17384a08}
+#reports #archiveList>.item>b{font-size:15px;color:#1c5060}
+#reports #archiveList .actions button{border-radius:11px}
+#reports .reports-result .daily-report{border:1px solid #e1eaee;border-radius:19px;box-shadow:0 8px 22px #17384a0b}
+#reports .reports-result .daily-report-head{background:radial-gradient(circle at 90% 0%,#ffffff24,transparent 35%),linear-gradient(120deg,#132e4b,#1c667b);border-radius:15px;padding:17px}
+#reports .reports-result .daily-stat{border-radius:14px;background:#fbfdfe}
+#reports .reports-result .daily-stat b{font-variant-numeric:tabular-nums}
+#reports .reports-result .daily-report-section{padding-top:3px}
+@media(min-width:560px){#reports #monthOverview .month-stats{grid-template-columns:repeat(3,minmax(0,1fr))}#reports .reports-result .daily-summary{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:390px){#reports .reports-hero{padding:18px 14px}#reports .reports-hero-icon{width:49px;height:49px;flex-basis:49px}#reports #monthOverview .month-stats>div{padding:11px;min-height:72px}#reports #monthOverview .month-stats b{font-size:13px}}
+@media print{#reports .reports-hero,#reports .reports-block-title>span{box-shadow:none}#reports .reports-block{break-inside:avoid}}
+</style>
 </head>
 <body>
 <header class="brand-header">
