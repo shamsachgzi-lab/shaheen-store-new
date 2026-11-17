@@ -1706,6 +1706,21 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 #expenses .expense-daily-empty{padding:20px 12px;border:1px dashed #cbdce2;border-radius:13px;background:#fff;color:#7b8d97;text-align:center;font-size:12px}
 @media(min-width:700px){#expenses .expense-daily-summary{grid-template-columns:1fr 1fr;align-items:stretch}#expenses .expense-daily-total{justify-content:center}}
 </style>
+<style>
+/* All-time expense total summary */
+#expenses .expense-alltime-panel{border:1px solid #cfe1e7!important;background:linear-gradient(150deg,#f2f8fa,#fff 72%)!important}
+#expenses .expense-alltime-heading{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+#expenses .expense-alltime-heading>span{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#dceff0;font-size:22px}
+#expenses .expense-alltime-heading h3{margin:0;color:#183e53;font-size:17px;font-weight:950}
+#expenses .expense-alltime-heading p{margin:4px 0 0;color:#71838e;font-size:11px;line-height:1.8}
+#expenses .expense-alltime-total{display:flex;flex-direction:column;gap:5px;padding:18px;border-radius:17px;background:linear-gradient(115deg,#15364e,#16756f);color:#fff}
+#expenses .expense-alltime-total small{color:#d0e9e6;font-size:11px}
+#expenses .expense-alltime-total strong{font-size:26px;font-weight:950;font-variant-numeric:tabular-nums}
+#expenses .expense-alltime-breakdown{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+#expenses .expense-alltime-breakdown>div{display:flex;justify-content:space-between;gap:10px;padding:11px 13px;border:1px solid #e2eaee;border-radius:12px;background:#fff;color:#526977;font-size:12px}
+#expenses .expense-alltime-breakdown b{color:#183e53;font-weight:900;font-variant-numeric:tabular-nums}
+@media(min-width:650px){#expenses .expense-alltime-breakdown{grid-template-columns:repeat(3,minmax(0,1fr))}#expenses .expense-alltime-breakdown>div{align-items:center}}
+</style>
 </head>
 <body>
 <header class="brand-header">
@@ -1928,6 +1943,10 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <button class="primary" onclick="addCashFee()">💾 نغدي فیس ثبت کړه</button>
  </div>
 
+ <div class="panel expense-alltime-panel">
+  <div class="expense-alltime-heading"><span>💰</span><div><h3>د ټولو مصارفو مجموعه</h3><p>له لومړي ثبت څخه تر نن پورې ټول ثبت شوي مصارف</p></div></div>
+  <div id="expenseAllTimeSummary" aria-live="polite"></div>
+ </div>
  <div class="panel expense-daily-report-panel">
   <div class="expense-daily-title"><span>📅</span><div><h3>د ورځې د مصارفو راپور</h3><p>یوازې د ټاکلې ورځې مصرفونه او د هماغې ورځې مجموعه</p></div></div>
   <label>د راپور ورځ وټاکه</label><input id="expenseReportDate" type="date">
@@ -3413,6 +3432,12 @@ function renderExpenseDailyReport(){
   ${rows||'<div class="expense-daily-empty">په دې ورځ هېڅ مصرف نه دی ثبت شوی.</div>'}`;
 }
 function renderExpenses(){
+ const allExpenses=(db.expenses||[]);
+ const allTotal=allExpenses.reduce((sum,e)=>sum+Number(e.amount||0),0);
+ const allCash=allExpenses.filter(e=>e.paymentType==="cash").reduce((sum,e)=>sum+Number(e.amount||0),0);
+ const allFees=allExpenses.filter(e=>e.paymentType==="cash_nonprofit").reduce((sum,e)=>sum+Number(e.amount||0),0);
+ const allStock=allExpenses.filter(e=>e.paymentType==="stock").reduce((sum,e)=>sum+Number(e.amount||0),0);
+ document.getElementById("expenseAllTimeSummary").innerHTML=`<div class="expense-alltime-total"><small>د ټولو ورځو ټول مصرف</small><strong>${money(allTotal)}</strong><small>AFN · ${allExpenses.length} ټول ثبتونه</small></div><div class="expense-alltime-breakdown"><div><span>نغدي لګښتونه</span><b>${money(allCash)}</b></div><div><span>نغدي فیسونه</span><b>${money(allFees)}</b></div><div><span>د موجودۍ مصرف</span><b>${money(allStock)}</b></div></div>`;
  const q=(value("expenseSearch")||"").trim().toLowerCase();
  const list=(db.expenses||[]).filter(e=>[e.name,e.category,e.note,e.productName,e.date].some(v=>String(v||"").toLowerCase().includes(q))).slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
  const groups=new Map();
