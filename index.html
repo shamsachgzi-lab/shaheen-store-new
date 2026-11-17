@@ -1354,6 +1354,13 @@ body.invoice-edit-open{position:static!important;top:auto!important;left:auto!im
  },{passive:true});
 })();
 </script>
+<style id="SHAHEEN_INVOICE_EDIT_BACKGROUND_LOCK_V3">
+html.invoice-edit-open{height:100%!important;overflow:hidden!important;overscroll-behavior:none!important;position:relative!important}
+body.invoice-edit-open{position:fixed!important;top:var(--invoice-edit-page-top,0px)!important;left:0!important;right:0!important;width:100%!important;height:100%!important;overflow:hidden!important;overscroll-behavior:none!important;touch-action:pan-x pan-y!important}
+#invoiceEditModal:not(.hidden){position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;z-index:10050!important;overscroll-behavior:none!important}
+#invoiceEditModal .invoice-edit-shade{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;display:block!important;box-sizing:border-box!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important;padding:12px 8px calc(24px + env(safe-area-inset-bottom))!important}
+#invoiceEditModal .invoice-edit-window{position:relative!important;margin:0 auto!important;overflow:visible!important;max-height:none!important;touch-action:pan-y!important}
+</style>
 </head>
 <body>
 <header class="brand-header">
