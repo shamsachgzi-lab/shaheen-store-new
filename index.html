@@ -1230,12 +1230,31 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
   root.style.setProperty("--sale-vv-top",top+"px");
   root.style.setProperty("--sale-visual-height",Math.max(240,h)+"px");
  }
+ function keepSaleFieldVisible(target){
+  const panel=document.querySelector("#sales .sale-page");
+  if(!panel||!target)return;
+  const pr=panel.getBoundingClientRect(),ir=target.getBoundingClientRect();
+  if(ir.bottom>pr.bottom-12)panel.scrollTop+=ir.bottom-pr.bottom+18;
+  else if(ir.top<pr.top+12)panel.scrollTop-=pr.top+12-ir.top;
+ }
  setSaleViewport();
  if(window.visualViewport){
-  window.visualViewport.addEventListener("resize",setSaleViewport,{passive:true});
+  window.visualViewport.addEventListener("resize",function(){
+   setSaleViewport();
+   const active=document.activeElement;
+   if(active&&active.closest&&active.closest("#sales"))setTimeout(()=>keepSaleFieldVisible(active),80);
+  },{passive:true});
   window.visualViewport.addEventListener("scroll",setSaleViewport,{passive:true});
  }
- window.addEventListener("orientationchange",function(){setTimeout(setSaleViewport,120);},{passive:true});
+ window.addEventListener("orientationchange",function(){setTimeout(setSaleViewport,150);},{passive:true});
+ document.addEventListener("focusin",function(e){
+  const target=e.target;
+  if(!target||!target.closest||!target.closest("#sales"))return;
+  requestAnimationFrame(function(){
+   if(document.body.classList.contains("sale-modal-open"))window.scrollTo(0,__salePageLockY);
+   keepSaleFieldVisible(target);
+  });
+ },true);
  document.addEventListener("keydown",function(e){
   const t=e.target;
   if((e.key==="Enter"||e.key==="Escape")&&t&&t.matches&&t.matches("#sales input,#sales textarea")){e.preventDefault();t.blur();}
@@ -1282,6 +1301,16 @@ input[type="search"],input.purchase-search{
 #expenseSearch:focus,#editInvoiceProductSearch:focus{
  outline-offset:1px!important;
 }
+</style>
+<style id="SHAHEEN_FINAL_IOS_MODAL_AND_SEARCH_V3">
+html.sale-modal-open,body.sale-modal-open{height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
+body.sale-modal-open{position:static!important;top:auto!important;left:auto!important;right:auto!important;width:100%!important;touch-action:none!important}
+#sales.sale-overlay:not(.hidden){position:fixed!important;left:0!important;right:0!important;top:var(--sale-vv-top,0px)!important;bottom:auto!important;width:100vw!important;height:var(--sale-vv-height,100dvh)!important;max-height:var(--sale-vv-height,100dvh)!important;min-height:0!important;overflow:hidden!important;align-items:stretch!important;justify-content:center!important}
+#sales.sale-overlay .sale-page{width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;margin:0 auto!important;border-radius:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;padding-bottom:calc(12px + env(safe-area-inset-bottom))!important}
+#sales .sale-invoice-details #saleCustomer,#sales .sale-product-search #saleProductSearch{box-sizing:border-box!important;width:100%!important;height:34px!important;min-height:34px!important;max-height:34px!important;padding:4px 8px!important;margin:2px 0 4px!important;font-size:16px!important;line-height:1.2!important;border-radius:8px!important}
+#productSearch,#lowStockSearch,#buyProductSearch,#purchasesSearch,#customerSearch,#supplierSearch,#eProductSearch,#expenseSearch,#editInvoiceProductSearch,#globalSearch,input[type="search"]{box-sizing:border-box!important;height:34px!important;min-height:34px!important;max-height:34px!important;padding:4px 8px!important;font-size:16px!important;line-height:1.2!important;border-radius:8px!important}
+#sales .sale-invoice-details label,#sales .sale-product-search label{font-size:11px!important;margin-bottom:1px!important}
+#sales .sale-keyboard-done{height:28px!important;min-height:28px!important;padding:3px 7px!important;font-size:11px!important;margin:2px 0!important}
 </style>
 </head>
 <body>
@@ -1787,24 +1816,18 @@ let __salePageLockY=0;
 function __lockSalePage(){
  if(document.body.classList.contains("sale-modal-open"))return;
  __salePageLockY=window.scrollY||window.pageYOffset||0;
+ document.documentElement.classList.add("sale-modal-open");
  document.body.classList.add("sale-modal-open");
- document.body.style.position="fixed";
- document.body.style.top=(-__salePageLockY)+"px";
- document.body.style.left="0";
- document.body.style.right="0";
- document.body.style.width="100%";
+ document.documentElement.style.overflow="hidden";
  document.body.style.overflow="hidden";
 }
 function __unlockSalePage(){
  if(!document.body.classList.contains("sale-modal-open"))return;
+ document.documentElement.classList.remove("sale-modal-open");
  document.body.classList.remove("sale-modal-open");
- document.body.style.removeProperty("position");
- document.body.style.removeProperty("top");
- document.body.style.removeProperty("left");
- document.body.style.removeProperty("right");
- document.body.style.removeProperty("width");
+ document.documentElement.style.removeProperty("overflow");
  document.body.style.removeProperty("overflow");
- window.scrollTo(0,__salePageLockY);
+ requestAnimationFrame(()=>window.scrollTo(0,__salePageLockY));
 }
 function show(id,btn){
  const wasSales=document.body.classList.contains("sale-modal-open");
