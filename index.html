@@ -2148,6 +2148,16 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 @media(max-width:370px){#home>.cards{gap:6px!important}#home>.cards>.card{min-height:65px!important;padding:7px!important}#home>.cards>.card>strong{font-size:12px!important}#home .shortcuts{gap:5px!important}#home .shortcuts .shortcut{min-height:56px!important}#home .shortcuts .shortcut span{font-size:9px!important}}
 
 
+
+/* Daily profit status: red for loss, green for profit */
+#home>.cards>.card.profit-negative{background:linear-gradient(135deg,#ffe3e3,#fff5f5)!important;border:1px solid #f2b8b8!important;border-right:4px solid #dc4545!important;box-shadow:0 3px 10px rgba(220,69,69,.12)!important}
+#home>.cards>.card.profit-negative>span{color:#a52e2e!important;font-weight:850!important}
+#home>.cards>.card.profit-negative>strong{color:#c62828!important;font-size:clamp(16px,4.2vw,19px)!important;font-weight:950!important}
+#home>.cards>.card.profit-negative:after{background:rgba(220,69,69,.08)!important}
+#home>.cards>.card.profit-positive{background:linear-gradient(135deg,#e0f7e9,#f4fff7)!important;border:1px solid #b4e6c6!important;border-right:4px solid #15965c!important}
+#home>.cards>.card.profit-positive>span{color:#126b45!important;font-weight:850!important}
+#home>.cards>.card.profit-positive>strong{color:#087747!important;font-size:clamp(16px,4.2vw,19px)!important;font-weight:950!important}
+
 /* Today's sales: clear green emphasis */
 #home>.cards>.card:first-child{background:linear-gradient(135deg,#d8f8e8,#f1fff7)!important;border:1px solid #a8e6c4!important;border-right:4px solid #15965c!important;box-shadow:0 3px 10px rgba(21,150,92,.13)!important}
 #home>.cards>.card:first-child>span{color:#126b45!important;font-size:11px!important;font-weight:850!important}
@@ -4014,6 +4024,7 @@ function updateDashboard(){
  put("cash",db.cash);put("stockValue",stock);put("debt",customerDebt);
  put("supplierDebt",supplierDebt);put("salesTotal",totalSales);
  put("profitToday",netProfit);put("debtToday",dailyDebt);
+ const profitCard=document.getElementById("profitToday")?.closest(".card");if(profitCard){profitCard.classList.toggle("profit-negative",netProfit<0);profitCard.classList.toggle("profit-positive",netProfit>0);profitCard.classList.toggle("profit-zero",netProfit===0);}
  put("expenseTotal",dailyExpenses);put("capital",capital);
  renderLowStock();
 }
