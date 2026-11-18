@@ -4055,6 +4055,24 @@ function updateDashboard(){
  put("supplierDebt",supplierDebt);put("salesTotal",totalSales);
  put("profitToday",netProfit);put("debtToday",dailyDebt);
  const profitText=document.getElementById("profitToday");if(profitText){profitText.style.setProperty("color","#49317f","important");const title=profitText.parentElement?.querySelector("span");if(title)title.style.setProperty("color","#59418f","important");}
+ const stockText=document.getElementById("stockValue");
+ if(stockText){
+  const stockCard=stockText.closest(".card");
+  if(stockCard){
+   stockCard.style.setProperty("min-height","88px","important");
+   stockCard.style.setProperty("padding","10px 11px","important");
+   stockCard.style.setProperty("border-radius","16px","important");
+   stockCard.style.setProperty("background","linear-gradient(135deg,#e8f4ff 0%,#d9eef2 100%)","important");
+   stockCard.style.setProperty("border","1px solid #b9dce9","important");
+   stockCard.style.setProperty("box-shadow","0 5px 14px rgba(24,92,125,.12)","important");
+   stockCard.style.setProperty("gap","5px","important");
+   const stockTitle=stockCard.querySelector("span");
+   if(stockTitle){stockTitle.style.setProperty("color","#24627e","important");stockTitle.style.setProperty("font-size","11px","important");stockTitle.style.setProperty("font-weight","800","important");}
+  }
+  stockText.style.setProperty("color","#124b68","important");
+  stockText.style.setProperty("font-size","16px","important");
+  stockText.style.setProperty("font-weight","900","important");
+ }
  const profitCard=document.getElementById("profitToday")?.closest(".card");if(profitCard){profitCard.classList.toggle("profit-negative",netProfit<0);profitCard.classList.toggle("profit-positive",netProfit>0);profitCard.classList.toggle("profit-zero",netProfit===0);}
  put("expenseTotal",dailyExpenses);put("capital",capital);
  renderLowStock();
