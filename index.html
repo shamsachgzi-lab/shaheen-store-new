@@ -2379,6 +2379,16 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <div class="panel supplier-form-card hidden" id="supplierFormPanel"><div class="supplier-form-title"><div><small>نوی ریکارډ</small><b>➕ تامین کوونکی ثبت کړه</b></div><button type="button" class="gray" onclick="toggleSupplierForm()">✕</button></div>
  <div class="supplier-fields"><div><label for="sName">د شرکت / تامین کوونکي نوم</label><input id="sName" placeholder="د شرکت نوم ولیکه..."></div><div><label for="sPhone">د اړیکې شمېره</label><input id="sPhone" type="tel" placeholder="07xxxxxxxx"></div><div><label for="sDebt">اوسنی پور (AFN)</label><input id="sDebt" type="number" min="0" value="0"></div></div>
  <button class="primary supplier-save-btn" onclick="window.addSupplier()">💾 معلومات خوندي کړه</button></div>
+ <div class="panel supplier-edit-card hidden" id="supplierEditPanel">
+  <div class="supplier-form-title"><div><small>EDIT PARTNER</small><b>✏️ د تامین کوونکي معلومات او پخوانی پور</b></div><button type="button" class="gray" onclick="closeSupplierEdit()">✕</button></div>
+  <input type="hidden" id="supplierEditId">
+  <label for="supplierEditName">د شرکت / تامین کوونکي نوم</label><input id="supplierEditName" placeholder="د شرکت نوم">
+  <label for="supplierEditPhone">د اړیکې شمېره</label><input id="supplierEditPhone" type="tel" placeholder="07xxxxxxxx">
+  <div class="supplier-opening-debt-box"><b>🧾 د پخواني پور / بدهۍ سمون</b><small>د شرکت هغه پاتې پور دلته په لاس ولیکه چې له مخکې څخه درباندې وي. اندازه په مستقیم ډول ثبتېږي.</small>
+   <label for="supplierEditDebt">اوسنی پاتې پور (AFN)</label><input id="supplierEditDebt" type="number" min="0" step="0.01" inputmode="decimal">
+  </div>
+  <button type="button" class="primary supplier-save-btn" onclick="saveSupplierEdit()">💾 بدلونونه خوندي کړه</button>
+ </div>
  <div class="supplier-list-panel"><div class="supplier-list-heading"><div><small>PARTNERS DIRECTORY</small><h4>د تامین کوونکو لېست</h4></div><span class="supplier-list-mark">☷</span></div>
  <div class="supplier-search-wrap"><span>⌕</span><input id="supplierSearch" type="search" placeholder="د نوم یا موبایل شمېرې له مخې لټون..." oninput="renderSuppliers()"></div><div id="suppliersList" class="supplier-results"></div></div>
 </section>
@@ -3812,10 +3822,33 @@ function renderSuppliers(){
  <div class="supplier-record-actions"><button type="button" class="gray" onclick="editSupplier('${s.id}')">✏️ سمون</button><button type="button" class="red" onclick="deleteSupplier('${s.id}')">🗑 حذف</button></div></article>`).join("")||(q?`<div class="supplier-empty"><span>🔎</span>د لټون نتیجه ونه موندل شوه</div>`:`<div class="supplier-empty"><span>🏢</span>تر اوسه تامین کوونکی نه دی ثبت شوی<br><small>د «نوی تامین کوونکی» تڼۍ وکاروه</small></div>`);
 }
 function editSupplier(id){
- const s=db.suppliers.find(x=>x.id===id);if(!s)return;
- const name=prompt("د شرکت نوم",s.name);if(name===null)return;
- const phone=prompt("شمېره",s.phone||"");if(phone===null)return;
- s.name=name.trim()||s.name;s.phone=phone.trim();saveDB();refreshAll();
+ const s=db.suppliers.find(x=>String(x.id)===String(id));if(!s)return;
+ const panel=document.getElementById("supplierEditPanel");
+ if(!panel)return;
+ document.getElementById("supplierEditId").value=s.id;
+ document.getElementById("supplierEditName").value=s.name||"";
+ document.getElementById("supplierEditPhone").value=s.phone||"";
+ document.getElementById("supplierEditDebt").value=Number(s.debt||0);
+ panel.classList.remove("hidden");
+ panel.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function closeSupplierEdit(){
+ document.getElementById("supplierEditPanel")?.classList.add("hidden");
+}
+function saveSupplierEdit(){
+ const id=document.getElementById("supplierEditId")?.value;
+ const s=db.suppliers.find(x=>String(x.id)===String(id));if(!s)return;
+ const name=(document.getElementById("supplierEditName")?.value||"").trim();
+ const phone=(document.getElementById("supplierEditPhone")?.value||"").trim();
+ const debt=Number(document.getElementById("supplierEditDebt")?.value);
+ if(!name)return alert("د تامین کوونکي نوم ولیکه");
+ if(!Number.isFinite(debt)||debt<0)return alert("د پخواني پور اندازه سمه ولیکه");
+ const duplicate=db.suppliers.some(x=>String(x.id)!==String(id)&&String(x.name||"").trim().toLowerCase()===name.toLowerCase());
+ if(duplicate)return alert("دا نوم د بل تامین کوونکي سره ثبت دی");
+ const old={name:s.name,phone:s.phone,debt:s.debt};
+ s.name=name;s.phone=phone;s.debt=debt;
+ try{saveDB();}catch(e){Object.assign(s,old);return alert("بدلون خوندي نه شو؛ معلومات پر خپل پخواني حالت پاتې دي.");}
+ closeSupplierEdit();refreshAll();alert("د تامین کوونکي معلومات او پخوانی پور سم شول");
 }
 function deleteSupplier(id){
  const s=db.suppliers.find(x=>x.id===id);if(!s)return;
@@ -5356,6 +5389,14 @@ nav button.active{background:linear-gradient(145deg,#eaf3ff,#f4f8ff)!important;c
  color:#34465b!important;font-size:12px!important;font-weight:800!important;
 }
 #home .shortcuts .shortcut:active{background:#eaf1f8!important;transform:scale(.98)!important}
+
+
+/* Supplier edit and manual opening balance */
+.supplier-edit-card{border:1px solid #dce6f0!important;border-radius:16px!important;background:#fff!important}
+.supplier-opening-debt-box{background:#f3f7fc;border:1px solid #dce7f2;border-radius:13px;padding:12px;margin:10px 0}
+.supplier-opening-debt-box b{display:block;color:#334b65;font-size:14px;margin-bottom:5px}
+.supplier-opening-debt-box small{display:block;color:#64748b;font-size:12px;line-height:1.7;margin-bottom:9px}
+.supplier-opening-debt-box input{background:#fff;border-color:#cbd9e8;font-weight:800}
 
 </style>
 
