@@ -3329,13 +3329,13 @@ function printSale(id){
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
- note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main>
+ note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main>'+
 
 
 
 
 
-</body>\n</html>');
+  '</body>\n</html>');
  w.document.close();w.focus();setTimeout(()=>w.print(),350);
 }
 function filterPurchaseProducts(){
