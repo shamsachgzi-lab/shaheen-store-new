@@ -3676,7 +3676,10 @@ function deleteCustomer(id){
 document.getElementById("salePriceType")?.addEventListener("change",updateSaleCartPrices);
 ["salePaid","saleDiscount"].forEach(id=>document.getElementById(id)?.addEventListener("input",updateSalePreview));
 ["saleJDay","saleJMonth","saleJYear"].forEach(id=>document.getElementById(id)?.addEventListener("change",updateSaleDateLabel));
-initJalaliSaleDate();renderSaleCart();updateSalePreview();
+274614initJalaliSaleDate();renderSaleCart();updateSalePreview();
+/* SHAHEEN_SAFE_RENDER_FUNCTION_EXPORTS_V1 */
+window.renderProducts=renderProducts;
+window.renderCustomers=renderCustomers;
 </script>
 
 <script>
