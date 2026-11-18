@@ -5260,6 +5260,71 @@ nav button.active{background:linear-gradient(145deg,#eaf3ff,#f4f8ff)!important;c
 /* وروستی تثبیت: د نن ګټې د عنوان او شمېرې ارغواني رنګ */
 #home>.cards>.card #profitToday{color:#49317f!important}
 #home>.cards>.card:has(#profitToday)>span{color:#59418f!important}
+
+/* ټولې اصلي لنډلارې: سپین، ساده او عصري ډیزاین */
+#home .shortcuts{
+ display:grid!important;
+ grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:9px!important;
+ margin:8px 0 16px!important;
+}
+#home .shortcuts .shortcut{
+ min-width:0!important;
+ min-height:82px!important;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:7px!important;
+ padding:10px 4px!important;
+ border:1px solid #e5eaf0!important;
+ border-top:1px solid #e5eaf0!important;
+ border-radius:14px!important;
+ background:#fff!important;
+ color:#344256!important;
+ box-shadow:0 2px 8px rgba(25,45,70,.055)!important;
+ transition:transform .15s ease,box-shadow .15s ease!important;
+}
+#home .shortcuts .shortcut:active{
+ transform:scale(.97)!important;
+ box-shadow:0 1px 4px rgba(25,45,70,.08)!important;
+}
+#home .shortcuts .shortcut .shortcut-icon{
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:34px!important;
+ height:34px!important;
+ margin:0!important;
+ border-radius:11px!important;
+ background:#f0f5fb!important;
+ color:#52779e!important;
+ font-size:20px!important;
+}
+#home .shortcuts .shortcut .shortcut-icon svg{
+ width:21px!important;
+ height:21px!important;
+ stroke:currentColor!important;
+ fill:none!important;
+ stroke-width:1.8!important;
+}
+#home .shortcuts .shortcut span{
+ color:#344256!important;
+ font-size:11px!important;
+ font-weight:750!important;
+ line-height:1.25!important;
+ text-align:center!important;
+}
+@media(min-width:700px){
+ #home .shortcuts{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important}
+ #home .shortcuts .shortcut{min-height:92px!important}
+}
+@media(max-width:380px){
+ #home .shortcuts{gap:7px!important}
+ #home .shortcuts .shortcut{min-height:74px!important;padding:8px 3px!important}
+ #home .shortcuts .shortcut span{font-size:10px!important}
+}
+
 </style>
 
 
