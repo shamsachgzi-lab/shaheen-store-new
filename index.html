@@ -4054,6 +4054,7 @@ function updateDashboard(){
  put("cash",db.cash);put("stockValue",stock);put("debt",customerDebt);
  put("supplierDebt",supplierDebt);put("salesTotal",totalSales);
  put("profitToday",netProfit);put("debtToday",dailyDebt);
+ const profitText=document.getElementById("profitToday");if(profitText){profitText.style.setProperty("color","#49317f","important");const title=profitText.parentElement?.querySelector("span");if(title)title.style.setProperty("color","#59418f","important");}
  const profitCard=document.getElementById("profitToday")?.closest(".card");if(profitCard){profitCard.classList.toggle("profit-negative",netProfit<0);profitCard.classList.toggle("profit-positive",netProfit>0);profitCard.classList.toggle("profit-zero",netProfit===0);}
  put("expenseTotal",dailyExpenses);put("capital",capital);
  renderLowStock();
