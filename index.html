@@ -2149,7 +2149,19 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 
 
 
-/* Daily profit status: red for loss, green for profit */
+
+/* Daily profit: modern amber loss / teal profit card */
+#home>.cards>.card.profit-negative{position:relative;min-height:66px!important;padding:8px 10px!important;gap:5px!important;border:1px solid #f0cf9d!important;border-right:4px solid #d58a24!important;border-radius:14px!important;background:linear-gradient(145deg,#fff1d8 0%,#fffaf0 100%)!important;box-shadow:0 4px 12px rgba(173,112,27,.12)!important}
+#home>.cards>.card.profit-negative>span{color:#855214!important;font-size:10px!important;font-weight:850!important}
+#home>.cards>.card.profit-negative>strong{color:#a65e08!important;font-size:clamp(15px,3.9vw,18px)!important;font-weight:950!important;letter-spacing:.1px!important}
+#home>.cards>.card.profit-negative:after{width:48px!important;height:48px!important;left:-13px!important;top:-14px!important;background:rgba(213,138,36,.09)!important}
+#home>.cards>.card.profit-positive{position:relative;min-height:66px!important;padding:8px 10px!important;gap:5px!important;border:1px solid #a9ded8!important;border-right:4px solid #168b83!important;border-radius:14px!important;background:linear-gradient(145deg,#dcf7f2 0%,#f3fffc 100%)!important;box-shadow:0 4px 12px rgba(22,139,131,.11)!important}
+#home>.cards>.card.profit-positive>span{color:#17645f!important;font-size:10px!important;font-weight:850!important}
+#home>.cards>.card.profit-positive>strong{color:#08766e!important;font-size:clamp(15px,3.9vw,18px)!important;font-weight:950!important}
+#home>.cards>.card.profit-zero{min-height:66px!important;padding:8px 10px!important;border-radius:14px!important;background:linear-gradient(145deg,#edf0f5,#fafbfc)!important;border:1px solid #d7dce4!important}
+#home>.cards>.card.profit-zero>span{color:#586579!important;font-size:10px!important;font-weight:850!important}
+#home>.cards>.card.profit-zero>strong{color:#465366!important;font-size:clamp(15px,3.9vw,18px)!important;font-weight:950!important}
+
 #home>.cards>.card.profit-negative{background:linear-gradient(135deg,#ffe3e3,#fff5f5)!important;border:1px solid #f2b8b8!important;border-right:4px solid #dc4545!important;box-shadow:0 3px 10px rgba(220,69,69,.12)!important}
 #home>.cards>.card.profit-negative>span{color:#a52e2e!important;font-weight:850!important}
 #home>.cards>.card.profit-negative>strong{color:#c62828!important;font-size:clamp(16px,4.2vw,19px)!important;font-weight:950!important}
