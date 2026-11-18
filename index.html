@@ -3194,6 +3194,7 @@ function editSale(id){
   <label>ورکړل شوې پیسې (نغدي)</label><input id="editInvoicePaid" type="number" min="0" step="any" value="${paid}" oninput="updateInvoiceEditSummary()">
   <div class="invoice-edit-summary" id="editInvoiceSummary"></div>
   <div class="invoice-edit-actions"><button type="button" class="primary" onclick="saveInvoiceEdit()">💾 اصلاح ذخیره کړه</button><button type="button" class="gray" onclick="printSale('${safe(selected.id)}')">🖨 چاپ</button></div>
+  <button type="button" class="red" style="width:100%;margin-top:9px" onclick="deleteInvoiceCompletely()">🗑 رسید مکمل حذف کړه او موجودي بېرته زیاته کړه</button>
  </div></div>`;
  invoiceEditPageScroll=window.scrollY||window.pageYOffset||0;
  document.documentElement.style.setProperty("--invoice-edit-page-top",(-invoiceEditPageScroll)+"px");
@@ -3306,6 +3307,23 @@ function saveInvoiceEdit(){
  });
  db.sales=db.sales.filter(x=>(x.invoice||x.id)!==invoiceEditId).concat(invoiceEditRows);
  saveDB();closeInvoiceEdit();refreshAll();if(currentCustomerId)renderCustomerDetail();alert("بشپړ رسید اصلاح او حسابونه تازه شول.");
+}
+function deleteInvoiceCompletely(){
+ const rows=db.sales.filter(x=>(x.invoice||x.id)===invoiceEditId);
+ if(!rows.length)return alert('رسید ونه موندل شو.');
+ const paid=rows.reduce((n,x)=>n+Number(x.paid||0),0);
+ const debt=rows.reduce((n,x)=>n+Number(x.debt||0),0);
+ const customer=db.customers.find(c=>c.id===rows[0].customerId);
+ if(paid>Number(db.cash||0))return alert('دا رسید نه شي حذفېدای: په صندوق کې د بېرته ګرځولو لپاره کافي نغدې نشته.');
+ if(debt>0&&(!customer||Number(customer.debt||0)+0.000001<debt))return alert('دا رسید نه شي حذفېدای: د مشتری پور وروسته بدل شوی یا یې یوه برخه ورکړې ده. د حساب د خرابېدو د مخنیوي لپاره حذف ودرول شو.');
+ const names=[...new Set(rows.map(x=>x.productName||'جنس'))].join('، ');
+ if(!confirm('ایا رسید #'+invoiceEditId+' مکمل حذف کړې؟\n\n• ټول '+rows.length+' د جنسونو ریکارډونه به حذف شي\n• '+names+' به بېرته موجودۍ ته اضافه شي\n• نغدي '+money(paid)+' به له صندوقه منفي شي\n• د مشتری پور '+money(debt)+' به کم شي\n\nدا کار بېرته نه راګرځي؛ تر مخه Backup واخله.'))return;
+ rows.forEach(x=>{const p=db.products.find(z=>String(z.id)===String(x.productId));if(p)p.qty=Number(p.qty||0)+Number(x.stockQty??(Number(x.qty||0)*Number(x.unitFactor||1)));});
+ db.cash=Number(db.cash||0)-paid;
+ if(customer)customer.debt=Math.max(0,Number(customer.debt||0)-debt);
+ db.sales=db.sales.filter(x=>(x.invoice||x.id)!==invoiceEditId);
+ saveDB();closeInvoiceEdit();refreshAll();if(currentCustomerId)renderCustomerDetail();
+ alert('رسید حذف شو؛ د جنسونو موجودي بېرته زیاته شوه او حسابونه تازه شول.');
 }
 function printSale(id){
  const selected=db.sales.find(x=>x.id===id);if(!selected)return;
