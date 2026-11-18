@@ -2147,6 +2147,12 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 @media(min-width:700px){#home>.cards{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}#home>.cards>.card{min-height:78px!important;padding:10px 12px!important}#home .shortcuts{grid-template-columns:repeat(5,minmax(0,1fr))!important}}
 @media(max-width:370px){#home>.cards{gap:6px!important}#home>.cards>.card{min-height:65px!important;padding:7px!important}#home>.cards>.card>strong{font-size:12px!important}#home .shortcuts{gap:5px!important}#home .shortcuts .shortcut{min-height:56px!important}#home .shortcuts .shortcut span{font-size:9px!important}}
 
+
+/* Today's sales: clear green emphasis */
+#home>.cards>.card:first-child{background:linear-gradient(135deg,#d8f8e8,#f1fff7)!important;border:1px solid #a8e6c4!important;border-right:4px solid #15965c!important;box-shadow:0 3px 10px rgba(21,150,92,.13)!important}
+#home>.cards>.card:first-child>span{color:#126b45!important;font-size:11px!important;font-weight:850!important}
+#home>.cards>.card:first-child>strong{color:#087747!important;font-size:clamp(16px,4.2vw,19px)!important;font-weight:950!important}
+#home>.cards>.card:first-child:after{background:rgba(21,150,92,.08)!important}
 </style>
 </head>
 <body>
