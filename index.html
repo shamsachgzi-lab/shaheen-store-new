@@ -4073,6 +4073,27 @@ function updateDashboard(){
   stockText.style.setProperty("font-size","16px","important");
   stockText.style.setProperty("font-weight","900","important");
  }
+ const debtCard=document.getElementById("debt")?.closest(".debt-card");
+ if(debtCard){
+  debtCard.style.setProperty("min-height","96px","important");
+  debtCard.style.setProperty("padding","10px 11px","important");
+  debtCard.style.setProperty("border-radius","16px","important");
+  debtCard.style.setProperty("background","linear-gradient(135deg,#f1eaff 0%,#e5e9ff 55%,#e0f1ff 100%)","important");
+  debtCard.style.setProperty("border","1px solid #d4c8f2","important");
+  debtCard.style.setProperty("box-shadow","0 5px 15px rgba(91,65,145,.13)","important");
+  debtCard.style.setProperty("gap","5px","important");
+  const debtTitle=debtCard.querySelector(":scope>span");
+  if(debtTitle){debtTitle.style.setProperty("color","#65449a","important");debtTitle.style.setProperty("font-size","11px","important");debtTitle.style.setProperty("font-weight","900","important");}
+  debtCard.querySelectorAll(":scope>div").forEach((group)=>{
+   group.style.setProperty("display","flex","important");
+   group.style.setProperty("align-items","center","important");
+   group.style.setProperty("justify-content","space-between","important");
+   group.style.setProperty("gap","6px","important");
+   group.querySelector("small")?.style.setProperty("color","#62577f","important");
+   const amount=group.querySelector("strong");
+   if(amount){amount.style.setProperty("color","#39265f","important");amount.style.setProperty("font-size","14px","important");amount.style.setProperty("font-weight","900","important");}
+  });
+ }
  const profitCard=document.getElementById("profitToday")?.closest(".card");if(profitCard){profitCard.classList.toggle("profit-negative",netProfit<0);profitCard.classList.toggle("profit-positive",netProfit>0);profitCard.classList.toggle("profit-zero",netProfit===0);}
  put("expenseTotal",dailyExpenses);put("capital",capital);
  renderLowStock();
