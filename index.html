@@ -4052,6 +4052,24 @@ function updateDashboard(){
  const capital=Number(db.cash)+stock+customerDebt+sarafHeld-supplierDebt-sarafOwed;
  const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
  put("cash",db.cash);put("stockValue",stock);put("debt",customerDebt);
+ const cashText=document.getElementById("cash");
+ if(cashText){
+  const cashCard=cashText.closest(".card");
+  if(cashCard){
+   cashCard.style.setProperty("min-height","88px","important");
+   cashCard.style.setProperty("padding","10px 11px","important");
+   cashCard.style.setProperty("border-radius","16px","important");
+   cashCard.style.setProperty("background","linear-gradient(135deg,#e8f8ef 0%,#d9f2e8 100%)","important");
+   cashCard.style.setProperty("border","1px solid #b9e3cd","important");
+   cashCard.style.setProperty("box-shadow","0 5px 14px rgba(28,112,72,.12)","important");
+   cashCard.style.setProperty("gap","5px","important");
+   const cashTitle=cashCard.querySelector("span");
+   if(cashTitle){cashTitle.style.setProperty("color","#24734d","important");cashTitle.style.setProperty("font-size","11px","important");cashTitle.style.setProperty("font-weight","900","important");}
+  }
+  cashText.style.setProperty("color","#145b3b","important");
+  cashText.style.setProperty("font-size","16px","important");
+  cashText.style.setProperty("font-weight","900","important");
+ }
  put("supplierDebt",supplierDebt);put("salesTotal",totalSales);
  put("profitToday",netProfit);put("debtToday",dailyDebt);
  const profitText=document.getElementById("profitToday");if(profitText){profitText.style.setProperty("color","#49317f","important");const title=profitText.parentElement?.querySelector("span");if(title)title.style.setProperty("color","#59418f","important");}
