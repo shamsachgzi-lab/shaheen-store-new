@@ -2389,6 +2389,18 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   </div>
   <button type="button" class="primary supplier-save-btn" onclick="saveSupplierEdit()">💾 بدلونونه خوندي کړه</button>
  </div>
+ <div class="panel supplier-ledger-card hidden" id="supplierLedgerPanel">
+  <div class="supplier-form-title"><div><small>SUPPLIER ACCOUNT · RECEIPTS</small><b>🧾 د تامین کوونکي رسید او حساب</b><span id="supplierLedgerName"></span></div><button type="button" class="gray" onclick="closeSupplierLedger()">✕</button></div>
+  <input type="hidden" id="supplierLedgerId">
+  <div class="supplier-ledger-balance"><small>اوسنی پاتې پور</small><strong id="supplierLedgerBalance">0 AFN</strong></div>
+  <label for="supplierLedgerType">د رسید ډول</label>
+  <select id="supplierLedgerType"><option value="charge">➕ نوی پور / د شرکت بل اضافه کول</option><option value="payment">💵 شرکت ته پیسې ورکول (رسید)</option></select>
+  <label for="supplierLedgerAmount">د رسید اندازه (AFN)</label><input id="supplierLedgerAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="د پیسو اندازه">
+  <label for="supplierLedgerDate">نېټه</label><input id="supplierLedgerDate" type="date">
+  <label for="supplierLedgerNote">تشریح / د رسید شمېره</label><input id="supplierLedgerNote" placeholder="لکه: د شرکت رسید ۱۲۳ یا د مال بل">
+  <button type="button" class="primary supplier-save-btn" onclick="saveSupplierLedgerEntry()">🧾 رسید ثبت کړه او حساب تازه کړه</button>
+  <div class="supplier-ledger-history-title">د دې تامین کوونکي د رسیدونو تاریخچه</div><div id="supplierLedgerHistory"></div>
+ </div>
  <div class="supplier-list-panel"><div class="supplier-list-heading"><div><small>PARTNERS DIRECTORY</small><h4>د تامین کوونکو لېست</h4></div><span class="supplier-list-mark">☷</span></div>
  <div class="supplier-search-wrap"><span>⌕</span><input id="supplierSearch" type="search" placeholder="د نوم یا موبایل شمېرې له مخې لټون..." oninput="renderSuppliers()"></div><div id="suppliersList" class="supplier-results"></div></div>
 </section>
@@ -3819,7 +3831,58 @@ function renderSuppliers(){
  list.innerHTML=filtered.map(s=>`
  <article class="supplier-record"><div class="supplier-record-head"><div class="supplier-record-icon">🏢</div><div><div class="supplier-record-name">${safe(s.name)}</div><div class="supplier-record-phone">📞 ${safe(s.phone||"شمېره نه ده ثبت شوې")}</div></div></div>
  <div class="supplier-record-debt"><small>اوسنی پاتې پور / بدهی</small><b>${money(s.debt)}</b></div>
- <div class="supplier-record-actions"><button type="button" class="gray" onclick="editSupplier('${s.id}')">✏️ سمون</button><button type="button" class="red" onclick="deleteSupplier('${s.id}')">🗑 حذف</button></div></article>`).join("")||(q?`<div class="supplier-empty"><span>🔎</span>د لټون نتیجه ونه موندل شوه</div>`:`<div class="supplier-empty"><span>🏢</span>تر اوسه تامین کوونکی نه دی ثبت شوی<br><small>د «نوی تامین کوونکی» تڼۍ وکاروه</small></div>`);
+ <div class="supplier-record-actions"><button type="button" class="primary" onclick="openSupplierLedger('${s.id}')">🧾 رسید / حساب</button><button type="button" class="gray" onclick="editSupplier('${s.id}')">✏️ سمون</button><button type="button" class="red" onclick="deleteSupplier('${s.id}')">🗑 حذف</button></div></article>`).join("")||(q?`<div class="supplier-empty"><span>🔎</span>د لټون نتیجه ونه موندل شوه</div>`:`<div class="supplier-empty"><span>🏢</span>تر اوسه تامین کوونکی نه دی ثبت شوی<br><small>د «نوی تامین کوونکی» تڼۍ وکاروه</small></div>`);
+}
+function openSupplierLedger(id){
+ const s=db.suppliers.find(x=>String(x.id)===String(id));if(!s)return;
+ document.getElementById("supplierLedgerId").value=s.id;
+ document.getElementById("supplierLedgerName").textContent=s.name||"";
+ document.getElementById("supplierLedgerBalance").textContent=money(s.debt||0);
+ document.getElementById("supplierLedgerAmount").value="";
+ document.getElementById("supplierLedgerDate").value=today();
+ document.getElementById("supplierLedgerNote").value="";
+ const panel=document.getElementById("supplierLedgerPanel");panel.classList.remove("hidden");
+ renderSupplierLedgerHistory(s.id);panel.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function closeSupplierLedger(){document.getElementById("supplierLedgerPanel")?.classList.add("hidden");}
+function renderSupplierLedgerHistory(id){
+ const rows=[];
+ (db.supplierReceipts||[]).filter(x=>String(x.supplierId)===String(id)).forEach(x=>rows.push(x));
+ (db.payments||[]).filter(x=>x.type==="supplier"&&String(x.personId)===String(id)&&!(db.supplierReceipts||[]).some(y=>y.paymentId===x.id)).forEach(x=>rows.push({...x,kind:"payment",note:x.note||"پخوانۍ تادیه"}));
+ rows.sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+ const box=document.getElementById("supplierLedgerHistory");
+ if(!box)return;
+ box.innerHTML=rows.map(x=>{const isPay=x.kind==="payment"||x.type==="payment";return '<div class="supplier-ledger-row"><div><b>'+(isPay?'💵 شرکت ته ورکړل شوې پیسې':'➕ پور / د شرکت بل')+'</b><small>'+safe(x.date||"—")+' · '+safe(x.note||"رسید")+'</small></div><strong class="'+(isPay?'supplier-ledger-minus':'supplier-ledger-plus')+'">'+(isPay?'−':'+')+money(x.amount)+'</strong></div>';}).join("")||'<div class="supplier-empty">تر اوسه رسید نه دی ثبت شوی</div>';
+}
+function saveSupplierLedgerEntry(){
+ const id=document.getElementById("supplierLedgerId").value;
+ const s=db.suppliers.find(x=>String(x.id)===String(id));if(!s)return;
+ const kind=document.getElementById("supplierLedgerType").value;
+ const amount=Number(document.getElementById("supplierLedgerAmount").value);
+ const date=document.getElementById("supplierLedgerDate").value||today();
+ const note=(document.getElementById("supplierLedgerNote").value||"").trim();
+ if(!Number.isFinite(amount)||amount<=0)return alert("د رسید اندازه سمه ولیکه");
+ if(kind==="payment"&&amount>Number(s.debt||0))return alert("تادیه د پاتې پور څخه زیاته ده");
+ if(kind==="payment"&&amount>Number(db.cash||0))return alert("په صندوق کې دومره نغدې پیسې نشته");
+ if(!Array.isArray(db.supplierReceipts))db.supplierReceipts=[];
+ const oldDebt=Number(s.debt||0);
+ const oldCash=Number(db.cash||0);
+ const receipt={id:uid(),supplierId:s.id,supplierName:s.name,kind,amount,date,note,previousDebt:oldDebt,newDebt:kind==="charge"?oldDebt+amount:oldDebt-amount,createdAt:Date.now()};
+ s.debt=receipt.newDebt;
+ if(kind==="payment"){
+  db.cash=oldCash-amount;
+  if(!Array.isArray(db.payments))db.payments=[];
+  const payment={id:uid(),type:"supplier",personId:s.id,personName:s.name,amount,date,note,supplierReceiptId:receipt.id};
+  receipt.paymentId=payment.id;db.payments.push(payment);
+ }
+ db.supplierReceipts.push(receipt);
+ try{saveDB();}catch(e){s.debt=oldDebt;db.cash=oldCash;db.supplierReceipts.pop();if(receipt.paymentId)db.payments=db.payments.filter(x=>x.id!==receipt.paymentId);return alert("رسید خوندي نه شو؛ معلومات پخواني حالت ته بېرته وګرځېدل");}
+ document.getElementById("supplierLedgerAmount").value="";
+ document.getElementById("supplierLedgerNote").value="";
+ document.getElementById("supplierLedgerBalance").textContent=money(s.debt);
+ renderSupplierLedgerHistory(s.id);refreshAll();
+ document.getElementById("supplierLedgerBalance").textContent=money(s.debt);
+ alert("رسید ثبت شو؛ د تامین کوونکي حساب تازه شو");
 }
 function editSupplier(id){
  const s=db.suppliers.find(x=>String(x.id)===String(id));if(!s)return;
@@ -5397,6 +5460,15 @@ nav button.active{background:linear-gradient(145deg,#eaf3ff,#f4f8ff)!important;c
 .supplier-opening-debt-box b{display:block;color:#334b65;font-size:14px;margin-bottom:5px}
 .supplier-opening-debt-box small{display:block;color:#64748b;font-size:12px;line-height:1.7;margin-bottom:9px}
 .supplier-opening-debt-box input{background:#fff;border-color:#cbd9e8;font-weight:800}
+
+
+.supplier-ledger-card{border:1px solid #dbe6f1!important;border-radius:16px!important;background:#fff!important}
+.supplier-ledger-balance{display:flex;align-items:center;justify-content:space-between;background:#f1f6fc;border:1px solid #dce7f2;border-radius:12px;padding:12px;margin:10px 0}
+.supplier-ledger-balance small{color:#52677e;font-weight:800}.supplier-ledger-balance strong{color:#233f61;font-size:18px;font-weight:900}
+.supplier-ledger-history-title{font-weight:900;color:#334b65;margin:16px 0 8px}
+.supplier-ledger-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid #edf1f6}
+.supplier-ledger-row b{display:block;font-size:12px;color:#334155}.supplier-ledger-row small{display:block;font-size:11px;color:#718096;margin-top:4px}
+.supplier-ledger-row strong{white-space:nowrap;font-size:13px}.supplier-ledger-minus{color:#15803d}.supplier-ledger-plus{color:#b45309}
 
 </style>
 
