@@ -1052,6 +1052,24 @@ nav button.active{background:#edf4fc!important;color:#1765bd!important;box-shado
  #home .shortcuts .shortcut span{font-size:11px!important}
 }
 
+
+/* Multi-item purchase receipt and landed-cost design */
+.purchase-pro-form{border:1px solid #c9dced!important;border-radius:20px!important;background:linear-gradient(180deg,#f4f9ff,#fff 210px)!important;box-shadow:0 8px 22px #244c7710!important}
+.purchase-pro-step{display:flex;flex-direction:column;gap:3px;padding:11px 12px;margin:10px 0;border-radius:12px;background:#eaf3ff;border:1px solid #d3e4f8;color:#194f87}
+.purchase-pro-step small{font-size:11px;color:#61758d}
+.purchase-add-line{width:100%;margin:10px 0;padding:13px;border-radius:12px;background:linear-gradient(100deg,#1455a0,#078b9a);color:white;font-weight:900;border:0}
+.purchase-cart-box{border:1px solid #dce7f2;border-radius:14px;background:#f8fbff;padding:9px;margin:8px 0 15px}
+.purchase-cart-empty{text-align:center;padding:17px;color:#7a8ba0;font-size:12px}
+.purchase-cart-line{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:10px;border-radius:10px;background:#fff;border:1px solid #e2eaf3;margin:5px 0}
+.purchase-cart-line div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.purchase-cart-line b{color:#244b76;font-size:13px}
+.purchase-cart-line small{color:#718096;font-size:11px}
+.purchase-cart-line button{border:0;border-radius:9px;background:#fff0f0;color:#c33;padding:8px 11px}
+.purchase-cost-preview{background:#edf6ff;border:1px solid #cfe1f5;border-radius:13px;padding:11px;margin:12px 0;color:#385675}
+.purchase-cost-preview>div{display:flex;justify-content:space-between;gap:8px;padding:4px 0;font-size:12px}
+.purchase-cost-preview>div:last-child{border-top:1px solid #d4e2f0;margin-top:5px;padding-top:9px;font-weight:900;color:#145c9e}
+.purchase-cost-preview b{color:#174b83;direction:ltr}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -2414,16 +2432,21 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 </section>
 <section id="purchases" class="hidden purchase-page">
  <div class="purchase-page-head"><div><small>شاهین فروشگاه</small><h3>🚚 پېرود او ګدام ته داخلول</h3><p>نوی مال ثبت کړه او د پېرود پخواني رسیدونه وګوره</p></div><button type="button" class="purchase-add-product" onclick="openProductFromPurchase()">＋ نوی جنس</button></div>
- <div class="purchase-form panel">
-  <div class="purchase-section-title"><b>🧾 د نوي پېرود معلومات</b><span>۱ · معلومات داخل کړه</span></div>
+ <div class="purchase-form panel purchase-pro-form">
+  <div class="purchase-section-title"><b>🧾 د پېرود نوی رسید</b><span>څو جنسونه په یوه رسید کې</span></div>
+  <div class="purchase-pro-step"><b>۱ · جنسونه رسید ته اضافه کړه</b><small>هر څومره جنسونه چې اخلې، یو په بل پسې یې اضافه کړه</small></div>
   <label>🔎 جنس د نوم یا بارکوډ له مخې ولټوه</label><input class="purchase-search" id="buyProductSearch" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off">
   <div class="row purchase-fields"><div><label>جنس انتخاب کړه</label><select id="buyProduct"></select></div><div><label>د پېرود واحد</label><select id="buyUnit"></select></div></div>
-  <label>شرکت / عرضه کوونکی انتخاب کړه</label><select id="buySupplier"><option value="">نغدي پېرود / شرکت نه لري</option></select><p class="purchase-hint">یوازې مخکې ثبت شوي شرکتونه دلته ښکاري. نوی شرکت لومړی د «تامین کوونکي» برخې څخه ثبت کړه.</p>
+  <div class="row purchase-fields"><div><label>مقدار / تعداد</label><input id="buyQty" type="number" min="0.001" step="any" placeholder="مثلاً ۵"></div><div><label>د هر واحد د اخیستلو قیمت (AFN)</label><input id="buyPrice" type="number" min="0.01" step="any" placeholder="مثلاً ۱۵۰۰"></div></div>
+  <button type="button" class="purchase-add-line" onclick="addPurchaseCartLine()">＋ دا جنس رسید ته اضافه کړه</button>
+  <div id="purchaseCartBox" class="purchase-cart-box"><div class="purchase-cart-empty">تر اوسه رسید ته جنس نه دی اضافه شوی</div></div>
+  <div class="purchase-pro-step"><b>۲ · د شرکت او پیسو معلومات</b></div>
+  <label>شرکت / عرضه کوونکی انتخاب کړه</label><select id="buySupplier"><option value="">نغدي پېرود / شرکت نه لري</option></select><p class="purchase-hint">که په پور مال اخلې، د هماغه شرکت انتخابول حتمي دي؛ پاتې پور به د شرکت حساب ته اضافه شي.</p>
   <label>د پېرود نېټه</label><input id="buyDate" type="date">
-  <div class="row purchase-fields"><div><label>مقدار / تعداد</label><input id="buyQty" type="number" min="0.01" step="any" placeholder="مثلاً ۵"></div><div><label>فی واحد قیمت (AFN)</label><input id="buyPrice" type="number" min="0" placeholder="قیمت"></div></div>
-  <label>ورکړل شوې پیسې (AFN)</label><input id="buyPaid" type="number" min="0" value="0" placeholder="نغدي ورکړه">
-  <button class="primary purchase-save" onclick="addPurchase()">✓ پېرود ثبت کړه</button>
-  <p class="notice purchase-hint">یادونه: د جنس ټاکلو سره سم واحد او د پېرود بیه په اتومات ډول راځي. نغدي ورکړه به له صندوقه کمه او پاتې پور به عرضه کوونکي ته ثبت شي.</p>
+  <div class="row purchase-fields"><div><label>شرکت ته ورکړل شوې پیسې (AFN)</label><input id="buyPaid" type="number" min="0" value="0" step="any" placeholder="نغدي ورکړه"></div><div><label>د انتقال او نورو مصارفو ټول (AFN)</label><input id="buyExtraExpense" type="number" min="0" value="0" step="any" placeholder="مثلاً ۵۰"></div></div>
+  <div id="purchaseCostPreview" class="purchase-cost-preview">د رسید مجموعه: 0 AFN</div>
+  <button class="primary purchase-save" onclick="addPurchase()">✓ ټول پېرود په یوه رسید کې ثبت کړه</button>
+  <p class="notice purchase-hint">د انتقال مصارف به د جنسونو د ارزښت په تناسب ووېشل شي او د هر جنس د موجودۍ اخیستلو قیمت ته به ورزیات شي. مثال: ۱۵۰۰ + ۵۰ = ۱۵۵۰ AFN. که شرکت ته پور پاتې وي، یوازې د هماغه شرکت حساب به زیات شي.</p>
  </div>
  <div class="purchase-history panel"><div class="purchase-section-title"><b>📚 د پېرود تاریخچه</b><button type="button" class="red" onclick="clearPurchaseHistory()">🗑️ ټوله تاریخچه پاکه کړه</button></div><label>🔍 د جنس، عرضه کوونکي یا رسید له مخې ولټوه</label><input id="purchasesSearch" placeholder="د لټون کلمه ولیکه..."><div id="purchasesList"></div></div>
 </section>
@@ -3584,38 +3607,79 @@ document.getElementById("buyProductSearch").addEventListener("input",filterPurch
 document.getElementById("buyProduct").addEventListener("change",()=>{updatePurchaseUnitOptions();updatePurchasePriceForUnit()});
 document.getElementById("buyUnit").addEventListener("change",updatePurchasePriceForUnit);
 document.getElementById("buyDate").value=today();
+["buyPaid","buyExtraExpense"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("input",renderPurchaseCart);});
+renderPurchaseCart();
 
-function addPurchase(){
+let purchaseCart=[];
+function purchaseCartTotals(){
+ const goods=purchaseCart.reduce((n,x)=>n+x.qty*x.price,0);
+ const extra=Math.max(0,number("buyExtraExpense"));
+ const paid=Math.max(0,number("buyPaid"));
+ return {goods,extra,paid,total:goods+extra,debt:Math.max(0,goods-paid),cashOut:paid+extra};
+}
+function renderPurchaseCart(){
+ const box=document.getElementById("purchaseCartBox");if(!box)return;
+ const t=purchaseCartTotals();
+ box.innerHTML=purchaseCart.length?purchaseCart.map((x,i)=>'<div class="purchase-cart-line"><div><b>'+safe(x.name)+'</b><small>'+x.qty+' '+safe(unitLabel(x.unit))+' × '+money(x.price)+' · د جنس مجموعه '+money(x.qty*x.price)+'</small></div><button type="button" onclick="removePurchaseCartLine('+i+')" aria-label="حذف جنس">✕</button></div>').join(""):'<div class="purchase-cart-empty">تر اوسه رسید ته جنس نه دی اضافه شوی</div>';
+ const preview=document.getElementById("purchaseCostPreview");
+ if(preview)preview.innerHTML='<div><span>د جنسونو ټول</span><b>'+money(t.goods)+'</b></div><div><span>اضافي مصارف</span><b>'+money(t.extra)+'</b></div><div><span>ټول د موجودۍ لګښت</span><b>'+money(t.total)+'</b></div><div><span>شرکت ته پاتې پور</span><b>'+money(t.debt)+'</b></div><div><span>له صندوقه ټول وتل</span><b>'+money(t.cashOut)+'</b></div>';
+}
+function addPurchaseCartLine(){
  const p=db.products.find(x=>String(x.id)===String(value("buyProduct")));
  if(!p)return alert("جنس انتخاب کړه");
- const supplierId=value("buySupplier"),qty=number("buyQty"),price=number("buyPrice"),paid=number("buyPaid");
- const factor=saleFactorForUnit(p,value("buyUnit"));
- const stockAdd=qty*factor,total=qty*price,date=value("buyDate")||today();
- if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<=0||!Number.isFinite(paid)||paid<0||paid>total)return alert("د پېرود شمېرې سمې نه دي");
- if(paid>Number(db.cash))return alert("په صندوق کې دومره نغدې پیسې نشته");
- const supplierRecord=supplierId?(db.suppliers||[]).find(x=>String(x.id)===String(supplierId)):null;
- if(supplierId&&!supplierRecord)return alert("ټاکل شوی شرکت ونه موندل شو؛ له لېسته یې بیا انتخاب کړه");
- const debt=total-paid;
- if(debt>0&&!supplierRecord)return alert("د پور پېرود لپاره شرکت حتمي انتخاب کړه");
- const oldQty=Number(p.qty)||0,oldCost=Number(p.cost)||0;
- const baseUnitCost=price/factor;
- p.cost=oldQty+stockAdd>0?(oldQty*oldCost+stockAdd*baseUnitCost)/(oldQty+stockAdd):baseUnitCost;
- p.qty=oldQty+stockAdd;
- db.cash=Number(db.cash)-paid;
- if(supplierRecord)supplierRecord.debt=Number(supplierRecord.debt||0)+debt;
- const purchase={id:uid(),invoice:"PUR-"+Date.now(),productId:p.id,productName:p.name,qty,unit:value("buyUnit")||(p.unit||"واحد"),stockQty:stockAdd,unitFactor:factor,price,total,paid,debt,supplier:supplierRecord?.name||"نغدي پېرود",supplierId:supplierRecord?.id||"",date};
- db.purchases.push(purchase);
- if(supplierRecord){
-  if(!Array.isArray(db.supplierReceipts))db.supplierReceipts=[];
-  db.supplierReceipts.push({id:uid(),supplierId:supplierRecord.id,supplierName:supplierRecord.name,kind:"purchase",amount:debt,total,paid,date,note:"رسید "+purchase.invoice+" · "+p.name+" · "+qty+" "+(value("buyUnit")||(p.unit||"واحد")),purchaseId:purchase.id,previousDebt:Number(supplierRecord.debt||0)-debt,newDebt:Number(supplierRecord.debt||0),createdAt:Date.now()});
- }
- try{saveDB();}catch(e){alert("پېرود خوندي نه شو. مهرباني وکړه معلومات وګوره؛ بیا یې تکرارولو مخکې د پېرود تاریخچه وګوره.");return;}
- ["buySupplier","buyQty","buyPrice"].forEach(id=>document.getElementById(id).value="");
- document.getElementById("buyPaid").value="0";
- document.getElementById("buyProductSearch").value="";
- document.getElementById("buyDate").value=today();
- refreshAll();alert("پېرود ثبت شو\nرسید: "+purchase.invoice+"\nټول: "+money(total)+"\nنغدي: "+money(paid)+"\nپاتې پور: "+money(debt));
+ const qty=number("buyQty"),price=number("buyPrice"),unit=value("buyUnit")||(p.unit||"واحد"),factor=saleFactorForUnit(p,unit);
+ if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<=0||!Number.isFinite(factor)||factor<=0)return alert("مقدار، واحد او قیمت سم ولیکه");
+ const found=purchaseCart.find(x=>String(x.productId)===String(p.id)&&x.unit===unit&&x.price===price);
+ if(found)found.qty+=qty;else purchaseCart.push({productId:p.id,name:p.name,qty,unit,price,factor});
+ document.getElementById("buyQty").value="";document.getElementById("buyPrice").value="";
+ renderPurchaseCart();
 }
+function removePurchaseCartLine(i){purchaseCart.splice(i,1);renderPurchaseCart();}
+function addPurchase(){
+ if(!purchaseCart.length)return alert("لومړی یو یا څو جنسونه رسید ته اضافه کړه");
+ const supplierId=value("buySupplier"),paid=number("buyPaid"),extra=number("buyExtraExpense"),date=value("buyDate")||today();
+ const supplierRecord=supplierId?(db.suppliers||[]).find(x=>String(x.id)===String(supplierId)):null;
+ if(supplierId&&!supplierRecord)return alert("ټاکل شوی شرکت ونه موندل شو؛ بیا یې انتخاب کړه");
+ const t=purchaseCartTotals();
+ if(!Number.isFinite(paid)||paid<0||paid>t.goods)return alert("د شرکت ته ورکړل شوې پیسې سمې نه دي؛ له جنسونو د ټول قیمت څخه زیاتې نه شي کېدای");
+ if(!Number.isFinite(extra)||extra<0)return alert("د اضافي مصارفو اندازه سمه نه ده");
+ if(t.debt>0&&!supplierRecord)return alert("د پور پېرود لپاره د هماغه شرکت انتخابول حتمي دي");
+ if(t.cashOut>Number(db.cash||0))return alert("په صندوق کې د ورکړې او انتقال مصارفو لپاره کافي نغدې پیسې نشته");
+ const invoice="PUR-"+Date.now(),oldCash=Number(db.cash||0),oldDebt=supplierRecord?Number(supplierRecord.debt||0):0;
+ const updates=[];
+ for(const line of purchaseCart){
+  const p=db.products.find(x=>String(x.id)===String(line.productId));if(!p)return alert("یو جنس نور په موجودۍ کې نه موندل کېږي؛ رسید ثبت نه شو");
+  const stockAdd=line.qty*line.factor,goods=line.qty*line.price,share=t.goods>0?extra*(goods/t.goods):0;
+  const landedTotal=goods+share,landedUnit=landedTotal/stockAdd;
+  const oldQty=Number(p.qty)||0,oldCost=Number(p.cost)||0;
+  updates.push({p,oldQty,oldCost,stockAdd,landedUnit,goods,share,line});
+ }
+ if(!Array.isArray(db.purchases))db.purchases=[];
+ if(!Array.isArray(db.supplierReceipts))db.supplierReceipts=[];
+ const records=[];
+ updates.forEach(u=>{
+  u.p.qty=u.oldQty+u.stockAdd;
+  u.p.cost=u.p.qty>0?(u.oldQty*u.oldCost+u.stockAdd*u.landedUnit)/u.p.qty:u.landedUnit;
+  const r={id:uid(),invoice,productId:u.p.id,productName:u.p.name,qty:u.line.qty,unit:u.line.unit,stockQty:u.stockAdd,unitFactor:u.line.factor,price:u.landedUnit,total:u.goods+u.share,goodsTotal:u.goods,expenseShare:u.share,paid:t.goods>0?paid*(u.goods/t.goods):0,debt:t.goods>0?t.debt*(u.goods/t.goods):0,supplier:supplierRecord?.name||"نغدي پېرود",supplierId:supplierRecord?.id||"",date,itemsCount:purchaseCart.length};
+  db.purchases.push(r);records.push(r);
+ });
+ db.cash=oldCash-t.cashOut;
+ if(supplierRecord){
+  supplierRecord.debt=oldDebt+t.debt;
+  db.supplierReceipts.push({id:uid(),supplierId:supplierRecord.id,supplierName:supplierRecord.name,kind:"purchase",amount:t.debt,total:t.goods,paid,date,note:"د پېرود ګډ رسید "+invoice+" · "+purchaseCart.map(x=>x.name).join("، ")+" · اضافي مصارف "+money(extra),purchaseId:invoice,previousDebt:oldDebt,newDebt:supplierRecord.debt,createdAt:Date.now()});
+ }
+ try{saveDB();}catch(e){
+  updates.forEach(u=>{u.p.qty=u.oldQty;u.p.cost=u.oldCost;});
+  db.cash=oldCash;if(supplierRecord)supplierRecord.debt=oldDebt;
+  db.purchases=db.purchases.filter(x=>x.invoice!==invoice);
+  db.supplierReceipts=db.supplierReceipts.filter(x=>x.purchaseId!==invoice);
+  return alert("پېرود خوندي نه شو؛ معلومات پخواني حالت ته بېرته وګرځېدل.");
+ }
+ const summary="پېرود ثبت شو\nرسید: "+invoice+"\nجنسونه: "+records.length+"\nد جنسونو قیمت: "+money(t.goods)+"\nاضافي مصارف: "+money(extra)+"\nټول: "+money(t.total)+"\nشرکت ته ورکړه: "+money(paid)+"\nپاتې شرکت پور: "+money(t.debt)+"\nله صندوقه وتلې: "+money(t.cashOut);
+ purchaseCart=[];document.getElementById("buyPaid").value="0";document.getElementById("buyExtraExpense").value="0";document.getElementById("buyProductSearch").value="";document.getElementById("buyDate").value=today();
+ renderPurchaseCart();refreshAll();alert(summary);
+}
+
 function clearPurchaseHistory(){
  if(!confirm("ایا د پېرود ټول پخواني ریکارډونه پاک کړې؟ موجودي، نغدې پیسې، د عرضه کوونکو پورونه او نور حسابونه به نه بدلېږي."))return;
  const previous=db.purchases;
