@@ -1070,6 +1070,30 @@ nav button.active{background:#edf4fc!important;color:#1765bd!important;box-shado
 .purchase-cost-preview>div:last-child{border-top:1px solid #d4e2f0;margin-top:5px;padding-top:9px;font-weight:900;color:#145c9e}
 .purchase-cost-preview b{color:#174b83;direction:ltr}
 
+
+/* Simplified, stable purchase screen */
+.purchase-pro-form{padding:12px!important;border:1px solid #dbe6f2!important;border-radius:16px!important;background:#fff!important;box-shadow:0 3px 14px #1d41600c!important}
+.purchase-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0 12px!important}
+.purchase-section-title b{font-size:16px!important;color:#204d7a}
+.purchase-section-title span{font-size:11px!important;color:#71839a}
+.purchase-pro-step{padding:9px 11px!important;margin:9px 0!important;border-radius:10px!important;background:#f0f5fb!important;border:1px solid #e1eaf4!important;color:#294e75!important}
+.purchase-pro-step small{font-size:11px!important;color:#71839a}
+.purchase-pro-form label{display:block;margin:8px 0 5px!important;font-size:12px!important;font-weight:700!important;color:#42566d!important}
+.purchase-pro-form input,.purchase-pro-form select{width:100%;min-width:0;min-height:40px!important;height:40px!important;padding:7px 10px!important;border:1px solid #d8e2ee!important;border-radius:10px!important;background:#fff!important;font-size:14px!important;box-sizing:border-box!important}
+.purchase-fields{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important}
+.purchase-fields>div{min-width:0!important}
+.purchase-add-line{width:100%!important;padding:11px!important;margin:9px 0!important;border:0!important;border-radius:10px!important;background:#eaf3ff!important;color:#15518b!important;font-weight:800!important}
+.purchase-cart-box{padding:7px!important;margin:7px 0 12px!important;border:1px solid #e2e9f1!important;border-radius:11px!important;background:#f8fafc!important}
+.purchase-cart-line{padding:8px!important;margin:4px 0!important;border:1px solid #e8edf3!important;border-radius:9px!important}
+.purchase-cart-line b{font-size:12px!important}
+.purchase-cart-line small{font-size:10px!important}
+.purchase-cart-empty{padding:12px!important;font-size:11px!important}
+.purchase-cost-preview{padding:9px 11px!important;margin:9px 0!important;border:1px solid #e0e8f1!important;border-radius:10px!important;background:#f7f9fc!important;color:#465b72!important}
+.purchase-cost-preview>div{padding:3px 0!important;font-size:11px!important}
+.purchase-cost-preview>div:last-child{color:#145c9e!important}
+.purchase-save{width:100%!important;min-height:44px!important;border-radius:11px!important;font-weight:800!important}
+.purchase-hint{font-size:11px!important;line-height:1.7!important;color:#687b90!important;margin:7px 0!important}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -3599,18 +3623,16 @@ function updatePurchaseUnitOptions(){
  updatePurchasePriceForUnit();
 }
 function updatePurchasePriceForUnit(){
- const p=db.products.find(x=>x.id===value("buyProduct"));if(!p)return;
+ const p=db.products.find(x=>String(x.id)===String(value("buyProduct")));if(!p)return;
  const factor=saleFactorForUnit(p,value("buyUnit"));
  document.getElementById("buyPrice").value=((Number(p.cost)||0)*factor).toFixed(4).replace(/0+$/,"").replace(/\.$/,"");
 }
+let purchaseCart=[];
 document.getElementById("buyProductSearch").addEventListener("input",filterPurchaseProducts);
-document.getElementById("buyProduct").addEventListener("change",()=>{updatePurchaseUnitOptions();updatePurchasePriceForUnit()});
+document.getElementById("buyProduct").addEventListener("change",updatePurchaseUnitOptions);
 document.getElementById("buyUnit").addEventListener("change",updatePurchasePriceForUnit);
 document.getElementById("buyDate").value=today();
 ["buyPaid","buyExtraExpense"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("input",renderPurchaseCart);});
-renderPurchaseCart();
-
-let purchaseCart=[];
 function purchaseCartTotals(){
  const goods=purchaseCart.reduce((n,x)=>n+x.qty*x.price,0);
  const extra=Math.max(0,number("buyExtraExpense"));
@@ -3622,7 +3644,7 @@ function renderPurchaseCart(){
  const t=purchaseCartTotals();
  box.innerHTML=purchaseCart.length?purchaseCart.map((x,i)=>'<div class="purchase-cart-line"><div><b>'+safe(x.name)+'</b><small>'+x.qty+' '+safe(unitLabel(x.unit))+' × '+money(x.price)+' · د جنس مجموعه '+money(x.qty*x.price)+'</small></div><button type="button" onclick="removePurchaseCartLine('+i+')" aria-label="حذف جنس">✕</button></div>').join(""):'<div class="purchase-cart-empty">تر اوسه رسید ته جنس نه دی اضافه شوی</div>';
  const preview=document.getElementById("purchaseCostPreview");
- if(preview)preview.innerHTML='<div><span>د جنسونو ټول</span><b>'+money(t.goods)+'</b></div><div><span>اضافي مصارف</span><b>'+money(t.extra)+'</b></div><div><span>ټول د موجودۍ لګښت</span><b>'+money(t.total)+'</b></div><div><span>شرکت ته پاتې پور</span><b>'+money(t.debt)+'</b></div><div><span>له صندوقه ټول وتل</span><b>'+money(t.cashOut)+'</b></div>';
+ if(preview)preview.innerHTML='<div><span>د جنسونو قیمت</span><b>'+money(t.goods)+'</b></div><div><span>مصارف</span><b>'+money(t.extra)+'</b></div><div><span>ټول رسید</span><b>'+money(t.total)+'</b></div><div><span>ورکړل شوې پیسې</span><b>'+money(t.paid)+'</b></div><div><span>د شرکت پاتې پور</span><b>'+money(t.debt)+'</b></div>';
 }
 function addPurchaseCartLine(){
  const p=db.products.find(x=>String(x.id)===String(value("buyProduct")));
