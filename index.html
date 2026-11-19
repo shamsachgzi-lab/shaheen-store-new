@@ -3658,7 +3658,7 @@ function renderCustomers(){
  <div class="customer-row">
   <div class="customer-row-main"><b>${safe(c.name)} <small style="display:inline">${c.type==="old"?"زاړه پوروړي":"اوسنی"}</small></b>
    <small>${c.father?" · د پلار نوم: "+safe(c.father):""}${c.phone?" · شمېره: "+safe(c.phone):""}${c.village?" · کلی: "+safe(c.village):""}${c.area?" · سیمه: "+safe(c.area):""}</small>
-   <div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger('${c.id}')">📒</button><button class="gray" title="سمون او د حساب اصلاح" onclick="editCustomer('${c.id}')">✏️</button><button class="red" title="مشتری او ټول ریکارډونه مکمل حذف" onclick="deleteCustomer('${c.id}')">🗑</button></div>
+   <div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger('${c.id}')">📒</button><button class="gray" title="سمون او د حساب اصلاح" onclick="editCustomer('${c.id}')">✏️</button></div>
   </div>
   <div class="customer-row-debt">${money(c.debt)}</div>
  </div>`).join("")||"<p>مشتری نشته</p>";
