@@ -3657,9 +3657,17 @@ function addPurchase(){
  if(!Array.isArray(db.purchases))db.purchases=[];
  if(!Array.isArray(db.supplierReceipts))db.supplierReceipts=[];
  const records=[];
+ const productTotals=new Map();
  updates.forEach(u=>{
-  u.p.qty=u.oldQty+u.stockAdd;
-  u.p.cost=u.p.qty>0?(u.oldQty*u.oldCost+u.stockAdd*u.landedUnit)/u.p.qty:u.landedUnit;
+  const key=String(u.p.id),v=productTotals.get(key)||{p:u.p,oldQty:u.oldQty,oldCost:u.oldCost,stock:0,costValue:0};
+  v.stock+=u.stockAdd;v.costValue+=u.stockAdd*u.landedUnit;productTotals.set(key,v);
+ });
+ productTotals.forEach(v=>{
+  const nextQty=v.oldQty+v.stock;
+  v.p.qty=nextQty;
+  v.p.cost=nextQty>0?(v.oldQty*v.oldCost+v.costValue)/nextQty:0;
+ });
+ updates.forEach(u=>{
   const r={id:uid(),invoice,productId:u.p.id,productName:u.p.name,qty:u.line.qty,unit:u.line.unit,stockQty:u.stockAdd,unitFactor:u.line.factor,price:u.landedUnit,total:u.goods+u.share,goodsTotal:u.goods,expenseShare:u.share,paid:t.goods>0?paid*(u.goods/t.goods):0,debt:t.goods>0?t.debt*(u.goods/t.goods):0,supplier:supplierRecord?.name||"نغدي پېرود",supplierId:supplierRecord?.id||"",date,itemsCount:purchaseCart.length};
   db.purchases.push(r);records.push(r);
  });
