@@ -5840,6 +5840,9 @@ nav button.active{background:linear-gradient(145deg,#eaf3ff,#f4f8ff)!important;c
 
 /* Keep the purchase screen hidden whenever another tab is active. */
 .purchase-page.hidden{display:none!important}
+
+/* Highest-specificity visibility guard: never show purchase tab on home/stock tabs. */
+html body main>section#purchases.purchase-page.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
 
 
