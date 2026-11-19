@@ -2489,12 +2489,13 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <div class="supplier-form-title"><div><small>SUPPLIER ACCOUNT · RECEIPTS</small><b>🧾 د تامین کوونکي رسید او حساب</b><span id="supplierLedgerName"></span></div><button type="button" class="gray" onclick="closeSupplierLedger()">✕</button></div>
   <input type="hidden" id="supplierLedgerId">
   <div class="supplier-ledger-balance"><small>اوسنی پاتې پور</small><strong id="supplierLedgerBalance">0 AFN</strong></div>
-  <label for="supplierLedgerType">د رسید ډول</label>
-  <select id="supplierLedgerType"><option value="charge">➕ نوی پور / د شرکت بل اضافه کول</option><option value="payment">💵 شرکت ته پیسې ورکول (رسید)</option></select>
-  <label for="supplierLedgerAmount">د رسید اندازه (AFN)</label><input id="supplierLedgerAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="د پیسو اندازه">
-  <label for="supplierLedgerDate">نېټه</label><input id="supplierLedgerDate" type="date">
-  <label for="supplierLedgerNote">تشریح / د رسید شمېره</label><input id="supplierLedgerNote" placeholder="لکه: د شرکت رسید ۱۲۳ یا د مال بل">
-  <button type="button" class="primary supplier-save-btn" onclick="saveSupplierLedgerEntry()">🧾 رسید ثبت کړه او حساب تازه کړه</button>
+  <div class="notice" style="margin:10px 0">💡 کله چې شرکت ته پیسې ورکوې، لاندې «تادیه» وټاکه؛ رسید به د همدې شرکت په حساب کې ثبت شي، پاتې پور او صندوق به په اتومات ډول کم شي.</div>
+  <label for="supplierLedgerType">د حساب معامله</label>
+  <select id="supplierLedgerType"><option value="payment">💵 شرکت ته پیسې ورکول — د تادیې رسید</option><option value="charge">➕ نوی پور / د شرکت بل اضافه کول</option></select>
+  <label for="supplierLedgerAmount">د ورکړل شويو پیسو اندازه (AFN)</label><input id="supplierLedgerAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="څومره پیسې دې ورکړې؟">
+  <label for="supplierLedgerDate">د تادیې نېټه</label><input id="supplierLedgerDate" type="date">
+  <label for="supplierLedgerNote">د رسید شمېره / یادښت</label><input id="supplierLedgerNote" placeholder="د شرکت رسید شمېره یا یادښت">
+  <button type="button" class="primary supplier-save-btn" onclick="saveSupplierLedgerEntry()">💵 تادیه ثبت کړه، رسید جوړ او پور کم کړه</button>
   <div class="supplier-ledger-history-title">د دې تامین کوونکي د رسیدونو تاریخچه</div><div id="supplierLedgerHistory"></div>
  </div>
  <div class="supplier-list-panel"><div class="supplier-list-heading"><div><small>PARTNERS DIRECTORY</small><h4>د تامین کوونکو لېست</h4></div><span class="supplier-list-mark">☷</span></div>
@@ -3992,14 +3993,16 @@ function saveSupplierLedgerEntry(){
  const amount=Number(document.getElementById("supplierLedgerAmount").value);
  const date=document.getElementById("supplierLedgerDate").value||today();
  const note=(document.getElementById("supplierLedgerNote").value||"").trim();
- if(!Number.isFinite(amount)||amount<=0)return alert("د رسید اندازه سمه ولیکه");
+ if(!Number.isFinite(amount)||amount<=0)return alert("د پیسو اندازه سمه ولیکه");
  if(kind==="payment"&&amount>Number(s.debt||0))return alert("تادیه د پاتې پور څخه زیاته ده");
  if(kind==="payment"&&amount>Number(db.cash||0))return alert("په صندوق کې دومره نغدې پیسې نشته");
+ const oldDebt=Number(s.debt||0),oldCash=Number(db.cash||0);
+ const newDebt=kind==="charge"?oldDebt+amount:oldDebt-amount;
+ const action=kind==="payment"?"شرکت ته تادیه":"نوی پور";
+ if(!confirm("تایید کړه:\nشرکت: "+s.name+"\nمعامله: "+action+"\nاندازه: "+money(amount)+"\nپخوانی پور: "+money(oldDebt)+"\nنوی پاتې پور: "+money(newDebt)+(kind==="payment"?"\nنوی صندوق: "+money(oldCash-amount):"")+"\n\nثبت یې کړم؟"))return;
  if(!Array.isArray(db.supplierReceipts))db.supplierReceipts=[];
- const oldDebt=Number(s.debt||0);
- const oldCash=Number(db.cash||0);
- const receipt={id:uid(),supplierId:s.id,supplierName:s.name,kind,amount,date,note,previousDebt:oldDebt,newDebt:kind==="charge"?oldDebt+amount:oldDebt-amount,createdAt:Date.now()};
- s.debt=receipt.newDebt;
+ const receipt={id:uid(),supplierId:s.id,supplierName:s.name,kind,amount,date,note,previousDebt:oldDebt,newDebt,createdAt:Date.now()};
+ s.debt=newDebt;
  if(kind==="payment"){
   db.cash=oldCash-amount;
   if(!Array.isArray(db.payments))db.payments=[];
@@ -4007,13 +4010,17 @@ function saveSupplierLedgerEntry(){
   receipt.paymentId=payment.id;db.payments.push(payment);
  }
  db.supplierReceipts.push(receipt);
- try{saveDB();}catch(e){s.debt=oldDebt;db.cash=oldCash;db.supplierReceipts.pop();if(receipt.paymentId)db.payments=db.payments.filter(x=>x.id!==receipt.paymentId);return alert("رسید خوندي نه شو؛ معلومات پخواني حالت ته بېرته وګرځېدل");}
+ try{saveDB();}catch(e){
+  s.debt=oldDebt;db.cash=oldCash;db.supplierReceipts=db.supplierReceipts.filter(x=>x.id!==receipt.id);
+  if(receipt.paymentId)db.payments=db.payments.filter(x=>x.id!==receipt.paymentId);
+  return alert("رسید خوندي نه شو؛ معلومات پخواني حالت ته بېرته وګرځېدل");
+ }
  document.getElementById("supplierLedgerAmount").value="";
  document.getElementById("supplierLedgerNote").value="";
  document.getElementById("supplierLedgerBalance").textContent=money(s.debt);
  renderSupplierLedgerHistory(s.id);refreshAll();
  document.getElementById("supplierLedgerBalance").textContent=money(s.debt);
- alert("رسید ثبت شو؛ د تامین کوونکي حساب تازه شو");
+ alert(kind==="payment"?"د تادیې رسید د شرکت په حساب کې ثبت شو؛ پاتې پور او نغدې پیسې کمې شوې.":"نوی پور د شرکت په حساب کې ثبت شو.");
 }
 function editSupplier(id){
  const s=db.suppliers.find(x=>String(x.id)===String(id));if(!s)return;
