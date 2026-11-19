@@ -3675,7 +3675,8 @@ function purchaseCartTotals(){
 function renderPurchaseCart(){
  const box=document.getElementById("purchaseCartBox");if(!box)return;
  const t=purchaseCartTotals();
- const count=document.getElementById("purchaseCartCount");if(count)count.textContent=String(purchaseCart.length);\n box.innerHTML=purchaseCart.length?purchaseCart.map((x,i)=>'<div class="purchase-cart-line"><div><b>'+safe(x.name)+'</b><small>'+x.qty+' '+safe(unitLabel(x.unit))+' × '+money(x.price)+' · د جنس مجموعه '+money(x.qty*x.price)+'</small></div><button type="button" onclick="removePurchaseCartLine('+i+')" aria-label="حذف جنس">✕</button></div>').join(""):'<div class="purchase-cart-empty">تر اوسه رسید ته جنس نه دی اضافه شوی</div>';
+ const count=document.getElementById("purchaseCartCount");if(count)count.textContent=String(purchaseCart.length);
+ box.innerHTML=purchaseCart.length?purchaseCart.map((x,i)=>'<div class="purchase-cart-line"><div><b>'+safe(x.name)+'</b><small>'+x.qty+' '+safe(unitLabel(x.unit))+' × '+money(x.price)+' · د جنس مجموعه '+money(x.qty*x.price)+'</small></div><button type="button" onclick="removePurchaseCartLine('+i+')" aria-label="حذف جنس">✕</button></div>').join(""):'<div class="purchase-cart-empty">تر اوسه رسید ته جنس نه دی اضافه شوی</div>';
  const preview=document.getElementById("purchaseCostPreview");
  if(preview)preview.innerHTML='<div><span>د جنسونو قیمت</span><b>'+money(t.goods)+'</b></div><div><span>مصارف</span><b>'+money(t.extra)+'</b></div><div><span>ټول رسید</span><b>'+money(t.total)+'</b></div><div><span>ورکړل شوې پیسې</span><b>'+money(t.paid)+'</b></div><div><span>د شرکت پاتې پور</span><b>'+money(t.debt)+'</b></div>';
 }
