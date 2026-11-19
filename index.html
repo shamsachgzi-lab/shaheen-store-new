@@ -3658,7 +3658,7 @@ function renderCustomers(){
  <div class="customer-row">
   <div class="customer-row-main"><b>${safe(c.name)} <small style="display:inline">${c.type==="old"?"زاړه پوروړي":"اوسنی"}</small></b>
    <small>${c.father?" · د پلار نوم: "+safe(c.father):""}${c.phone?" · شمېره: "+safe(c.phone):""}${c.village?" · کلی: "+safe(c.village):""}${c.area?" · سیمه: "+safe(c.area):""}</small>
-   <div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger('${c.id}')">📒</button><button class="gray" title="سمون" onclick="editCustomer('${c.id}')">✏️</button></div>
+   <div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger('${c.id}')">📒</button><button class="gray" title="سمون او د حساب اصلاح" onclick="editCustomer('${c.id}')">✏️</button><button class="red" title="مشتری او ټول ریکارډونه مکمل حذف" onclick="deleteCustomer('${c.id}')">🗑</button></div>
   </div>
   <div class="customer-row-debt">${money(c.debt)}</div>
  </div>`).join("")||"<p>مشتری نشته</p>";
@@ -3781,14 +3781,46 @@ function editCustomer(id){
  const village=prompt("کلی",c.village||"");if(village===null)return;
  const area=prompt("سیمه",c.area||"");if(area===null)return;
  const type=prompt("active یا old ولیکه",c.type||"active");if(type===null)return;
- c.name=name.trim()||c.name;c.father=father.trim();c.phone=phone.trim();c.village=village.trim();c.area=area.trim();c.type=type==="old"?"old":"active";
+ const debtText=prompt("د مشتری اوسنی پاتې پور (AFN) — د حساب د لاسي اصلاح لپاره",String(Number(c.debt||0)));if(debtText===null)return;
+ const correctedDebt=Number(debtText);
+ if(!Number.isFinite(correctedDebt))return alert("د پور اندازه سمه نه ده.");
+ c.name=name.trim()||c.name;c.father=father.trim();c.phone=phone.trim();c.village=village.trim();c.area=area.trim();c.type=type==="old"?"old":"active";c.debt=correctedDebt;
  saveDB();refreshAll();
 }
 function deleteCustomer(id){
- const c=db.customers.find(x=>x.id===id);if(!c)return;
- if(Number(c.debt)>0)return alert("پور لرونکی مشتری مه حذفوه.");
- if(db.sales.some(s=>s.customerId===id))return alert("د خرڅلاو تاریخچه لري؛ حذف یې مه کوه.");
- if(confirm("مشتری حذف شي؟")){db.customers=db.customers.filter(x=>x.id!==id);saveDB();refreshAll()}
+ const c=db.customers.find(x=>String(x.id)===String(id));if(!c)return;
+ const linkedSales=db.sales.filter(x=>String(x.customerId||"")===String(c.id)||(!x.customerId&&String(x.customer||"")===String(c.name)));
+ const linkedPayments=(db.payments||[]).filter(p=>
+  (String(p.personId||"")===String(c.id))||
+  (!p.personId&&String(p.personName||"")===String(c.name))
+ );
+ const saleInvoices=[...new Set(linkedSales.map(x=>String(x.invoice||x.id)))];
+ const salePaid=linkedSales.reduce((n,x)=>n+Number(x.paid||0),0);
+ const receipts=linkedPayments.filter(p=>p.type==="customer").reduce((n,p)=>n+Number(p.amount||0),0);
+ const payouts=linkedPayments.filter(p=>p.type==="customer_out").reduce((n,p)=>n+Number(p.amount||0),0);
+ const cashToReturn=salePaid+receipts-payouts;
+ if(cashToReturn>Number(db.cash||0)+0.000001){
+  return alert("مشتری نه شي حذفېدای: د خرڅلاو او ترلاسه شویو پیسو د بېرته حساب لپاره په صندوق کې کافي نغدې نشته. لومړی صندوق او معاملې وڅېړه.");
+ }
+ const warning="مشتری «"+c.name+"» مکمل حذف شي؟\n\n"+
+  "• د مشتری نوم او حساب\n"+
+  "• "+linkedPayments.length+" رسیدونه او تادیات\n"+
+  "• "+linkedSales.length+" د خرڅلاو کرښې ("+saleInvoices.length+" رسیدونه)\n"+
+  "• د راپورونو اړوند تاریخچه\n\n"+
+  "د خرڅلاو جنسونه به بېرته موجودۍ ته اضافه شي؛ د خرڅلاو نغدې او ترلاسه شوې پیسې به له صندوقه منفي او مشتری ته ورکړل شوې پیسې به بېرته صندوق ته جمع شي.\n\nدا کار بېرته نه راګرځي. مخکې Backup واخله.";
+ if(!confirm(warning))return;
+ if(!confirm("وروستی تایید: د «"+c.name+"» ټول معلومات په بشپړ ډول حذف کړم؟"))return;
+ linkedSales.forEach(x=>{
+  const p=db.products.find(z=>String(z.id)===String(x.productId));
+  if(p)p.qty=Number(p.qty||0)+Number(x.stockQty??(Number(x.qty||0)*Number(x.unitFactor||1)));
+ });
+ db.cash=Number(db.cash||0)-cashToReturn;
+ db.sales=db.sales.filter(x=>!linkedSales.includes(x));
+ db.payments=(db.payments||[]).filter(p=>!linkedPayments.includes(p));
+ db.customers=db.customers.filter(x=>String(x.id)!==String(id));
+ if(String(currentCustomerId)===String(id))currentCustomerId="";
+ saveDB();refreshAll();renderCustomers();
+ alert("مشتری او ټول اړوند ریکارډونه حذف شول؛ موجودي، صندوق او راپورونه تازه شول.");
 }let saleSearchTimer=null;
  document.getElementById("saleProductSearch")?.addEventListener("input",()=>{
   clearTimeout(saleSearchTimer);
