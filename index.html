@@ -1094,6 +1094,31 @@ nav button.active{background:#edf4fc!important;color:#1765bd!important;box-shado
 .purchase-save{width:100%!important;min-height:44px!important;border-radius:11px!important;font-weight:800!important}
 .purchase-hint{font-size:11px!important;line-height:1.7!important;color:#687b90!important;margin:7px 0!important}
 
+
+/* Purchase page rebuilt to match the supplied mobile reference */
+body:has(#purchases:not(.hidden)) .brand-header{display:none!important}
+body:has(#purchases:not(.hidden)) main{padding-top:0!important}
+.purchase-page{max-width:760px;margin:0 auto;padding:0 10px 18px!important;background:#f4f7ff;min-height:100vh}
+.purchase-page-head{position:sticky;top:0;z-index:30;display:grid!important;grid-template-columns:48px 1fr 48px;align-items:center;gap:8px;padding:10px 4px 13px!important;margin:0 -10px 8px;background:rgba(248,250,255,.96);border-bottom:1px solid #dfe8fa;box-shadow:0 4px 14px #183c7510;backdrop-filter:blur(12px)}
+.purchase-home-btn,.purchase-basket-btn{height:44px;width:44px;border-radius:13px;border:1px solid #d7e3f8;background:#edf3ff;color:#174a9a;font-size:24px;font-weight:900;position:relative}
+.purchase-brand{text-align:center;display:flex;flex-direction:column;gap:2px}.purchase-brand b{font-size:19px;color:#102d70;font-weight:950}.purchase-brand span{font-size:12px;color:#33466c}.purchase-basket-btn{font-size:22px}.purchase-basket-btn i{position:absolute;right:-4px;top:-5px;background:#e11d48;color:white;border-radius:50%;font-size:10px;font-style:normal;min-width:19px;height:19px;display:grid;place-items:center;border:2px solid white}
+.purchase-form,.purchase-history{border:1px solid #dce7fa!important;border-radius:17px!important;background:#fff!important;padding:12px!important;box-shadow:0 5px 16px #234b8010!important;margin:0 0 12px!important}
+.purchase-section-title{margin:-12px -12px 12px!important;padding:12px 13px!important;background:linear-gradient(100deg,#0757bd,#0874dc)!important;color:#fff!important;border-radius:16px 16px 0 0;min-height:47px}
+.purchase-section-title b{color:#fff!important;font-size:15px!important}.purchase-section-title span{color:#fff!important;background:#ffffff22!important}
+.purchase-pro-step{background:#edf4ff!important;border:0!important;border-radius:10px!important;margin:5px 0 10px!important;padding:9px 11px!important;color:#174a91!important}.purchase-pro-step b{font-size:14px}.purchase-pro-step small{font-size:11px!important}
+.purchase-pro-form label{font-size:12px!important;color:#193e78!important;font-weight:850!important;margin:7px 2px 4px!important}
+.purchase-pro-form input,.purchase-pro-form select{height:43px!important;min-height:43px!important;border:1px solid #cbd9f0!important;border-radius:11px!important;background:#fbfcff!important;color:#172d5d!important;font-size:14px!important}
+.purchase-pro-form .purchase-search{height:48px!important;border:1px solid #cbd9f0!important;background:#f3f6ff!important;border-radius:13px!important}
+.purchase-fields{grid-template-columns:1fr 1fr!important;gap:8px!important}.purchase-fields>div{min-width:0!important}
+.purchase-selected-product{display:flex;align-items:center;gap:12px;padding:8px 4px 5px;margin:5px 0 2px;min-height:70px;color:#142e65}.purchase-product-thumb{width:68px;height:68px;flex:0 0 68px;border-radius:10px;background:linear-gradient(145deg,#eef3ff,#fff);border:1px solid #d8e2f3;display:grid;place-items:center;font-size:30px}.purchase-selected-product>div:last-child{display:flex;flex-direction:column;gap:5px}.purchase-selected-product b{font-size:15px}.purchase-selected-product small{font-size:11px;color:#657895}
+.purchase-add-line{background:linear-gradient(100deg,#1263d4,#0876e5)!important;color:#fff!important;border-radius:11px!important;font-size:15px!important;padding:13px!important;margin:9px 0!important;box-shadow:0 4px 10px #1263d426}
+.purchase-cart-box{background:#f6f8ff!important;border:1px solid #e0e8f8!important;border-radius:12px!important;padding:8px!important;margin:7px 0 13px!important}.purchase-cart-line{display:flex!important;flex-direction:row!important;align-items:center!important;background:#fff!important;border:1px solid #e3eaf5!important;border-radius:10px!important;padding:9px!important}.purchase-cart-line div{flex:1}.purchase-cart-line button{order:-1;background:#fff1f2!important;color:#d11!important}
+.purchase-cost-preview{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:0!important;padding:8px 3px!important;background:#edfff1!important;border:1px solid #d1f1d8!important;border-radius:13px!important;margin:10px 0!important;color:#19456b!important}.purchase-cost-preview>div{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;gap:5px!important;padding:4px 2px!important;border:0!important;border-left:1px solid #cfe2d4!important;font-size:10px!important;min-width:0}.purchase-cost-preview>div:last-child{border:0!important;margin:0!important;padding:4px 2px!important;color:#0c7a3d!important}.purchase-cost-preview b{font-size:12px!important;overflow-wrap:anywhere;color:#153d69!important}.purchase-cost-preview span{font-size:10px!important;line-height:1.35;color:#355879!important}
+.purchase-save{background:linear-gradient(100deg,#2da66b,#27b779)!important;color:white!important;border:0!important;border-radius:11px!important;box-shadow:0 4px 10px #21945a2b!important;padding:13px!important;font-size:15px!important}
+.purchase-hint{background:#f4f8ff!important;color:#4b6485!important;border:1px solid #e3ebf7!important;font-size:11px!important;line-height:1.6}
+.purchase-history .purchase-section-title{margin:-12px -12px 10px!important;background:#f0f5ff!important;border-bottom:1px solid #e0e9f7!important;border-radius:16px 16px 0 0}.purchase-history .purchase-section-title b{color:#173a79!important}.purchase-history .purchase-section-title button{font-size:10px!important;padding:6px!important}.purchase-history input{height:43px!important;background:#f5f7ff!important;border-radius:11px!important}.purchase-stats{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:3px!important;background:#f5f7fb;border-radius:11px;padding:7px 2px}.purchase-stats>div{border:0!important;border-left:1px solid #d8e0ed!important;border-radius:0!important;background:transparent!important;padding:4px 2px!important;text-align:center}.purchase-stats small{font-size:10px!important;color:#435879!important}.purchase-stats b{font-size:11px!important;color:#122e66!important;overflow-wrap:anywhere}
+@media(max-width:390px){.purchase-page{padding-left:8px!important;padding-right:8px!important}.purchase-fields{gap:6px!important}.purchase-pro-form input,.purchase-pro-form select{font-size:13px!important;padding:6px!important}.purchase-cost-preview b{font-size:10px!important}.purchase-cost-preview span{font-size:9px!important}.purchase-brand b{font-size:17px}}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -2455,12 +2480,12 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  </div>
 </section>
 <section id="purchases" class="hidden purchase-page">
- <div class="purchase-page-head"><div><small>شاهین فروشگاه</small><h3>🚚 پېرود او ګدام ته داخلول</h3><p>نوی مال ثبت کړه او د پېرود پخواني رسیدونه وګوره</p></div><button type="button" class="purchase-add-product" onclick="openProductFromPurchase()">＋ نوی جنس</button></div>
+ <div class="purchase-page-head"><button type="button" class="purchase-home-btn" onclick="show(\'home\')">⌂</button><div class="purchase-brand"><b>شاهین فروشگاه</b><span>پېرود او ګدام ته داخلول</span></div><button type="button" class="purchase-basket-btn" onclick="document.getElementById(\'purchaseCartBox\').scrollIntoView({behavior:\'smooth\',block:\'center\'})">🛒<i id="purchaseCartCount">0</i></button></div>
  <div class="purchase-form panel purchase-pro-form">
   <div class="purchase-section-title"><b>🧾 د پېرود نوی رسید</b><span>څو جنسونه په یوه رسید کې</span></div>
   <div class="purchase-pro-step"><b>۱ · جنسونه رسید ته اضافه کړه</b><small>هر څومره جنسونه چې اخلې، یو په بل پسې یې اضافه کړه</small></div>
   <label>🔎 جنس د نوم یا بارکوډ له مخې ولټوه</label><input class="purchase-search" id="buyProductSearch" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off">
-  <div class="row purchase-fields"><div><label>جنس انتخاب کړه</label><select id="buyProduct"></select></div><div><label>د پېرود واحد</label><select id="buyUnit"></select></div></div>
+  <div class="row purchase-fields"><div><label>جنس انتخاب کړه</label><select id="buyProduct"></select></div><div><label>د پېرود واحد</label><select id="buyUnit"></select></div></div><div id="purchaseSelectedProduct" class="purchase-selected-product"><div class="purchase-product-thumb">📦</div><div><b>جنس انتخاب کړه</b><small>موجودي به دلته ښکاره شي</small></div></div>
   <div class="row purchase-fields"><div><label>مقدار / تعداد</label><input id="buyQty" type="number" min="0.001" step="any" placeholder="مثلاً ۵"></div><div><label>د هر واحد د اخیستلو قیمت (AFN)</label><input id="buyPrice" type="number" min="0.01" step="any" placeholder="مثلاً ۱۵۰۰"></div></div>
   <button type="button" class="purchase-add-line" onclick="addPurchaseCartLine()">＋ دا جنس رسید ته اضافه کړه</button>
   <div id="purchaseCartBox" class="purchase-cart-box"><div class="purchase-cart-empty">تر اوسه رسید ته جنس نه دی اضافه شوی</div></div>
@@ -3613,6 +3638,14 @@ function filterPurchaseProducts(){
  if(!select.value&&list.length)select.value=list[0].id;
  updatePurchaseUnitOptions();
 }
+function renderPurchaseSelectedProduct(){
+ const box=document.getElementById("purchaseSelectedProduct");if(!box)return;
+ const p=db.products.find(x=>String(x.id)===String(value("buyProduct")));
+ if(!p){box.innerHTML='<div class="purchase-product-thumb">📦</div><div><b>جنس انتخاب کړه</b><small>موجودي به دلته ښکاره شي</small></div>';return;}
+ const image=p.image||p.photo||p.imageUrl||p.photoUrl||"";
+ const thumb=image?'<img src="'+safe(image)+'" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:9px">':"📦";
+ box.innerHTML='<div class="purchase-product-thumb">'+thumb+'</div><div><b>'+safe(p.name)+'</b><small>موجودي: '+safe(p.qty??0)+' '+safe(unitLabel(p.unit||"واحد"))+' · کوډ: '+safe(p.code||"—")+'</small></div>';
+}
 function updatePurchaseUnitOptions(){
  const p=db.products.find(x=>String(x.id)===String(value("buyProduct")));
  const unit=document.getElementById("buyUnit");if(!unit)return;
@@ -3620,7 +3653,7 @@ function updatePurchaseUnitOptions(){
  const choices=getProductUnitChoices(p),old=unit.value;
  unit.innerHTML=choices.map(x=>`<option value="${safe(x.name)}">${safe(unitLabel(x.name))}</option>`).join("");
  unit.value=choices.some(x=>x.name===old)?old:(p.tradeUnit||p.unit);
- updatePurchasePriceForUnit();
+ updatePurchasePriceForUnit();renderPurchaseSelectedProduct();
 }
 function updatePurchasePriceForUnit(){
  const p=db.products.find(x=>String(x.id)===String(value("buyProduct")));if(!p)return;
@@ -3642,7 +3675,7 @@ function purchaseCartTotals(){
 function renderPurchaseCart(){
  const box=document.getElementById("purchaseCartBox");if(!box)return;
  const t=purchaseCartTotals();
- box.innerHTML=purchaseCart.length?purchaseCart.map((x,i)=>'<div class="purchase-cart-line"><div><b>'+safe(x.name)+'</b><small>'+x.qty+' '+safe(unitLabel(x.unit))+' × '+money(x.price)+' · د جنس مجموعه '+money(x.qty*x.price)+'</small></div><button type="button" onclick="removePurchaseCartLine('+i+')" aria-label="حذف جنس">✕</button></div>').join(""):'<div class="purchase-cart-empty">تر اوسه رسید ته جنس نه دی اضافه شوی</div>';
+ const count=document.getElementById("purchaseCartCount");if(count)count.textContent=String(purchaseCart.length);\n box.innerHTML=purchaseCart.length?purchaseCart.map((x,i)=>'<div class="purchase-cart-line"><div><b>'+safe(x.name)+'</b><small>'+x.qty+' '+safe(unitLabel(x.unit))+' × '+money(x.price)+' · د جنس مجموعه '+money(x.qty*x.price)+'</small></div><button type="button" onclick="removePurchaseCartLine('+i+')" aria-label="حذف جنس">✕</button></div>').join(""):'<div class="purchase-cart-empty">تر اوسه رسید ته جنس نه دی اضافه شوی</div>';
  const preview=document.getElementById("purchaseCostPreview");
  if(preview)preview.innerHTML='<div><span>د جنسونو قیمت</span><b>'+money(t.goods)+'</b></div><div><span>مصارف</span><b>'+money(t.extra)+'</b></div><div><span>ټول رسید</span><b>'+money(t.total)+'</b></div><div><span>ورکړل شوې پیسې</span><b>'+money(t.paid)+'</b></div><div><span>د شرکت پاتې پور</span><b>'+money(t.debt)+'</b></div>';
 }
