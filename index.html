@@ -5882,4 +5882,32 @@ body.app-keyboard-open nav{display:none!important}
  document.addEventListener("focusout",function(){setTimeout(update,180);},true);
 })();
 </script>
+<style id="SHAHEEN_SALE_PRODUCT_SEARCH_NO_ZOOM_V1">
+/* د جنس او مشتری د لټون فونټ یو شان 16px؛ iPhone به د جنس په خانه کې zoom نه کوي */
+#sales #saleProductSearch,#sales #saleCustomer{font-size:16px!important;min-height:40px!important;height:40px!important;max-height:40px!important;line-height:1.25!important;transform:none!important;zoom:1!important;-webkit-text-size-adjust:100%!important}
+#sales .sale-page{transform:none!important;zoom:1!important}
+</style>
+<script id="SHAHEEN_SALE_PRODUCT_SEARCH_KEEP_VIEWPORT_V1">
+(function(){
+ document.addEventListener("focusin",function(e){
+  var f=e.target;
+  if(!f||f.id!=="saleProductSearch")return;
+  requestAnimationFrame(function(){
+   if(!document.body.classList.contains("sale-modal-open"))return;
+   var panel=document.querySelector("#sales>.sale-page");
+   var y=window.__salePageLockY||0;
+   window.scrollTo(0,y);
+   document.documentElement.scrollTop=y;
+   document.body.scrollTop=0;
+   if(panel){
+    var vv=window.visualViewport;
+    var top=vv?vv.offsetTop:0;
+    var bottom=vv?vv.offsetTop+vv.height:window.innerHeight;
+    var rect=f.getBoundingClientRect();
+    if(rect.bottom>bottom-12)panel.scrollTop+=rect.bottom-bottom+16;
+   }
+  });
+ },true);
+})();
+</script>
 </html>
