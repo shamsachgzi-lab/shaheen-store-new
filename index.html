@@ -3312,18 +3312,41 @@ function updateSaleCartPrices(){
 function updateSaleCartLine(index,field,raw){
  const x=saleCart[index];if(!x)return;
  const p=db.products.find(z=>z.id===x.productId);if(!p)return;
+ const old={qty:x.qty,unit:x.unit,price:x.price,factor:x.factor,stockQty:x.stockQty};
  if(field==="unit"){
   const nextFactor=saleFactorForUnit(p,raw);
   const baseUnitPrice=x.price/(Number(x.factor)||1);
   x.price=baseUnitPrice*nextFactor;x.unit=raw;x.factor=nextFactor;
  }else{
-  const n=Number(raw);if(!Number.isFinite(n)||n<0||(field==="qty"&&n<=0))return renderSaleCart();
+  const n=Number(raw);
+  if(!Number.isFinite(n)||n<0||(field==="qty"&&n<=0)){
+   const input=document.querySelector('#saleCartList [data-sale-index="'+index+'"][data-sale-field="'+field+'"]');
+   if(input)input.value=String(old[field]);
+   return;
+  }
   x[field]=n;
  }
  x.stockQty=x.qty*x.factor;
  const reserved=saleCart.filter(z=>z.productId===x.productId).reduce((a,z)=>a+z.stockQty,0);
- if(reserved>Number(p.qty)){alert("د "+x.productName+" موجودي بسنه نه کوي");return renderSaleCart();}
- renderSaleCart();updateSalePreview();
+ if(reserved>Number(p.qty)){
+  Object.assign(x,old);
+  const input=document.querySelector('#saleCartList [data-sale-index="'+index+'"][data-sale-field="'+field+'"]');
+  if(input)input.value=String(old[field]);
+  alert("د "+x.productName+" موجودي بسنه نه کوي");
+  return;
+ }
+ // یوازې د همدغه جنس د مجموعې برخه تازه کړه؛ ټول بیل بیا نه رسموو،
+ // نو د iPhone کیبورډ، فوکس او د پاڼې سکرول پر خپل ځای پاتې کېږي.
+ const card=document.querySelectorAll('#saleCartList .sale-line-card')[index];
+ if(card){
+  const total=card.querySelector('.sale-line-total b');
+  if(total)total.textContent=money(x.qty*x.price);
+  if(field==="unit"){
+   const priceInput=card.querySelector('[data-sale-field="price"]');
+   if(priceInput)priceInput.value=String(x.price);
+  }
+ }
+ updateSalePreview();
 }
 function removeSaleCartItem(index){saleCart.splice(index,1);renderSaleCart();updateSalePreview();}
 function renderSaleCart(){
