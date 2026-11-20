@@ -5388,6 +5388,7 @@ body.sale-modal-open{position:fixed!important;top:var(--sale-lock-top,0px)!impor
 </style>
 <script id="SHAHEEN_SALE_FIXED_KEYBOARD_VIEWPORT_V13">
 (function(){
+ // یوازې د viewport اندازه ثبتوو؛ د کیبورډ پرانیستل باید د خرڅلاو بیل په خپله ونه سکرولوي.
  function updateSaleViewport(){
   if(!document.body.classList.contains("sale-modal-open"))return;
   var vv=window.visualViewport;
@@ -5402,20 +5403,6 @@ body.sale-modal-open{position:fixed!important;top:var(--sale-lock-top,0px)!impor
   window.visualViewport.addEventListener("scroll",updateSaleViewport,{passive:true});
  }
  window.addEventListener("resize",updateSaleViewport,{passive:true});
- document.addEventListener("focusin",function(e){
-  var field=e.target;
-  if(!field||!field.matches||!field.matches("#sales input,#sales select,#sales textarea"))return;
-  requestAnimationFrame(function(){
-   if(!document.body.classList.contains("sale-modal-open"))return;
-   var panel=document.querySelector("#sales>.sale-page");
-   if(!panel)return;
-   var rect=field.getBoundingClientRect();
-   var visibleBottom=(window.visualViewport?window.visualViewport.height+window.visualViewport.offsetTop:window.innerHeight)-12;
-   var visibleTop=window.visualViewport?window.visualViewport.offsetTop+12:12;
-   if(rect.bottom>visibleBottom)panel.scrollTop+=rect.bottom-visibleBottom;
-   else if(rect.top<visibleTop)panel.scrollTop-=visibleTop-rect.top;
-  });
- },true);
 })();
 </script>
 <style id="shaheen-sales-modern-clean-v1">
