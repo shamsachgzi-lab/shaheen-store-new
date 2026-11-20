@@ -2904,15 +2904,30 @@ function __unlockSalePage(){
 }
 function show(id,btn){
  const wasSales=document.body.classList.contains("sale-modal-open");
+ const wasAppPage=document.body.classList.contains("app-page-open");
  const previousScroll=window.scrollY||document.documentElement.scrollTop||0;
- if(id==="sales")__lockSalePage();
- else if(wasSales)__unlockSalePage();
+ if(id==="sales"){
+  document.documentElement.classList.remove("app-page-open");
+  document.body.classList.remove("app-page-open");
+  document.querySelectorAll("main section.app-page-fixed").forEach(s=>s.classList.remove("app-page-fixed"));
+  __lockSalePage();
+ }else{
+  if(wasSales)__unlockSalePage();
+  if(id==="home"){
+   document.documentElement.classList.remove("app-page-open");
+   document.body.classList.remove("app-page-open");
+  }else{
+   document.documentElement.classList.add("app-page-open");
+   document.body.classList.add("app-page-open");
+  }
+ }
  document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
  const active=document.getElementById(id);active?.classList.remove("hidden");
+ if(active&&id!=="home"&&id!=="sales")active.classList.add("app-page-fixed");
  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
  if(btn)btn.classList.add("active");
  refreshAll();
- if(id!=="sales"&&!wasSales)requestAnimationFrame(()=>window.scrollTo(0,previousScroll));
+ if(id==="home"&&(wasAppPage||wasSales))requestAnimationFrame(()=>window.scrollTo(0,previousScroll));
 }
 function toggleLang(){
  alert("دا نسخه یوازې په پښتو ژبه ده.");
@@ -3620,7 +3635,81 @@ function printSale(id){
 
 
 
-  '</body>\n</html>');
+  '
+<style id="SHAHEEN_ALL_PAGES_FIXED_FORM_V1">
+/* ټولې داخلي برخې د فروش د کړکۍ په څېر: ثابت چوکاټ، سکرول یوازې د فعالې برخې دننه */
+html.app-page-open,body.app-page-open{
+ height:100%!important;
+ overflow:hidden!important;
+ overscroll-behavior:none!important;
+}
+body.app-page-open{touch-action:pan-x pan-y!important}
+main section.app-page-fixed:not(.hidden){
+ position:fixed!important;
+ left:0!important;
+ right:0!important;
+ top:var(--app-page-top,150px)!important;
+ height:var(--app-page-height,calc(100dvh - 150px))!important;
+ max-height:var(--app-page-height,calc(100dvh - 150px))!important;
+ min-height:0!important;
+ margin:0!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ overscroll-behavior:contain!important;
+ -webkit-overflow-scrolling:touch!important;
+ touch-action:pan-y!important;
+ background:#fff!important;
+ border-radius:24px 24px 0 0!important;
+ padding:14px 10px calc(24px + env(safe-area-inset-bottom))!important;
+ z-index:20!important;
+ box-sizing:border-box!important;
+}
+main section.app-page-fixed:not(.hidden) input,
+main section.app-page-fixed:not(.hidden) textarea,
+main section.app-page-fixed:not(.hidden) select{
+ font-size:16px!important;
+ scroll-margin:14px!important;
+}
+main section.app-page-fixed:not(.hidden) *{scroll-behavior:auto!important}
+</style>
+<script id="SHAHEEN_ALL_PAGES_KEYBOARD_VIEWPORT_V1">
+(function(){
+ function updatePageViewport(){
+  const body=document.body;
+  if(!body.classList.contains("app-page-open"))return;
+  const header=document.querySelector("header.brand-header,header");
+  const headerBottom=header?Math.max(0,header.getBoundingClientRect().bottom):0;
+  const vv=window.visualViewport;
+  const visibleBottom=vv?(vv.height+vv.offsetTop):window.innerHeight;
+  const top=Math.min(headerBottom,visibleBottom);
+  const height=Math.max(120,visibleBottom-top);
+  document.documentElement.style.setProperty("--app-page-top",top+"px");
+  document.documentElement.style.setProperty("--app-page-height",height+"px");
+ }
+ updatePageViewport();
+ window.addEventListener("resize",updatePageViewport,{passive:true});
+ if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",updatePageViewport,{passive:true});
+  window.visualViewport.addEventListener("scroll",updatePageViewport,{passive:true});
+ }
+ document.addEventListener("focusin",function(e){
+  const field=e.target;
+  if(!field||!field.matches||!field.matches("input,textarea,select,[contenteditable=true]"))return;
+  const page=field.closest("main section.app-page-fixed");
+  if(!page)return;
+  requestAnimationFrame(function(){
+   updatePageViewport();
+   const r=field.getBoundingClientRect();
+   const v=window.visualViewport;
+   const bottom=v?(v.height+v.offsetTop):window.innerHeight;
+   const top=v?v.offsetTop:0;
+   if(r.bottom>bottom-18)page.scrollTop+=r.bottom-bottom+28;
+   else if(r.top<top+12)page.scrollTop-=top+12-r.top;
+  });
+ },true);
+})();
+</script>
+</body>\n</html>');
  w.document.close();w.focus();setTimeout(()=>w.print(),350);
 }
 function filterPurchaseProducts(){
@@ -5278,61 +5367,7 @@ section:not(.hidden){scroll-margin-top:10px}
 }
 
 </style>
-<script id="SHAHEEN_IOS_KEYBOARD_PAGE_STABILITY_V3">
-/* د فورمو پر مهال د اصلي پاڼې سکرول ثابت ساتي؛ د فروش او رسید د سمون ځانګړي کړکۍ نه بدلوي */
-(function(){
- let activeField=null,lockedY=0,touchY=null,lastTouch=0,restoring=false;
- const fieldSelector='input,textarea,select,[contenteditable="true"]';
- function isSpecial(field){
-  return !!(field&&field.closest&&(field.closest("#sales")||field.closest("#invoiceEditModal")));
- }
- function restorePage(){
-  if(!activeField||isSpecial(activeField)||restoring)return;
-  const current=window.scrollY||window.pageYOffset||document.documentElement.scrollTop||0;
-  if(Math.abs(current-lockedY)<2)return;
-  restoring=true;
-  window.scrollTo(0,lockedY);
-  requestAnimationFrame(function(){restoring=false;});
- }
- document.addEventListener("touchstart",function(e){
-  const t=e.target;
-  if(t&&t.closest&&t.closest(fieldSelector)){
-   touchY=window.scrollY||window.pageYOffset||document.documentElement.scrollTop||0;
-   lastTouch=Date.now();
-  }
- },{capture:true,passive:true});
- document.addEventListener("focusin",function(e){
-  const t=e.target;
-  if(!t||!t.matches||!t.matches(fieldSelector))return;
-  if(isSpecial(t)){activeField=null;return;}
-  activeField=t;
-  lockedY=(touchY!==null&&Date.now()-lastTouch<1500)?touchY:(window.scrollY||window.pageYOffset||document.documentElement.scrollTop||0);
-  touchY=null;
-  requestAnimationFrame(restorePage);
-  setTimeout(restorePage,80);
-  setTimeout(restorePage,220);
- },true);
- document.addEventListener("focusout",function(e){
-  if(e.target===activeField){
-   setTimeout(function(){
-    const next=document.activeElement;
-    if(!next||!next.matches||!next.matches(fieldSelector)){
-     activeField=null;touchY=null;
-    }
-   },80);
-  }
- },true);
- window.addEventListener("scroll",restorePage,{passive:true});
- if(window.visualViewport){
-  window.visualViewport.addEventListener("resize",function(){
-   if(activeField)requestAnimationFrame(restorePage);
-  },{passive:true});
-  window.visualViewport.addEventListener("scroll",function(){
-   if(activeField)requestAnimationFrame(restorePage);
-  },{passive:true});
- }
-})();
-</script>
+
 <style id="SHAHEEN_IOS_SEARCH_AND_SCROLL_FIX_V2">
 /* کوچنۍ خانې، خو 16px متن ساتل کېږي څو iPhone په فوکس کې پاڼه زوم نه کړي */
 #productSearch,#lowStockSearch,#saleCustomer,#saleProductSearch,#buyProductSearch,
