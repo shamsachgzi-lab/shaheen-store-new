@@ -5957,4 +5957,21 @@ html body main>section#purchases.purchase-page.hidden{display:none!important;vis
 }
 </style>
 
+<style id="SHAHEEN_SALE_BILL_STABLE_VIEWPORT_V14">
+/* د خرڅلاو بیل د کیبورډ پرانیستل/بندېدو پر مهال له visualViewport سره نه پورته او ښکته کېږي */
+#sales.sale-overlay:not(.hidden){
+ position:fixed!important;inset:0!important;top:0!important;bottom:0!important;
+ height:100vh!important;max-height:100vh!important;min-height:100vh!important;
+ overflow:hidden!important;transform:none!important;
+}
+#sales.sale-overlay:not(.hidden)>.sale-page{
+ position:absolute!important;inset:0!important;top:0!important;bottom:0!important;
+ height:100vh!important;max-height:100vh!important;min-height:100vh!important;
+ overflow-x:hidden!important;overflow-y:auto!important;
+ -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+ scroll-behavior:auto!important;overflow-anchor:none!important;
+}
+#sales #saleCartList,#sales #saleCartList *{scroll-behavior:auto!important}
+</style>
+
 </html>
