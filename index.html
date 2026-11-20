@@ -3629,87 +3629,8 @@ function printSale(id){
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
- note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main>'+
+ note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main></body></html>');
 
-
-
-
-
-  '
-<style id="SHAHEEN_ALL_PAGES_FIXED_FORM_V1">
-/* ټولې داخلي برخې د فروش د کړکۍ په څېر: ثابت چوکاټ، سکرول یوازې د فعالې برخې دننه */
-html.app-page-open,body.app-page-open{
- height:100%!important;
- overflow:hidden!important;
- overscroll-behavior:none!important;
-}
-body.app-page-open{touch-action:pan-x pan-y!important}
-main section.app-page-fixed:not(.hidden){
- position:fixed!important;
- left:0!important;
- right:0!important;
- top:var(--app-page-top,150px)!important;
- height:var(--app-page-height,calc(100dvh - 150px))!important;
- max-height:var(--app-page-height,calc(100dvh - 150px))!important;
- min-height:0!important;
- margin:0!important;
- overflow-x:hidden!important;
- overflow-y:auto!important;
- overscroll-behavior:contain!important;
- -webkit-overflow-scrolling:touch!important;
- touch-action:pan-y!important;
- background:#fff!important;
- border-radius:24px 24px 0 0!important;
- padding:14px 10px calc(24px + env(safe-area-inset-bottom))!important;
- z-index:20!important;
- box-sizing:border-box!important;
-}
-main section.app-page-fixed:not(.hidden) input,
-main section.app-page-fixed:not(.hidden) textarea,
-main section.app-page-fixed:not(.hidden) select{
- font-size:16px!important;
- scroll-margin:14px!important;
-}
-main section.app-page-fixed:not(.hidden) *{scroll-behavior:auto!important}
-</style>
-<script id="SHAHEEN_ALL_PAGES_KEYBOARD_VIEWPORT_V1">
-(function(){
- function updatePageViewport(){
-  const body=document.body;
-  if(!body.classList.contains("app-page-open"))return;
-  const header=document.querySelector("header.brand-header,header");
-  const headerBottom=header?Math.max(0,header.getBoundingClientRect().bottom):0;
-  const vv=window.visualViewport;
-  const visibleBottom=vv?(vv.height+vv.offsetTop):window.innerHeight;
-  const top=Math.min(headerBottom,visibleBottom);
-  const height=Math.max(120,visibleBottom-top);
-  document.documentElement.style.setProperty("--app-page-top",top+"px");
-  document.documentElement.style.setProperty("--app-page-height",height+"px");
- }
- updatePageViewport();
- window.addEventListener("resize",updatePageViewport,{passive:true});
- if(window.visualViewport){
-  window.visualViewport.addEventListener("resize",updatePageViewport,{passive:true});
-  window.visualViewport.addEventListener("scroll",updatePageViewport,{passive:true});
- }
- document.addEventListener("focusin",function(e){
-  const field=e.target;
-  if(!field||!field.matches||!field.matches("input,textarea,select,[contenteditable=true]"))return;
-  const page=field.closest("main section.app-page-fixed");
-  if(!page)return;
-  requestAnimationFrame(function(){
-   updatePageViewport();
-   const r=field.getBoundingClientRect();
-   const v=window.visualViewport;
-   const bottom=v?(v.height+v.offsetTop):window.innerHeight;
-   const top=v?v.offsetTop:0;
-   if(r.bottom>bottom-18)page.scrollTop+=r.bottom-bottom+28;
-   else if(r.top<top+12)page.scrollTop-=top+12-r.top;
-  });
- },true);
-})();
-</script>
-</body>\n</html>');
  w.document.close();w.focus();setTimeout(()=>w.print(),350);
 }
 function filterPurchaseProducts(){
