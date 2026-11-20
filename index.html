@@ -3637,7 +3637,53 @@ function printSale(id){
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
- note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main></body></html>');
+ note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main></body>
+<script id="SHAHEEN_SALE_MATCH_CUSTOMER_SEARCH_STABILITY_V15">
+(function(){
+ var panel=null,lockedTop=0,field=null,raf=0;
+ function getPanel(){return document.querySelector("#sales.sale-overlay:not(.hidden)>.sale-page");}
+ function inSaleField(el){return !!(el&&el.matches&&el.matches("#sales input,#sales textarea,#sales select"));}
+ function hold(){
+  if(!field||!panel||!document.body.classList.contains("sale-modal-open"))return;
+  if(panel.scrollTop!==lockedTop)panel.scrollTop=lockedTop;
+  if(window.scrollY!==0)window.scrollTo(0,0);
+ }
+ function schedule(){
+  if(raf)return;
+  raf=requestAnimationFrame(function(){raf=0;hold();});
+ }
+ document.addEventListener("touchstart",function(e){
+  if(!inSaleField(e.target))return;
+  panel=getPanel();
+  if(panel)lockedTop=panel.scrollTop;
+ },{capture:true,passive:true});
+ document.addEventListener("focusin",function(e){
+  if(!inSaleField(e.target))return;
+  field=e.target;
+  panel=getPanel();
+  if(panel){
+   // د ټچ له مخه ثبت شوی سکرول وساته؛ که مستقیم فوکس وي اوسنی موقعیت واخله.
+   if(!Number.isFinite(lockedTop))lockedTop=panel.scrollTop;
+   schedule();
+   setTimeout(schedule,50);
+   setTimeout(schedule,180);
+   setTimeout(schedule,350);
+  }
+ },true);
+ document.addEventListener("focusout",function(e){
+  if(e.target!==field)return;
+  setTimeout(function(){
+   if(!inSaleField(document.activeElement)){field=null;panel=null;}
+  },100);
+ },true);
+ window.addEventListener("scroll",schedule,{passive:true});
+ if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",schedule,{passive:true});
+  window.visualViewport.addEventListener("scroll",schedule,{passive:true});
+ }
+})();
+</script>
+</html>');
 
  w.document.close();w.focus();setTimeout(()=>w.print(),350);
 }
