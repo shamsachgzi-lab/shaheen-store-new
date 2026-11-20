@@ -5851,6 +5851,26 @@ body.app-keyboard-open nav{display:none!important}
   document.documentElement.style.setProperty("--app-page-bottom",Math.max(0,window.innerHeight-bottom)+"px");
   document.body.classList.toggle("app-keyboard-open",keyboard);
  }
+ function keepSaleProductSearchInside(e){
+  var field=e.target;
+  if(!field||field.id!=="saleProductSearch")return;
+  requestAnimationFrame(function(){
+   update();
+   window.scrollTo(0,savedScroll);
+   var page=field.closest("#sales .sale-page");
+   if(page){
+    var r=field.getBoundingClientRect(),vv=window.visualViewport,top=vv?vv.offsetTop:0,bottom=vv?vv.offsetTop+vv.height:window.innerHeight;
+    if(r.bottom>bottom-18)page.scrollTop+=r.bottom-bottom+26;
+    else if(r.top<top+12)page.scrollTop-=top+12-r.top;
+   }
+  });
+ }
+ document.addEventListener("touchstart",function(e){
+  if(e.target&&e.target.id==="saleProductSearch")savedScroll=window.scrollY||document.documentElement.scrollTop||0;
+ },{capture:true,passive:true});
+ document.addEventListener("pointerdown",function(e){
+  if(e.target&&e.target.id==="saleProductSearch")savedScroll=window.scrollY||document.documentElement.scrollTop||0;
+ },true);
  function keepProductSearchInside(e){
   var field=e.target;
   if(!field||field.id!=="productSearch")return;
@@ -5872,7 +5892,7 @@ body.app-keyboard-open nav{display:none!important}
  document.addEventListener("focusin",function(e){
   var f=e.target;
   if(!f||!f.matches||!f.matches("input,textarea,select,[contenteditable=true]"))return;
-  if(f.id==="productSearch"){keepProductSearchInside(e);return;}
+  if(f.id==="saleProductSearch"){keepSaleProductSearchInside(e);return;}\n  if(f.id==="productSearch"){keepProductSearchInside(e);return;}
   var p=f.closest("main section.app-page-fixed");if(!p)return;
   requestAnimationFrame(function(){
    update();var r=f.getBoundingClientRect(),v=window.visualViewport,t=v?v.offsetTop:0,b=v?v.offsetTop+v.height:window.innerHeight;
