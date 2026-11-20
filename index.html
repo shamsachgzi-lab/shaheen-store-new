@@ -5278,29 +5278,59 @@ section:not(.hidden){scroll-margin-top:10px}
 }
 
 </style>
-<script>
-/* په آیفون کې د کیبورډ د خلاصېدو پر مهال د پاڼې ناڅاپي پورته کېدل مه پرېږده */
+<script id="SHAHEEN_IOS_KEYBOARD_PAGE_STABILITY_V3">
+/* د فورمو پر مهال د اصلي پاڼې سکرول ثابت ساتي؛ د فروش او رسید د سمون ځانګړي کړکۍ نه بدلوي */
 (function(){
- let touchScrollY=null,lastTouchAt=0;
- function rememberTouch(e){
-  const t=e.target;
-  if(t&&t.closest&&t.closest('input,select,textarea,[contenteditable="true"]')){
-   touchScrollY=window.scrollY;
-   lastTouchAt=Date.now();
-  }
+ let activeField=null,lockedY=0,touchY=null,lastTouch=0,restoring=false;
+ const fieldSelector='input,textarea,select,[contenteditable="true"]';
+ function isSpecial(field){
+  return !!(field&&field.closest&&(field.closest("#sales")||field.closest("#invoiceEditModal")));
  }
- document.addEventListener("touchstart",rememberTouch,{capture:true,passive:true});
- document.addEventListener("pointerdown",rememberTouch,true);
+ function restorePage(){
+  if(!activeField||isSpecial(activeField)||restoring)return;
+  const current=window.scrollY||window.pageYOffset||document.documentElement.scrollTop||0;
+  if(Math.abs(current-lockedY)<2)return;
+  restoring=true;
+  window.scrollTo(0,lockedY);
+  requestAnimationFrame(function(){restoring=false;});
+ }
+ document.addEventListener("touchstart",function(e){
+  const t=e.target;
+  if(t&&t.closest&&t.closest(fieldSelector)){
+   touchY=window.scrollY||window.pageYOffset||document.documentElement.scrollTop||0;
+   lastTouch=Date.now();
+  }
+ },{capture:true,passive:true});
  document.addEventListener("focusin",function(e){
   const t=e.target;
-  if(!t||!t.matches||!t.matches('input,select,textarea,[contenteditable="true"]'))return;
-  if(t.closest&&t.closest("#sales"))return;
-  const y=(touchScrollY!==null&&Date.now()-lastTouchAt<1200)?touchScrollY:window.scrollY;
-  touchScrollY=null;
-  requestAnimationFrame(function(){window.scrollTo(0,y);});
-  setTimeout(function(){window.scrollTo(0,y);},80);
-  setTimeout(function(){window.scrollTo(0,y);},220);
+  if(!t||!t.matches||!t.matches(fieldSelector))return;
+  if(isSpecial(t)){activeField=null;return;}
+  activeField=t;
+  lockedY=(touchY!==null&&Date.now()-lastTouch<1500)?touchY:(window.scrollY||window.pageYOffset||document.documentElement.scrollTop||0);
+  touchY=null;
+  requestAnimationFrame(restorePage);
+  setTimeout(restorePage,80);
+  setTimeout(restorePage,220);
  },true);
+ document.addEventListener("focusout",function(e){
+  if(e.target===activeField){
+   setTimeout(function(){
+    const next=document.activeElement;
+    if(!next||!next.matches||!next.matches(fieldSelector)){
+     activeField=null;touchY=null;
+    }
+   },80);
+  }
+ },true);
+ window.addEventListener("scroll",restorePage,{passive:true});
+ if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",function(){
+   if(activeField)requestAnimationFrame(restorePage);
+  },{passive:true});
+  window.visualViewport.addEventListener("scroll",function(){
+   if(activeField)requestAnimationFrame(restorePage);
+  },{passive:true});
+ }
 })();
 </script>
 <style id="SHAHEEN_IOS_SEARCH_AND_SCROLL_FIX_V2">
