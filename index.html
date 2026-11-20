@@ -5844,59 +5844,6 @@ nav button.active{background:linear-gradient(145deg,#eaf3ff,#f4f8ff)!important;c
 /* Highest-specificity visibility guard: never show purchase tab on home/stock tabs. */
 html body main>section#purchases.purchase-page.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
 
-/* SHAHEEN APP-WIDE STABLE WORKSPACE V1
-   Fixed shop header and bottom navigation; each page scrolls inside its own viewport.
-   Search fields remain pinned while the page content scrolls. */
-:root{--shaheen-header-h:88px;--shaheen-nav-h:70px;--shaheen-vh:100dvh}
-html,body{height:100%;min-height:100%;overflow:hidden!important;overscroll-behavior:none!important}
-body{padding-bottom:0!important}
-body>header.brand-header{position:fixed!important;top:0!important;left:0!important;right:0!important;width:100%!important;z-index:100!important;margin:0!important;border-radius:0 0 16px 16px!important}
-body>main{
- position:fixed!important;top:var(--shaheen-header-h)!important;
- bottom:var(--shaheen-nav-h)!important;left:0!important;right:0!important;
- width:100%!important;max-width:100%!important;height:auto!important;
- margin:0 auto!important;padding:12px max(11px,calc((100vw - 950px)/2 + 14px)) 22px!important;
- overflow-x:hidden!important;overflow-y:auto!important;
- -webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;
- touch-action:pan-y!important;scrollbar-width:thin;
-}
-body>main>section:not(.hidden){min-height:100%;width:100%;overflow:visible!important}
-body>nav{
- position:fixed!important;left:0!important;right:0!important;bottom:0!important;
- z-index:120!important;min-height:var(--shaheen-nav-h)!important;
- padding-bottom:calc(8px + env(safe-area-inset-bottom))!important;
-}
-body>main>section input[type="search"],
-body>main>section #productSearch,
-body>main>section #lowStockSearch,
-body>main>section #saleCustomer,
-body>main>section #saleProductSearch,
-body>main>section #buyProductSearch,
-body>main>section #purchasesSearch,
-body>main>section #customerSearch,
-body>main>section #supplierSearch,
-body>main>section #eProductSearch,
-body>main>section #expenseSearch,
-body>main>section #editInvoiceProductSearch,
-body>main>section #globalSearch{
- position:sticky!important;top:0!important;z-index:30!important;
- background:#fff!important;box-shadow:0 3px 9px rgba(25,55,90,.10)!important;
- scroll-margin-top:5px!important;
-}
-body>main>section .product-list-panel,
-body>main>section .panel:has(> #customersList),
-body>main>section .supplier-list-panel{overflow:visible!important}
-body>main>section input:focus,
-body>main>section textarea:focus,
-body>main>section select:focus{scroll-margin-top:12px!important}
-@media(max-width:600px){
- :root{--shaheen-nav-h:calc(62px + env(safe-area-inset-bottom))}
- body>header.brand-header{padding-top:calc(10px + env(safe-area-inset-top))!important;padding-bottom:11px!important}
- body>main{padding:10px 10px 18px!important}
-}
-@media(min-width:700px){
- body>main{padding:18px max(24px,calc((100vw - 950px)/2 + 20px)) 28px!important}
-}
 </style>
 
 
