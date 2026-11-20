@@ -5909,7 +5909,23 @@ nav button.active{background:linear-gradient(145deg,#eaf3ff,#f4f8ff)!important;c
 /* Highest-specificity visibility guard: never show purchase tab on home/stock tabs. */
 html body main>section#purchases.purchase-page.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
 
+
+/* SHAHEEN_ALL_PAGES_FIXED_FORM_ACTIVE_V2 */
+html.app-page-open,body.app-page-open{height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
+body.app-page-open{position:relative!important;touch-action:pan-x pan-y!important}
+main section.app-page-fixed:not(.hidden){position:fixed!important;left:0!important;right:0!important;top:var(--app-page-top,130px)!important;height:var(--app-page-height,calc(100dvh - 210px))!important;max-height:var(--app-page-height,calc(100dvh - 210px))!important;min-height:0!important;margin:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;background:#fff!important;border-radius:20px 20px 0 0!important;padding:12px 10px calc(86px + env(safe-area-inset-bottom))!important;z-index:9!important;box-sizing:border-box!important}
+main section.app-page-fixed:not(.hidden) input,main section.app-page-fixed:not(.hidden) textarea,main section.app-page-fixed:not(.hidden) select{font-size:16px!important;scroll-margin:14px!important}
+main section.app-page-fixed:not(.hidden) *{scroll-behavior:auto!important}
+@media(min-width:700px){html.app-page-open,body.app-page-open{height:auto!important;overflow:auto!important}main section.app-page-fixed:not(.hidden){position:static!important;height:auto!important;max-height:none!important;overflow:visible!important;border-radius:0!important;padding:14px!important}}
 </style>
 
 
+
+<script id="SHAHEEN_ALL_PAGES_FIXED_FORM_ACTIVE_V2">
+(function(){
+ function update(){if(!document.body.classList.contains("app-page-open"))return;var h=document.querySelector("header.brand-header,body>header,header"),v=window.visualViewport,topV=v?Math.max(0,v.offsetTop):0,bottom=v?v.offsetTop+v.height:window.innerHeight,headerBottom=h?h.getBoundingClientRect().bottom:120,top=Math.max(topV,Math.min(headerBottom,bottom-120)),n=document.querySelector("body>nav,nav"),nh=n?n.getBoundingClientRect().height:72,height=Math.max(120,bottom-top-nh);document.documentElement.style.setProperty("--app-page-top",top+"px");document.documentElement.style.setProperty("--app-page-height",height+"px");}
+ update();window.addEventListener("resize",update,{passive:true});if(window.visualViewport){window.visualViewport.addEventListener("resize",update,{passive:true});window.visualViewport.addEventListener("scroll",update,{passive:true});}
+ document.addEventListener("focusin",function(e){var f=e.target;if(!f||!f.matches||!f.matches("input,textarea,select,[contenteditable=true]"))return;var p=f.closest("main section.app-page-fixed");if(!p)return;requestAnimationFrame(function(){update();var r=f.getBoundingClientRect(),v=window.visualViewport,t=v?v.offsetTop:0,b=v?v.offsetTop+v.height:window.innerHeight;if(r.bottom>b-24)p.scrollTop+=r.bottom-b+32;else if(r.top<t+12)p.scrollTop-=t+12-r.top;});},true);
+})();
+</script>
 </html>
