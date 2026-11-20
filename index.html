@@ -5907,3 +5907,73 @@ html body main>section#purchases.purchase-page.hidden{display:none!important;vis
 <!-- SHAHEEN_SALE_PRODUCT_SEARCH_SMALL_V1 -->
 
 </html>
+
+/* SHAHEEN_BILL_ITEMS_COMPACT_MODERN_V1
+   Compact modern layout for each product row inside the sales bill.
+   Visual-only CSS: no records, calculations, or storage are changed. */
+#sales #saleCartList .sale-line-card{
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:11px!important;
+  padding:8px 9px!important;
+  margin:6px 0!important;
+  box-shadow:0 1px 3px rgba(15,23,42,.045)!important;
+}
+#sales #saleCartList .sale-line-head{
+  margin:0 0 6px!important;
+  gap:6px!important;
+  min-height:25px;
+}
+#sales #saleCartList .sale-line-head b,
+#sales #saleCartList .sale-line-head strong{
+  font-size:13px!important;
+  line-height:1.35!important;
+  color:#1e293b!important;
+}
+#sales #saleCartList .sale-line-fields{
+  gap:6px!important;
+  margin:0!important;
+}
+#sales #saleCartList .sale-line-fields label{
+  font-size:10px!important;
+  font-weight:600!important;
+  color:#64748b!important;
+  margin:0 1px 3px!important;
+}
+#sales #saleCartList .sale-line-fields input,
+#sales #saleCartList .sale-line-fields select{
+  min-height:34px!important;
+  height:34px!important;
+  padding:5px 6px!important;
+  border:1px solid #dbe3ec!important;
+  border-radius:7px!important;
+  background:#f8fafc!important;
+  color:#1e293b!important;
+  font-size:12px!important;
+  box-shadow:none!important;
+}
+#sales #saleCartList .sale-line-total{
+  margin-top:6px!important;
+  padding:6px 2px 0!important;
+  border-top:1px solid #edf1f5!important;
+  font-size:11px!important;
+  color:#64748b!important;
+}
+#sales #saleCartList .sale-line-total b{
+  color:#1557a5!important;
+  font-size:13px!important;
+  font-weight:800!important;
+}
+#sales #saleCartList .sale-remove{
+  min-width:28px!important;
+  min-height:27px!important;
+  padding:3px 7px!important;
+  border-radius:7px!important;
+  font-size:12px!important;
+}
+@media(max-width:520px){
+  #sales #saleCartList .sale-line-card{padding:7px!important;margin:5px 0!important}
+  #sales #saleCartList .sale-line-fields{gap:5px!important}
+  #sales #saleCartList .sale-line-fields input,
+  #sales #saleCartList .sale-line-fields select{font-size:12px!important;padding:4px!important}
+}
