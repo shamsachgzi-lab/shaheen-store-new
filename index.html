@@ -2905,10 +2905,11 @@ function __unlockSalePage(){
 function show(id,btn){
  const wasSales=document.body.classList.contains("sale-modal-open");
  const wasAppPage=document.body.classList.contains("app-page-open");
- const previousScroll=window.scrollY||document.documentElement.scrollTop||0;
+ const previousScroll=wasAppPage?Math.abs(parseFloat(document.body.style.getPropertyValue("--app-page-lock-top"))||0):(window.scrollY||document.documentElement.scrollTop||0);
  if(id==="sales"){
   document.documentElement.classList.remove("app-page-open");
   document.body.classList.remove("app-page-open");
+  document.body.style.removeProperty("--app-page-lock-top");
   document.querySelectorAll("main section.app-page-fixed").forEach(s=>s.classList.remove("app-page-fixed"));
   __lockSalePage();
  }else{
@@ -2916,7 +2917,9 @@ function show(id,btn){
   if(id==="home"){
    document.documentElement.classList.remove("app-page-open");
    document.body.classList.remove("app-page-open");
+   document.body.style.removeProperty("--app-page-lock-top");
   }else{
+   if(!wasAppPage)document.body.style.setProperty("--app-page-lock-top",-(window.scrollY||document.documentElement.scrollTop||0)+"px");
    document.documentElement.classList.add("app-page-open");
    document.body.classList.add("app-page-open");
   }
@@ -5833,7 +5836,7 @@ html body main>section#purchases.purchase-page.hidden{display:none!important;vis
 
 /* SHAHEEN_ALL_PAGES_FIXED_FORM_ACTIVE_V2 */
 html.app-page-open,body.app-page-open{height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
-body.app-page-open{position:relative!important;touch-action:pan-x pan-y!important}
+body.app-page-open{position:fixed!important;top:var(--app-page-lock-top,0px)!important;left:0!important;right:0!important;width:100%!important;touch-action:pan-x pan-y!important}body.app-page-open>header{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:11!important}
 main section.app-page-fixed:not(.hidden){position:fixed!important;left:0!important;right:0!important;top:var(--app-page-top,130px)!important;height:var(--app-page-height,calc(100dvh - 210px))!important;max-height:var(--app-page-height,calc(100dvh - 210px))!important;min-height:0!important;margin:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;background:#fff!important;border-radius:20px 20px 0 0!important;padding:12px 10px calc(86px + env(safe-area-inset-bottom))!important;z-index:9!important;box-sizing:border-box!important}
 main section.app-page-fixed:not(.hidden) input,main section.app-page-fixed:not(.hidden) textarea,main section.app-page-fixed:not(.hidden) select{font-size:16px!important;scroll-margin:14px!important}
 main section.app-page-fixed:not(.hidden) *{scroll-behavior:auto!important}
