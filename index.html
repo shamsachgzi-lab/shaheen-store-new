@@ -2914,19 +2914,13 @@ function show(id,btn){
   __lockSalePage();
  }else{
   if(wasSales)__unlockSalePage();
-  if(id==="home"){
-   document.documentElement.classList.remove("app-page-open");
-   document.body.classList.remove("app-page-open");
-   document.body.style.removeProperty("--app-page-lock-top");
-  }else{
-   if(!wasAppPage)document.body.style.setProperty("--app-page-lock-top",-(window.scrollY||document.documentElement.scrollTop||0)+"px");
-   document.documentElement.classList.add("app-page-open");
-   document.body.classList.add("app-page-open");
-  }
+  if(!wasAppPage)document.body.style.setProperty("--app-page-lock-top",-(window.scrollY||document.documentElement.scrollTop||0)+"px");
+  document.documentElement.classList.add("app-page-open");
+  document.body.classList.add("app-page-open");
  }
  document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
  const active=document.getElementById(id);active?.classList.remove("hidden");
- if(active&&id!=="home"&&id!=="sales")active.classList.add("app-page-fixed");
+ if(active&&id!=="sales")active.classList.add("app-page-fixed");
  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
  if(btn)btn.classList.add("active");
  refreshAll();
@@ -5834,19 +5828,14 @@ nav button.active{background:linear-gradient(145deg,#eaf3ff,#f4f8ff)!important;c
 html body main>section#purchases.purchase-page.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
 
 
-/* SHAHEEN_ALL_PAGES_FIXED_FORM_ACTIVE_V3 */
-html.app-page-open,body.app-page-open{height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
-body.app-page-open{position:fixed!important;top:var(--app-page-lock-top,0px)!important;left:0!important;right:0!important;width:100%!important;touch-action:pan-x pan-y!important}
+/* SHAHEEN_ALL_PAGES_FIXED_FORM_ACTIVE_V4 — all tabs use the sales-style fixed viewport */
+html.app-page-open{height:100%!important;overflow:hidden!important;overscroll-behavior:none!important}
+body.app-page-open{position:static!important;top:auto!important;left:auto!important;right:auto!important;width:100%!important;height:100%!important;overflow:hidden!important;overscroll-behavior:none!important;touch-action:pan-x pan-y!important;padding-bottom:0!important}
 body.app-page-open>header{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:11!important}
 main section.app-page-fixed:not(.hidden){position:fixed!important;left:0!important;right:0!important;top:var(--app-page-top,130px)!important;bottom:var(--app-page-bottom,0px)!important;height:auto!important;max-height:none!important;min-height:0!important;margin:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;background:#fff!important;border-radius:20px 20px 0 0!important;padding:12px 10px calc(86px + env(safe-area-inset-bottom))!important;z-index:9!important;box-sizing:border-box!important}
 main section.app-page-fixed:not(.hidden) input,main section.app-page-fixed:not(.hidden) textarea,main section.app-page-fixed:not(.hidden) select{font-size:16px!important;scroll-margin:14px!important}
 body.app-keyboard-open nav{display:none!important}
-@media(min-width:700px){html.app-page-open,body.app-page-open{height:auto!important;overflow:auto!important}main section.app-page-fixed:not(.hidden){position:static!important;height:auto!important;max-height:none!important;overflow:visible!important;border-radius:0!important;padding:14px!important}body.app-keyboard-open nav{display:flex!important}}
-</style>
-
-
-
-<script id="SHAHEEN_ALL_PAGES_FIXED_FORM_ACTIVE_V3">
+@media(min-width:700px){html.app-page-open,body.app-page-open{height:auto!important;overflow:auto!important}main section.app-page-fixed:not(.hidden){position:static!important;height:auto!important;max-height:none!important;overflow:visible!imp<script id="SHAHEEN_ALL_PAGES_FIXED_FORM_ACTIVE_V4">
 (function(){
  function update(){
   if(!document.body.classList.contains("app-page-open"))return;
@@ -5865,6 +5854,10 @@ body.app-keyboard-open nav{display:none!important}
   var f=e.target;if(!f||!f.matches||!f.matches("input,textarea,select,[contenteditable=true]"))return;
   var p=f.closest("main section.app-page-fixed");if(!p)return;
   requestAnimationFrame(function(){update();var r=f.getBoundingClientRect(),v=window.visualViewport,t=v?v.offsetTop:0,b=v?v.offsetTop+v.height:window.innerHeight;if(r.bottom>b-24)p.scrollTop+=r.bottom-b+32;else if(r.top<t+12)p.scrollTop-=t+12-r.top;});
+ },true);
+ document.addEventListener("focusout",function(){setTimeout(update,180);},true);
+})();
+</script>+12-r.top;});
  },true);
  document.addEventListener("focusout",function(){setTimeout(update,180);},true);
 })();
