@@ -2445,7 +2445,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   </div>
   <div class="sale-simple sale-product-search">
    <label>د جنس نوم یا بارکوډ ولټوه</label>
-   <input id="saleProductSearch" type="search" autocomplete="off" placeholder="د جنس نوم یا بارکوډ ولیکه...">
+   <input id="saleProductSearch" type="text" autocomplete="off" placeholder="د جنس نوم یا بارکوډ ولیکه...">
    <button type="button" id="saleKeyboardDone" class="sale-keyboard-done" onclick="document.getElementById('saleProductSearch').blur();this.hidden=true" hidden>کیبورډ بند کړه ✓</button>
    <div id="saleSearchResults" class="sale-search-results hidden"></div>
    <select id="saleProduct" class="hidden" aria-label="جنس"></select>
@@ -5887,27 +5887,5 @@ body.app-keyboard-open nav{display:none!important}
 #sales #saleProductSearch,#sales #saleCustomer{font-size:16px!important;min-height:40px!important;height:40px!important;max-height:40px!important;line-height:1.25!important;transform:none!important;zoom:1!important;-webkit-text-size-adjust:100%!important}
 #sales .sale-page{transform:none!important;zoom:1!important}
 </style>
-<script id="SHAHEEN_SALE_PRODUCT_SEARCH_KEEP_VIEWPORT_V1">
-(function(){
- document.addEventListener("focusin",function(e){
-  var f=e.target;
-  if(!f||f.id!=="saleProductSearch")return;
-  requestAnimationFrame(function(){
-   if(!document.body.classList.contains("sale-modal-open"))return;
-   var panel=document.querySelector("#sales>.sale-page");
-   var y=window.__salePageLockY||0;
-   window.scrollTo(0,y);
-   document.documentElement.scrollTop=y;
-   document.body.scrollTop=0;
-   if(panel){
-    var vv=window.visualViewport;
-    var top=vv?vv.offsetTop:0;
-    var bottom=vv?vv.offsetTop+vv.height:window.innerHeight;
-    var rect=f.getBoundingClientRect();
-    if(rect.bottom>bottom-12)panel.scrollTop+=rect.bottom-bottom+16;
-   }
-  });
- },true);
-})();
-</script>
+<!-- Removed faulty product-search auto-scroll: it forced window.scrollTo(0,0) -->
 </html>
