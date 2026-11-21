@@ -3647,7 +3647,16 @@ function printSale(id){
  const receipt=document.createElement("div");receipt.className="receipt-paper";receipt.style.cssText="flex:1 1 auto;overflow:auto;width:100%;background:#fff;color:#111";
  receipt.innerHTML=bodyMatch?bodyMatch[1]:"رسید ونه موندل شو";
  bar.className="receipt-toolbar";
- print.onclick=()=>{try{window.focus();window.print()}catch(e){alert("چاپ پیل نه شو؛ د موبایل د شریکولو له مېنو څخه Print وټاکه.")}};
+ print.onclick=()=>{
+  // د چاپ تڼۍ د کارونکي په مستقیم ټچ کې جلا چاپي ټب پرانیزي؛ د ثبت پر وخت هېڅ پاپ‌اپ نه خلاصیږي.
+  let pw=null;
+  try{
+   pw=window.open("","_blank");
+   if(!pw){alert("Safari د نوې پاڼې اجازه بنده کړې؛ د Safari Settings کې Pop-ups اجازه فعاله کړه.");return;}
+   pw.document.open();pw.document.write(html);pw.document.close();
+   setTimeout(()=>{try{pw.focus();pw.print()}catch(e){alert("چاپ پیل نه شو؛ د Safari د Share مېنو څخه Print وټاکه.")}},700);
+  }catch(e){try{if(pw)pw.close()}catch(_){}alert("چاپ پیل نه شو؛ د Safari د Share مېنو څخه Print وټاکه.")}
+ };
  bar.appendChild(back);bar.appendChild(status);bar.appendChild(print);view.appendChild(bar);view.appendChild(receipt);
  const oldStyle=document.getElementById("shaheenReceiptPrintStyle");if(oldStyle)oldStyle.remove();
  document.head.appendChild(printStyle);document.body.appendChild(view);
