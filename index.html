@@ -3621,7 +3621,7 @@ function printSale(id){
  '.grand{margin:1mm 0;padding:2mm 1.5mm!important;background:#eee;border:1px solid #222;border-radius:2mm;font-size:11px!important;font-weight:900}.grand b{font-size:12px!important}'+
  '.paid{color:#075b32;border:1px solid #25804b;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}.debt{color:#991b1b;border:1px solid #b33;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}'+
  '.note{padding:2mm 0;font-size:8px;border-bottom:1px dashed #555;overflow-wrap:anywhere}.thanks{text-align:center;padding:3mm 0 1mm;margin-top:2mm;border-top:1px dashed #555;font-size:8.5px;font-weight:800}.footer{text-align:center;font-size:7px;color:#555;margin-top:1mm}'+
- '@media screen{body{background:#e8edf3;padding:8px 0}.invoice{background:#fff;box-shadow:0 2px 12px #0002}}'+
+ '@media screen{html,body{width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:0!important;background:#fff}.invoice{width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:16px 14px 24px!important;background:#fff;box-shadow:none;font-size:15px;line-height:1.65}.top h1{font-size:23px}.top .subtitle{font-size:14px}.meta div{font-size:13px}.meta b{font-size:11px}table{font-size:13px}th{font-size:12px}.totals div{font-size:14px;padding:8px 4px}.totals b{font-size:14px}.grand{font-size:18px!important}.grand b{font-size:19px!important}.paid,.debt{font-size:15px}.thanks{font-size:14px}.footer{font-size:11px}}'+
  '@media print{html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important}.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
  '</style></head><body><main class="invoice">'+
  '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
@@ -3629,11 +3629,18 @@ function printSale(id){
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main></body></html>';
- w.document.open();w.document.write(html);w.document.close();
- let printStarted=false;
- const startPrint=()=>{if(printStarted||w.closed)return;printStarted=true;try{w.focus();w.print();}catch(e){alert("چاپ پیل نه شو؛ د چاپ کړکۍ څخه بیا هڅه وکړه.");}};
- w.onload=()=>setTimeout(startPrint,500);
- setTimeout(startPrint,1100);
+ // رسید په همدې اپلیکیشن کې د بشپړ سکرین په بڼه ښکاره کړه؛ نو تور پاپ‌اپ نه پرانیستل کېږي.
+ const oldView=document.getElementById("shaheenReceiptView");if(oldView)oldView.remove();
+ const view=document.createElement("div");view.id="shaheenReceiptView";
+ view.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#fff;display:flex;flex-direction:column;width:100%;height:100%;height:100dvh";
+ const bar=document.createElement("div");bar.style.cssText="flex:0 0 auto;display:flex;gap:10px;padding:10px;background:#172033;color:#fff;align-items:center;justify-content:space-between;direction:rtl";
+ const back=document.createElement("button");back.type="button";back.textContent="↩ بېرته اپلیکیشن ته";back.style.cssText="border:0;border-radius:9px;padding:11px 14px;background:#fff;color:#111;font-size:15px;font-weight:800";
+ back.onclick=()=>view.remove();
+ const print=document.createElement("button");print.type="button";print.textContent="🖨 چاپ";print.style.cssText="border:0;border-radius:9px;padding:11px 22px;background:#16a34a;color:#fff;font-size:15px;font-weight:800";
+ const frame=document.createElement("iframe");frame.title="د خرڅلاو رسید";frame.style.cssText="display:block;flex:1 1 auto;width:100%;height:100%;border:0;background:#fff";
+ print.onclick=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(e){alert("چاپ پیل نه شو؛ بیا هڅه وکړه.")}};
+ bar.appendChild(back);bar.appendChild(print);view.appendChild(bar);view.appendChild(frame);document.body.appendChild(view);
+ frame.srcdoc=html;
 }
 function filterPurchaseProducts(){
  const q=value("buyProductSearch").toLowerCase();
