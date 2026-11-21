@@ -4442,8 +4442,8 @@ function updateDashboard(){
  const dailyExpenses=expensesToday.filter(e=>e.paymentType!=="cash_nonprofit").reduce((a,e)=>a+Number(e.amount||0),0);
  const dailyDebt=salesToday.reduce((a,s)=>a+Number(s.debt||0),0);
  const netProfit=grossProfit-dailyExpenses;
- const sarafHeld=(db.sarafAccounts||[]).reduce((n,x)=>n+sarafTotals(x.id).held,0);
- const sarafOwed=(db.sarafAccounts||[]).reduce((n,x)=>n+sarafTotals(x.id).owed,0);
+ const sarafHeld=sarafTotals().held;
+ const sarafOwed=sarafTotals().owed;
  const capital=Number(db.cash)+stock+customerDebt+sarafHeld-supplierDebt-sarafOwed;
  const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
  put("cash",db.cash);put("stockValue",stock);put("debt",customerDebt);
