@@ -3595,7 +3595,7 @@ function printSale(id){
  const selected=(db.sales||[]).find(x=>String(x.id)===String(id));if(!selected)return alert("رسید ونه موندل شو");
  const invoice=selected.invoice||"";
  const rows=invoice?(db.sales||[]).filter(x=>String(x.invoice||"")===String(invoice)):[selected];
- const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه؛ د براوزر Pop-up اجازه فعاله کړه");
+ // د iPhone په Safari کې تش about:blank مه پرانیزه؛ رسید به لاندې په اپلیکیشن کې ښکاره شي.
  const shop=safe(db.settings?.shopName||"شاهین فروشگاه");
  const phone=db.settings?.shopPhone?safe(db.settings.shopPhone):"";
  const subtotal=rows.reduce((n,x)=>n+(Number(x.subtotal)||((Number(x.qty)||0)*(Number(x.price)||0))),0);
