@@ -3640,6 +3640,20 @@ function printSale(id){
  const back=document.createElement("button");back.type="button";back.textContent="↩ بېرته اپلیکیشن ته";back.style.cssText="border:0;border-radius:9px;padding:11px 14px;background:#fff;color:#111;font-size:15px;font-weight:800";
  back.onclick=()=>view.remove();
  const print=document.createElement("button");print.type="button";print.textContent="🖨 چاپ";print.style.cssText="border:0;border-radius:9px;padding:11px 22px;background:#16a34a;color:#fff;font-size:15px;font-weight:800";
+ const share=document.createElement("button");share.type="button";share.textContent="↗️ شریکول";share.style.cssText="border:0;border-radius:9px;padding:11px 16px;background:#2563eb;color:#fff;font-size:15px;font-weight:800";
+ share.onclick=async()=>{
+  const fileName="Shaheen-Receipt-"+String(invoice||selected.id).replace(/[^a-zA-Z0-9_-]/g,"_")+".html";
+  try{
+   const file=new File([html],fileName,{type:"text/html"});
+   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:"د شاهین فروشگاه رسید"});
+   }else if(navigator.share){
+    await navigator.share({title:"د شاهین فروشگاه رسید",text:"رسید: "+(invoice||selected.id)+"\nمشتری: "+customer+"\nټول: "+money(total)+"\nورکړل شوي: "+money(paid)+"\nپاتې پور: "+money(debt)});
+   }else{
+    alert("په دې براوزر کې شریکول فعال نه دي. د Safari له لارې اپلیکیشن خلاص کړه.");
+   }
+  }catch(e){if(e&&e.name!=="AbortError")alert("شریکول ترسره نه شول؛ بیا هڅه وکړه.")}
+ };
  const styleMatch=html.match(/<style>([\s\S]*?)<\/style>/i);
  const bodyMatch=html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
  const printStyle=document.createElement("style");printStyle.id="shaheenReceiptPrintStyle";
@@ -3657,7 +3671,7 @@ function printSale(id){
    setTimeout(()=>{try{pw.focus();pw.print()}catch(e){alert("چاپ پیل نه شو؛ د Safari د Share مېنو څخه Print وټاکه.")}},700);
   }catch(e){try{if(pw)pw.close()}catch(_){}alert("چاپ پیل نه شو؛ د Safari د Share مېنو څخه Print وټاکه.")}
  };
- bar.appendChild(back);bar.appendChild(status);bar.appendChild(print);view.appendChild(bar);view.appendChild(receipt);
+ bar.appendChild(back);bar.appendChild(status);bar.appendChild(share);bar.appendChild(print);view.appendChild(bar);view.appendChild(receipt);
  const oldStyle=document.getElementById("shaheenReceiptPrintStyle");if(oldStyle)oldStyle.remove();
  document.head.appendChild(printStyle);document.body.appendChild(view);
 }
