@@ -3586,60 +3586,50 @@ function deleteInvoiceCompletely(){
  alert('رسید حذف شو؛ د جنسونو موجودي بېرته زیاته شوه او حسابونه تازه شول.');
 }
 function printSale(id){
- const selected=db.sales.find(x=>x.id===id);if(!selected)return;
+ const selected=(db.sales||[]).find(x=>String(x.id)===String(id));if(!selected)return alert("رسید ونه موندل شو");
  const invoice=selected.invoice||"";
- const rows=invoice?db.sales.filter(x=>x.invoice===invoice):[selected];
- const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه");
+ const rows=invoice?(db.sales||[]).filter(x=>String(x.invoice||"")===String(invoice)):[selected];
+ const w=window.open("","_blank");if(!w)return alert("د چاپ کړکۍ اجازه ورکړه؛ د براوزر Pop-up اجازه فعاله کړه");
  const shop=safe(db.settings?.shopName||"شاهین فروشگاه");
  const phone=db.settings?.shopPhone?safe(db.settings.shopPhone):"";
  const subtotal=rows.reduce((n,x)=>n+(Number(x.subtotal)||((Number(x.qty)||0)*(Number(x.price)||0))),0);
- const discount=rows.reduce((n,x)=>n+(Number(x.discount)||0),0);
- const total=rows.reduce((n,x)=>n+(Number(x.total)||0),0);
- const paid=rows.reduce((n,x)=>n+(Number(x.paid)||0),0);
- const debt=rows.reduce((n,x)=>n+(Number(x.debt)||0),0);
+ const discount=rows.reduce((n,x)=>n+Number(x.discount||0),0);
+ const total=rows.reduce((n,x)=>n+Number(x.total||0),0);
+ const paid=rows.reduce((n,x)=>n+Number(x.paid||0),0);
+ const debt=rows.reduce((n,x)=>n+Number(x.debt||0),0);
  const date=displayDate(selected.date);
  const customer=safe(selected.customer||"نغدي مشتری");
- const itemRows=rows.map((x,i)=>'<tr><td class="item-name">'+safe(x.productName||"-")+'</td><td>'+safe(x.qty)+' '+safe(x.unit||"")+'</td><td>'+money(x.price)+'</td><td class="amount">'+money(Number(x.total)||0)+'</td></tr>').join("");
+ const itemRows=rows.map(x=>'<tr><td class="item-name">'+safe(x.productName||"-")+'</td><td>'+safe(x.qty)+' '+safe(x.unit||"")+'</td><td>'+money(x.price)+'</td><td class="amount">'+money(Number(x.total)||0)+'</td></tr>').join("");
  const note=selected.note?'<div class="note"><b>یادښت:</b> '+safe(selected.note)+'</div>':"";
- w.document.write('<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>رسید '+safe(invoice||selected.id)+'</title><style>'+
+ const html='<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>رسید '+safe(invoice||selected.id)+'</title><style>'+
  '*{box-sizing:border-box}'+
  '@page{size:58mm auto;margin:0}'+
- 'html,body{width:58mm;margin:0;padding:0;background:#fff;color:#111;font-family:Arial,Tahoma,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+ 'html,body{width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important;background:#fff;color:#111;font-family:Arial,Tahoma,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
  'body{font-size:9px;line-height:1.45;font-weight:600}'+
- '.invoice{width:58mm;max-width:58mm;margin:0 auto;padding:2.5mm 2mm 3mm;border:0}'+
+ '.invoice{width:58mm;max-width:58mm;margin:0 auto;padding:2.5mm 2mm 3mm}'+
  '.top{text-align:center;padding:1mm 0 2mm;border-bottom:1px dashed #333}'+
  '.top h1{font-size:16px;line-height:1.3;margin:0 0 1mm;font-weight:900}'+
- '.top .subtitle{font-size:9px;font-weight:800;margin:0}'+
- '.top .phone{font-size:8px;margin-top:1mm}'+
+ '.top .subtitle{font-size:9px;font-weight:800;margin:0}.top .phone{font-size:8px;margin-top:1mm}'+
  '.receipt-title{display:inline-block;margin-top:1.5mm;padding:1mm 4mm;border:1px solid #222;border-radius:10px;font-size:9px;font-weight:900}'+
- '.meta{display:grid;grid-template-columns:1fr 1fr;gap:1mm;padding:2mm 0;border-bottom:1px dashed #555}'+
- '.meta div{min-width:0;font-size:8.5px;overflow-wrap:anywhere}'+
- '.meta b{display:block;font-size:7.5px;color:#444;margin-bottom:.3mm}'+
- 'table{width:100%;border-collapse:collapse;margin:2mm 0;font-size:8px;table-layout:fixed}'+
- 'th,td{padding:1.2mm .6mm;border-bottom:1px solid #aaa;text-align:right;vertical-align:top;overflow-wrap:anywhere}'+
- 'th{font-size:7.5px;background:#eee;border-top:1px solid #555;border-bottom:1px solid #555;font-weight:900}'+
- 'th:nth-child(1){width:34%}th:nth-child(2){width:19%}th:nth-child(3){width:21%}th:nth-child(4){width:26%}'+
- '.item-name{font-weight:800}.amount{font-weight:800;white-space:nowrap}'+
- '.totals{margin:2mm 0 0;padding-top:1mm;border-top:1px dashed #555}'+
- '.totals div{display:flex;justify-content:space-between;gap:2mm;padding:1mm .5mm;font-size:8.5px}'+
- '.totals b{white-space:nowrap;font-size:8.5px}'+
- '.grand{margin:1mm 0;padding:2mm 1.5mm!important;background:#eee;border:1px solid #222;border-radius:2mm;font-size:11px!important;font-weight:900}'+
- '.grand b{font-size:12px!important}'+
- '.paid{color:#075b32;border:1px solid #25804b;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}'+
- '.debt{color:#991b1b;border:1px solid #b33;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}'+
- '.note{padding:2mm 0;font-size:8px;border-bottom:1px dashed #555;overflow-wrap:anywhere}'+
- '.thanks{text-align:center;padding:3mm 0 1mm;margin-top:2mm;border-top:1px dashed #555;font-size:8.5px;font-weight:800}'+
- '.footer{text-align:center;font-size:7px;color:#555;margin-top:1mm}'+
+ '.meta{display:grid;grid-template-columns:1fr 1fr;gap:1mm;padding:2mm 0;border-bottom:1px dashed #555}.meta div{min-width:0;font-size:8.5px;overflow-wrap:anywhere}.meta b{display:block;font-size:7.5px;color:#444;margin-bottom:.3mm}'+
+ 'table{width:100%;border-collapse:collapse;margin:2mm 0;font-size:8px;table-layout:fixed}th,td{padding:1.2mm .6mm;border-bottom:1px solid #aaa;text-align:right;vertical-align:top;overflow-wrap:anywhere}th{font-size:7.5px;background:#eee;border-top:1px solid #555;border-bottom:1px solid #555;font-weight:900}'+
+ 'th:nth-child(1){width:34%}th:nth-child(2){width:19%}th:nth-child(3){width:21%}th:nth-child(4){width:26%}.item-name{font-weight:800}.amount{font-weight:800;white-space:nowrap}'+
+ '.totals{margin:2mm 0 0;padding-top:1mm;border-top:1px dashed #555}.totals div{display:flex;justify-content:space-between;gap:2mm;padding:1mm .5mm;font-size:8.5px}.totals b{white-space:nowrap;font-size:8.5px}'+
+ '.grand{margin:1mm 0;padding:2mm 1.5mm!important;background:#eee;border:1px solid #222;border-radius:2mm;font-size:11px!important;font-weight:900}.grand b{font-size:12px!important}'+
+ '.paid{color:#075b32;border:1px solid #25804b;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}.debt{color:#991b1b;border:1px solid #b33;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}'+
+ '.note{padding:2mm 0;font-size:8px;border-bottom:1px dashed #555;overflow-wrap:anywhere}.thanks{text-align:center;padding:3mm 0 1mm;margin-top:2mm;border-top:1px dashed #555;font-size:8.5px;font-weight:800}.footer{text-align:center;font-size:7px;color:#555;margin-top:1mm}'+
  '@media screen{body{background:#e8edf3;padding:8px 0}.invoice{background:#fff;box-shadow:0 2px 12px #0002}}'+
- '@media print{html,body{width:58mm!important;margin:0!important;padding:0!important}.invoice{width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}.top,th,.grand{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
- '</style>\n<style id="customer-ledger-fullscreen-style">\n/* د مشتری حساب جلا صفحه: د لېست نورې برخې پټېږي */\n#customers.customer-ledger-open>.customer-top,\n#customers.customer-ledger-open>.customer-addbar,\n#customers.customer-ledger-open>.customer-summary,\n#customers.customer-ledger-open>.customer-reports,\n#customers.customer-ledger-open>.customer-tabs,\n#customers.customer-ledger-open>#customerFormPanel,\n#customers.customer-ledger-open>.customer-list-head{display:none!important}\n#customers.customer-ledger-open>.panel:last-child{display:block!important;margin:0;padding:10px;border-radius:14px;min-height:65vh}\n#customers.customer-ledger-open #customerSearch,\n#customers.customer-ledger-open #invoiceEditModal{display:none!important}\n#customers.customer-ledger-open .customer-detail{max-width:760px;margin:0 auto}\n#customers.customer-ledger-open .customer-detail>button:first-child{position:sticky;top:5px;z-index:5;box-shadow:0 2px 8px #00000012}\n</style>\n\n<style id="customer-add-form-page-style">/* د مشتری فورم د پرانیستلو پر مهال د مشتریانو لېست او لنډیز مه پټوه. */#customers.customer-form-open>#customerFormPanel{display:block!important;visibility:visible!important;max-width:620px;margin:12px auto;padding:16px!important;background:#fff!important;border:1px solid #d9e3ef!important;border-radius:16px!important;box-shadow:0 5px 20px rgba(20,45,75,.08)}#customers.customer-form-open .customer-form-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px;margin-bottom:15px;border-radius:12px;background:linear-gradient(135deg,#e8f2ff,#d6e8ff);border:1px solid #b9d2f0}#customers.customer-form-open .customer-form-head h3{margin:5px 0;color:#173b63;font-size:20px}#customers.customer-form-open .customer-form-head small{color:#53718f;font-weight:700}#customers.customer-form-open .customer-form-head p{margin:0;color:#526579;font-size:12px}#customers.customer-form-open #customerFormPanel label{display:block;margin:11px 0 5px;font-weight:700;color:#29435d}#customers.customer-form-open #customerFormPanel input,#customers.customer-form-open #customerFormPanel select{width:100%;min-height:45px;border:1px solid #cbd7e4;border-radius:10px;padding:10px;background:#fbfdff;font-size:16px}#customers.customer-form-open #addCustomerBtn{width:100%;min-height:48px;margin-top:16px;border-radius:11px;font-size:16px;font-weight:800}</style>\n</head><body><main class="invoice">'+
+ '@media print{html,body{width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}.invoice{width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
+ '</style></head><body><main class="invoice">'+
  '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
- note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">شاهین فروشگاه · AFN</div></main></'+'body></'+'html>');
-
- w.document.close();w.focus();setTimeout(()=>w.print(),350);
+ note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main></body></html>';
+ w.document.open();w.document.write(html);w.document.close();
+ const startPrint=()=>{try{w.focus();w.print();}catch(e){alert("چاپ پیل نه شو؛ د چاپ کړکۍ څخه بیا هڅه وکړه.");}};
+ w.onload=()=>setTimeout(startPrint,450);
+ setTimeout(()=>{if(!w.closed)startPrint();},900);
 }
 function filterPurchaseProducts(){
  const q=value("buyProductSearch").toLowerCase();
