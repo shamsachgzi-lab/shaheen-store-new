@@ -6191,3 +6191,120 @@ body.sale-modal-open{
  }
 })();
 </script>
+
+
+<style id="SHAHEEN_SALE_FINANCIAL_SUMMARY_MODERN_V1">
+/* د خرڅلاو د حساب لنډیز: نوی پاک، عصري او لوستلو ته اسانه ډیزاین */
+#sales .sale-summary{
+ display:grid!important;
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:8px!important;
+ margin:13px 0!important;
+ padding:12px!important;
+ background:#f1f5fa!important;
+ border:1px solid #dce5ef!important;
+ border-radius:17px!important;
+ box-shadow:0 5px 16px rgba(24,52,82,.07)!important;
+}
+#sales .sale-summary>div{
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:flex-start!important;
+ justify-content:center!important;
+ gap:7px!important;
+ min-width:0!important;
+ min-height:66px!important;
+ margin:0!important;
+ padding:10px 11px!important;
+ border:1px solid #e3eaf2!important;
+ border-radius:12px!important;
+ background:#fff!important;
+ box-shadow:0 2px 5px rgba(25,45,70,.035)!important;
+}
+#sales .sale-summary>div>span{
+ color:#68798d!important;
+ font-size:11px!important;
+ line-height:1.5!important;
+ font-weight:700!important;
+}
+#sales .sale-summary>div>strong{
+ display:block!important;
+ max-width:100%!important;
+ color:#263b53!important;
+ font-size:15px!important;
+ line-height:1.35!important;
+ font-weight:900!important;
+ direction:ltr!important;
+ text-align:right!important;
+ overflow-wrap:anywhere!important;
+ font-variant-numeric:tabular-nums!important;
+}
+#sales .sale-summary>div:nth-child(1){background:#fff!important}
+#sales .sale-summary>div:nth-child(2){background:#fffaf0!important;border-color:#f1e4c7!important}
+#sales .sale-summary>div:nth-child(2)>strong{color:#b7791f!important}
+#sales .sale-summary>div.sale-total{
+ grid-column:1/-1!important;
+ min-height:88px!important;
+ padding:13px 15px!important;
+ flex-direction:row!important;
+ align-items:center!important;
+ justify-content:space-between!important;
+ gap:12px!important;
+ background:linear-gradient(115deg,#123f78,#1976bd)!important;
+ border:0!important;
+ border-radius:14px!important;
+ box-shadow:0 5px 13px rgba(20,83,145,.18)!important;
+}
+#sales .sale-summary>div.sale-total>span{
+ color:#e8f3ff!important;font-size:13px!important;font-weight:800!important
+}
+#sales .sale-summary>div.sale-total>strong{
+ color:#fff!important;font-size:23px!important;letter-spacing:.2px!important
+}
+#sales .sale-summary>div.sale-cash-line{
+ background:#effaf4!important;border-color:#cdebd9!important
+}
+#sales .sale-summary>div.sale-cash-line>strong{color:#07804b!important}
+#sales .sale-summary>div.sale-debt-line{
+ background:#fff3f2!important;border-color:#f2d8d5!important
+}
+#sales .sale-summary>div.sale-debt-line>strong{color:#c13d45!important}
+#sales .sale-summary>div.sale-balance-equation{
+ grid-column:1/-1!important;
+ min-height:52px!important;
+ flex-direction:row!important;
+ align-items:center!important;
+ justify-content:space-between!important;
+ gap:8px!important;
+ padding:9px 11px!important;
+ background:#f3f0ff!important;
+ border-color:#ded6ff!important;
+}
+#sales .sale-summary>div.sale-balance-equation>span{color:#66539b!important}
+#sales .sale-summary>div.sale-balance-equation>strong{
+ color:#66539b!important;font-size:11px!important;text-align:left!important
+}
+#sales .sale-summary>div:last-child:not(.sale-balance-equation){
+ background:#f3f7ff!important;border-color:#d9e5fb!important
+}
+#sales .sale-summary>div:last-child:not(.sale-balance-equation)>strong{color:#315fa7!important}
+#sales .sale-save-button{
+ min-height:49px!important;border-radius:12px!important;
+ font-size:15px!important;font-weight:900!important;
+ background:linear-gradient(110deg,#087b58,#0aa879)!important;
+ box-shadow:0 5px 13px rgba(8,127,88,.2)!important
+}
+@media(max-width:360px){
+ #sales .sale-summary{gap:6px!important;padding:9px!important}
+ #sales .sale-summary>div{min-height:60px!important;padding:8px!important}
+ #sales .sale-summary>div>span{font-size:10px!important}
+ #sales .sale-summary>div>strong{font-size:13px!important}
+ #sales .sale-summary>div.sale-total>strong{font-size:20px!important}
+ #sales .sale-summary>div.sale-balance-equation>strong{font-size:10px!important}
+}
+@media(min-width:760px){
+ #sales .sale-summary{grid-template-columns:repeat(3,minmax(0,1fr))!important;padding:15px!important;gap:10px!important}
+ #sales .sale-summary>div.sale-total{grid-column:1/-1!important}
+ #sales .sale-summary>div.sale-balance-equation{grid-column:1/-1!important}
+}
+</style>
