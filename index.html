@@ -6013,55 +6013,6 @@ html body main>section#purchases.purchase-page.hidden{display:none!important;vis
  scroll-margin:0!important;
 }
 </style>
-<script id="SHAHEEN_SALE_CART_KEYBOARD_STABLE_V1">
-(function(){
- if(window.__shaheenSaleCartKeyboardStableV2)return;
- window.__shaheenSaleCartKeyboardStableV2=true;
- var page=document.querySelector("#sales .sale-page");
- if(!page)return;
- var savedTop=0,active=false,focusTimer=[];
- function isCartField(el){return !!(el&&el.closest&&el.closest("#saleCartList .sale-line-fields"));}
- function restore(){
-  if(!active||!page.isConnected)return;
-  page.scrollTop=savedTop;
-  document.documentElement.scrollTop=0;
-  document.body.scrollTop=0;
- }
- page.addEventListener("touchstart",function(e){
-  if(!isCartField(e.target))return;
-  savedTop=page.scrollTop;
- },{capture:true,passive:true});
- page.addEventListener("pointerdown",function(e){
-  if(!isCartField(e.target))return;
-  savedTop=page.scrollTop;
- },true);
- page.addEventListener("focusin",function(e){
-  if(!isCartField(e.target))return;
-  active=true;
-  page.classList.add("sale-cart-input-focused");
-  restore();
-  requestAnimationFrame(restore);
-  requestAnimationFrame(function(){requestAnimationFrame(restore);});
-  [80,180,320,500].forEach(function(ms){focusTimer.push(setTimeout(restore,ms));});
- },true);
- page.addEventListener("focusout",function(e){
-  if(!isCartField(e.target))return;
-  setTimeout(function(){
-   if(!isCartField(document.activeElement)){
-    active=false;
-    page.classList.remove("sale-cart-input-focused");
-   }
-  },120);
- },true);
- if(window.visualViewport){
-  window.visualViewport.addEventListener("resize",function(){if(active)restore();},{passive:true});
-  window.visualViewport.addEventListener("scroll",function(){if(active)restore();},{passive:true});
- }
- window.addEventListener("scroll",function(){if(active)restore();},{passive:true});
-})();
-</script>
-
-
 <style id="SHAHEEN_SALE_VISUAL_VIEWPORT_KEYBOARD_V2">
 /* د iPhone د کیبورډ له پرانیستلو سره خرڅلاو د حقیقي visual viewport په اندازه عیارول */
 html.sale-modal-open,body.sale-modal-open{
@@ -6098,37 +6049,145 @@ html.sale-modal-open,body.sale-modal-open{
  touch-action:pan-y!important;
 }
 </style>
-<script id="SHAHEEN_SALE_VISUAL_VIEWPORT_KEYBOARD_V2">
-(function(){
- if(window.__shaheenSaleVisualViewportV2)return;
- window.__shaheenSaleVisualViewportV2=true;
- function sync(){
-  if(!document.body.classList.contains("sale-modal-open"))return;
-  var vv=window.visualViewport;
-  var top=vv?Math.max(0,vv.offsetTop):0;
-  var height=vv?vv.height:window.innerHeight;
-  document.documentElement.style.setProperty("--sale-vv-top",top+"px");
-  document.documentElement.style.setProperty("--sale-vv-height",height+"px");
+</html>
+
+<style id="SHAHEEN_SALES_PAGE_COMPLETE_STABILITY_V3">
+/* بشپړه خرڅلاو پاڼه: ثابته کړکۍ، دننه مستقل سکرول، د iPhone کیبورډ سره سمون */
+html.sale-modal-open,body.sale-modal-open{
+  height:100%!important;overflow:hidden!important;overscroll-behavior:none!important;
+}
+body.sale-modal-open{
+  position:fixed!important;top:var(--sale-lock-top,0px)!important;
+  left:0!important;right:0!important;width:100%!important;
+  touch-action:pan-x!important;
+}
+#sales.sale-overlay:not(.hidden){
+  display:block!important;position:fixed!important;
+  inset:0 0 auto 0!important;top:0!important;
+  width:100%!important;height:var(--sale-vv-height,100dvh)!important;
+  max-height:var(--sale-vv-height,100dvh)!important;min-height:0!important;
+  margin:0!important;padding:0!important;overflow:hidden!important;
+  transform:none!important;z-index:1000!important;background:#f3f6fb!important;
+}
+#sales.sale-overlay:not(.hidden)>.sale-page{
+  position:absolute!important;inset:0!important;
+  width:100%!important;height:100%!important;
+  max-height:100%!important;min-height:0!important;
+  margin:0!important;border-radius:0!important;
+  padding:10px 10px calc(18px + env(safe-area-inset-bottom))!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;overflow-anchor:none!important;
+  touch-action:pan-y!important;box-sizing:border-box!important;
+  background:#f4f7fb!important;
+}
+#sales .sale-blue-header{
+  position:sticky!important;top:0!important;z-index:5!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  min-height:54px!important;margin:0 0 10px!important;padding:10px 13px!important;
+  border-radius:13px!important;box-shadow:0 3px 10px #123f7818!important;
+}
+#sales .sale-invoice-details,#sales .sale-product-search,
+#sales #saleCartList,#sales .sale-money-row,#sales .sale-summary{
+  width:100%!important;min-width:0!important;box-sizing:border-box!important;
+}
+#sales .sale-invoice-details,#sales .sale-product-search{
+  margin:8px 0!important;padding:10px!important;
+  border:1px solid #e0e7ef!important;border-radius:12px!important;
+  background:#fff!important;box-shadow:0 2px 7px #17203308!important;
+}
+#sales #saleCartList{margin:9px 0!important}
+#sales .sale-money-row{gap:9px!important;margin:10px 0!important}
+#sales .sale-money-row>.sale-simple{
+  min-width:0!important;padding:9px!important;border:1px solid #e0e7ef!important;
+  border-radius:11px!important;background:#fff!important;
+}
+#sales .sale-summary{margin:10px 0!important}
+#sales .sale-save-button{
+  position:sticky!important;bottom:0!important;z-index:4!important;
+  margin:8px 0 0!important;box-shadow:0 -4px 12px #f4f7fb!important;
+}
+#sales input,#sales select,#sales textarea{
+  max-width:100%!important;scroll-margin:10px!important;
+}
+#sales #saleCartList .sale-line-fields input,
+#sales #saleCartList .sale-line-fields select{
+  font-size:16px!important; /* د iPhone د اتومات زوم مخنیوی */
+}
+@media(min-width:760px){
+ #sales.sale-overlay:not(.hidden)>.sale-page{
+  width:min(760px,100%)!important;margin:0 auto!important;
+  left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+  padding:16px 18px 24px!important;border-left:1px solid #e3eaf2!important;
+  border-right:1px solid #e3eaf2!important;box-shadow:0 0 28px #17203318!important;
  }
+ #sales .sale-invoice-details{display:grid!important;grid-template-columns:1.2fr 1fr .8fr!important;gap:9px!important}
+ #sales .sale-money-row{display:grid!important;grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:430px){
+ #sales.sale-overlay:not(.hidden)>.sale-page{padding:8px 8px calc(14px + env(safe-area-inset-bottom))!important}
+ #sales .sale-invoice-details,#sales .sale-product-search{padding:8px!important;margin:6px 0!important}
+ #sales .sale-money-row{gap:6px!important}
+ #sales .sale-money-row>.sale-simple{padding:7px!important}
+}
+</style>
+<script id="SHAHEEN_SALES_PAGE_COMPLETE_STABILITY_V3">
+(function(){
+ if(window.__shaheenSalesPageCompleteStabilityV3)return;
+ window.__shaheenSalesPageCompleteStabilityV3=true;
+ var page=null,raf=0;
+ function active(){return document.body.classList.contains("sale-modal-open")}
+ function sync(){
+  if(!active())return;
+  var vv=window.visualViewport;
+  var h=vv&&vv.height?vv.height:window.innerHeight;
+  document.documentElement.style.setProperty("--sale-vv-height",Math.max(180,h)+"px");
+ }
+ function keepDocumentStill(){
+  if(!active())return;
+  var y=window.__shaheenSaleLockedScrollY;
+  if(typeof y==="number"&&Math.abs(window.scrollY-y)>2)window.scrollTo(0,y);
+ }
+ function revealField(el){
+  if(!active()||!el)return;
+  page=document.querySelector("#sales .sale-page");
+  if(!page)return;
+  var vv=window.visualViewport;
+  var visibleBottom=(vv&&vv.height?vv.height:window.innerHeight)-12;
+  var r=el.getBoundingClientRect();
+  if(r.bottom>visibleBottom)page.scrollTop+=r.bottom-visibleBottom;
+  else if(r.top<8)page.scrollTop-=8-r.top;
+ }
+ document.addEventListener("focusin",function(e){
+  if(!active()||!e.target||!e.target.matches("#sales input,#sales select,#sales textarea"))return;
+  var el=e.target;
+  sync();
+  [80,180,320,500].forEach(function(ms){
+   setTimeout(function(){sync();revealField(el);keepDocumentStill()},ms);
+  });
+ },true);
  if(window.visualViewport){
-  window.visualViewport.addEventListener("resize",sync,{passive:true});
-  window.visualViewport.addEventListener("scroll",sync,{passive:true});
+  window.visualViewport.addEventListener("resize",function(){sync();keepDocumentStill()},{passive:true});
+  window.visualViewport.addEventListener("scroll",function(){sync();keepDocumentStill()},{passive:true});
  }
  window.addEventListener("resize",sync,{passive:true});
- document.addEventListener("focusin",function(e){
-  if(e.target&&e.target.closest&&e.target.closest("#sales #saleCartList .sale-line-fields")){
+ document.addEventListener("touchmove",function(e){
+  if(!active())return;
+  if(e.target&&e.target.closest&&e.target.closest("#sales .sale-page"))return;
+  e.preventDefault();
+ },{passive:false});
+ document.addEventListener("click",function(e){
+  if(e.target&&e.target.closest&&e.target.closest("#sales .sale-modal-close")){
+   document.documentElement.style.removeProperty("--sale-vv-height");
+  }
+ },true);
+ var originalLock=window.__lockSalePage;
+ if(typeof originalLock==="function"){
+  window.__lockSalePage=function(){
+   originalLock();
+   window.__shaheenSaleLockedScrollY=window.scrollY||0;
    sync();
-   requestAnimationFrame(sync);
-   setTimeout(sync,100);
-   setTimeout(sync,300);
-  }
- },true);
- document.addEventListener("focusout",function(e){
-  if(e.target&&e.target.closest&&e.target.closest("#sales #saleCartList .sale-line-fields")){
-   setTimeout(sync,250);
-  }
- },true);
+  };
+ }
 })();
 </script>
-
-</html>
