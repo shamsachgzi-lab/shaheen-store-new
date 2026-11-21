@@ -5992,4 +5992,56 @@ html body main>section#purchases.purchase-page.hidden{display:none!important;vis
 }
 </style>
 
+
+<style id="SHAHEEN_SALE_CART_KEYBOARD_STABLE_V1">
+/* د خرڅلاو د بیل د جنس د لټون خانه کوچنۍ */
+#sales.sale-overlay .sale-product-search input#saleProductSearch{
+ height:30px!important;min-height:30px!important;max-height:30px!important;
+ padding:2px 8px!important;font-size:16px!important;line-height:1.1!important;
+ margin:2px 0 4px!important;box-sizing:border-box!important;
+}
+/* د مقدار، واحد او نرخ د لیکلو پر مهال د بیل پاڼه نه خوځېږي */
+#sales.sale-overlay .sale-page{
+ overflow-anchor:none!important;scroll-behavior:auto!important;
+}
+#sales.sale-overlay .sale-page.sale-cart-input-focused{
+ overflow-y:hidden!important;touch-action:pan-x!important;
+}
+#sales.sale-overlay #saleCartList .sale-line-fields input:focus,
+#sales.sale-overlay #saleCartList .sale-line-fields select:focus{
+ outline:2px solid #8bb8ed!important;outline-offset:1px!important;
+ scroll-margin:0!important;
+}
+</style>
+<script id="SHAHEEN_SALE_CART_KEYBOARD_STABLE_V1">
+(function(){
+ if(window.__shaheenSaleCartKeyboardStableV1)return;
+ window.__shaheenSaleCartKeyboardStableV1=true;
+ var page=document.querySelector("#sales .sale-page");
+ if(!page)return;
+ var savedTop=0,active=false;
+ function restore(){
+  if(!active||!page.isConnected)return;
+  page.scrollTop=savedTop;
+  window.scrollTo(0,0);
+ }
+ page.addEventListener("focusin",function(e){
+  if(!e.target.closest("#saleCartList .sale-line-fields"))return;
+  savedTop=page.scrollTop;
+  active=true;
+  page.classList.add("sale-cart-input-focused");
+  requestAnimationFrame(function(){restore();requestAnimationFrame(restore);});
+ },true);
+ page.addEventListener("focusout",function(e){
+  if(!e.target.closest("#saleCartList .sale-line-fields"))return;
+  active=false;
+  page.classList.remove("sale-cart-input-focused");
+ },true);
+ if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",restore,{passive:true});
+  window.visualViewport.addEventListener("scroll",restore,{passive:true});
+ }
+})();
+</script>
+
 </html>
