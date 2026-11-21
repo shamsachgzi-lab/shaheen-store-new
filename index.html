@@ -6476,3 +6476,70 @@ body.sale-modal-open{
 @media(max-width:370px){#sales .sale-money-row{gap:7px!important;padding:8px!important}#sales .sale-money-row>.sale-simple{padding:8px!important}#sales .sale-money-row>.sale-simple>label{font-size:10px!important}#sales .sale-actions button{font-size:10px!important}#sales .sale-summary{gap:6px!important;padding:8px!important}#sales .sale-summary>div{padding:8px!important;min-height:58px!important}#sales .sale-summary>div>span{font-size:10px!important}#sales .sale-summary>div>strong{font-size:13px!important}#sales .sale-summary>div.sale-total>strong{font-size:21px!important}}
 @media(min-width:760px){#sales .sale-money-row{grid-template-columns:1fr 1fr!important}#sales .sale-summary{grid-template-columns:repeat(3,minmax(0,1fr))!important}#sales .sale-summary>div.sale-total,#sales .sale-summary>div.sale-balance-equation,#sales .sale-summary>div:last-child:not(.sale-balance-equation){grid-column:1/-1!important}}
 </style>
+
+<style id="SHAHEEN_SALE_CASH_DEBT_BIG_CLEAR_V1">
+/* نغدې ترلاسه شوې او پاتې پور: غټې، جلا او بې‌اشتباه مالي خانې */
+#sales .sale-summary>div.sale-cash-line,
+#sales .sale-summary>div.sale-debt-line{
+ grid-column:1/-1!important;
+ display:flex!important;
+ flex-direction:row!important;
+ align-items:center!important;
+ justify-content:space-between!important;
+ gap:14px!important;
+ width:100%!important;
+ min-width:0!important;
+ min-height:104px!important;
+ margin:0!important;
+ padding:18px 17px!important;
+ border-radius:16px!important;
+ box-sizing:border-box!important;
+}
+#sales .sale-summary>div.sale-cash-line{
+ background:linear-gradient(115deg,#e7f8ee,#f5fff8)!important;
+ border:2px solid #76c99a!important;
+ box-shadow:0 5px 14px rgba(16,130,73,.10)!important;
+}
+#sales .sale-summary>div.sale-debt-line{
+ background:linear-gradient(115deg,#fff0ef,#fff8f7)!important;
+ border:2px solid #e9a0a0!important;
+ box-shadow:0 5px 14px rgba(180,45,55,.09)!important;
+}
+#sales .sale-summary>div.sale-cash-line>span,
+#sales .sale-summary>div.sale-debt-line>span{
+ display:block!important;
+ flex:1 1 auto!important;
+ min-width:0!important;
+ font-size:16px!important;
+ line-height:1.65!important;
+ font-weight:900!important;
+}
+#sales .sale-summary>div.sale-cash-line>span{color:#08683d!important}
+#sales .sale-summary>div.sale-debt-line>span{color:#a52d36!important}
+#sales .sale-summary>div.sale-cash-line>strong,
+#sales .sale-summary>div.sale-debt-line>strong{
+ display:block!important;
+ flex:0 0 auto!important;
+ min-width:116px!important;
+ padding:11px 9px!important;
+ border-radius:11px!important;
+ background:rgba(255,255,255,.82)!important;
+ font-size:24px!important;
+ line-height:1.3!important;
+ font-weight:1000!important;
+ direction:ltr!important;
+ text-align:center!important;
+ white-space:nowrap!important;
+ font-variant-numeric:tabular-nums!important;
+}
+#sales .sale-summary>div.sale-cash-line>strong{color:#087747!important;border:1px solid #b8e7cb!important}
+#sales .sale-summary>div.sale-debt-line>strong{color:#b42332!important;border:1px solid #f1c3c3!important}
+@media(max-width:380px){
+ #sales .sale-summary>div.sale-cash-line,
+ #sales .sale-summary>div.sale-debt-line{min-height:94px!important;padding:13px 11px!important;gap:8px!important}
+ #sales .sale-summary>div.sale-cash-line>span,
+ #sales .sale-summary>div.sale-debt-line>span{font-size:13px!important}
+ #sales .sale-summary>div.sale-cash-line>strong,
+ #sales .sale-summary>div.sale-debt-line>strong{min-width:100px!important;padding:10px 6px!important;font-size:20px!important}
+}
+</style>
