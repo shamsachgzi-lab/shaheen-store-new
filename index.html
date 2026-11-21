@@ -5318,7 +5318,7 @@ section:not(.hidden){scroll-margin-top:10px}
  let activeField=null,lockedY=0,touchY=null,lastTouch=0,restoring=false;
  const fieldSelector='input,textarea,select,[contenteditable="true"]';
  function isSpecial(field){
-  return !!(field&&field.closest&&(field.closest("#sales")||field.closest("#invoiceEditModal")));
+  return !!(field&&field.closest&&(field.closest("#sales")||field.closest("#invoiceEditModal")||field.closest("#customers")));
  }
  function restorePage(){
   if(!activeField||isSpecial(activeField)||restoring)return;
