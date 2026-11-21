@@ -3640,8 +3640,8 @@ function printSale(id){
  const back=document.createElement("button");back.type="button";back.textContent="↩ بېرته اپلیکیشن ته";back.style.cssText="border:0;border-radius:9px;padding:11px 14px;background:#fff;color:#111;font-size:15px;font-weight:800";
  back.onclick=()=>view.remove();
  const print=document.createElement("button");print.type="button";print.textContent="🖨 چاپ";print.style.cssText="border:0;border-radius:9px;padding:11px 22px;background:#16a34a;color:#fff;font-size:15px;font-weight:800";
- const styleMatch=html.match(/<style>([\\s\\S]*?)<\\/style>/i);
- const bodyMatch=html.match(/<body[^>]*>([\\s\\S]*?)<\\/body>/i);
+ const styleMatch=html.match(/<style>([\s\S]*?)<\/style>/i);
+ const bodyMatch=html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
  const printStyle=document.createElement("style");printStyle.id="shaheenReceiptPrintStyle";
  printStyle.textContent=(styleMatch?styleMatch[1]:"")+"\\n@media print{body>*:not(#shaheenReceiptView){display:none!important}#shaheenReceiptView{position:absolute!important;inset:0 auto auto 0!important;display:block!important;width:58mm!important;height:auto!important;min-height:0!important;background:#fff!important;z-index:2147483000!important}#shaheenReceiptView .receipt-toolbar{display:none!important}#shaheenReceiptView .receipt-paper{display:block!important;width:58mm!important;max-width:58mm!important;margin:0!important;padding:0!important;box-shadow:none!important}}";
  const receipt=document.createElement("div");receipt.className="receipt-paper";receipt.style.cssText="flex:1 1 auto;overflow:auto;width:100%;background:#fff;color:#111";
