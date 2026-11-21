@@ -3426,7 +3426,10 @@ function addSale(){
  document.getElementById("saleQty").value="1";selectedSaleCustomerId="";
  document.getElementById("saleDate").value=today();updateSaleDateLabel();document.getElementById("saleCustomerResults").classList.add("hidden");
  refreshAll();
- alert("خرڅلاو ثبت شو\nرسید: "+invoice+"\nجنسونه: "+db.sales.filter(x=>x.invoice===invoice).length+"\nټول: "+money(total)+"\nتخفیف: "+money(discount)+"\nپور: "+money(total-paid));
+ // د ثبت په هماغه کلیک کې د رسید کړکۍ پرانیزه، څو د iPhone د Pop-up بندیز مخه ونیول شي.
+ const savedSale=(db.sales||[]).find(x=>String(x.invoice)===String(invoice));
+ if(savedSale)printSale(savedSale.id);
+ alert("خرڅلاو ثبت شو\nرسید: "+invoice+"\nجنسونه: "+db.sales.filter(x=>x.invoice===invoice).length+"\nټول: "+money(total)+"\nتخفیف: "+money(discount)+"\nپور: "+money(total-paid)+"\n\nد چاپ کړکۍ باید پرانیستل شوې وي؛ که نه وي، د خرڅلاو له تاریخچې څخه د چاپ تڼۍ وکاروه.");
 }
 function renderSales(){ renderSaleCart(); updateSalePreview(); }
 
@@ -3627,9 +3630,10 @@ function printSale(id){
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main></body></html>';
  w.document.open();w.document.write(html);w.document.close();
- const startPrint=()=>{try{w.focus();w.print();}catch(e){alert("چاپ پیل نه شو؛ د چاپ کړکۍ څخه بیا هڅه وکړه.");}};
- w.onload=()=>setTimeout(startPrint,450);
- setTimeout(()=>{if(!w.closed)startPrint();},900);
+ let printStarted=false;
+ const startPrint=()=>{if(printStarted||w.closed)return;printStarted=true;try{w.focus();w.print();}catch(e){alert("چاپ پیل نه شو؛ د چاپ کړکۍ څخه بیا هڅه وکړه.");}};
+ w.onload=()=>setTimeout(startPrint,500);
+ setTimeout(startPrint,1100);
 }
 function filterPurchaseProducts(){
  const q=value("buyProductSearch").toLowerCase();
