@@ -3426,10 +3426,13 @@ function addSale(){
  document.getElementById("saleQty").value="1";selectedSaleCustomerId="";
  document.getElementById("saleDate").value=today();updateSaleDateLabel();document.getElementById("saleCustomerResults").classList.add("hidden");
  refreshAll();
- // د ثبت په هماغه کلیک کې د رسید کړکۍ پرانیزه، څو د iPhone د Pop-up بندیز مخه ونیول شي.
+ // رسید د اپلیکیشن دننه په بشپړ سکرین کې ښکاره کړه؛ نوی براوزر یا about:blank مه پرانیزه.
  const savedSale=(db.sales||[]).find(x=>String(x.invoice)===String(invoice));
- if(savedSale)printSale(savedSale.id);
- alert("خرڅلاو ثبت شو\nرسید: "+invoice+"\nجنسونه: "+db.sales.filter(x=>x.invoice===invoice).length+"\nټول: "+money(total)+"\nتخفیف: "+money(discount)+"\nپور: "+money(total-paid)+"\n\nد چاپ کړکۍ باید پرانیستل شوې وي؛ که نه وي، د خرڅلاو له تاریخچې څخه د چاپ تڼۍ وکاروه.");
+ if(savedSale){
+   printSale(savedSale.id);
+ }else{
+   alert("خرڅلاو ثبت شو، خو رسید ونه موندل شو. د خرڅلاو له تاریخچې یې پرانیزه.");
+ }
 }
 function renderSales(){ renderSaleCart(); updateSalePreview(); }
 
@@ -3633,13 +3636,13 @@ function printSale(id){
  const oldView=document.getElementById("shaheenReceiptView");if(oldView)oldView.remove();
  const view=document.createElement("div");view.id="shaheenReceiptView";
  view.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#fff;display:flex;flex-direction:column;width:100%;height:100%;height:100dvh";
- const bar=document.createElement("div");bar.style.cssText="flex:0 0 auto;display:flex;gap:10px;padding:10px;background:#172033;color:#fff;align-items:center;justify-content:space-between;direction:rtl";
+ const bar=document.createElement("div");bar.style.cssText="flex:0 0 auto;display:flex;gap:10px;padding:10px;background:#172033;color:#fff;align-items:center;justify-content:space-between;direction:rtl";const status=document.createElement("strong");status.textContent="✓ خرڅلاو ثبت شو — رسید";status.style.cssText="font-size:13px;color:#fff;flex:1;text-align:center";
  const back=document.createElement("button");back.type="button";back.textContent="↩ بېرته اپلیکیشن ته";back.style.cssText="border:0;border-radius:9px;padding:11px 14px;background:#fff;color:#111;font-size:15px;font-weight:800";
  back.onclick=()=>view.remove();
  const print=document.createElement("button");print.type="button";print.textContent="🖨 چاپ";print.style.cssText="border:0;border-radius:9px;padding:11px 22px;background:#16a34a;color:#fff;font-size:15px;font-weight:800";
  const frame=document.createElement("iframe");frame.title="د خرڅلاو رسید";frame.style.cssText="display:block;flex:1 1 auto;width:100%;height:100%;border:0;background:#fff";
  print.onclick=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(e){alert("چاپ پیل نه شو؛ بیا هڅه وکړه.")}};
- bar.appendChild(back);bar.appendChild(print);view.appendChild(bar);view.appendChild(frame);document.body.appendChild(view);
+ bar.appendChild(back);bar.appendChild(status);bar.appendChild(print);view.appendChild(bar);view.appendChild(frame);document.body.appendChild(view);
  frame.srcdoc=html;
 }
 function filterPurchaseProducts(){
