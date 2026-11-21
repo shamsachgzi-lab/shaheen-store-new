@@ -3640,10 +3640,17 @@ function printSale(id){
  const back=document.createElement("button");back.type="button";back.textContent="↩ بېرته اپلیکیشن ته";back.style.cssText="border:0;border-radius:9px;padding:11px 14px;background:#fff;color:#111;font-size:15px;font-weight:800";
  back.onclick=()=>view.remove();
  const print=document.createElement("button");print.type="button";print.textContent="🖨 چاپ";print.style.cssText="border:0;border-radius:9px;padding:11px 22px;background:#16a34a;color:#fff;font-size:15px;font-weight:800";
- const frame=document.createElement("iframe");frame.title="د خرڅلاو رسید";frame.style.cssText="display:block;flex:1 1 auto;width:100%;height:100%;border:0;background:#fff";
- print.onclick=()=>{try{frame.contentWindow.focus();frame.contentWindow.print()}catch(e){alert("چاپ پیل نه شو؛ بیا هڅه وکړه.")}};
- bar.appendChild(back);bar.appendChild(status);bar.appendChild(print);view.appendChild(bar);view.appendChild(frame);document.body.appendChild(view);
- frame.srcdoc=html;
+ const styleMatch=html.match(/<style>([\\s\\S]*?)<\\/style>/i);
+ const bodyMatch=html.match(/<body[^>]*>([\\s\\S]*?)<\\/body>/i);
+ const printStyle=document.createElement("style");printStyle.id="shaheenReceiptPrintStyle";
+ printStyle.textContent=(styleMatch?styleMatch[1]:"")+"\\n@media print{body>*:not(#shaheenReceiptView){display:none!important}#shaheenReceiptView{position:absolute!important;inset:0 auto auto 0!important;display:block!important;width:58mm!important;height:auto!important;min-height:0!important;background:#fff!important;z-index:2147483000!important}#shaheenReceiptView .receipt-toolbar{display:none!important}#shaheenReceiptView .receipt-paper{display:block!important;width:58mm!important;max-width:58mm!important;margin:0!important;padding:0!important;box-shadow:none!important}}";
+ const receipt=document.createElement("div");receipt.className="receipt-paper";receipt.style.cssText="flex:1 1 auto;overflow:auto;width:100%;background:#fff;color:#111";
+ receipt.innerHTML=bodyMatch?bodyMatch[1]:"رسید ونه موندل شو";
+ bar.className="receipt-toolbar";
+ print.onclick=()=>{try{window.focus();window.print()}catch(e){alert("چاپ پیل نه شو؛ د موبایل د شریکولو له مېنو څخه Print وټاکه.")}};
+ bar.appendChild(back);bar.appendChild(status);bar.appendChild(print);view.appendChild(bar);view.appendChild(receipt);
+ const oldStyle=document.getElementById("shaheenReceiptPrintStyle");if(oldStyle)oldStyle.remove();
+ document.head.appendChild(printStyle);document.body.appendChild(view);
 }
 function filterPurchaseProducts(){
  const q=value("buyProductSearch").toLowerCase();
