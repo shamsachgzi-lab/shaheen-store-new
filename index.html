@@ -6061,4 +6061,74 @@ html body main>section#purchases.purchase-page.hidden{display:none!important;vis
 })();
 </script>
 
+
+<style id="SHAHEEN_SALE_VISUAL_VIEWPORT_KEYBOARD_V2">
+/* د iPhone د کیبورډ له پرانیستلو سره خرڅلاو د حقیقي visual viewport په اندازه عیارول */
+html.sale-modal-open,body.sale-modal-open{
+ overflow:hidden!important;
+}
+#sales.sale-overlay:not(.hidden){
+ position:fixed!important;
+ inset:auto 0 auto 0!important;
+ top:var(--sale-vv-top,0px)!important;
+ bottom:auto!important;
+ width:100%!important;
+ height:var(--sale-vv-height,100dvh)!important;
+ max-height:var(--sale-vv-height,100dvh)!important;
+ min-height:0!important;
+ overflow:hidden!important;
+ transform:none!important;
+}
+#sales.sale-overlay:not(.hidden)>.sale-page{
+ position:absolute!important;
+ inset:0!important;
+ width:100%!important;
+ height:100%!important;
+ max-height:100%!important;
+ min-height:0!important;
+ margin:0!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ -webkit-overflow-scrolling:touch!important;
+ overscroll-behavior:contain!important;
+ box-sizing:border-box!important;
+}
+#sales.sale-overlay .sale-page.sale-cart-input-focused{
+ overflow-y:auto!important;
+ touch-action:pan-y!important;
+}
+</style>
+<script id="SHAHEEN_SALE_VISUAL_VIEWPORT_KEYBOARD_V2">
+(function(){
+ if(window.__shaheenSaleVisualViewportV2)return;
+ window.__shaheenSaleVisualViewportV2=true;
+ function sync(){
+  if(!document.body.classList.contains("sale-modal-open"))return;
+  var vv=window.visualViewport;
+  var top=vv?Math.max(0,vv.offsetTop):0;
+  var height=vv?vv.height:window.innerHeight;
+  document.documentElement.style.setProperty("--sale-vv-top",top+"px");
+  document.documentElement.style.setProperty("--sale-vv-height",height+"px");
+ }
+ if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",sync,{passive:true});
+  window.visualViewport.addEventListener("scroll",sync,{passive:true});
+ }
+ window.addEventListener("resize",sync,{passive:true});
+ document.addEventListener("focusin",function(e){
+  if(e.target&&e.target.closest&&e.target.closest("#sales #saleCartList .sale-line-fields")){
+   sync();
+   requestAnimationFrame(sync);
+   setTimeout(sync,100);
+   setTimeout(sync,300);
+  }
+ },true);
+ document.addEventListener("focusout",function(e){
+  if(e.target&&e.target.closest&&e.target.closest("#sales #saleCartList .sale-line-fields")){
+   setTimeout(sync,250);
+  }
+ },true);
+})();
+</script>
+
 </html>
