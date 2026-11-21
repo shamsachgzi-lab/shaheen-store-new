@@ -2470,8 +2470,8 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
    <div><span>مجموع</span><strong id="saleSubtotalPreview">AFN 0</strong></div>
    <div><span>تخفیف</span><strong id="saleDiscountPreview">AFN 0</strong></div>
    <div class="sale-total"><span>ټول مبلغ</span><strong id="saleTotalPreview">AFN 0</strong></div>
-   <div class="sale-debt-line"><span><b class="sale-payment-icon">📕</b> پاتې پور — لا نه دی ورکړل شوی</span><strong id="saleDebtPreview">AFN 0</strong></div>
-   <div class="sale-cash-line"><span><b class="sale-payment-icon">💵</b> نغدې ترلاسه شوې — ورکړل شوې پیسې</span><strong id="salePaidPreview">AFN 0</strong></div>
+   <div class="sale-cash-line"><span><b class="sale-payment-icon">💵</b> نغدې پیسې — مشتری همدا اوس څومره پیسې راکړې؟</span><strong id="salePaidPreview">AFN 0</strong></div>
+   <div class="sale-debt-line"><span><b class="sale-payment-icon">📕</b> پاتې پور — مشتری لا څومره پیسې پوروړی دی؟</span><strong id="saleDebtPreview">AFN 0</strong></div>
    <div class="sale-balance-equation"><span>د حساب تصدیق</span><strong id="saleBalanceCheck">وروستی مبلغ = نغدې + پاتې پور</strong></div>
    <div><span>ګټه</span><strong id="saleProfitPreview">AFN 0</strong></div>
   </div>
@@ -6552,4 +6552,17 @@ body.sale-modal-open{
  #sales .sale-summary>div.sale-cash-line>strong,
  #sales .sale-summary>div.sale-debt-line>strong{min-width:100px!important;padding:10px 6px!important;font-size:20px!important}
 }
+</style>
+
+<style id="shaheen-sale-cash-debt-clear-large-v1">
+#sales .sale-summary>div.sale-cash-line,#sales .sale-summary>div.sale-debt-line{grid-column:1/-1!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;width:100%!important;min-height:108px!important;padding:18px 16px!important;margin:4px 0!important;border-width:2px!important;border-radius:16px!important;box-sizing:border-box!important}
+#sales .sale-summary>div.sale-cash-line{background:linear-gradient(110deg,#e5f8ed,#f5fff8)!important;border-color:#78c99a!important}
+#sales .sale-summary>div.sale-debt-line{background:linear-gradient(110deg,#fff0ef,#fff9f8)!important;border-color:#e69b9b!important}
+#sales .sale-summary>div.sale-cash-line>span,#sales .sale-summary>div.sale-debt-line>span{display:block!important;flex:1 1 auto!important;min-width:0!important;font-size:16px!important;line-height:1.65!important;font-weight:900!important;white-space:normal!important}
+#sales .sale-summary>div.sale-cash-line>span{color:#075d38!important}
+#sales .sale-summary>div.sale-debt-line>span{color:#9f202b!important}
+#sales .sale-summary>div.sale-cash-line>strong,#sales .sale-summary>div.sale-debt-line>strong{display:block!important;flex:0 0 auto!important;font-size:25px!important;line-height:1.2!important;font-weight:1000!important;direction:ltr!important;text-align:left!important;white-space:nowrap!important;font-variant-numeric:tabular-nums!important}
+#sales .sale-summary>div.sale-cash-line>strong{color:#087747!important}
+#sales .sale-summary>div.sale-debt-line>strong{color:#b42332!important}
+@media(max-width:390px){#sales .sale-summary>div.sale-cash-line,#sales .sale-summary>div.sale-debt-line{min-height:100px!important;padding:14px 11px!important;gap:7px!important}#sales .sale-summary>div.sale-cash-line>span,#sales .sale-summary>div.sale-debt-line>span{font-size:14px!important}#sales .sale-summary>div.sale-cash-line>strong,#sales .sale-summary>div.sale-debt-line>strong{font-size:21px!important}}
 </style>
