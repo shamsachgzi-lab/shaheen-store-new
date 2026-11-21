@@ -2497,7 +2497,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <button class="primary purchase-save" onclick="addPurchase()">✓ ټول پېرود په یوه رسید کې ثبت کړه</button>
   <p class="notice purchase-hint">د انتقال مصارف به د جنسونو د ارزښت په تناسب ووېشل شي او د هر جنس د موجودۍ اخیستلو قیمت ته به ورزیات شي. مثال: ۱۵۰۰ + ۵۰ = ۱۵۵۰ AFN. که شرکت ته پور پاتې وي، یوازې د هماغه شرکت حساب به زیات شي.</p>
  </div>
- <div class="purchase-history panel"><div class="purchase-section-title"><b>📚 د پېرود تاریخچه</b><button type="button" class="red" onclick="clearPurchaseHistory()">🗑️ ټوله تاریخچه پاکه کړه</button></div><label>🔍 د جنس، عرضه کوونکي یا رسید له مخې ولټوه</label><input id="purchasesSearch" placeholder="د لټون کلمه ولیکه..."><div id="purchasesList"></div></div>
+ <div class="purchase-history panel"><div class="purchase-section-title"><b>📚 د پېرود تاریخچه</b><button type="button" class="red" onclick="clearPurchaseHistory()">🗑️ ټوله تاریخچه پاکه کړه</button></div><div class="purchase-date-filter"><div class="purchase-date-filter-title">📅 د پېرود د نېټې راپور</div><div class="row purchase-date-fields"><div><label>له نېټې</label><input id="purchaseFromDate" type="date"></div><div><label>تر نېټې</label><input id="purchaseToDate" type="date"></div></div><div class="actions purchase-date-actions"><button type="button" class="gray" onclick="setPurchaseLast7Days()">وروستۍ ۷ ورځې</button><button type="button" class="gray" onclick="clearPurchaseDateFilter()">ټول پېرودونه</button></div><small class="purchase-date-hint">د یوې ورځې د لیدلو لپاره په دواړو ځایونو کې هماغه نېټه وټاکه.</small></div><label>🔍 د جنس، عرضه کوونکي یا رسید له مخې ولټوه</label><input id="purchasesSearch" placeholder="د لټون کلمه ولیکه..."><div id="purchasesList"></div></div>
 </section>
 
 <section id="customers" class="hidden">
@@ -2817,7 +2817,7 @@ function initAllJalaliDatePickers(root=document){
  root.querySelectorAll('input[type="date"]').forEach(input=>{
   if(input.dataset.jalaliReady==="1")return;
   input.dataset.jalaliReady="1";
-  if(!input.value&&!["reportFrom","reportTo"].includes(input.id))input.value=today();
+  if(!input.value&&!["reportFrom","reportTo","purchaseFromDate","purchaseToDate"].includes(input.id))input.value=today();
   input.style.display="none";
   const wrap=document.createElement("div");wrap.className="jalali-date-picker";
   const iso=input.value||"";let jy="",jm="",jd="";
@@ -2828,7 +2828,7 @@ function initAllJalaliDatePickers(root=document){
   wrap.innerHTML='<div class="jalali-date-fields"><select class="jalali-day" aria-label="ورځ"><option value="">ورځ</option>'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'" '+(String(i+1)===String(jd)?"selected":"")+'>'+jalaliDigits(i+1)+'</option>').join("")+'</select><select class="jalali-month" aria-label="میاشت"><option value="">میاشت</option>'+months.map((m,i)=>'<option value="'+(i+1)+'" '+(String(i+1)===String(jm)?"selected":"")+'>'+m+'</option>').join("")+'</select><select class="jalali-year" aria-label="کال"><option value="">کال</option>'+years+'</select></div><div class="jalali-date-label">'+(iso?displayDate(iso):"لمریز کال / میاشت / ورځ وټاکه")+'</div>';
   input.insertAdjacentElement("afterend",wrap);
   const update=()=>{const day=wrap.querySelector(".jalali-day").value,month=wrap.querySelector(".jalali-month").value,year=wrap.querySelector(".jalali-year").value,label=wrap.querySelector(".jalali-date-label");if(!day||!month||!year){input.value="";label.textContent="لمریز کال / میاشت / ورځ وټاکه";return;}const value=jalaliToISO(Number(year),Number(month),Number(day));if(!value){input.value="";label.textContent="دا لمریزه نېټه سمه نه ده";return;}input.value=value;label.textContent=displayDate(value);};
-  wrap.querySelectorAll("select").forEach(el=>el.addEventListener("change",update));
+  wrap.querySelectorAll("select").forEach(el=>el.addEventListener("change",()=>{update();if((input.id==="purchaseFromDate"||input.id==="purchaseToDate")&&typeof renderPurchases==="function")renderPurchases();}));
  });
 }
 function watchJalaliDatePickers(){
@@ -3769,19 +3769,34 @@ function clearPurchaseHistory(){
  try{saveDB();const search=document.getElementById("purchasesSearch");if(search)search.value="";renderPurchases();updateDashboard();renderCapitalPage();alert("د پېرود تاریخچه پاکه شوه. نور حسابونه هماغسې پاتې دي.");}
  catch(e){db.purchases=previous;alert("تاریخچه پاکه نه شوه؛ معلومات خوندي پاتې دي.");}
 }
+function setPurchaseLast7Days(){
+ const end=new Date();const start=new Date(end);start.setDate(start.getDate()-6);
+ const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+ document.getElementById("purchaseFromDate").value=iso(start);
+ document.getElementById("purchaseToDate").value=iso(end);
+ syncJalaliDatePicker("purchaseFromDate");syncJalaliDatePicker("purchaseToDate");renderPurchases();
+}
+function clearPurchaseDateFilter(){
+ document.getElementById("purchaseFromDate").value="";
+ document.getElementById("purchaseToDate").value="";
+ syncJalaliDatePicker("purchaseFromDate");syncJalaliDatePicker("purchaseToDate");renderPurchases();
+}
 function renderPurchases(){
  const q=value("purchasesSearch").toLowerCase();
  const all=db.purchases||[];
- const list=all.filter(p=>
+ const from=value("purchaseFromDate"),to=value("purchaseToDate");
+ const dateFiltered=all.filter(p=>{const d=String(p.date||p.purchaseDate||"").slice(0,10);return (!from||d>=from)&&(!to||d<=to);});
+ const list=dateFiltered.filter(p=>
   String(p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"").toLowerCase().includes(q)||
   String(p.supplier||p.supplierName||p.company||"").toLowerCase().includes(q)||
   String(p.invoice||p.receipt||"").toLowerCase().includes(q)||
   String(p.date||p.purchaseDate||"").includes(q)
  ).slice().reverse();
  const sum=(arr,key)=>arr.reduce((n,p)=>n+Number(p[key]||0),0);
- const total=sum(all,"total"),paid=sum(all,"paid"),debt=all.reduce((n,p)=>n+Number(p.debt??Math.max(0,Number(p.total||0)-Number(p.paid||0))),0);
+ const total=sum(dateFiltered,"total"),paid=sum(dateFiltered,"paid"),debt=dateFiltered.reduce((n,p)=>n+Number(p.debt??Math.max(0,Number(p.total||0)-Number(p.paid||0))),0);
+ const receiptCount=new Set(dateFiltered.map(p=>p.invoice||p.receipt||p.id)).size;
  const box=document.getElementById("purchasesList");if(!box)return;
- const stats=`<div class="purchase-stats"><div><small>ټول رسیدونه</small><b>${all.length}</b></div><div><small>ټول پېرود</small><b>${money(total)}</b></div><div><small>ورکړل شوې پیسې</small><b>${money(paid)}</b></div><div><small>پاتې پور</small><b>${money(debt)}</b></div></div>`;
+ const stats=`<div class="purchase-stats"><div><small>رسیدونه</small><b>${receiptCount}</b></div><div><small>ټول پېرود</small><b>${money(total)}</b></div><div><small>ورکړل شوې پیسې</small><b>${money(paid)}</b></div><div><small>پاتې پور</small><b>${money(debt)}</b></div></div>`;
  const showNum=v=>v===undefined||v===null||v===""||!Number.isFinite(Number(v))?"—":Number(v).toLocaleString("en-US",{maximumFractionDigits:3});
  const cards=list.map(p=>{
   const productName=p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"پخوانی نامکمل ریکارډ";
