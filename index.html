@@ -3607,9 +3607,9 @@ function printSale(id){
  const html='<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>رسید '+safe(invoice||selected.id)+'</title><style>'+
  '*{box-sizing:border-box}'+
  '@page{size:58mm auto;margin:0}'+
- 'html,body{width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important;background:#fff;color:#111;font-family:Arial,Tahoma,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
- 'body{font-size:9px;line-height:1.45;font-weight:600}'+
- '.invoice{width:58mm;max-width:58mm;margin:0 auto;padding:2.5mm 2mm 3mm}'+
+ 'html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}'+
+ 'body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important;background:#fff;color:#111;font-family:Arial,Tahoma,sans-serif;font-size:9px;line-height:1.45;font-weight:600;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+ '.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:0!important;padding:2.5mm 2mm 3mm}'+
  '.top{text-align:center;padding:1mm 0 2mm;border-bottom:1px dashed #333}'+
  '.top h1{font-size:16px;line-height:1.3;margin:0 0 1mm;font-weight:900}'+
  '.top .subtitle{font-size:9px;font-weight:800;margin:0}.top .phone{font-size:8px;margin-top:1mm}'+
@@ -3622,7 +3622,7 @@ function printSale(id){
  '.paid{color:#075b32;border:1px solid #25804b;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}.debt{color:#991b1b;border:1px solid #b33;padding:1.5mm!important;margin-top:1mm;border-radius:1.5mm;font-weight:900}'+
  '.note{padding:2mm 0;font-size:8px;border-bottom:1px dashed #555;overflow-wrap:anywhere}.thanks{text-align:center;padding:3mm 0 1mm;margin-top:2mm;border-top:1px dashed #555;font-size:8.5px;font-weight:800}.footer{text-align:center;font-size:7px;color:#555;margin-top:1mm}'+
  '@media screen{body{background:#e8edf3;padding:8px 0}.invoice{background:#fff;box-shadow:0 2px 12px #0002}}'+
- '@media print{html,body{width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}.invoice{width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
+ '@media print{html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important}.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
  '</style></head><body><main class="invoice">'+
  '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
