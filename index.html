@@ -6159,9 +6159,8 @@ body.sale-modal-open{
   document.documentElement.style.setProperty("--sale-vv-height",Math.max(180,h)+"px");
  }
  function keepDocumentStill(){
-  if(!active())return;
-  var y=window.__shaheenSaleLockedScrollY;
-  if(typeof y==="number"&&Math.abs(window.scrollY-y)>2)window.scrollTo(0,y);
+  /* د خرڅلاو پر مهال د window اجباري scrollTo لرې شو؛ دا په iPhone کې د کنګل کېدو او ټکر سبب کېدای شو. */
+  return;
  }
  function revealField(el){
   if(!active()||!el)return;
@@ -6186,11 +6185,7 @@ body.sale-modal-open{
   window.visualViewport.addEventListener("scroll",function(){sync();keepDocumentStill()},{passive:true});
  }
  window.addEventListener("resize",sync,{passive:true});
- document.addEventListener("touchmove",function(e){
-  if(!active())return;
-  if(e.target&&e.target.closest&&e.target.closest("#sales .sale-page"))return;
-  e.preventDefault();
- },{passive:false});
+ /* د خرڅلاو څخه بهر touchmove نور په زور نه بندېږي؛ د iPhone عادي لمس خوندي پاتې کېږي. */
  document.addEventListener("click",function(e){
   if(e.target&&e.target.closest&&e.target.closest("#sales .sale-modal-close")){
    document.documentElement.style.removeProperty("--sale-vv-height");
