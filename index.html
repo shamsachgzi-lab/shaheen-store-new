@@ -4909,7 +4909,7 @@ function restoreData(mergeOnly=false){
 
 /* د لټون او انتخابونو فعالول */
 document.getElementById("productSearch").addEventListener("input",renderProducts);
-document.getElementById("customerSearch").addEventListener("input",()=>{const y=window.scrollY;renderCustomers();requestAnimationFrame(()=>window.scrollTo(0,y));});
+document.getElementById("customerSearch").addEventListener("input",()=>{renderCustomers();});
 
 /* د مشتری د ثبت تڼۍ: مستقیم event او د تېروتنې ښکاره کول */
 document.getElementById("addCustomerBtn")?.addEventListener("click",function(){
