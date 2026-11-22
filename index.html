@@ -3208,9 +3208,13 @@ window.unitLabel=unitLabel;
 function purchaseUnitWeightKg(product,unit,stored){
  const saved=Number(stored)||0;if(saved>0)return saved;
  const byUnit=unitWeightInKg(unit);if(byUnit>0)return byUnit;
- const name=String(product?.name||product?.productName||"");
- const match=name.match(/(\d+(?:[.,]\d+)?)\s*(?:کیلوګرام|کیلو|کیلویی|کيلو|kg)/i);
- if(match){const n=Number(match[1].replace(",","."));if(Number.isFinite(n)&&n>0)return n;}
+ const rawName=String(product?.productName||product?.name||product?.title||"");
+ const name=rawName.replace(/[كک]/g,"ک").replace(/[يى]/g,"ی").replace(/ې/g,"ی").toLowerCase();
+ // د جنس په نوم کې لیکل شوی وزن هم پېژني، لکه 40 کیلویی او 50 کیلویی
+ if(/کیلو|کيلو|kg|کيلوګرام|کیلوګرام/.test(name)){
+  const match=name.match(/(\d+(?:[.,]\d+)?)/);
+  if(match){const n=Number(match[1].replace(",","."));if(Number.isFinite(n)&&n>0)return n;}
+ }
  return 0;
 }
 function unitWeightInKg(name){
