@@ -3838,6 +3838,19 @@ function editPurchaseWeight(id){
  try{saveDB();renderPurchases();alert("وزن اصلاح شو. ټول وزن: "+p.weightKg.toLocaleString("en-US")+" کیلوګرام");}
  catch(e){p.weightKg=old.weightKg;p.unitWeightKg=old.unitWeightKg;alert("بدلون خوندي نه شو؛ پخوانی وزن هماغسې پاتې شو");}
 }
+function openPurchaseInvoiceEditor(encodedKey){
+ const key=decodeURIComponent(encodedKey),rows=(db.purchases||[]).filter(p=>String(p.invoice||p.receipt||("single-"+p.id))===key);
+ if(!rows.length)return alert("د خرید رسید ونه موندل شو");
+ const old=document.getElementById("purchaseInvoiceEditModal");if(old)old.remove();
+ const modal=document.createElement("div");modal.id="purchaseInvoiceEditModal";modal.style.cssText="position:fixed;inset:0;z-index:100001;background:#101827aa;overflow:auto;padding:12px";
+ const cards=rows.map((p,i)=>{const qty=Number(p.qty??p.quantity)||0,uw=qty>0&&Number(p.weightKg)>0?Number(p.weightKg)/qty:Number(p.unitWeightKg)||0,name=p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"جنس";return '<section style="border:1px solid #dbe4ef;border-radius:12px;padding:12px;margin:10px 0"><b>'+safe(name)+'</b><p>مقدار: '+qty+' '+safe(unitLabel(p.unit||p.purchaseUnit||""))+'</p><label>د یوه واحد وزن (کیلوګرام)</label><input data-row="'+i+'" type="number" min="0.001" step="any" value="'+(uw||"")+'" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px"><p>ټول وزن: <b data-total="'+i+'">'+(uw*qty||0)+'</b> کیلو</p></section>';}).join("");
+ modal.innerHTML='<div style="max-width:650px;margin:10px auto;background:white;border-radius:16px;padding:16px"><div style="display:flex;justify-content:space-between"><h3>🧾 د خرید بشپړ رسید</h3><button onclick="document.getElementById(\'purchaseInvoiceEditModal\').remove()">✕</button></div><p>د دې رسید ټول جنسونه دلته یوځای دي. د هر جنس وزن بدل کړه.</p>'+cards+'<h3 id="purchaseWeightSum" style="background:#edf4ff;padding:12px;border-radius:9px">ټول وزن: — کیلو</h3><button id="savePurchaseInvoiceWeights" class="primary" style="width:100%;padding:14px">💾 ټول بدلونونه خوندي کړه</button></div>';
+ document.body.appendChild(modal);
+ const update=()=>{let sum=0;modal.querySelectorAll("[data-row]").forEach((el,i)=>{const qty=Number(rows[i].qty??rows[i].quantity)||0,total=qty*(Number(el.value)||0);sum+=total;modal.querySelector('[data-total="'+i+'"]').textContent=total.toLocaleString("en-US",{maximumFractionDigits:3});});modal.querySelector("#purchaseWeightSum").textContent="ټول وزن: "+sum.toLocaleString("en-US",{maximumFractionDigits:3})+" کیلو";};
+ modal.querySelectorAll("[data-row]").forEach(el=>el.addEventListener("input",update));
+ modal.querySelector("#savePurchaseInvoiceWeights").onclick=()=>{const changes=[];modal.querySelectorAll("[data-row]").forEach((el,i)=>{const qty=Number(rows[i].qty??rows[i].quantity)||0,w=Number(el.value);if(qty<=0||!Number.isFinite(w)||w<=0)changes.push(null);else changes.push({p:rows[i],w,kg:qty*w});});if(changes.some(x=>!x))return alert("د هر جنس د یوه واحد وزن سم ولیکه");const backup=changes.map(x=>({p:x.p,w:x.p.weightKg,u:x.p.unitWeightKg}));changes.forEach(x=>{x.p.unitWeightKg=x.w;x.p.weightKg=x.kg;});try{saveDB();modal.remove();renderPurchases();alert("د دې رسید ټول وزنونه اصلاح او خوندي شول");}catch(e){backup.forEach(x=>{x.p.weightKg=x.w;x.p.unitWeightKg=x.u;});alert("بدلون خوندي نه شو؛ پخواني معلومات وساتل شول");}};
+ update();
+}
 function renderPurchases(){
  const q=value("purchasesSearch").toLowerCase();
  const all=db.purchases||[];
@@ -3855,34 +3868,13 @@ function renderPurchases(){
  const box=document.getElementById("purchasesList");if(!box)return;
  const stats=`<div class="purchase-stats"><div><small>رسیدونه</small><b>${receiptCount}</b></div><div><small>ټول پېرود</small><b>${money(total)}</b></div><div><small>ورکړل شوې پیسې</small><b>${money(paid)}</b></div><div><small>پاتې پور</small><b>${money(debt)}</b></div></div>`;
  const showNum=v=>v===undefined||v===null||v===""||!Number.isFinite(Number(v))?"—":Number(v).toLocaleString("en-US",{maximumFractionDigits:3});
- const cards=list.map(p=>{
-  const productName=p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"پخوانی نامکمل ریکارډ";
-  const supplier=p.supplier||p.supplierName||p.company||"نغدي پېرود / نوم نه دی ثبت شوی";
-  const unit=p.unit||p.purchaseUnit||p.productUnit||"";
-  const qty=p.qty??p.quantity,stockQty=p.stockQty??p.stockAdded??p.addedQty;
-  const price=p.price??p.unitPrice??p.costPrice;
-  const totalValue=p.total??p.amount??((Number(qty)>0&&Number(price)>0)?Number(qty)*Number(price):0);
-  const paidValue=p.paid??p.paidAmount??0;
-  const debtValue=p.debt??p.remainingDebt??Math.max(0,Number(totalValue)-Number(paidValue));
-  const invoice=p.invoice||p.receipt||"نه دی ثبت شوی";
-  const date=displayDate(p.date||p.purchaseDate||"");
-  const missing=!p.productName&&!p.name&&!db.products.some(x=>String(x.id)===String(p.productId));
-  const stockText=stockQty===undefined||stockQty===null?"—":showNum(stockQty)+" "+safe(unitLabel(p.productUnit||p.baseUnit||unit));
-  return `<article class="purchase-history-item">
-   <div class="purchase-history-top"><b>${safe(productName)}</b><span>${money(totalValue)}</span></div>
-   ${missing?'<div class="purchase-legacy-note">⚠️ د دې زوړ ریکارډ جنس او مقدار په پخوانیو معلوماتو کې نه دي ثبت شوي؛ اصلي مبلغ خوندي دی.</div>':""}
-   <div class="purchase-meta"><span>رسید: ${safe(invoice)}</span><span>نېټه: ${safe(date)}</span></div>
-   <div class="purchase-meta"><span>عرضه کوونکی: ${safe(supplier)}</span></div>
-   <div class="purchase-detail-grid">
-    <div><small>پېرودل شوی مقدار</small><b>${qty===undefined?"—":showNum(qty)+" "+safe(unitLabel(unit))}</b></div>
-    <div><small>ګدام ته داخل شوی</small><b>${stockText}</b></div>
-    <div><small>فی واحد قیمت</small><b>${price===undefined?"—":money(price)}</b></div>
-    <div><small>ټول وزن</small><b>${Number(p.weightKg)>0?showNum(p.weightKg)+" کیلو":"وزن نه دی ثبت شوی"}</b></div>
-    <div><small>ورکړل شوې پیسې</small><b class="purchase-paid">${money(paidValue)}</b></div>
-    <div><small>پاتې پور</small><b class="purchase-debt">${money(debtValue)}</b></div>
-   </div>
-   <button type="button" class="gray" onclick="editPurchaseWeight('${p.id}')">✏️ د یوه واحد وزن اصلاح کړه</button>
-  </article>`;
+ const grouped=new Map();list.forEach(p=>{const key=String(p.invoice||p.receipt||("single-"+p.id));if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(p);});
+ const cards=[...grouped.entries()].map(([key,rows])=>{
+ const first=rows[0],supplier=first.supplier||first.supplierName||first.company||"نغدي پېرود / نوم نه دی ثبت شوی",invoice=first.invoice||first.receipt||"رسید نمبر نشته",date=displayDate(first.date||first.purchaseDate||"");
+ const amount=rows.reduce((n,p)=>n+Number(p.total??p.amount??((Number(p.qty??p.quantity)||0)*(Number(p.price??p.unitPrice??p.costPrice)||0))),0);
+ const paid=rows.reduce((n,p)=>n+Number((p.paid??p.paidAmount)||0),0),weight=rows.reduce((n,p)=>n+Number(p.weightKg||0),0);
+ const lines=rows.map(p=>{const name=p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"جنس";return '<div style="padding:9px 2px;border-bottom:1px solid #e5eaf1"><b>'+safe(name)+'</b><div style="font-size:12px;color:#64748b">مقدار: '+showNum(p.qty??p.quantity)+' '+safe(unitLabel(p.unit||p.purchaseUnit||""))+' · ټول وزن: '+(Number(p.weightKg)>0?showNum(p.weightKg)+' کیلو':'نه دی ثبت شوی')+'</div></div>';}).join("");
+ return '<article class="purchase-history-item"><div class="purchase-history-top"><b>🧾 د خرید رسید</b><span>'+money(amount)+'</span></div><div class="purchase-meta"><span>رسید: '+safe(invoice)+'</span><span>نېټه: '+safe(date)+'</span></div><div class="purchase-meta"><span>شرکت: '+safe(supplier)+'</span><span>جنسونه: '+rows.length+'</span></div><div style="margin-top:8px">'+lines+'</div><div class="purchase-meta"><b>ټول وزن: '+showNum(weight)+' کیلوګرام</b><b>ورکړل شوې: '+money(paid)+'</b></div><button type="button" class="primary" style="width:100%;margin-top:10px" onclick="openPurchaseInvoiceEditor(\''+encodeURIComponent(key)+'\')">📂 بشپړ رسید خلاص او اصلاح کړه</button></article>';
  }).join("");
  box.innerHTML=stats+(cards||'<p class="purchase-empty">د پېرود ریکارډ ونه موندل شو</p>');
 }
