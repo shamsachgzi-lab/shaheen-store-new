@@ -5054,27 +5054,57 @@ function restoreData(mergeOnly=false){
    if(!Array.isArray(restored.sarafTransactions))restored.sarafTransactions=[];
    if(!Array.isArray(restored.archives))restored.archives=[];
    if(mergeOnly){
-    // خوندي یوځای کول: د اوسني DB نورې برخې مه بدلوه؛ یوازې ورک جنسونه او مشتریان ورزیات کړه.
-    const productKeys=new Set((db.products||[]).map(p=>String(p.id||"")+"|"+String(p.name||"").trim().toLowerCase()));
-    const productNames=new Set((db.products||[]).map(p=>String(p.name||"").trim().toLowerCase()).filter(Boolean));
+    // خوندي تاریخچه-یوځای کول: د موجودو حسابونو پور، نغدې او موجودي نه محاسبه/بدلوو.
+    const key=(x)=>String(x?.id||"");
+    const norm=(x)=>String(x||"").trim().toLowerCase();
+    const addUnique=(current,incoming,identity)=>{
+     const seen=new Set((current||[]).map(identity).filter(Boolean));
+     const added=[];
+     for(const item of (incoming||[])){
+      const k=identity(item);
+      if(k&&seen.has(k))continue;
+      if(k)seen.add(k);
+      added.push(item);
+     }
+     return added;
+    };
+    const productNames=new Set((db.products||[]).map(p=>norm(p.name)).filter(Boolean));
+    const productIds=new Set((db.products||[]).map(p=>key(p)).filter(Boolean));
     const newProducts=(restored.products||[]).filter(p=>{
-     const key=String(p.id||"")+"|"+String(p.name||"").trim().toLowerCase(),name=String(p.name||"").trim().toLowerCase();
-     if(productKeys.has(key)||(name&&productNames.has(name)))return false;
-     productKeys.add(key);if(name)productNames.add(name);return true;
+     if(productIds.has(key(p))||(norm(p.name)&&productNames.has(norm(p.name))))return false;
+     if(key(p))productIds.add(key(p));if(norm(p.name))productNames.add(norm(p.name));return true;
     });
-    const customerKeys=new Set((db.customers||[]).map(c=>String(c.id||"")+"|"+String(c.name||"").trim().toLowerCase()));
-    const customerNames=new Set((db.customers||[]).map(c=>String(c.name||"").trim().toLowerCase()).filter(Boolean));
+    const customerIds=new Set((db.customers||[]).map(key).filter(Boolean));
+    const customerNames=new Set((db.customers||[]).map(c=>norm(c.name)).filter(Boolean));
     const newCustomers=(restored.customers||[]).filter(c=>{
-     const key=String(c.id||"")+"|"+String(c.name||"").trim().toLowerCase(),name=String(c.name||"").trim().toLowerCase();
-     if(customerKeys.has(key)||(name&&customerNames.has(name)))return false;
-     customerKeys.add(key);if(name)customerNames.add(name);return true;
+     if(customerIds.has(key(c))||(norm(c.name)&&customerNames.has(norm(c.name))))return false;
+     if(key(c))customerIds.add(key(c));if(norm(c.name))customerNames.add(norm(c.name));return true;
     });
-    if(!newProducts.length&&!newCustomers.length)return alert("د بیک‌اف د شمېر تشخیص:\nپه زاړه فایل کې جنسونه: "+(restored.products||[]).length+"؛ اوسني جنسونه: "+(db.products||[]).length+"؛ نوي موندل شوي جنسونه: 0.\nپه زاړه فایل کې مشتریان: "+(restored.customers||[]).length+"؛ اوسني مشتریان: "+(db.customers||[]).length+"؛ نوي موندل شوي مشتریان: 0.\nاوسني معلومات نه دي بدل شوي. دا پیغام راته ولیږه.");
-    if(!confirm("د زاړه بیک‌اف څخه "+newProducts.length+" نوي جنسونه او "+newCustomers.length+" نوي مشتریان به ورزیات شي. د دغو نویو مشتریانو ثبت شوی پاتې پور به هم ورسره راشي. اوسني خرڅلاو، نوي پورونه، ورکړې، نغدې پیسې، مصارف، راپورونه او موجود مشتریان به نه بدلېږي. د زړو بلونو او ورکړو جلا تاریخچه نه انتقالېږي. دوام ورکړو؟"))return;
+    const supplierIds=new Set((db.suppliers||[]).map(key).filter(Boolean));
+    const supplierNames=new Set((db.suppliers||[]).map(x=>norm(x.name)).filter(Boolean));
+    const newSuppliers=(restored.suppliers||[]).filter(v=>{
+     if(supplierIds.has(key(v))||(norm(v.name)&&supplierNames.has(norm(v.name))))return false;
+     if(key(v))supplierIds.add(key(v));if(norm(v.name))supplierNames.add(norm(v.name));return true;
+    });
+    const newSales=addUnique(db.sales,restored.sales,x=>key(x)||([x.invoice,x.productId,x.date,x.customerId,x.qty,x.price].join("|")));
+    const newPurchases=addUnique(db.purchases,restored.purchases,x=>key(x)||([x.invoice,x.productId,x.date,x.supplierId,x.qty,x.price].join("|")));
+    const newPayments=addUnique(db.payments,restored.payments,x=>key(x)||([x.type,x.personId,x.personName,x.date,x.amount,x.note].join("|")));
+    const newSupplierReceipts=addUnique(db.supplierReceipts,restored.supplierReceipts,x=>key(x)||([x.supplierId,x.kind,x.purchaseId,x.paymentId,x.date,x.amount,x.note].join("|")));
+    const newExpenses=addUnique(db.expenses,restored.expenses,x=>key(x)||([x.date,x.name,x.amount,x.note].join("|")));
+    const addedCount=newProducts.length+newCustomers.length+newSuppliers.length+newSales.length+newPurchases.length+newPayments.length+newSupplierReceipts.length+newExpenses.length;
+    if(!addedCount)return alert("د بیک‌اپ تاریخچه له اوسنیو معلوماتو سره یو شان ده؛ نوي ریکارډونه ونه موندل شول. هېڅ معلومات بدل نه شول.");
+    const report="له پخواني بیک‌اپ څخه به دا نوي ریکارډونه ورزیات شي:\nجنسونه: "+newProducts.length+"\nمشتریان: "+newCustomers.length+"\nعرضه‌کوونکي: "+newSuppliers.length+"\nد خرڅلاو کرښې/رسیدونه: "+newSales.length+"\nد خرید کرښې: "+newPurchases.length+"\nتادیات: "+newPayments.length+"\nد عرضه‌کوونکو تاریخچه: "+newSupplierReceipts.length+"\nلګښتونه: "+newExpenses.length+"\n\nد موجودو مشتریانو او عرضه‌کوونکو اوسني پورونه، صندوق، د جنسونو موجودي او اوسني نرخونه به نه بدلېږي. نوي نومونه یوازې هغه وخت ورزیاتېږي چې په اوسني لېست کې نه وي. تکراري ریکارډونه به پرېښودل شي. دوام ورکړو؟";
+    if(!confirm(report))return;
     db.products=[...(db.products||[]),...newProducts];
     db.customers=[...(db.customers||[]),...newCustomers];
+    db.suppliers=[...(db.suppliers||[]),...newSuppliers];
+    db.sales=[...(db.sales||[]),...newSales];
+    db.purchases=[...(db.purchases||[]),...newPurchases];
+    db.payments=[...(db.payments||[]),...newPayments];
+    db.supplierReceipts=[...(db.supplierReceipts||[]),...newSupplierReceipts];
+    db.expenses=[...(db.expenses||[]),...newExpenses];
     saveDB();refreshAll();
-    alert("خوندي یوځای کول بشپړ شول: "+newProducts.length+" جنسونه او "+newCustomers.length+" مشتریان ورزیات شول. اوسني نور حسابونه بدل نه شول.");
+    alert("خوندي یوځای کول بشپړ شول. نوي ریکارډونه ورزیات شول؛ د موجودو مشتریانو/عرضه‌کوونکو پورونه، صندوق او موجودي نه دي بدل شوي.");
     return;
    }
    if(!confirm("Backup تایید شو. د نوي شاهین فروشگاه اوسني معلومات به د دې بیک‌اف په معلوماتو بدل شي. مخکېنی Backup دې خوندي کړی؟"))return;
