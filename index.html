@@ -4988,9 +4988,9 @@ function restoreData(mergeOnly=false){
      return {...c,id:customerId,debt:legacyDebt,type:c.type||(c.status==="old"?"old":"active")};
     });
     const suppliers=oldSuppliers.map(v=>{
-     const bought=oldPurchases.filter(x=>x.supplierId===v.id).reduce((a,x)=>a+Number(x.total||0),0);
-     const paid=oldPurchases.filter(x=>x.supplierId===v.id).reduce((a,x)=>a+Number(x.paid||0),0);
-     return {...v,debt:Math.max(0,Number(v.opening||0)+bought-paid)};
+     const storedDebt=v.debt!==undefined&&v.debt!==null&&v.debt!==""?Number(v.debt):
+      Math.max(0,Number(v.opening||0)+oldPurchases.filter(x=>x.supplierId===v.id).reduce((a,x)=>a+Number(x.total||0)-Number(x.paid||0),0));
+     return {...v,debt:Number.isFinite(storedDebt)?storedDebt:0};
     });
     const importedDebtTotal=customers.reduce((n,c)=>n+Number(c.debt||0),0);
     // د پخواني اپ منفي بیلانس د مشتری د پیشکي پیسو په توګه وساته؛ مه یې صفر کوه.
@@ -5093,25 +5093,44 @@ function restoreData(mergeOnly=false){
      if(supplierIds.has(key(v))||(norm(v.name)&&supplierNames.has(norm(v.name))))return false;
      if(key(v))supplierIds.add(key(v));if(norm(v.name))supplierNames.add(norm(v.name));return true;
     });
+    const supplierDebtUpdates=[];
+    (restored.suppliers||[]).forEach(source=>{
+     const target=(db.suppliers||[]).find(v=>key(v)===key(source)||norm(v.name)===norm(source.name));
+     if(!target)return;
+     const before=Number(target.debt)||0,after=Number(source.debt)||0;
+     if(Math.abs(before-after)>0.009)supplierDebtUpdates.push({target,source,before,after,delta:after-before});
+    });
+    const supplierIdMap=new Map();
+    (restored.suppliers||[]).forEach(source=>{
+     const target=(db.suppliers||[]).find(v=>key(v)===key(source)||norm(v.name)===norm(source.name))||newSuppliers.find(v=>key(v)===key(source)||norm(v.name)===norm(source.name));
+     if(target)supplierIdMap.set(key(source),key(target));
+    });
+    const remappedSupplierReceipts=(restored.supplierReceipts||[]).map(x=>({...x,supplierId:supplierIdMap.get(String(x.supplierId||""))||x.supplierId}));
+    const remappedPayments=(restored.payments||[]).map(x=>x.type==="supplier"?({...x,personId:supplierIdMap.get(String(x.personId||""))||x.personId}):x);
     const newSales=addUnique(db.sales,restored.sales,x=>key(x)||([x.invoice,x.productId,x.date,x.customerId,x.qty,x.price].join("|")));
     const newPurchases=addUnique(db.purchases,restored.purchases,x=>key(x)||([x.invoice,x.productId,x.date,x.supplierId,x.qty,x.price].join("|")));
-    const newPayments=addUnique(db.payments,restored.payments,x=>key(x)||([x.type,x.personId,x.personName,x.date,x.amount,x.note].join("|")));
-    const newSupplierReceipts=addUnique(db.supplierReceipts,restored.supplierReceipts,x=>key(x)||([x.supplierId,x.kind,x.purchaseId,x.paymentId,x.date,x.amount,x.note].join("|")));
+    const newPayments=addUnique(db.payments,remappedPayments,x=>key(x)||([x.type,x.personId,x.personName,x.date,x.amount,x.note].join("|")));
+    const newSupplierReceipts=addUnique(db.supplierReceipts,remappedSupplierReceipts,x=>key(x)||([x.supplierId,x.kind,x.purchaseId,x.paymentId,x.date,x.amount,x.note].join("|")));
     const newExpenses=addUnique(db.expenses,restored.expenses,x=>key(x)||([x.date,x.name,x.amount,x.note].join("|")));
-    const addedCount=newProducts.length+newCustomers.length+newSuppliers.length+newSales.length+newPurchases.length+newPayments.length+newSupplierReceipts.length+newExpenses.length;
+    const addedCount=newProducts.length+newCustomers.length+newSuppliers.length+newSales.length+newPurchases.length+newPayments.length+newSupplierReceipts.length+newExpenses.length+supplierDebtUpdates.length;
     if(!addedCount)return alert("د بیک‌اپ تاریخچه له اوسنیو معلوماتو سره یو شان ده؛ نوي ریکارډونه ونه موندل شول. هېڅ معلومات بدل نه شول.");
-    const report="له پخواني بیک‌اپ څخه به دا نوي ریکارډونه ورزیات شي:\nجنسونه: "+newProducts.length+"\nمشتریان: "+newCustomers.length+"\nعرضه‌کوونکي: "+newSuppliers.length+"\nد خرڅلاو کرښې/رسیدونه: "+newSales.length+"\nد خرید کرښې: "+newPurchases.length+"\nتادیات: "+newPayments.length+"\nد عرضه‌کوونکو تاریخچه: "+newSupplierReceipts.length+"\nلګښتونه: "+newExpenses.length+"\n\nد موجودو مشتریانو او عرضه‌کوونکو اوسني پورونه، صندوق، د جنسونو موجودي او اوسني نرخونه به نه بدلېږي. نوي نومونه یوازې هغه وخت ورزیاتېږي چې په اوسني لېست کې نه وي. تکراري ریکارډونه به پرېښودل شي. دوام ورکړو؟";
+    const report="له پخواني بیک‌اپ څخه به دا نوي ریکارډونه ورزیات شي:\nجنسونه: "+newProducts.length+"\nمشتریان: "+newCustomers.length+"\nعرضه‌کوونکي: "+newSuppliers.length+"\nد خرڅلاو کرښې/رسیدونه: "+newSales.length+"\nد خرید کرښې: "+newPurchases.length+"\nتادیات: "+newPayments.length+"\nد عرضه‌کوونکو تاریخچه: "+newSupplierReceipts.length+"\nلګښتونه: "+newExpenses.length+"\nد شرکتونو د پور سمون: "+supplierDebtUpdates.length+"\n\nد شرکتونو پورونه به د بیک‌اپ له ثبت شوو شمېرو سره برابر شي. د سمون توپیر به د شرکت په تاریخچه کې ښکاره شي. صندوق، موجودي او د مشتریانو پورونه نه بدلېږي. تکراري تاریخچه به نه ورزیاتېږي. دوام ورکړو؟";
     if(!confirm(report))return;
     db.products=[...(db.products||[]),...newProducts];
     db.customers=[...(db.customers||[]),...newCustomers];
     db.suppliers=[...(db.suppliers||[]),...newSuppliers];
+    supplierDebtUpdates.forEach(u=>{
+     u.target.debt=u.after;
+     if(!Array.isArray(db.supplierReceipts))db.supplierReceipts=[];
+     db.supplierReceipts.push({id:uid(),supplierId:u.target.id,supplierName:u.target.name,kind:"adjustment",amount:Math.abs(u.delta),delta:u.delta,date:today(),note:"د 2026-11-22 بیک‌اپ له مخې د شرکت پور سمون؛ مخکې "+money(u.before)+"، اوس "+money(u.after),createdAt:Date.now()});
+    });
     db.sales=[...(db.sales||[]),...newSales];
     db.purchases=[...(db.purchases||[]),...newPurchases];
     db.payments=[...(db.payments||[]),...newPayments];
     db.supplierReceipts=[...(db.supplierReceipts||[]),...newSupplierReceipts];
     db.expenses=[...(db.expenses||[]),...newExpenses];
     saveDB();refreshAll();
-    alert("خوندي یوځای کول بشپړ شول. نوي ریکارډونه ورزیات شول؛ د موجودو مشتریانو/عرضه‌کوونکو پورونه، صندوق او موجودي نه دي بدل شوي.");
+    alert("خوندي یوځای کول بشپړ شول. د شرکتونو پورونه د بیک‌اپ له شمېرو سره برابر شول؛ د پور سمون په تاریخچه کې ثبت شو. صندوق، موجودي او د مشتریانو پورونه نه دي بدل شوي.");
     return;
    }
    if(!confirm("Backup تایید شو. د نوي شاهین فروشگاه اوسني معلومات به د دې بیک‌اف په معلوماتو بدل شي. مخکېنی Backup دې خوندي کړی؟"))return;
