@@ -4784,9 +4784,17 @@ function makeReport(){
  const expenses=db.expenses.filter(x=>inside(x.date));
  const payments=(db.payments||[]).filter(x=>inside(x.date));
  const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
+ const purchaseAmount=p=>{
+  const total=Number(p.total);
+  if(Number.isFinite(total)&&total>0)return total;
+  const goods=Number(p.goodsTotal),share=Number(p.expenseShare);
+  if(Number.isFinite(goods)&&goods>0)return goods+(Number.isFinite(share)?share:0);
+  const qty=Number(p.qty??p.quantity)||0,price=Number(p.price??p.unitPrice??p.costPrice)||0;
+  return qty*price;
+ };
  const totalSales=sum(sales,"total"),totalPaid=sum(sales,"paid"),totalDebt=sum(sales,"debt");
  const cashSales=totalPaid,creditSales=totalDebt;
- const totalPurchases=sum(purchases,"total"),purchasePaid=sum(purchases,"paid");
+ const totalPurchases=purchases.reduce((n,p)=>n+purchaseAmount(p),0),purchasePaid=sum(purchases,"paid");
  const gross=sum(sales,"profit"),expenseTotal=sum(expenses.filter(e=>e.paymentType!=="cash_nonprofit"),"amount"),cashNonProfitTotal=sum(expenses.filter(e=>e.paymentType==="cash_nonprofit"),"amount");
  const net=gross-expenseTotal;
  const dateLabel=from===to?jalaliDisplayDate(from):(from||to?jalaliDisplayDate(from)+" تر "+jalaliDisplayDate(to):"ټولې نېټې");
@@ -4794,7 +4802,7 @@ function makeReport(){
  const table=(headers,rows,empty)=>`
  <div class="daily-table-wrap"><table class="daily-report-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
  <tbody>${rows.length?rows.join(""):`<tr><td colspan="${headers.length}" class="daily-empty">${empty}</td></tr>`}</tbody></table></div>`;
- const purchaseRows=purchases.map(p=>`<tr><td>${esc(p.productName||"—")}</td><td>${esc(p.qty)} ${esc(unitLabel(p.unit||""))}</td><td>${money(p.total)}</td><td>${money(p.paid)}</td></tr>`);
+ const purchaseRows=purchases.map(p=>`<tr><td>${esc(p.productName||"—")}</td><td>${esc(p.qty)} ${esc(unitLabel(p.unit||""))}</td><td>${money(purchaseAmount(p))}</td><td>${money(p.paid)}</td></tr>`);
  const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
  const saleRows=sales.map(x=>`<tr><td>${esc(x.productName||"—")}</td><td>${esc(x.customer||"نغدي مشتری")}</td><td>${esc(x.qty)} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
  const customerPurchases=new Map();
