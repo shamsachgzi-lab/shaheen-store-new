@@ -3825,6 +3825,19 @@ function clearPurchaseDateFilter(){
  document.getElementById("purchaseToDate").value="";
  syncJalaliDatePicker("purchaseFromDate");syncJalaliDatePicker("purchaseToDate");renderPurchases();
 }
+function editPurchaseWeight(id){
+ const p=(db.purchases||[]).find(x=>String(x.id)===String(id));if(!p)return alert("د پېرود ریکارډ ونه موندل شو");
+ const qty=Number(p.qty??p.quantity);if(!Number.isFinite(qty)||qty<=0)return alert("د دې ریکارډ مقدار نشته؛ وزن نه شي محاسبه کېدای");
+ const current=Number(p.weightKg)>0?Number(p.weightKg)/qty:Number(p.unitWeightKg)||0;
+ const raw=prompt("د یوه واحد وزن په کیلوګرام ولیکه. مقدار: "+qty+" "+(p.unit||"واحد"),current>0?String(current):"");
+ if(raw===null)return;
+ const unitWeight=Number(String(raw).replace(/,/g,"."));
+ if(!Number.isFinite(unitWeight)||unitWeight<=0)return alert("د یوه واحد وزن باید له صفر څخه زیات وي");
+ const old={weightKg:p.weightKg,unitWeightKg:p.unitWeightKg};
+ p.unitWeightKg=unitWeight;p.weightKg=qty*unitWeight;
+ try{saveDB();renderPurchases();alert("وزن اصلاح شو. ټول وزن: "+p.weightKg.toLocaleString("en-US")+" کیلوګرام");}
+ catch(e){p.weightKg=old.weightKg;p.unitWeightKg=old.unitWeightKg;alert("بدلون خوندي نه شو؛ پخوانی وزن هماغسې پاتې شو");}
+}
 function renderPurchases(){
  const q=value("purchasesSearch").toLowerCase();
  const all=db.purchases||[];
@@ -3864,9 +3877,11 @@ function renderPurchases(){
     <div><small>پېرودل شوی مقدار</small><b>${qty===undefined?"—":showNum(qty)+" "+safe(unitLabel(unit))}</b></div>
     <div><small>ګدام ته داخل شوی</small><b>${stockText}</b></div>
     <div><small>فی واحد قیمت</small><b>${price===undefined?"—":money(price)}</b></div>
+    <div><small>ټول وزن</small><b>${Number(p.weightKg)>0?showNum(p.weightKg)+" کیلو":"وزن نه دی ثبت شوی"}</b></div>
     <div><small>ورکړل شوې پیسې</small><b class="purchase-paid">${money(paidValue)}</b></div>
     <div><small>پاتې پور</small><b class="purchase-debt">${money(debtValue)}</b></div>
    </div>
+   <button type="button" class="gray" onclick="editPurchaseWeight('${p.id}')">✏️ د یوه واحد وزن اصلاح کړه</button>
   </article>`;
  }).join("");
  box.innerHTML=stats+(cards||'<p class="purchase-empty">د پېرود ریکارډ ونه موندل شو</p>');
