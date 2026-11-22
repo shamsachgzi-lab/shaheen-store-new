@@ -3205,6 +3205,14 @@ function unitLabel(name){
  return labels[normalized]||normalized||"واحد";
 }
 window.unitLabel=unitLabel;
+function purchaseUnitWeightKg(product,unit,stored){
+ const saved=Number(stored)||0;if(saved>0)return saved;
+ const byUnit=unitWeightInKg(unit);if(byUnit>0)return byUnit;
+ const name=String(product?.name||product?.productName||"");
+ const match=name.match(/(\d+(?:[.,]\d+)?)\s*(?:کیلوګرام|کیلو|کیلویی|کيلو|kg)/i);
+ if(match){const n=Number(match[1].replace(",","."));if(Number.isFinite(n)&&n>0)return n;}
+ return 0;
+}
 function unitWeightInKg(name){
  const fixed={kg:1,kilo:1,kilogram:1,"کیلو":1,"کیلوګرام":1,g:0.001,gram:0.001,"ګرام":0.001,"0.5kg":0.5,"نیم کیلو":0.5};
  if(Object.prototype.hasOwnProperty.call(fixed,name))return fixed[name];
@@ -3851,7 +3859,7 @@ function purchaseInvoiceEditLineHtml(x,i){
  const p=db.products.find(z=>String(z.id)===String(x.productId));
  const qty=Number(x.qty??x.quantity)||0;
  const rawUnit=String(x.unit||p?.unit||"واحد"),displayUnit=typeof unitLabel==="function"?unitLabel(rawUnit):rawUnit;
- const weight=qty>0&&Number(x.weightKg)>0?Number(x.weightKg)/qty:(Number(x.unitWeightKg)||unitWeightInKg(rawUnit)||0);
+ const weight=qty>0&&Number(x.weightKg)>0?Number(x.weightKg)/qty:purchaseUnitWeightKg(p,rawUnit,x.unitWeightKg);
  return '<section data-purchase-edit-row="'+i+'" style="border:1px solid #dbe4ef;border-radius:13px;padding:12px;margin:10px 0;background:#fbfdff">'+
  '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>جنس '+(i+1)+'</b><button type="button" class="red" onclick="removePurchaseInvoiceEditLine('+i+')">🗑 حذف</button></div>'+
  '<label>جنس</label><select data-field="productId" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px">'+products+'</select>'+
@@ -3978,7 +3986,7 @@ function renderPurchases(){
  const cards=[...grouped.entries()].map(([key,rows])=>{
  const first=rows[0],supplier=first.supplier||first.supplierName||first.company||"نغدي پېرود / نوم نه دی ثبت شوی",invoice=first.invoice||first.receipt||"رسید نمبر نشته",date=displayDate(first.date||first.purchaseDate||"");
  const amount=rows.reduce((n,p)=>n+Number(p.total??p.amount??((Number(p.qty??p.quantity)||0)*(Number(p.price??p.unitPrice??p.costPrice)||0))),0);
- const paid=rows.reduce((n,p)=>n+Number((p.paid??p.paidAmount)||0),0),weight=rows.reduce((n,p)=>n+Number(p.weightKg||0),0);
+ const paid=rows.reduce((n,p)=>n+Number((p.paid??p.paidAmount)||0),0),weight=rows.reduce((n,p)=>{const product=db.products.find(z=>String(z.id)===String(p.productId));return n+(Number(p.weightKg)>0?Number(p.weightKg):((Number(p.qty??p.quantity)||0)*purchaseUnitWeightKg(product,p.unit||p.purchaseUnit||product?.unit,p.unitWeightKg)));},0);
  const lines=rows.map(p=>{const name=p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"جنس";return '<div style="padding:9px 2px;border-bottom:1px solid #e5eaf1"><b>'+safe(name)+'</b><div style="font-size:12px;color:#64748b">مقدار: '+showNum(p.qty??p.quantity)+' '+safe(unitLabel(p.unit||p.purchaseUnit||""))+' · ټول وزن: '+(Number(p.weightKg)>0?showNum(p.weightKg)+' کیلو':'نه دی ثبت شوی')+'</div></div>';}).join("");
  return '<article class="purchase-history-item"><div class="purchase-history-top"><b>🧾 د خرید رسید</b><span>'+money(amount)+'</span></div><div class="purchase-meta"><span>رسید: '+safe(invoice)+'</span><span>نېټه: '+safe(date)+'</span></div><div class="purchase-meta"><span>شرکت: '+safe(supplier)+'</span><span>جنسونه: '+rows.length+'</span></div><div style="margin-top:8px">'+lines+'</div><div class="purchase-meta"><b>ټول وزن: '+showNum(weight)+' کیلوګرام</b><b>ورکړل شوې: '+money(paid)+'</b></div><button type="button" class="primary" style="width:100%;margin-top:10px" onclick="openPurchaseInvoiceEditor(\''+encodeURIComponent(key)+'\')">📂 بشپړ رسید خلاص او اصلاح کړه</button></article>';
  }).join("");
