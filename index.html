@@ -3757,13 +3757,20 @@ function addPurchase(){
  if(t.cashOut>Number(db.cash||0))return alert("په صندوق کې د ورکړې او انتقال مصارفو لپاره کافي نغدې پیسې نشته");
  const invoice="PUR-"+Date.now(),oldCash=Number(db.cash||0),oldDebt=supplierRecord?Number(supplierRecord.debt||0):0;
  const updates=[];
+ let totalWeightKg=0;
  for(const line of purchaseCart){
   const p=db.products.find(x=>String(x.id)===String(line.productId));if(!p)return alert("یو جنس نور په موجودۍ کې نه موندل کېږي؛ رسید ثبت نه شو");
-  const stockAdd=line.qty*line.factor,goods=line.qty*line.price,share=t.goods>0?extra*(goods/t.goods):0;
-  const landedTotal=goods+share,landedUnit=landedTotal/stockAdd;
-  const oldQty=Number(p.qty)||0,oldCost=Number(p.cost)||0;
-  updates.push({p,oldQty,oldCost,stockAdd,landedUnit,goods,share,line});
+  const stockAdd=line.qty*line.factor,goods=line.qty*line.price;
+  const baseKg=unitWeightInKg(p.unit||line.unit);
+  const weightKg=baseKg>0?stockAdd*baseKg:stockAdd;
+  totalWeightKg+=weightKg;
+  updates.push({p,oldQty:Number(p.qty)||0,oldCost:Number(p.cost)||0,stockAdd,goods,weightKg,line});
  }
+ updates.forEach(u=>{
+  const share=totalWeightKg>0?extra*(u.weightKg/totalWeightKg):0;
+  const landedTotal=u.goods+share,landedUnit=landedTotal/u.stockAdd;
+  u.share=share;u.landedUnit=landedUnit;
+ });
  if(!Array.isArray(db.purchases))db.purchases=[];
  if(!Array.isArray(db.supplierReceipts))db.supplierReceipts=[];
  const records=[];
