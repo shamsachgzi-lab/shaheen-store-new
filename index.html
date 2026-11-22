@@ -3078,8 +3078,8 @@ function renderProducts(){
   return `
  <div class="item product-list-item">${p.image?'<img class="product-thumb" alt="د جنس عکس" src="'+safe(p.image)+'">':'<div class="product-thumb product-no-image">📦</div>'}
  <div class="product-list-info"><b>${safe(p.name)}</b>
- <div>موجودي: <b>${Number(shownQty.toFixed(3))} ${safe(unitLabel(trade))}</b>${trade!==base?' <small>('+Number((Number(p.qty)||0).toFixed(3))+' '+safe(unitLabel(base))+')</small>':''}</div>
- <div>فی ${safe(unitLabel(trade))}: پېرود ${money(tradeCost)} · عمده ${money(wholesale)} · پرچون ${money(retail)}</div>
+ <div>موجودي: <b>${Number(shownQty.toFixed(3))} ${safe(window.unitLabel(trade))}</b>${trade!==base?' <small>('+Number((Number(p.qty)||0).toFixed(3))+' '+safe(window.unitLabel(base))+')</small>':''}</div>
+ <div>فی ${safe(window.unitLabel(trade))}: پېرود ${money(tradeCost)} · عمده ${money(wholesale)} · پرچون ${money(retail)}</div>
  <div>کوډ: ${safe(p.code||"-")}</div>
  <div class="actions"><button class="gray" onclick="editProduct('${p.id}')">سمون</button><button class="gray" onclick="changeProductImage('${p.id}')">عکس بدلول</button><button class="red" onclick="deleteProduct('${p.id}')">حذف</button></div></div></div>`;
  }).join("")||"<p>جنس نشته</p>";
@@ -3200,6 +3200,7 @@ function unitLabel(name){
  const labels={"0.5kg":"نیم کیلو","کیلو":"کیلو","کیلوګرام":"کیلو","ګرام":"ګرام","نیم کیلو":"نیم کیلو","پیاله":"ګیلاس","ګیلاس":"ګیلاس","دانه":"دانه","بوجۍ":"بوجۍ","کارټن":"کارټن","بسته":"بسته","ټوټه":"ټوټه","بوتل":"بوتل","لیټر":"لیټر","پاکټ":"پاکټ","سیر":"سیر"};
  return labels[normalized]||normalized||"واحد";
 }
+window.unitLabel=unitLabel;
 function unitWeightInKg(name){
  const fixed={kg:1,g:0.001,"0.5kg":0.5};
  if(Object.prototype.hasOwnProperty.call(fixed,name))return fixed[name];
