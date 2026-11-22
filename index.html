@@ -2723,8 +2723,8 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <button class="primary" onclick="backupData()">⬇️ بیک‌اف جوړ کړه</button>
   <label>⬆️ بیک‌اف بېرته راواخله — د شاهین فروشگاه فایل</label><input type="file" id="restoreFile" accept=".json,application/json">
   <button class="green" onclick="restoreData()">⬆️ بشپړ بیک‌اف بېرته راګرځول (اوسني معلومات بدلوي)</button>
-  <button class="primary" style="margin-top:8px" onclick="restoreData(true)">🛡️ یوازې ورکې جنسونه او مشتریان خوندي ورزیات کړه</button>
-  <hr><p class="notice">خوندي ورزیاتول یوازې له بیک‌اف څخه نوي جنسونه او مشتریان زیاتوي؛ موجود خرڅلاو، راپورونه، نغدې او نور حسابونه نه بدلوي. د ورته نوم جنس/مشتری تکراري نه زیاتوي. بشپړ Restore اوسني معلومات بدلوي.</p>
+  <button class="primary" style="margin-top:8px" onclick="restoreData(true)">🛡️ خوندي یوځای کول: جنسونه، مشتریان او د شرکتونو پورونه</button>
+  <hr><p class="notice">خوندي یوځای کول له بیک‌اپ څخه ورکې جنسونه، مشتریان او شرکتونه زیاتوي؛ د موجودو شرکتونو پاتې پور د بیک‌اپ له ثبت شوې شمېرې سره برابروي او د پور توپیر په تاریخچه کې ثبتوي. د خرڅلاو، راپورونو، نغدو، موجودۍ او د مشتریانو اوسني پورونه نه بدلوي. تکراري رسیدونه نه زیاتوي. بشپړ Restore اوسني معلومات بدلوي.</p>
   <button class="red" onclick="clearAllData()">⚠️ ټول معلومات پاکول</button>
  </div>
 </section>
@@ -5063,7 +5063,7 @@ function restoreData(mergeOnly=false){
    if(mergeOnly){
     // خوندي تاریخچه-یوځای کول: د موجودو حسابونو پور، نغدې او موجودي نه محاسبه/بدلوو.
     const key=(x)=>String(x?.id||"");
-    const norm=(x)=>String(x||"").trim().toLowerCase();
+    const norm=(x)=>String(x||"").normalize("NFKC").replace(/[\u064B-\u065F\u0670\u200B-\u200F\uFEFF]/g,"").replace(/[\sـ]+/g,"").trim().toLowerCase();
     const addUnique=(current,incoming,identity)=>{
      const seen=new Set((current||[]).map(identity).filter(Boolean));
      const added=[];
