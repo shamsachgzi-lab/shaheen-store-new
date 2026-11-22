@@ -6744,3 +6744,39 @@ body.sale-modal-open{
  try{if(document.querySelector("main section:not(.hidden)")?.id==="customers")window.renderCustomers();}catch(e){console.error(e);}
 })();
 </script>
+
+
+<script id="SHAHEEN_SALE_PRODUCT_SEARCH_RECOVERY_V1">
+(function(){
+ function bind(){
+  const input=document.getElementById("saleProductSearch");
+  const box=document.getElementById("saleSearchResults");
+  if(!input||!box||input.dataset.shaheenSearchBound==="1")return;
+  input.dataset.shaheenSearchBound="1";
+  function search(){
+   try{
+    const q=String(input.value||"").trim().toLowerCase();
+    if(!q){box.innerHTML="";box.classList.add("hidden");return;}
+    const products=(typeof db!=="undefined"&&Array.isArray(db.products))?db.products:[];
+    const matches=products.filter(p=>p&&typeof p==="object"&&
+      [p.name,p.code,p.barcode,p.barCode].some(v=>String(v||"").toLowerCase().includes(q))).slice(0,40);
+    box.innerHTML=matches.length?matches.map(p=>{
+      const id=String(p.id||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+      const name=typeof safe==="function"?safe(p.name||"بې نومه جنس"):String(p.name||"بې نومه جنس");
+      const unit=typeof unitLabel==="function"?unitLabel(p.tradeUnit||p.unit||"واحد"):(p.tradeUnit||p.unit||"واحد");
+      return '<button type="button" class="sale-search-result" data-product-id="'+id+'"><b>'+name+'</b><span>موجودي: '+(Number(p.qty)||0)+' '+unit+'</span></button>';
+    }).join(""):'<div class="sale-no-result">جنس ونه موندل شو</div>';
+    box.classList.remove("hidden");
+   }catch(e){console.error("Sale product search recovery:",e);box.innerHTML='<div class="sale-no-result">د جنسونو لټون کې ستونزه ده</div>';box.classList.remove("hidden");}
+  }
+  input.addEventListener("input",search);
+  box.addEventListener("click",function(e){
+   const b=e.target.closest("button[data-product-id]");if(!b)return;
+   const id=b.getAttribute("data-product-id");
+   if(typeof chooseSaleSearchResult==="function")chooseSaleSearchResult(id);
+  });
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind,{once:true});else bind();
+ window.addEventListener("pageshow",bind);
+})();
+</script>
