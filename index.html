@@ -6662,18 +6662,34 @@ body.sale-modal-open{
 #sales .sale-summary>div.sale-debt-line>strong{color:#b42332!important}
 @media(max-width:390px){#sales .sale-summary>div.sale-cash-line,#sales .sale-summary>div.sale-debt-line{min-height:100px!important;padding:14px 11px!important;gap:7px!important}#sales .sale-summary>div.sale-cash-line>span,#sales .sale-summary>div.sale-debt-line>span{font-size:14px!important}#sales .sale-summary>div.sale-cash-line>strong,#sales .sale-summary>div.sale-debt-line>strong{font-size:21px!important}}
 </style>
-<!-- SHAHEEN_PRODUCTS_RENDER_RECOVERY_V1 -->
+<!-- SHAHEEN_PRODUCTS_RENDER_RECOVERY_V2 -->
 <script>
 (function(){
- function restoreProductRenderer(){
+ function renderProductListFallback(){
+  const listBox=document.getElementById("productList");
+  if(!listBox||typeof db==="undefined")return;
+  const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();
+  const products=Array.isArray(db.products)?db.products:[];
+  const list=products.filter(p=>p&&typeof p==="object"&&(String(p.name||"").toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q)));
+  const count=document.getElementById("productCount");
+  if(count)count.textContent=products.length+" جنس";
+  listBox.innerHTML=list.map(p=>{
+   const unit=p.tradeUnit||p.unit||"واحد",factor=Math.max(0.000001,Number(p.unitFactor)||1);
+   const qty=unit===(p.unit||"واحد")?(Number(p.qty)||0):(Number(p.qty)||0)/factor;
+   const cost=(Number(p.cost)||0)*factor;
+   const retail=typeof productRetailPrice==="function"?productRetailPrice(p):Number(p.retailPrice||p.price||0);
+   const wholesale=typeof productWholesalePrice==="function"?productWholesalePrice(p):Number(p.wholesalePrice||p.wholesale||0);
+   return '<div class="item product-list-item">'+(p.image?'<img class="product-thumb" alt="د جنس عکس" src="'+safe(p.image)+'">':'<div class="product-thumb product-no-image">📦</div>')+'<div class="product-list-info"><b>'+safe(p.name||"بې نومه جنس")+'</b><div>موجودي: <b>'+Number(qty.toFixed(3))+' '+safe(unitLabel(unit))+'</b></div><div>فی '+safe(unitLabel(unit))+': پېرود '+money(cost)+' · عمده '+money(wholesale)+' · پرچون '+money(retail)+'</div><div>کوډ: '+safe(p.code||"-")+'</div><div class="actions"><button class="gray" onclick="editProduct(\''+p.id+'\')">سمون</button><button class="gray" onclick="changeProductImage(\''+p.id+'\')">عکس بدلول</button><button class="red" onclick="deleteProduct(\''+p.id+'\')">حذف</button></div></div></div>';
+  }).join("")||"<p>جنس نشته</p>";
+ }
+ function recover(){
   try{
-   if(typeof renderProducts==="function")window.renderProducts=renderProducts;
-   if(typeof renderCustomers==="function")window.renderCustomers=renderCustomers;
+   if(typeof window.renderProducts!=="function")window.renderProducts=renderProductListFallback;
+   if(typeof window.renderCustomers!=="function"&&typeof renderCustomers==="function")window.renderCustomers=renderCustomers;
    const active=document.querySelector("main section:not(.hidden)");
    if(active&&active.id==="products"&&typeof window.renderProducts==="function")window.renderProducts();
-  }catch(error){console.error("Products page recovery:",error);}
+  }catch(error){console.error("Product list recovery:",error);}
  }
- if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",restoreProductRenderer,{once:true});
- else restoreProductRenderer();
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",recover,{once:true});else recover();
 })();
 </script>
