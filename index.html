@@ -3750,7 +3750,8 @@ function addPurchase(){
  const supplierRecord=supplierId?(db.suppliers||[]).find(x=>String(x.id)===String(supplierId)):null;
  if(supplierId&&!supplierRecord)return alert("ټاکل شوی شرکت ونه موندل شو؛ بیا یې انتخاب کړه");
  const t=purchaseCartTotals();
- if(!Number.isFinite(paid)||paid<0||paid>t.goods)return alert("د شرکت ته ورکړل شوې پیسې سمې نه دي؛ له جنسونو د ټول قیمت څخه زیاتې نه شي کېدای");
+ const goodsLimit=Math.round((t.goods+Number.EPSILON)*100)/100;
+ if(!Number.isFinite(paid)||paid<0||paid>goodsLimit+0.001)return alert("د شرکت ته ورکړل شوې پیسې سمې نه دي؛ له جنسونو د ټول قیمت څخه زیاتې نه شي کېدای");
  if(!Number.isFinite(extra)||extra<0)return alert("د اضافي مصارفو اندازه سمه نه ده");
  if(t.debt>0&&!supplierRecord)return alert("د پور پېرود لپاره د هماغه شرکت انتخابول حتمي دي");
  if(t.cashOut>Number(db.cash||0))return alert("په صندوق کې د ورکړې او انتقال مصارفو لپاره کافي نغدې پیسې نشته");
