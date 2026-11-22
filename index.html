@@ -3870,7 +3870,7 @@ function purchaseInvoiceEditLineHtml(x,i){
  '<label>جنس</label><select data-field="productId" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px">'+products+'</select>'+
  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><div><label>مقدار</label><input data-field="qty" type="number" min="0.001" step="any" value="'+qty+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div><div><label>واحد (په پښتو)</label><input data-field="unit" value="'+safe(displayUnit)+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div>'+
  '<div><label>د یوه واحد قیمت (AFN)</label><input data-field="price" type="number" min="0" step="any" value="'+Number(x.goodsTotal!==undefined&&qty>0?Number(x.goodsTotal)/qty:(Number(x.price)||0))+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div><div><label>د یوه واحد وزن (کیلو)</label><input data-field="unitWeight" type="number" min="0.001" step="any" value="'+(weight||"")+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div></div>'+
- '<small style="display:block;margin-top:7px;color:#64748b">پخوانی وزن: '+(Number(x.weightKg)||0).toLocaleString("en-US")+' کیلو · د نرخ محاسبه د مصارفو له وېش سره کېږي</small></section>';
+ '<small style="display:block;margin-top:7px;color:#64748b">پخوانی وزن: '+(qty>0?(Number(x.weightKg)>0?Number(x.weightKg):qty*(Number(weight)||0)):(Number(x.weightKg)||0)).toLocaleString("en-US")+' کیلو · د نرخ محاسبه د مصارفو له وېش سره کېږي</small></section>';
 }
 function addPurchaseInvoiceEditLine(){
  const box=document.getElementById("purchaseInvoiceEditLines");if(!box)return;
