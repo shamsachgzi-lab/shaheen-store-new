@@ -6662,33 +6662,39 @@ body.sale-modal-open{
 #sales .sale-summary>div.sale-debt-line>strong{color:#b42332!important}
 @media(max-width:390px){#sales .sale-summary>div.sale-cash-line,#sales .sale-summary>div.sale-debt-line{min-height:100px!important;padding:14px 11px!important;gap:7px!important}#sales .sale-summary>div.sale-cash-line>span,#sales .sale-summary>div.sale-debt-line>span{font-size:14px!important}#sales .sale-summary>div.sale-cash-line>strong,#sales .sale-summary>div.sale-debt-line>strong{font-size:21px!important}}
 </style>
-<!-- SHAHEEN_PRODUCTS_RENDER_RECOVERY_V2 -->
+<!-- SHAHEEN_PRODUCTS_RENDER_RECOVERY_V3 -->
 <script>
 (function(){
- function renderProductListFallback(){
-  const listBox=document.getElementById("productList");
-  if(!listBox||typeof db==="undefined")return;
-  const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();
+ function labelUnit(value){
+  const n=String(value||"واحد").trim();
+  const map={kg:"کیلو",g:"ګرام",bag:"بوجۍ",sack:"بوجۍ",piece:"ټوټه",pcs:"ټوټه",carton:"کارټن",bottle:"بوتل",liter:"لیټر",litre:"لیټر",packet:"پاکټ",glass:"ګلاس",dana:"دانه"};
+  return map[n.toLowerCase()]||n;
+ }
+ function safeText(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ }
+ function renderProductListSafe(){
+  const box=document.getElementById("productList");if(!box||typeof db==="undefined")return;
   const products=Array.isArray(db.products)?db.products:[];
+  const q=(document.getElementById("productSearch")?.value||"").trim().toLowerCase();
   const list=products.filter(p=>p&&typeof p==="object"&&(String(p.name||"").toLowerCase().includes(q)||String(p.code||"").toLowerCase().includes(q)));
-  const count=document.getElementById("productCount");
-  if(count)count.textContent=products.length+" جنس";
-  listBox.innerHTML=list.map(p=>{
-   const unit=p.tradeUnit||p.unit||"واحد",factor=Math.max(0.000001,Number(p.unitFactor)||1);
-   const qty=unit===(p.unit||"واحد")?(Number(p.qty)||0):(Number(p.qty)||0)/factor;
-   const cost=(Number(p.cost)||0)*factor;
-   const retail=typeof productRetailPrice==="function"?productRetailPrice(p):Number(p.retailPrice||p.price||0);
-   const wholesale=typeof productWholesalePrice==="function"?productWholesalePrice(p):Number(p.wholesalePrice||p.wholesale||0);
-   return '<div class="item product-list-item">'+(p.image?'<img class="product-thumb" alt="د جنس عکس" src="'+safe(p.image)+'">':'<div class="product-thumb product-no-image">📦</div>')+'<div class="product-list-info"><b>'+safe(p.name||"بې نومه جنس")+'</b><div>موجودي: <b>'+Number(qty.toFixed(3))+' '+safe(unitLabel(unit))+'</b></div><div>فی '+safe(unitLabel(unit))+': پېرود '+money(cost)+' · عمده '+money(wholesale)+' · پرچون '+money(retail)+'</div><div>کوډ: '+safe(p.code||"-")+'</div><div class="actions"><button class="gray" onclick="editProduct(\''+p.id+'\')">سمون</button><button class="gray" onclick="changeProductImage(\''+p.id+'\')">عکس بدلول</button><button class="red" onclick="deleteProduct(\''+p.id+'\')">حذف</button></div></div></div>';
+  const count=document.getElementById("productCount");if(count)count.textContent=products.length+" جنس";
+  box.innerHTML=list.map(p=>{
+   const base=p.unit||"واحد",trade=p.tradeUnit||base,factor=Math.max(0.000001,Number(p.unitFactor)||1);
+   const qty=trade===base?(Number(p.qty)||0):(Number(p.qty)||0)/factor;
+   const fmt=n=>(Number(n)||0).toLocaleString("en-US",{maximumFractionDigits:3});
+   const cost=(Number(p.cost)||0)*factor,retail=Number(p.retailPrice??p.retail??p.price??p.salePrice)||0,wholesale=Number(p.wholesalePrice??p.wholesale??p.bulkPrice)||0;
+   const img=p.image?'<img class="product-thumb" alt="د جنس عکس" src="'+safeText(p.image)+'">':'<div class="product-thumb product-no-image">📦</div>';
+   return '<div class="item product-list-item">'+img+'<div class="product-list-info"><b>'+safeText(p.name||"بې نومه جنس")+'</b><div>موجودي: <b>'+fmt(qty)+' '+safeText(labelUnit(trade))+'</b>'+(trade!==base?' <small>('+fmt(p.qty)+' '+safeText(labelUnit(base))+')</small>':'')+'</div><div>فی '+safeText(labelUnit(trade))+': پېرود '+fmt(cost)+' AFN · عمده '+fmt(wholesale)+' · پرچون '+fmt(retail)+'</div><div>کوډ: '+safeText(p.code||"-")+'</div><div class="actions"><button class="gray" onclick="editProduct(\''+safeText(p.id)+'\')">سمون</button><button class="gray" onclick="changeProductImage(\''+safeText(p.id)+'\')">عکس بدلول</button><button class="red" onclick="deleteProduct(\''+safeText(p.id)+'\')">حذف</button></div></div></div>';
   }).join("")||"<p>جنس نشته</p>";
  }
  function recover(){
   try{
-   if(typeof window.renderProducts!=="function")window.renderProducts=renderProductListFallback;
-   if(typeof window.renderCustomers!=="function"&&typeof renderCustomers==="function")window.renderCustomers=renderCustomers;
+   // د اصلي renderer پر ځای مستقل renderer وکاروه؛ د unitLabel په ګډون پر نورو فنکشنونو تکیه نه لري.
+   window.renderProducts=renderProductListSafe;
    const active=document.querySelector("main section:not(.hidden)");
-   if(active&&active.id==="products"&&typeof window.renderProducts==="function")window.renderProducts();
-  }catch(error){console.error("Product list recovery:",error);}
+   if(active&&active.id==="products")renderProductListSafe();
+  }catch(error){console.error("Product list safe renderer:",error);}
  }
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",recover,{once:true});else recover();
 })();
