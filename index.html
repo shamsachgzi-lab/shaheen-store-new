@@ -3632,7 +3632,67 @@ function printSale(id){
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
- note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main></body></html>';
+ note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>
+<!-- SHAHEEN_CUSTOMERS_RENDER_RECOVERY_V1 -->
+<script>
+(function(){
+ window.renderCustomers=function(){
+  try{
+   if(typeof db==="undefined"||!Array.isArray(db.customers))throw new Error("د مشتریانو ذخیره لاسرسی نه لري");
+   const root=document.getElementById("customers");
+   if(!root)return;
+   if(typeof currentCustomerId!=="undefined"&&currentCustomerId&&typeof renderCustomerDetail==="function"){
+    root.classList.remove("customer-form-open");
+    renderCustomerDetail();
+    return;
+   }
+   if(root.classList.contains("customer-form-open"))return;
+   root.classList.remove("customer-ledger-open");
+   const records=db.customers.filter(c=>c&&typeof c==="object");
+   let view="all";
+   try{if(typeof customerView!=="undefined")view=customerView;}catch(e){}
+   const active=records.filter(c=>(c.type||"active")!=="old");
+   const old=records.filter(c=>c.type==="old");
+   const debtOf=list=>list.reduce((n,c)=>n+(Number(c.debt)||0),0);
+   const el=id=>document.getElementById(id);
+   if(el("activeCustomerDebt"))el("activeCustomerDebt").textContent=money(debtOf(active));
+   if(el("oldCustomerDebt"))el("oldCustomerDebt").textContent=money(debtOf(old));
+   if(el("allCustomerDebt"))el("allCustomerDebt").textContent=money(debtOf(records));
+   const todayKey=typeof today==="function"?today():new Date().toISOString().slice(0,10);
+   const monthKey=todayKey.slice(0,7);
+   const receipts=(Array.isArray(db.payments)?db.payments:[]).filter(p=>p&&p.type==="customer");
+   const sumRows=rows=>rows.reduce((n,p)=>n+(Number(p.amount)||0),0);
+   const todayRows=receipts.filter(p=>String(p.date||"").slice(0,10)===todayKey);
+   const monthRows=receipts.filter(p=>String(p.date||"").slice(0,7)===monthKey);
+   if(el("customerReceivedToday"))el("customerReceivedToday").textContent=money(sumRows(todayRows));
+   if(el("customerReceivedMonth"))el("customerReceivedMonth").textContent=money(sumRows(monthRows));
+   const byId=new Map(records.map(c=>[String(c.id),c]));
+   const byName=new Map(records.map(c=>[String(c.name),c]));
+   const report=(rows,empty)=>{
+    const grouped=new Map();
+    rows.forEach(p=>{
+     const c=(p.personId!=null?byId.get(String(p.personId)):null)||byName.get(String(p.personName));
+     const name=c?c.name:(p.personName||"نامعلوم مشتری");
+     grouped.set(name,(grouped.get(name)||0)+(Number(p.amount)||0));
+    });
+    return grouped.size?[...grouped].sort((a,b)=>b[1]-a[1]).map(([name,total])=>'<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 2px;border-bottom:1px solid #e5e7eb"><b>'+safe(name)+'</b><strong style="color:#087f4b;white-space:nowrap">'+money(total)+'</strong></div>').join(""):'<small>'+empty+'</small>';
+   };
+   if(el("customerDailyReport"))el("customerDailyReport").innerHTML=report(todayRows,"نن هېڅ مشتری پیسې نه دي راکړې");
+   if(el("customerMonthlyReport"))el("customerMonthlyReport").innerHTML=report(monthRows,"په دې میاشت کې پیسې نه دي ترلاسه شوې");
+   const base=view==="active"?active:view==="old"?old:records;
+   const q=(el("customerSearch")?.value||"").trim().toLowerCase();
+   const list=base.filter(c=>String(c.name||"").toLowerCase().includes(q)||String(c.father||"").toLowerCase().includes(q)||String(c.phone||"").includes(q)||String(c.village||"").toLowerCase().includes(q)||String(c.area||"").toLowerCase().includes(q));
+   const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي"};
+   if(el("customerListTitle"))el("customerListTitle").textContent=titles[view]||titles.all;
+   if(el("customerListCount"))el("customerListCount").textContent="("+list.length+")";
+   if(el("customerListTotal"))el("customerListTotal").textContent=money(debtOf(list));
+   if(el("customersList"))el("customersList").innerHTML=list.map(c=>'<div class="customer-row"><div class="customer-row-main"><b>'+safe(c.name||"بې نومه مشتری")+' <small style="display:inline">'+(c.type==="old"?"زاړه پوروړي":"اوسنی")+'</small></b><small>'+(c.father?" · د پلار نوم: "+safe(c.father):"")+(c.phone?" · شمېره: "+safe(c.phone):"")+(c.village?" · کلی: "+safe(c.village):"")+(c.area?" · سیمه: "+safe(c.area):"")+'</small><div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger(\''+safe(c.id)+'\')">📒</button><button class="gray" title="سمون او د حساب اصلاح" onclick="editCustomer(\''+safe(c.id)+'\')">✏️</button></div></div><div class="customer-row-debt">'+money(c.debt)+'</div></div>').join("")||"<p>مشتری نشته</p>";
+  }catch(error){console.error("Customer safe renderer:",error);const box=document.getElementById("customersList");if(box)box.innerHTML="<p>د مشتریانو پاڼه کې تخنیکي ستونزه ده؛ معلومات خوندي دي.</p>";}
+ };
+ try{if(document.querySelector("main section:not(.hidden)")?.id==="customers")window.renderCustomers();}catch(e){console.error(e);}
+})();
+</script>
+</body></html>';
  // رسید په همدې اپلیکیشن کې د بشپړ سکرین په بڼه ښکاره کړه؛ نو تور پاپ‌اپ نه پرانیستل کېږي.
  const oldView=document.getElementById("shaheenReceiptView");if(oldView)oldView.remove();
  const view=document.createElement("div");view.id="shaheenReceiptView";
