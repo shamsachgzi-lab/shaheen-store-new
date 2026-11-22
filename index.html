@@ -6662,3 +6662,18 @@ body.sale-modal-open{
 #sales .sale-summary>div.sale-debt-line>strong{color:#b42332!important}
 @media(max-width:390px){#sales .sale-summary>div.sale-cash-line,#sales .sale-summary>div.sale-debt-line{min-height:100px!important;padding:14px 11px!important;gap:7px!important}#sales .sale-summary>div.sale-cash-line>span,#sales .sale-summary>div.sale-debt-line>span{font-size:14px!important}#sales .sale-summary>div.sale-cash-line>strong,#sales .sale-summary>div.sale-debt-line>strong{font-size:21px!important}}
 </style>
+<!-- SHAHEEN_PRODUCTS_RENDER_RECOVERY_V1 -->
+<script>
+(function(){
+ function restoreProductRenderer(){
+  try{
+   if(typeof renderProducts==="function")window.renderProducts=renderProducts;
+   if(typeof renderCustomers==="function")window.renderCustomers=renderCustomers;
+   const active=document.querySelector("main section:not(.hidden)");
+   if(active&&active.id==="products"&&typeof window.renderProducts==="function")window.renderProducts();
+  }catch(error){console.error("Products page recovery:",error);}
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",restoreProductRenderer,{once:true});
+ else restoreProductRenderer();
+})();
+</script>
