@@ -3636,8 +3636,8 @@ function printSale(id){
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
- note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>
-</body></html>';
+ note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
+ '</body></html>';
  // رسید په همدې اپلیکیشن کې د بشپړ سکرین په بڼه ښکاره کړه؛ نو تور پاپ‌اپ نه پرانیستل کېږي.
  const oldView=document.getElementById("shaheenReceiptView");if(oldView)oldView.remove();
  const view=document.createElement("div");view.id="shaheenReceiptView";
@@ -3881,7 +3881,7 @@ function openPurchaseInvoiceEditor(encodedKey){
  const oldPaid=rows.reduce((n,x)=>n+Number(x.paid||0),0);
  const modal=document.createElement("div");modal.id="purchaseInvoiceEditModal";modal.style.cssText="position:fixed;inset:0;z-index:100001;background:#101827aa;overflow:auto;padding:10px";
  modal.innerHTML='<div style="max-width:680px;margin:8px auto;background:white;border-radius:16px;padding:15px;box-shadow:0 12px 40px #0004">'+
- '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>🧾 د خرید بشپړ رسید اصلاح</h3><button type="button" onclick="document.getElementById(\\'purchaseInvoiceEditModal\\').remove()">✕</button></div>'+
+ '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>🧾 د خرید بشپړ رسید اصلاح</h3><button type="button" onclick="document.getElementById(&quot;purchaseInvoiceEditModal&quot;).remove()">✕</button></div>'+
  '<p style="color:#64748b">رسید: <b>'+safe(first.invoice||first.receipt||key)+'</b> · شرکت: <b>'+safe(first.supplier||first.supplierName||supplier?.name||"نغدي پېرود")+'</b></p>'+
  '<div id="purchaseInvoiceEditLines">'+rows.map((x,i)=>purchaseInvoiceEditLineHtml(x,i)).join("")+'</div>'+
  '<button type="button" class="gray" style="width:100%;padding:11px;margin:5px 0" onclick="addPurchaseInvoiceEditLine()">＋ نوی جنس اضافه کړه</button>'+
