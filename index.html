@@ -3838,18 +3838,116 @@ function editPurchaseWeight(id){
  try{saveDB();renderPurchases();alert("وزن اصلاح شو. ټول وزن: "+p.weightKg.toLocaleString("en-US")+" کیلوګرام");}
  catch(e){p.weightKg=old.weightKg;p.unitWeightKg=old.unitWeightKg;alert("بدلون خوندي نه شو؛ پخوانی وزن هماغسې پاتې شو");}
 }
+let purchaseInvoiceEditRows=[];
+let purchaseInvoiceEditKey="";
+function purchaseInvoiceEditLineHtml(x,i){
+ const products=(db.products||[]).map(p=>'<option value="'+safe(p.id)+'" '+(String(p.id)===String(x.productId)?'selected':'')+'>'+safe(p.name)+'</option>').join("");
+ const p=db.products.find(z=>String(z.id)===String(x.productId));
+ const qty=Number(x.qty??x.quantity)||0;
+ const weight=qty>0&&Number(x.weightKg)>0?Number(x.weightKg)/qty:Number(x.unitWeightKg)||0;
+ return '<section data-purchase-edit-row="'+i+'" style="border:1px solid #dbe4ef;border-radius:13px;padding:12px;margin:10px 0;background:#fbfdff">'+
+ '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>جنس '+(i+1)+'</b><button type="button" class="red" onclick="removePurchaseInvoiceEditLine('+i+')">🗑 حذف</button></div>'+
+ '<label>جنس</label><select data-field="productId" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px">'+products+'</select>'+
+ '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><div><label>مقدار</label><input data-field="qty" type="number" min="0.001" step="any" value="'+qty+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div><div><label>واحد</label><input data-field="unit" value="'+safe(x.unit||p?.unit||"واحد")+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div>'+
+ '<div><label>د یوه واحد قیمت (AFN)</label><input data-field="price" type="number" min="0" step="any" value="'+Number(x.goodsTotal!==undefined&&qty>0?Number(x.goodsTotal)/qty:(Number(x.price)||0))+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div><div><label>د یوه واحد وزن (کیلو)</label><input data-field="unitWeight" type="number" min="0.001" step="any" value="'+(weight||"")+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div></div>'+
+ '<small style="display:block;margin-top:7px;color:#64748b">پخوانی وزن: '+(Number(x.weightKg)||0).toLocaleString("en-US")+' کیلو · د نرخ محاسبه د مصارفو له وېش سره کېږي</small></section>';
+}
+function addPurchaseInvoiceEditLine(){
+ const box=document.getElementById("purchaseInvoiceEditLines");if(!box)return;
+ const i=box.querySelectorAll("[data-purchase-edit-row]").length;
+ const p=(db.products||[])[0];
+ if(!p)return alert("لومړی د جنسونو په برخه کې جنس ثبت کړه");
+ const x={productId:p.id,qty:1,unit:p.tradeUnit||p.unit||"واحد",price:Number(p.cost)||0,goodsTotal:Number(p.cost)||0,weightKg:1,unitWeightKg:1};
+ const wrap=document.createElement("div");wrap.innerHTML=purchaseInvoiceEditLineHtml(x,i);box.appendChild(wrap.firstElementChild);
+}
+function removePurchaseInvoiceEditLine(i){
+ const box=document.querySelector('#purchaseInvoiceEditLines [data-purchase-edit-row="'+i+'"]');if(box)box.remove();
+ document.querySelectorAll("#purchaseInvoiceEditLines [data-purchase-edit-row]").forEach((el,n)=>{el.dataset.purchaseEditRow=n;const title=el.querySelector("b");if(title)title.textContent="جنس "+(n+1);const btn=el.querySelector("button.red");if(btn)btn.setAttribute("onclick","removePurchaseInvoiceEditLine("+n+")");});
+}
 function openPurchaseInvoiceEditor(encodedKey){
  const key=decodeURIComponent(encodedKey),rows=(db.purchases||[]).filter(p=>String(p.invoice||p.receipt||("single-"+p.id))===key);
  if(!rows.length)return alert("د خرید رسید ونه موندل شو");
+ purchaseInvoiceEditKey=key;
  const old=document.getElementById("purchaseInvoiceEditModal");if(old)old.remove();
- const modal=document.createElement("div");modal.id="purchaseInvoiceEditModal";modal.style.cssText="position:fixed;inset:0;z-index:100001;background:#101827aa;overflow:auto;padding:12px";
- const cards=rows.map((p,i)=>{const qty=Number(p.qty??p.quantity)||0,uw=qty>0&&Number(p.weightKg)>0?Number(p.weightKg)/qty:Number(p.unitWeightKg)||0,name=p.productName||p.name||(db.products.find(x=>String(x.id)===String(p.productId))||{}).name||"جنس";return '<section style="border:1px solid #dbe4ef;border-radius:12px;padding:12px;margin:10px 0"><b>'+safe(name)+'</b><p>مقدار: '+qty+' '+safe(unitLabel(p.unit||p.purchaseUnit||""))+'</p><label>د یوه واحد وزن (کیلوګرام)</label><input data-row="'+i+'" type="number" min="0.001" step="any" value="'+(uw||"")+'" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px"><p>ټول وزن: <b data-total="'+i+'">'+(uw*qty||0)+'</b> کیلو</p></section>';}).join("");
- modal.innerHTML='<div style="max-width:650px;margin:10px auto;background:white;border-radius:16px;padding:16px"><div style="display:flex;justify-content:space-between"><h3>🧾 د خرید بشپړ رسید</h3><button onclick="document.getElementById(\'purchaseInvoiceEditModal\').remove()">✕</button></div><p>د دې رسید ټول جنسونه دلته یوځای دي. د هر جنس وزن بدل کړه.</p>'+cards+'<h3 id="purchaseWeightSum" style="background:#edf4ff;padding:12px;border-radius:9px">ټول وزن: — کیلو</h3><button id="savePurchaseInvoiceWeights" class="primary" style="width:100%;padding:14px">💾 ټول بدلونونه خوندي کړه</button></div>';
+ const first=rows[0],supplierId=first.supplierId||"",supplier=(db.suppliers||[]).find(x=>String(x.id)===String(supplierId));
+ const oldGoods=rows.reduce((n,x)=>n+Number(x.goodsTotal??((Number(x.qty)||0)*(Number(x.price)||0))),0);
+ const oldExtra=rows.reduce((n,x)=>n+Number(x.expenseShare||0),0);
+ const oldPaid=rows.reduce((n,x)=>n+Number(x.paid||0),0);
+ const modal=document.createElement("div");modal.id="purchaseInvoiceEditModal";modal.style.cssText="position:fixed;inset:0;z-index:100001;background:#101827aa;overflow:auto;padding:10px";
+ modal.innerHTML='<div style="max-width:680px;margin:8px auto;background:white;border-radius:16px;padding:15px;box-shadow:0 12px 40px #0004">'+
+ '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>🧾 د خرید بشپړ رسید اصلاح</h3><button type="button" onclick="document.getElementById(\\'purchaseInvoiceEditModal\\').remove()">✕</button></div>'+
+ '<p style="color:#64748b">رسید: <b>'+safe(first.invoice||first.receipt||key)+'</b> · شرکت: <b>'+safe(first.supplier||first.supplierName||supplier?.name||"نغدي پېرود")+'</b></p>'+
+ '<div id="purchaseInvoiceEditLines">'+rows.map((x,i)=>purchaseInvoiceEditLineHtml(x,i)).join("")+'</div>'+
+ '<button type="button" class="gray" style="width:100%;padding:11px;margin:5px 0" onclick="addPurchaseInvoiceEditLine()">＋ نوی جنس اضافه کړه</button>'+
+ '<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px"><div><label>د رسید اضافي مصارف (AFN)</label><input id="purchaseEditExtra" type="number" min="0" step="any" value="'+oldExtra+'" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px"></div><div><label>ورکړل شوې پیسې (AFN)</label><input id="purchaseEditPaid" type="number" min="0" step="any" value="'+oldPaid+'" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px"></div></div>'+
+ '<div id="purchaseEditSummary" style="background:#f0f5fb;padding:12px;border-radius:10px;margin:12px 0;line-height:2"></div>'+
+ '<p style="font-size:12px;color:#9a5b12">یادونه: که د همدې جنس له دې رسید وروسته خرڅلاو یا بل خرید شوی وي، د هغه جنس مقدار او نرخ نه بدلېږي، څو پخوانی ګټه او د موجودۍ قیمت خراب نه شي. وزن او نور خوندي بدلونونه بیا هم ثبتېدای شي.</p>'+
+ '<button id="savePurchaseInvoiceFull" type="button" class="primary" style="width:100%;padding:14px">💾 ټول بدلونونه خوندي کړه</button></div>';
  document.body.appendChild(modal);
- const update=()=>{let sum=0;modal.querySelectorAll("[data-row]").forEach((el,i)=>{const qty=Number(rows[i].qty??rows[i].quantity)||0,total=qty*(Number(el.value)||0);sum+=total;modal.querySelector('[data-total="'+i+'"]').textContent=total.toLocaleString("en-US",{maximumFractionDigits:3});});modal.querySelector("#purchaseWeightSum").textContent="ټول وزن: "+sum.toLocaleString("en-US",{maximumFractionDigits:3})+" کیلو";};
- modal.querySelectorAll("[data-row]").forEach(el=>el.addEventListener("input",update));
- modal.querySelector("#savePurchaseInvoiceWeights").onclick=()=>{const changes=[];modal.querySelectorAll("[data-row]").forEach((el,i)=>{const qty=Number(rows[i].qty??rows[i].quantity)||0,w=Number(el.value);if(qty<=0||!Number.isFinite(w)||w<=0)changes.push(null);else changes.push({p:rows[i],w,kg:qty*w});});if(changes.some(x=>!x))return alert("د هر جنس د یوه واحد وزن سم ولیکه");const backup=changes.map(x=>({p:x.p,w:x.p.weightKg,u:x.p.unitWeightKg}));changes.forEach(x=>{x.p.unitWeightKg=x.w;x.p.weightKg=x.kg;});try{saveDB();modal.remove();renderPurchases();alert("د دې رسید ټول وزنونه اصلاح او خوندي شول");}catch(e){backup.forEach(x=>{x.p.weightKg=x.w;x.p.unitWeightKg=x.u;});alert("بدلون خوندي نه شو؛ پخواني معلومات وساتل شول");}};
- update();
+ const summary=()=>{const box=document.getElementById("purchaseEditSummary");if(!box)return;let goods=0,kg=0;modal.querySelectorAll("[data-purchase-edit-row]").forEach(row=>{const q=Number(row.querySelector('[data-field="qty"]')?.value)||0,pr=Number(row.querySelector('[data-field="price"]')?.value)||0,w=Number(row.querySelector('[data-field="unitWeight"]')?.value)||0;goods+=q*pr;kg+=q*w;});const extra=Math.max(0,Number(document.getElementById("purchaseEditExtra")?.value)||0),paid=Math.max(0,Number(document.getElementById("purchaseEditPaid")?.value)||0);box.innerHTML="د جنسونو قیمت: <b>"+money(goods)+"</b><br>اضافي مصارف: <b>"+money(extra)+"</b><br>ټول رسید: <b>"+money(goods+extra)+"</b><br>ورکړل شوې پیسې: <b>"+money(paid)+"</b><br>نوی پاتې شرکت پور: <b>"+money(Math.max(0,goods-paid))+"</b><br>ټول وزن: <b>"+kg.toLocaleString("en-US",{maximumFractionDigits:3})+" کیلو</b>";};
+ modal.addEventListener("input",summary);modal.addEventListener("change",summary);summary();
+ document.getElementById("savePurchaseInvoiceFull").onclick=()=>{
+  const newRows=[...modal.querySelectorAll("[data-purchase-edit-row]")].map(row=>{const productId=row.querySelector('[data-field="productId"]').value,p=db.products.find(z=>String(z.id)===String(productId));return {row,product:p,productId,qty:Number(row.querySelector('[data-field="qty"]').value),unit:(row.querySelector('[data-field="unit"]').value||"").trim(),price:Number(row.querySelector('[data-field="price"]').value),unitWeight:Number(row.querySelector('[data-field="unitWeight"]').value)};});
+  if(!newRows.length)return alert("په رسید کې لږ تر لږه یو جنس وساته");
+  if(newRows.some(x=>!x.product||!Number.isFinite(x.qty)||x.qty<=0||!x.unit||!Number.isFinite(x.price)||x.price<0||!Number.isFinite(x.unitWeight)||x.unitWeight<=0))return alert("د هر جنس نوم، مقدار، واحد، نرخ او وزن سم ولیکه");
+  const extra=Number(document.getElementById("purchaseEditExtra").value),paid=Number(document.getElementById("purchaseEditPaid").value);
+  if(!Number.isFinite(extra)||extra<0||!Number.isFinite(paid)||paid<0)return alert("مصارف او ورکړل شوې پیسې سمې ولیکه");
+  const goods=newRows.reduce((n,x)=>n+x.qty*x.price,0),debt=Math.max(0,goods-paid);
+  if(paid>goods+0.001)return alert("ورکړل شوې پیسې د جنسونو له ټول قیمت څخه زیاتې نه شي کېدای");
+  const oldPaid=rows.reduce((n,x)=>n+Number(x.paid||0),0),oldExtra=rows.reduce((n,x)=>n+Number(x.expenseShare||0),0),oldDebt=rows.reduce((n,x)=>n+Number(x.debt||0),0);
+  const receipt=(db.supplierReceipts||[]).find(x=>String(x.purchaseId)===key&&x.kind==="purchase");
+  const supplierRec=supplierId?(db.suppliers||[]).find(x=>String(x.id)===String(supplierId)):null;
+  if(debt>0&&(!supplierRec||!receipt))return alert("د دې رسید د شرکت پور له اصلي حساب سره تړلی نه دی؛ د پور د خوندي سمون لپاره بدلون ونه شو");
+  const oldCashOut=oldPaid+oldExtra,newCashOut=paid+extra,cashDelta=oldCashOut-newCashOut;
+  if(cashDelta<0&&-cashDelta>Number(db.cash||0))return alert("په صندوق کې د دې زیاتې ورکړې/مصارفو لپاره کافي پیسې نشته");
+  const oldById=new Map();rows.forEach(x=>{const id=String(x.productId);const v=oldById.get(id)||{qty:0,goods:0,expense:0,rows:[]};v.qty+=Number(x.stockQty??(Number(x.qty)||0)*(Number(x.unitFactor)||1));v.goods+=Number(x.goodsTotal??((Number(x.qty)||0)*(Number(x.price)||0)));v.expense+=Number(x.expenseShare||0);v.rows.push(x);oldById.set(id,v);});
+  const newById=new Map();let totalWeight=0;newRows.forEach(x=>{const factor=saleFactorForUnit(x.product,x.unit);if(!Number.isFinite(factor)||factor<=0)throw new Error("د "+x.product.name+" واحد بدلولو ضریب سم نه دی");const stockQty=x.qty*factor,weight=x.qty*x.unitWeight;totalWeight+=weight;const v=newById.get(String(x.productId))||{product:x.product,qty:0,goods:0,weight:0,lines:[]};v.qty+=stockQty;v.goods+=x.qty*x.price;v.weight+=weight;v.lines.push({...x,factor,stockQty,weight});newById.set(String(x.productId),v);});
+  const affected=new Set([...oldById.keys(),...newById.keys()]);
+  for(const id of affected){
+   const old=oldById.get(id)||{qty:0,goods:0,expense:0},next=newById.get(id)||{product:db.products.find(z=>String(z.id)===id),qty:0,goods:0,weight:0};
+   const p=next.product||db.products.find(z=>String(z.id)===id);if(!p) return alert("یو جنس ونه موندل شو");
+   const oldCost=old.qty>0?(old.goods+old.expense)/old.qty:0,newGoods=next.goods||0,newCost=next.qty>0?(newGoods+(totalWeight>0?extra*(next.weight/totalWeight):0))/next.qty:0;
+   const changed=Math.abs(old.qty-next.qty)>0.000001||Math.abs(oldCost-newCost)>0.000001;
+   if(changed){
+    const date=String(first.date||"").slice(0,10);
+    const laterSale=(db.sales||[]).some(z=>String(z.productId)===id&&String(z.date||"").slice(0,10)>date);
+    const laterPurchase=(db.purchases||[]).some(z=>!rows.includes(z)&&String(z.productId)===id&&String(z.date||"").slice(0,10)>date);
+    if(laterSale||laterPurchase)return alert("د «"+p.name+"» له دې رسید وروسته خرڅلاو یا بل خرید ثبت شوی. د دې جنس مقدار/نرخ بدلول به پخوانۍ ګټه او موجودي ګډوډ کړي؛ دغه جنس جلا د تاریخچې له بیا محاسبې پرته نه شو بدلولای.");
+    if(Number(p.qty)<old.qty-0.000001)return alert("د «"+p.name+"» اوسنی موجودي د دې رسید د پخواني مقدار څخه کمه ده؛ د مقدار کمول خوندي نه دي.");
+   }
+  }
+  const oldState={cash:Number(db.cash||0),supplierDebt:supplierRec?Number(supplierRec.debt||0):0,products:[...affected].map(id=>{const p=db.products.find(z=>String(z.id)===id);return {p,qty:p.qty,cost:p.cost};}),purchases:rows.map(x=>({...x})),receipt:receipt?{...receipt}:null};
+  try{
+   // د هر جنس پخوانی پېرود له موجودۍ وباسه، نوی مقدار او د مصارفو ونډه ورزیاته کړه.
+   for(const id of affected){
+    const old=oldById.get(id)||{qty:0,goods:0,expense:0},next=newById.get(id)||{product:db.products.find(z=>String(z.id)===id),qty:0,goods:0,weight:0};
+    const p=next.product||db.products.find(z=>String(z.id)===id),oldQty=Number(old.qty)||0,newQty=Number(next.qty)||0;
+    const currentQty=Number(p.qty)||0,currentCost=Number(p.cost)||0;
+    const remainingQty=currentQty-oldQty;
+    const oldValue=oldQty*((old.goods+old.expense)/Math.max(oldQty,0.0000001));
+    const newExpense=totalWeight>0?extra*(next.weight/totalWeight):0;
+    const newValue=newQty>0?next.goods+newExpense:0;
+    p.qty=remainingQty+newQty;
+    p.cost=p.qty>0?Math.max(0,(currentQty*currentCost-oldValue+newValue)/p.qty):0;
+   }
+   const paidRatio=goods>0?paid/goods:0;
+   const lineRows=[];
+   newRows.forEach(x=>{const v=newById.get(String(x.productId)),share=totalWeight>0?extra*(x.weight/totalWeight)/v.lines.length:0;});
+   let remainingGoods=goods,remainingPaid=paid;
+   newRows.forEach((x,i)=>{const weight=x.weight,total=x.qty*x.price,share=totalWeight>0?extra*(weight/totalWeight):0;const linePaid=i===newRows.length-1?remainingPaid:(goods>0?paid*(total/goods):0);remainingPaid-=linePaid;const lineDebt=total-linePaid;const p=x.product;const record={id:rows[i]?.id||uid(),invoice:key,productId:p.id,productName:p.name,qty:x.qty,unit:x.unit,stockQty:x.stockQty,unitFactor:x.factor,weightKg:weight,unitWeightKg:x.unitWeight,price:x.price+(x.qty>0?share/x.qty:0),total:total+share,goodsTotal:total,expenseShare:share,paid:linePaid,debt:lineDebt,supplier:first.supplier||supplierRec?.name||"نغدي پېرود",supplierId:supplierId||"",date:first.date||today(),itemsCount:newRows.length};lineRows.push(record);});
+   db.purchases=db.purchases.filter(x=>!rows.includes(x)).concat(lineRows);
+   db.cash=Number(db.cash||0)+cashDelta;
+   if(supplierRec){supplierRec.debt=Number(supplierRec.debt||0)+(debt-oldDebt);receipt.total=goods;receipt.paid=paid;receipt.amount=debt;receipt.note="د پېرود ګډ رسید "+key+" · جنسونه: "+lineRows.map(x=>x.productName).join("، ")+" · اضافي مصارف "+money(extra);receipt.newDebt=supplierRec.debt;}
+   saveDB();
+   modal.remove();renderPurchases();refreshAll();alert("د خرید رسید اصلاح او خوندي شو. موجودي، صندوق او د شرکت پور هم ورسره نوي شول.");
+  }catch(e){
+   db.cash=oldState.cash;if(supplierRec)supplierRec.debt=oldState.supplierDebt;
+   oldState.products.forEach(x=>{x.p.qty=x.qty;x.p.cost=x.cost;});
+   db.purchases=db.purchases.filter(x=>!lineRows.includes(x));rows.forEach((x,i)=>Object.assign(x,oldState.purchases[i]));db.purchases.push(...rows);
+   if(receipt&&oldState.receipt)Object.assign(receipt,oldState.receipt);
+   alert("رسید خوندي نه شو؛ پخواني حسابونه بېرته وساتل شول. "+(e?.message||""));
+  }
+ };
 }
 function renderPurchases(){
  const q=value("purchasesSearch").toLowerCase();
