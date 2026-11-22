@@ -4315,7 +4315,7 @@ function renderSupplierLedgerHistory(id){
  rows.sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
  const box=document.getElementById("supplierLedgerHistory");
  if(!box)return;
- box.innerHTML=rows.map(x=>{const isPay=x.kind==="payment"||x.type==="payment",isPurchase=x.kind==="purchase";const title=isPay?'💵 شرکت ته ورکړل شوې پیسې':(isPurchase?'🧾 د جنس پېرود رسید':'➕ پور / د شرکت بل');const detail=isPurchase?(safe(x.note||"پېرود")+" · ټول: "+money(x.total||0)+" · نغدي: "+money(x.paid||0)+" · پور: "+money(x.amount||0)):(safe(x.note||"رسید"));return '<div class="supplier-ledger-row"><div><b>'+title+'</b><small>'+safe(x.date||"—")+' · '+detail+'</small></div><strong class="'+(isPay?'supplier-ledger-minus':'supplier-ledger-plus')+'">'+(isPay?'−':'+')+money(x.amount||0)+'</strong></div>';}).join("")||'<div class="supplier-empty">تر اوسه رسید نه دی ثبت شوی</div>';
+ box.innerHTML=rows.map(x=>{const isPay=x.kind==="payment"||x.type==="payment",isPurchase=x.kind==="purchase",isAdjust=x.kind==="adjustment";const title=isPay?'💵 شرکت ته ورکړل شوې پیسې':(isPurchase?'🧾 د جنس پېرود رسید':(isAdjust?'⚖️ د پخواني حساب سمون':'➕ پور / د شرکت بل'));const detail=isPurchase?(safe(x.note||"پېرود")+" · ټول: "+money(x.total||0)+" · نغدي: "+money(x.paid||0)+" · پور: "+money(x.amount||0)):(safe(x.note||"رسید"));const negative=isPay||(isAdjust&&Number(x.delta||0)<0);return '<div class="supplier-ledger-row"><div><b>'+title+'</b><small>'+safe(x.date||"—")+' · '+detail+'</small></div><strong class="'+(negative?'supplier-ledger-minus':'supplier-ledger-plus')+'">'+(negative?'−':'+')+money(x.amount||0)+'</strong></div>';}).join("")||'<div class="supplier-empty">تر اوسه رسید نه دی ثبت شوی</div>';
 }
 function saveSupplierLedgerEntry(){
  const id=document.getElementById("supplierLedgerId").value;
@@ -4378,9 +4378,16 @@ function saveSupplierEdit(){
  const duplicate=db.suppliers.some(x=>String(x.id)!==String(id)&&String(x.name||"").trim().toLowerCase()===name.toLowerCase());
  if(duplicate)return alert("دا نوم د بل تامین کوونکي سره ثبت دی");
  const old={name:s.name,phone:s.phone,debt:s.debt};
+ const oldDebt=Number(s.debt)||0,delta=debt-oldDebt;
+ let adjustment=null;
  s.name=name;s.phone=phone;s.debt=debt;
- try{saveDB();}catch(e){Object.assign(s,old);return alert("بدلون خوندي نه شو؛ معلومات پر خپل پخواني حالت پاتې دي.");}
- closeSupplierEdit();refreshAll();alert("د تامین کوونکي معلومات او پخوانی پور سم شول");
+ if(Math.abs(delta)>0.000001){
+  if(!Array.isArray(db.supplierReceipts))db.supplierReceipts=[];
+  adjustment={id:uid(),supplierId:s.id,supplierName:name,kind:"adjustment",amount:Math.abs(delta),delta,date:today(),note:"د پخواني حساب سمون؛ له "+money(oldDebt)+" څخه "+money(debt)+" ته",previousDebt:oldDebt,newDebt:debt,createdAt:Date.now()};
+  db.supplierReceipts.push(adjustment);
+ }
+ try{saveDB();}catch(e){Object.assign(s,old);if(adjustment)db.supplierReceipts=db.supplierReceipts.filter(x=>x.id!==adjustment.id);return alert("بدلون خوندي نه شو؛ معلومات پر خپل پخواني حالت پاتې دي.");}
+ closeSupplierEdit();refreshAll();alert("د تامین کوونکي معلومات او پور سم شول. د پور د بدلون اندازه د حساب په تاریخچه کې هم ثبت شوه.");
 }
 function deleteSupplier(id){
  const s=db.suppliers.find(x=>x.id===id);if(!s)return;
