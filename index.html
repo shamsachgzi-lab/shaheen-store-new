@@ -3917,6 +3917,7 @@ function openPurchaseInvoiceEditor(encodedKey){
    }
   }
   const oldState={cash:Number(db.cash||0),supplierDebt:supplierRec?Number(supplierRec.debt||0):0,products:[...affected].map(id=>{const p=db.products.find(z=>String(z.id)===id);return {p,qty:p.qty,cost:p.cost};}),purchases:rows.map(x=>({...x})),receipt:receipt?{...receipt}:null};
+  const lineRows=[];
   try{
    // د هر جنس پخوانی پېرود له موجودۍ وباسه، نوی مقدار او د مصارفو ونډه ورزیاته کړه.
    for(const id of affected){
@@ -3927,11 +3928,11 @@ function openPurchaseInvoiceEditor(encodedKey){
     const oldValue=oldQty*((old.goods+old.expense)/Math.max(oldQty,0.0000001));
     const newExpense=totalWeight>0?extra*(next.weight/totalWeight):0;
     const newValue=newQty>0?next.goods+newExpense:0;
-    p.qty=remainingQty+newQty;
+    // که د رسید د جنس مقدار بدل شوی نه وي، موجودي په عین پخواني مقدار وساته.
+    p.qty=Math.abs(oldQty-newQty)<=0.000001?currentQty:remainingQty+newQty;
     p.cost=p.qty>0?Math.max(0,(currentQty*currentCost-oldValue+newValue)/p.qty):0;
    }
    const paidRatio=goods>0?paid/goods:0;
-   const lineRows=[];
    newRows.forEach(x=>{const v=newById.get(String(x.productId)),share=totalWeight>0?extra*(x.weight/totalWeight)/v.lines.length:0;});
    let remainingGoods=goods,remainingPaid=paid;
    newRows.forEach((x,i)=>{const weight=x.weight,total=x.qty*x.price,share=totalWeight>0?extra*(weight/totalWeight):0;const linePaid=i===newRows.length-1?remainingPaid:(goods>0?paid*(total/goods):0);remainingPaid-=linePaid;const lineDebt=total-linePaid;const p=x.product;const record={id:rows[i]?.id||uid(),invoice:key,productId:p.id,productName:p.name,qty:x.qty,unit:x.unit,stockQty:x.stockQty,unitFactor:x.factor,weightKg:weight,unitWeightKg:x.unitWeight,price:x.price+(x.qty>0?share/x.qty:0),total:total+share,goodsTotal:total,expenseShare:share,paid:linePaid,debt:lineDebt,supplier:first.supplier||supplierRec?.name||"نغدي پېرود",supplierId:supplierId||"",date:first.date||today(),itemsCount:newRows.length};lineRows.push(record);});
