@@ -2486,7 +2486,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <div class="purchase-pro-step"><b>۱ · جنسونه رسید ته اضافه کړه</b><small>هر څومره جنسونه چې اخلې، یو په بل پسې یې اضافه کړه</small></div>
   <label>🔎 جنس د نوم یا بارکوډ له مخې ولټوه</label><input class="purchase-search" id="buyProductSearch" placeholder="د جنس نوم یا بارکوډ ولیکه..." autocomplete="off">
   <div class="row purchase-fields"><div><label>جنس انتخاب کړه</label><select id="buyProduct"></select></div><div><label>د پېرود واحد</label><select id="buyUnit"></select></div></div><div id="purchaseSelectedProduct" class="purchase-selected-product"><div class="purchase-product-thumb">📦</div><div><b>جنس انتخاب کړه</b><small>موجودي به دلته ښکاره شي</small></div></div>
-  <div class="row purchase-fields"><div><label>مقدار / تعداد</label><input id="buyQty" type="number" min="0.001" step="any" placeholder="مثلاً ۵"></div><div><label>د هر واحد د اخیستلو قیمت (AFN)</label><input id="buyPrice" type="number" min="0.01" step="any" placeholder="مثلاً ۱۵۰۰"></div></div><label>د دې جنس ټول وزن (کیلوګرام)</label><input id="buyWeightKg" type="number" min="0.001" step="any" placeholder="مثلاً ۲۵۰ کیلو (۵ بوجۍ × ۵۰ کیلو)">
+  <div class="row purchase-fields"><div><label>مقدار / تعداد</label><input id="buyQty" type="number" min="0.001" step="any" placeholder="مثلاً ۵"></div><div><label>د هر واحد د اخیستلو قیمت (AFN)</label><input id="buyPrice" type="number" min="0.01" step="any" placeholder="مثلاً ۱۵۰۰"></div></div><label>د یوه واحد وزن (کیلوګرام)</label><input id="buyWeightKg" type="number" min="0.001" step="any" placeholder="مثلاً یوه بوجۍ ۱۰ کیلو">
   <button type="button" class="purchase-add-line" onclick="addPurchaseCartLine()">＋ دا جنس رسید ته اضافه کړه</button>
   <div id="purchaseCartBox" class="purchase-cart-box"><div class="purchase-cart-empty">تر اوسه رسید ته جنس نه دی اضافه شوی</div></div>
   <div class="purchase-pro-step"><b>۲ · د شرکت او پیسو معلومات</b></div>
@@ -3736,8 +3736,9 @@ function renderPurchaseCart(){
 function addPurchaseCartLine(){
  const p=db.products.find(x=>String(x.id)===String(value("buyProduct")));
  if(!p)return alert("جنس انتخاب کړه");
- const qty=number("buyQty"),price=number("buyPrice"),weightKg=number("buyWeightKg"),unit=value("buyUnit")||(p.unit||"واحد"),factor=saleFactorForUnit(p,unit);
- if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<=0||!Number.isFinite(factor)||factor<=0||!Number.isFinite(weightKg)||weightKg<=0)return alert("مقدار، قیمت او د جنس ټول وزن په کیلوګرام سم ولیکه");
+ const qty=number("buyQty"),price=number("buyPrice"),unitWeightKg=number("buyWeightKg"),unit=value("buyUnit")||(p.unit||"واحد"),factor=saleFactorForUnit(p,unit);
+ if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(price)||price<=0||!Number.isFinite(factor)||factor<=0||!Number.isFinite(unitWeightKg)||unitWeightKg<=0)return alert("مقدار، قیمت او د یوه واحد وزن په کیلوګرام سم ولیکه");
+ const weightKg=qty*unitWeightKg;
  const found=purchaseCart.find(x=>String(x.productId)===String(p.id)&&x.unit===unit&&x.price===price);
  if(found){found.qty+=qty;found.weightKg+=weightKg;}else purchaseCart.push({productId:p.id,name:p.name,qty,unit,price,factor,weightKg});
  document.getElementById("buyQty").value="";document.getElementById("buyPrice").value="";document.getElementById("buyWeightKg").value="";
