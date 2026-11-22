@@ -5093,17 +5093,30 @@ function restoreData(mergeOnly=false){
      if(supplierIds.has(key(v))||(norm(v.name)&&supplierNames.has(norm(v.name))))return false;
      if(key(v))supplierIds.add(key(v));if(norm(v.name))supplierNames.add(norm(v.name));return true;
     });
+    // د شرکتونو د پېژندلو باوري طریقه: لومړی غیرخالي ID، بیا نوم، او په پای کې د تلیفون شمېره.
+    // د دوو تشو ID ګانو برابرول منع دي؛ هغه پخوانی منطق کولای شوای ناسم شرکت سره ونښلوي.
+    const matchSupplier=(source,list=db.suppliers||[])=>{
+     const sourceId=key(source),sourceName=norm(source.name);
+     const digits=v=>String(v||"").replace(/\\D/g,"");
+     const sourcePhone=digits(source.phone);
+     return list.find(v=>{
+      const targetId=key(v),targetName=norm(v.name),targetPhone=digits(v.phone);
+      return (sourceId&&targetId&&sourceId===targetId) ||
+       (sourceName&&targetName&&sourceName===targetName) ||
+       (sourcePhone&&targetPhone&&sourcePhone===targetPhone);
+     });
+    };
     const supplierDebtUpdates=[];
     (restored.suppliers||[]).forEach(source=>{
-     const target=(db.suppliers||[]).find(v=>key(v)===key(source)||norm(v.name)===norm(source.name));
+     const target=matchSupplier(source);
      if(!target)return;
      const before=Number(target.debt)||0,after=Number(source.debt)||0;
      if(Math.abs(before-after)>0.009)supplierDebtUpdates.push({target,source,before,after,delta:after-before});
     });
     const supplierIdMap=new Map();
     (restored.suppliers||[]).forEach(source=>{
-     const target=(db.suppliers||[]).find(v=>key(v)===key(source)||norm(v.name)===norm(source.name))||newSuppliers.find(v=>key(v)===key(source)||norm(v.name)===norm(source.name));
-     if(target)supplierIdMap.set(key(source),key(target));
+     const target=matchSupplier(source)||newSuppliers.find(v=>(key(source)&&key(v)&&key(v)===key(source))||(norm(source.name)&&norm(v.name)===norm(source.name))||(String(source.phone||"").replace(/\\D/g,"")&&String(v.phone||"").replace(/\\D/g,"")===String(source.phone||"").replace(/\\D/g,"")));
+     if(target&&key(source))supplierIdMap.set(key(source),key(target));
     });
     const remappedSupplierReceipts=(restored.supplierReceipts||[]).map(x=>({...x,supplierId:supplierIdMap.get(String(x.supplierId||""))||x.supplierId}));
     const remappedPayments=(restored.payments||[]).map(x=>x.type==="supplier"?({...x,personId:supplierIdMap.get(String(x.personId||""))||x.personId}):x);
