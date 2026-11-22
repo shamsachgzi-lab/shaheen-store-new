@@ -2803,12 +2803,7 @@ function runStorageDiagnostic(){
   alert("د معلوماتو خوندي تشخیص — هېڅ معلومات نه بدلوي\\n\\nاوسنی ادرس: "+location.origin+"\\nد اپلیکیشن ذخیره: "+DB_KEY+"\\n\\nد اپلیکیشن روان معلومات:\\nجنسونه: "+runtimeProducts+"\\nمشتریان: "+runtimeCustomers+"\\n\\nد پاڼې حالت:\\nاوسنۍ پاڼه: "+activePage+"\\nد بیا رسم نتیجه: "+renderStatus+"\\nپه سکرین کې شمېر: "+visibleProductCount+"\\nد جنسونو د لېست قطارونه: "+visibleProductRows+"\\n\\nد مشتریانو د پور خوندي تشخیص:\\nټول مشتریان: "+(db.customers||[]).length+"\\nپه c.debt کې د پور مجموعه: "+customerDebtTotal+" AFN\\nپور لرونکي مشتریان: "+customersWithDebt+"\\nد پخواني opening مجموعه: "+openingTotal+" AFN\\nد بدیلو فیلډونو مجموعه: "+alternateTotals+"\\nد مشتریانو د خرڅلاو پور مجموعه: "+salesDebtTotal+" AFN\\nد مشتریانو د ترلاسه شوو پیسو مجموعه: "+customerPaymentsTotal+" AFN\\nد خرڅلاو ریکارډونه: "+customerSales.length+"\\nد تادیاتو ریکارډونه: "+customerPayments.length+"\\n\\nپه همدې ذخیره کې ثبت معلومات:\\nجنسونه: "+storedProducts+"\\nمشتریان: "+storedCustomers+"\\nد لوستلو تېروتنه: "+(storageError?"هو":"نه")+"\\n\\nموندل شوې ذخیرې:\\n"+(keys.length?keys.map(x=>x.key+" — جنسونه: "+x.products+"، مشتریان: "+x.customers+(x.parseError?" (لوستلو تېروتنه)":"")).join("\\n"):"هیڅ بله ورته ذخیره ونه موندل شوه"));
 }
 
-// د کارن په تایید د پېرود پخوانۍ تاریخچه یو ځل پاکول؛ نور حسابونه او موجودي نه بدلېږي
-if(db.settings.purchaseHistoryClearedV1!==true){
- db.purchases=[];
- db.settings.purchaseHistoryClearedV1=true;
- saveDB();
-}
+// د پېرود تاریخچه په اتومات ډول مه پاکوه؛ د کارن ټول پخواني ریکارډونه وساته.
 function money(n){return (Number(n)||0).toLocaleString("en-US")+" "+(db.settings?.currency||"AFN")}
 function firstSavedPrice(...values){for(const v of values){const n=Number(v);if(Number.isFinite(n)&&n>0)return n;}return 0;}
 function productRetailPrice(p){return firstSavedPrice(p?.retailPrice,p?.retail,p?.price,p?.salePrice);}
