@@ -3206,7 +3206,7 @@ function unitLabel(name){
 }
 window.unitLabel=unitLabel;
 function unitWeightInKg(name){
- const fixed={kg:1,g:0.001,"0.5kg":0.5};
+ const fixed={kg:1,kilo:1,kilogram:1,"کیلو":1,"کیلوګرام":1,g:0.001,gram:0.001,"ګرام":0.001,"0.5kg":0.5,"نیم کیلو":0.5};
  if(Object.prototype.hasOwnProperty.call(fixed,name))return fixed[name];
  const meta=(db.settings?.units||[]).find(u=>String(u.name)===String(name));
  if(meta?.type==="weight"&&meta.base==="kg"&&Number(meta.factor)>0)return Number(meta.factor);
@@ -3850,11 +3850,12 @@ function purchaseInvoiceEditLineHtml(x,i){
  const products=(db.products||[]).map(p=>'<option value="'+safe(p.id)+'" '+(String(p.id)===String(x.productId)?'selected':'')+'>'+safe(p.name)+'</option>').join("");
  const p=db.products.find(z=>String(z.id)===String(x.productId));
  const qty=Number(x.qty??x.quantity)||0;
- const weight=qty>0&&Number(x.weightKg)>0?Number(x.weightKg)/qty:Number(x.unitWeightKg)||0;
+ const rawUnit=String(x.unit||p?.unit||"واحد"),displayUnit=typeof unitLabel==="function"?unitLabel(rawUnit):rawUnit;
+ const weight=qty>0&&Number(x.weightKg)>0?Number(x.weightKg)/qty:(Number(x.unitWeightKg)||unitWeightInKg(rawUnit)||0);
  return '<section data-purchase-edit-row="'+i+'" style="border:1px solid #dbe4ef;border-radius:13px;padding:12px;margin:10px 0;background:#fbfdff">'+
  '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>جنس '+(i+1)+'</b><button type="button" class="red" onclick="removePurchaseInvoiceEditLine('+i+')">🗑 حذف</button></div>'+
  '<label>جنس</label><select data-field="productId" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px">'+products+'</select>'+
- '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><div><label>مقدار</label><input data-field="qty" type="number" min="0.001" step="any" value="'+qty+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div><div><label>واحد</label><input data-field="unit" value="'+safe(x.unit||p?.unit||"واحد")+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div>'+
+ '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><div><label>مقدار</label><input data-field="qty" type="number" min="0.001" step="any" value="'+qty+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div><div><label>واحد (په پښتو)</label><input data-field="unit" value="'+safe(displayUnit)+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div>'+
  '<div><label>د یوه واحد قیمت (AFN)</label><input data-field="price" type="number" min="0" step="any" value="'+Number(x.goodsTotal!==undefined&&qty>0?Number(x.goodsTotal)/qty:(Number(x.price)||0))+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div><div><label>د یوه واحد وزن (کیلو)</label><input data-field="unitWeight" type="number" min="0.001" step="any" value="'+(weight||"")+'" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px"></div></div>'+
  '<small style="display:block;margin-top:7px;color:#64748b">پخوانی وزن: '+(Number(x.weightKg)||0).toLocaleString("en-US")+' کیلو · د نرخ محاسبه د مصارفو له وېش سره کېږي</small></section>';
 }
@@ -3890,10 +3891,10 @@ function openPurchaseInvoiceEditor(encodedKey){
  '<p style="font-size:12px;color:#9a5b12">یادونه: که د همدې جنس له دې رسید وروسته خرڅلاو یا بل خرید شوی وي، د هغه جنس مقدار او نرخ نه بدلېږي، څو پخوانی ګټه او د موجودۍ قیمت خراب نه شي. وزن او نور خوندي بدلونونه بیا هم ثبتېدای شي.</p>'+
  '<button id="savePurchaseInvoiceFull" type="button" class="primary" style="width:100%;padding:14px">💾 ټول بدلونونه خوندي کړه</button></div>';
  document.body.appendChild(modal);
- const summary=()=>{const box=document.getElementById("purchaseEditSummary");if(!box)return;let goods=0,kg=0;modal.querySelectorAll("[data-purchase-edit-row]").forEach(row=>{const q=Number(row.querySelector('[data-field="qty"]')?.value)||0,pr=Number(row.querySelector('[data-field="price"]')?.value)||0,w=Number(row.querySelector('[data-field="unitWeight"]')?.value)||0;goods+=q*pr;kg+=q*w;});const extra=Math.max(0,Number(document.getElementById("purchaseEditExtra")?.value)||0),paid=Math.max(0,Number(document.getElementById("purchaseEditPaid")?.value)||0);box.innerHTML="د جنسونو قیمت: <b>"+money(goods)+"</b><br>اضافي مصارف: <b>"+money(extra)+"</b><br>ټول رسید: <b>"+money(goods+extra)+"</b><br>ورکړل شوې پیسې: <b>"+money(paid)+"</b><br>نوی پاتې شرکت پور: <b>"+money(Math.max(0,goods-paid))+"</b><br>ټول وزن: <b>"+kg.toLocaleString("en-US",{maximumFractionDigits:3})+" کیلو</b>";};
+ const summary=()=>{const box=document.getElementById("purchaseEditSummary");if(!box)return;let goods=0,kg=0;modal.querySelectorAll("[data-purchase-edit-row]").forEach(row=>{const q=Number(row.querySelector('[data-field="qty"]')?.value)||0,pr=Number(row.querySelector('[data-field="price"]')?.value)||0,unit=row.querySelector('[data-field="unit"]')?.value||"",w=Number(row.querySelector('[data-field="unitWeight"]')?.value)||unitWeightInKg(unit)||0;goods+=q*pr;kg+=q*w;});const extra=Math.max(0,Number(document.getElementById("purchaseEditExtra")?.value)||0),paid=Math.max(0,Number(document.getElementById("purchaseEditPaid")?.value)||0);box.innerHTML="د جنسونو قیمت: <b>"+money(goods)+"</b><br>اضافي مصارف: <b>"+money(extra)+"</b><br>ټول رسید: <b>"+money(goods+extra)+"</b><br>ورکړل شوې پیسې: <b>"+money(paid)+"</b><br>نوی پاتې شرکت پور: <b>"+money(Math.max(0,goods-paid))+"</b><br>ټول وزن: <b>"+kg.toLocaleString("en-US",{maximumFractionDigits:3})+" کیلو</b>";};
  modal.addEventListener("input",summary);modal.addEventListener("change",summary);summary();
  document.getElementById("savePurchaseInvoiceFull").onclick=()=>{
-  const newRows=[...modal.querySelectorAll("[data-purchase-edit-row]")].map(row=>{const productId=row.querySelector('[data-field="productId"]').value,p=db.products.find(z=>String(z.id)===String(productId));return {row,product:p,productId,qty:Number(row.querySelector('[data-field="qty"]').value),unit:(row.querySelector('[data-field="unit"]').value||"").trim(),price:Number(row.querySelector('[data-field="price"]').value),unitWeight:Number(row.querySelector('[data-field="unitWeight"]').value)};});
+  const newRows=[...modal.querySelectorAll("[data-purchase-edit-row]")].map(row=>{const productId=row.querySelector('[data-field="productId"]').value,p=db.products.find(z=>String(z.id)===String(productId));return {row,product:p,productId,qty:Number(row.querySelector('[data-field="qty"]').value),unit:(row.querySelector('[data-field="unit"]').value||"").trim(),price:Number(row.querySelector('[data-field="price"]').value),unitWeight:(Number(row.querySelector('[data-field="unitWeight"]').value)||unitWeightInKg(row.querySelector('[data-field="unit"]').value)||0)};});
   if(!newRows.length)return alert("په رسید کې لږ تر لږه یو جنس وساته");
   if(newRows.some(x=>!x.product||!Number.isFinite(x.qty)||x.qty<=0||!x.unit||!Number.isFinite(x.price)||x.price<0||!Number.isFinite(x.unitWeight)||x.unitWeight<=0))return alert("د هر جنس نوم، مقدار، واحد، نرخ او وزن سم ولیکه");
   const extra=Number(document.getElementById("purchaseEditExtra").value),paid=Number(document.getElementById("purchaseEditPaid").value);
