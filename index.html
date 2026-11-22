@@ -2724,6 +2724,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <label>⬆️ بیک‌اف بېرته راواخله — د شاهین فروشگاه فایل</label><input type="file" id="restoreFile" accept=".json,application/json">
   <button class="green" onclick="restoreData()">⬆️ بشپړ بیک‌اف بېرته راګرځول (اوسني معلومات بدلوي)</button>
   <button class="primary" style="margin-top:8px" onclick="restoreData(true)">🛡️ خوندي یوځای کول: جنسونه، مشتریان او د شرکتونو پورونه</button>
+  <button class="primary" style="margin-top:8px" onclick="restoreData('supplierDebtOnly')">🏢 یوازې د شرکتونو پورونه د بیک‌اپ له مخې سمول</button>
   <hr><p class="notice">خوندي یوځای کول له بیک‌اپ څخه ورکې جنسونه، مشتریان او شرکتونه زیاتوي؛ د موجودو شرکتونو پاتې پور د بیک‌اپ له ثبت شوې شمېرې سره برابروي او د پور توپیر په تاریخچه کې ثبتوي. د خرڅلاو، راپورونو، نغدو، موجودۍ او د مشتریانو اوسني پورونه نه بدلوي. تکراري رسیدونه نه زیاتوي. بشپړ Restore اوسني معلومات بدلوي.</p>
   <button class="red" onclick="clearAllData()">⚠️ ټول معلومات پاکول</button>
  </div>
@@ -5113,6 +5114,21 @@ function restoreData(mergeOnly=false){
      const before=Number(target.debt)||0,after=Number(source.debt)||0;
      if(Math.abs(before-after)>0.009)supplierDebtUpdates.push({target,source,before,after,delta:after-before});
     });
+    if(mergeOnly==="supplierDebtOnly"){
+     if(!supplierDebtUpdates.length)return alert("د بیک‌اپ او اوسنیو شرکتونو ترمنځ د پور توپیر ونه موندل شو؛ هېڅ معلومات بدل نه شول.");
+     const summary="یوازې د شرکتونو پورونه به د بیک‌اپ له شمېرې سره برابر شي:\n"+
+      supplierDebtUpdates.map(u=>u.target.name+": "+money(u.before)+" → "+money(u.after)).join("\n")+
+      "\n\nنور ټول معلومات، لکه جنسونه، مشتریان، خرڅلاو، نغدې پیسې او تاریخچه، نه بدلېږي. دوام ورکړو؟";
+     if(!confirm(summary))return;
+     supplierDebtUpdates.forEach(u=>{
+      u.target.debt=u.after;
+      if(!Array.isArray(db.supplierReceipts))db.supplierReceipts=[];
+      db.supplierReceipts.push({id:uid(),supplierId:u.target.id,supplierName:u.target.name,kind:"adjustment",amount:Math.abs(u.delta),delta:u.delta,date:today(),note:"یوازې د شرکت پور سمون د بیک‌اپ له مخې؛ مخکې "+money(u.before)+"، اوس "+money(u.after),createdAt:Date.now()});
+     });
+     saveDB();refreshAll();
+     alert("یوازې د شرکتونو پورونه سم شول. نور معلومات بدل نه شول.");
+     return;
+    }
     const supplierIdMap=new Map();
     (restored.suppliers||[]).forEach(source=>{
      const target=matchSupplier(source)||newSuppliers.find(v=>(key(source)&&key(v)&&key(v)===key(source))||(norm(source.name)&&norm(v.name)===norm(source.name))||(String(source.phone||"").replace(/\\D/g,"")&&String(v.phone||"").replace(/\\D/g,"")===String(source.phone||"").replace(/\\D/g,"")));
