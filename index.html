@@ -3773,7 +3773,27 @@ function printSale(id){
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
- '</body></html>';
+ '
+
+<script id="SHAHEEN_HOME_DASHBOARD_INIT_FIX_V1">
+(function(){
+ function refreshHomeDashboard(){
+  try{
+   const home=document.getElementById("home");
+   if(home && !home.classList.contains("hidden") && typeof updateDashboard==="function"){
+    updateDashboard();
+   }
+  }catch(error){console.error("Home dashboard refresh:",error);}
+ }
+ if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",refreshHomeDashboard,{once:true});
+ }else{
+  refreshHomeDashboard();
+ }
+ window.addEventListener("pageshow",refreshHomeDashboard);
+})();
+</script>
+</body></html>';
  // رسید په همدې اپلیکیشن کې د بشپړ سکرین په بڼه ښکاره کړه؛ نو تور پاپ‌اپ نه پرانیستل کېږي.
  const oldView=document.getElementById("shaheenReceiptView");if(oldView)oldView.remove();
  const view=document.createElement("div");view.id="shaheenReceiptView";
