@@ -2993,7 +2993,7 @@ function runGlobalSearch(){
 function refreshAll(){
  // یوازې ښکاره پاڼه تازه کړه؛ د ټولو پټو پاڼو بیا رسمول موبایل ورو کوي.
  const active=document.querySelector("main section:not(.hidden)")?.id||"home";
- if(active==="home")updateDashboard();
+ if(active==="home"){updateDashboard();if(typeof renderLowStock==="function")renderLowStock();}
  if(active==="products"){
   updateProductUnitOptions();
   fillProductSelects();
@@ -3782,6 +3782,7 @@ function printSale(id){
    const home=document.getElementById("home");
    if(home && !home.classList.contains("hidden") && typeof updateDashboard==="function"){
     updateDashboard();
+    if(typeof renderLowStock==="function")renderLowStock();
    }
   }catch(error){console.error("Home dashboard refresh:",error);}
  }
