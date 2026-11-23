@@ -2935,6 +2935,7 @@ function updateSaleDateLabel(){
 }
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function nextSaleInvoiceNumber(){const used=(db.sales||[]).map(x=>String(x.invoice||"").match(/^SH-(\d{1,6})$/)).filter(Boolean).map(m=>Number(m[1]));let n=Math.max(0,...used)+1;let code="SH-"+String(n).padStart(4,"0");while((db.sales||[]).some(x=>String(x.invoice||"")===code)){n++;code="SH-"+String(n).padStart(4,"0");}return code;}
 let __salePageLockY=0;
 function __lockSalePage(){
  if(document.body.classList.contains("sale-modal-open"))return;
@@ -3477,7 +3478,7 @@ function addSale(){
  if(customer){c=db.customers.find(x=>x.id===selectedSaleCustomerId)||db.customers.find(x=>String(x.name).toLowerCase()===customer.toLowerCase());if(!c){c={id:uid(),name:customer,phone:"",debt:0,type:"active",created:today()};db.customers.push(c);}}
  else if(total-paid>0)return alert("که خرڅلاو پور وي، د مشتری نوم حتمي ولیکه.");
  for(const item of saleCart){const p=db.products.find(x=>x.id===item.productId);if(!p||Number(p.qty)<item.stockQty)return alert("د "+item.productName+" موجودي بدله شوې؛ کارټ بیا وګوره.");}
- const invoice="SH-"+Date.now(),date=value("saleDate")||today();
+ const invoice=nextSaleInvoiceNumber(),date=value("saleDate")||today();
  let paidLeft=paid,discountLeft=discount;
  saleCart.forEach((item,index)=>{
   const p=db.products.find(x=>x.id===item.productId),lineSubtotal=item.qty*item.price;
