@@ -3214,11 +3214,18 @@ function selectSaleCustomer(id){
 
 function unitLabel(name){
  name=String(name||"").trim();
+ if(!name)return "دانه";
  const key=name.toLowerCase();
- const aliases={bori:"بوجۍ",bory:"بوجۍ",bor:"بوجۍ",bora:"بوجۍ",sack:"بوجۍ",bag:"بوجۍ","بوري":"بوجۍ","بوری":"بوجۍ","بوجي":"بوجۍ",dana:"دانه",daana:"دانه",danah:"دانه",basta:"بسته",bastah:"بسته",cartons:"کارټن",carton:"کارټن",kg:"کیلو",kilo:"کیلو",kilogram:"کیلو",g:"ګرام",gram:"ګرام",piece:"ټوټه",pcs:"ټوټه",bottle:"بوتل",liter:"لیټر",litre:"لیټر",packet:"پاکټ",pack:"بسته",unit:"دانه",cup:"ګیلاس",glass:"ګیلاس",seer:"سیر"};
- const normalized=aliases[key]||name;
+ // که زوړ ریکارډ د واحد ID ساتلی وي، لومړی یې د تنظیماتو له اصلي نوم سره ونښلوه.
+ const savedUnits=Array.isArray(db?.settings?.units)?db.settings.units:[];
+ const byId=savedUnits.find(u=>[u.id,u.key,u.code,u.value].some(v=>v!=null&&String(v)===name));
+ if(byId?.name)name=String(byId.name).trim();
+ const aliases={bori:"بوجۍ",bory:"بوجۍ",bor:"بوجۍ",bora:"بوجۍ",sack:"بوجۍ",bag:"بوجۍ","بوري":"بوجۍ","بوری":"بوجۍ","بوجي":"بوجۍ",dana:"دانه",daana:"دانه",danah:"دانه",dane:"دانه",danae:"دانه",basta:"بسته",bastah:"بسته",cartons:"کارټن",carton:"کارټن",kg:"کیلو",kilo:"کیلو",kilogram:"کیلو",g:"ګرام",gram:"ګرام",piece:"ټوټه",pcs:"ټوټه",bottle:"بوتل",liter:"لیټر",litre:"لیټر",packet:"پاکټ",pack:"بسته",unit:"دانه",cup:"ګیلاس",glass:"ګیلاس",seer:"سیر"};
+ const normalized=aliases[name.toLowerCase()]||name;
  const labels={"0.5kg":"نیم کیلو","کیلو":"کیلو","کیلوګرام":"کیلو","ګرام":"ګرام","نیم کیلو":"نیم کیلو","پیاله":"ګیلاس","ګیلاس":"ګیلاس","دانه":"دانه","بوجۍ":"بوجۍ","کارټن":"کارټن","بسته":"بسته","ټوټه":"ټوټه","بوتل":"بوتل","لیټر":"لیټر","پاکټ":"پاکټ","سیر":"سیر"};
- return labels[normalized]||normalized||"واحد";
+ // داخلي تصادفي کوډونه د واحد نوم نه دي؛ په راپور کې یې مه ښکاره کوه.
+ if(/^[a-z0-9_-]{5,}$/i.test(normalized))return "دانه";
+ return labels[normalized]||normalized||"دانه";
 }
 window.unitLabel=unitLabel;
 function purchaseUnitWeightKg(product,unit,stored){
