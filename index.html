@@ -2935,7 +2935,7 @@ function updateSaleDateLabel(){
 }
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
-function nextSaleInvoiceNumber(){const used=(db.sales||[]).map(x=>String(x.invoice||"").match(/^SH-(\d{1,6})$/)).filter(Boolean).map(m=>Number(m[1]));let n=Math.max(0,...used)+1;let code="SH-"+String(n).padStart(4,"0");while((db.sales||[]).some(x=>String(x.invoice||"")===code)){n++;code="SH-"+String(n).padStart(4,"0");}return code;}
+function nextSaleInvoiceNumber(){const used=(db.sales||[]).map(x=>String(x.invoice||"").match(/^SH-([0-9]{1,6})$/)).filter(Boolean).map(m=>Number(m[1]));let n=Math.max(0,...used)+1;let code="SH-"+String(n).padStart(4,"0");while((db.sales||[]).some(x=>String(x.invoice||"")===code)){n++;code="SH-"+String(n).padStart(4,"0");}return code;}
 let __salePageLockY=0;
 function __lockSalePage(){
  if(document.body.classList.contains("sale-modal-open"))return;
@@ -3672,7 +3672,7 @@ function pashtoSaleReceiptLabel(invoice){
  return ordinals[n]?("د خرڅلاو "+ordinals[n]+" پاکتور"):("د خرڅلاو پاکتور نمبر "+String(n).replace(/[0-9]/g,d=>"۰۱۲۳۴۵۶۷۸۹"[Number(d)]));
 }
 function printSale(id){
- const selected=(db.sales||[]).find(x=>String(x.id)===String(id));if(!selected)return alert("رسید ونه موندل شو");
+ const selected=(db.sales||[]).find(x=>String(x.id)===String(id));if(!selected)return alert("پاکټور ونه موندل شو");
  const invoice=selected.invoice||"";
  const rows=invoice?(db.sales||[]).filter(x=>String(x.invoice||"")===String(invoice)):[selected];
  // د iPhone په Safari کې تش about:blank مه پرانیزه؛ رسید به لاندې په اپلیکیشن کې ښکاره شي.
@@ -3708,8 +3708,8 @@ function printSale(id){
  '@media screen{html,body{width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:0!important;background:#fff}.invoice{width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:16px 14px 24px!important;background:#fff;box-shadow:none;font-size:15px;line-height:1.65}.top h1{font-size:23px}.top .subtitle{font-size:14px}.meta div{font-size:15px}.meta b{font-size:12px}.meta strong{font-size:17px!important;font-weight:900!important}table{font-size:13px}th{font-size:12px}.totals div{font-size:14px;padding:8px 4px}.totals b{font-size:14px}.grand{font-size:18px!important}.grand b{font-size:19px!important}.paid,.debt{font-size:15px}.thanks{font-size:14px}.footer{font-size:11px}}'+
  '@media print{html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important}.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
  '</style></head><body><main class="invoice">'+
- '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو پاکتور</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
- '<section class="meta"><div><b>د رسید ډول</b><strong>'+safe(pashtoSaleReceiptLabel(invoice))+'</strong></div><div><b>نېټه او ورځ</b><strong>'+safe(date)+'</strong></div><div><b>مشتری</b><strong>'+customer+'</strong></div><div><b>د جنسونو شمېر</b><strong>'+rows.length+'</strong></div></section>'+
+ '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو پاکتور</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">پاکټور ثبت شو</div></header>'+
+ '<section class="meta"><div><b>د پاکټور شمېره</b><strong>'+safe(pashtoSaleReceiptLabel(invoice))+'</strong></div><div><b>نېټه او ورځ</b><strong>'+safe(date)+'</strong></div><div><b>مشتری</b><strong>'+customer+'</strong></div><div><b>د جنسونو شمېر</b><strong>'+rows.length+'</strong></div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
@@ -3718,7 +3718,7 @@ function printSale(id){
  const oldView=document.getElementById("shaheenReceiptView");if(oldView)oldView.remove();
  const view=document.createElement("div");view.id="shaheenReceiptView";
  view.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#fff;display:flex;flex-direction:column;width:100%;height:100%;height:100dvh";
- const bar=document.createElement("div");bar.style.cssText="flex:0 0 auto;display:flex;gap:10px;padding:10px;background:#172033;color:#fff;align-items:center;justify-content:space-between;direction:rtl";const status=document.createElement("strong");status.textContent="✓ خرڅلاو ثبت شو — رسید";status.style.cssText="font-size:13px;color:#fff;flex:1;text-align:center";
+ const bar=document.createElement("div");bar.style.cssText="flex:0 0 auto;display:flex;gap:10px;padding:10px;background:#172033;color:#fff;align-items:center;justify-content:space-between;direction:rtl";const status=document.createElement("strong");status.textContent="✓ خرڅلاو ثبت شو — پاکټور";status.style.cssText="font-size:13px;color:#fff;flex:1;text-align:center";
  const back=document.createElement("button");back.type="button";back.textContent="↩ بېرته اپلیکیشن ته";back.style.cssText="border:0;border-radius:9px;padding:11px 14px;background:#fff;color:#111;font-size:15px;font-weight:800";
  back.onclick=()=>view.remove();
  const print=document.createElement("button");print.type="button";print.textContent="🖨 چاپ";print.style.cssText="border:0;border-radius:9px;padding:11px 22px;background:#16a34a;color:#fff;font-size:15px;font-weight:800";
