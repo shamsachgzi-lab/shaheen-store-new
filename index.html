@@ -422,12 +422,27 @@ nav button{font-size:10px;padding:5px 3px}
 .daily-stat.profit{background:#f0eaff;border-color:#cbb7f2}
 .daily-report-section{background:#fff;border:1px solid #e1e8f0;border-radius:13px;padding:11px;margin:10px 0}
 .daily-report-section h3{font-size:14px;line-height:1.6;margin:0 0 9px;color:#1c416b}
-.daily-table-wrap{width:100%;overflow-x:auto}
-.daily-report-table{min-width:360px;width:100%;border-collapse:collapse;font-size:12px}
-.daily-report-table th{background:#edf4fc;color:#294563;font-weight:800;white-space:nowrap}
-.daily-report-table td,.daily-report-table th{padding:9px 6px;border-bottom:1px solid #edf0f5}
-.daily-report-table td{vertical-align:top}
+.daily-table-wrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;direction:ltr;-webkit-overflow-scrolling:touch}
+.daily-report-table{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;font-size:12px;direction:rtl}
+.daily-report-table th{background:#edf4fc;color:#294563;font-weight:800;white-space:normal;overflow-wrap:anywhere}
+.daily-report-table td,.daily-report-table th{padding:9px 5px;border-bottom:1px solid #edf0f5;box-sizing:border-box}
+.daily-report-table td{vertical-align:top;white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.65}
+.daily-report-table td:nth-child(2),.daily-report-table th:nth-child(2){text-align:center}
+.daily-report-table td:nth-child(3),.daily-report-table th:nth-child(3){text-align:center}
+.daily-report-table td:nth-child(3){direction:ltr;font-variant-numeric:tabular-nums}
+.daily-report-table td:nth-child(4),.daily-report-table th:nth-child(4){text-align:center}
+.daily-report-table td:nth-child(4){white-space:normal}
+.daily-report-section{min-width:0;max-width:100%;overflow:hidden}
 .daily-empty{text-align:center!important;color:#8a96a6;padding:16px!important}
+@media(max-width:420px){
+ .daily-report-section{padding:8px}
+ .daily-report-table{font-size:11px}
+ .daily-report-table td,.daily-report-table th{padding:8px 3px}
+ .daily-report-table th:first-child,.daily-report-table td:first-child{width:38%}
+ .daily-report-table th:nth-child(2),.daily-report-table td:nth-child(2){width:22%}
+ .daily-report-table th:nth-child(3),.daily-report-table td:nth-child(3){width:23%}
+ .daily-report-table th:nth-child(4),.daily-report-table td:nth-child(4){width:17%}
+}
 .daily-report-total{display:flex;justify-content:space-between;align-items:center;padding:10px 3px 2px;font-size:13px;font-weight:800}
 .daily-report-total b,.daily-report-footer b{direction:ltr}
 .daily-report-footer{padding:10px 3px 2px;font-size:12px;line-height:2;color:#24533c}
