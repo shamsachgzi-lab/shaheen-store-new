@@ -3669,7 +3669,7 @@ function pashtoSaleReceiptLabel(invoice){
  if(!match)return "د خرڅلاو رسید";
  const n=Number(match[1]);
  const ordinals={1:"لومړی",2:"دوهم",3:"درېیم",4:"څلورم",5:"پنځم",6:"شپږم",7:"اووم",8:"اتم",9:"نهم",10:"لسم",11:"یوولسم",12:"دوولسم",13:"دیارلسم",14:"څوارلسم",15:"پنځلسم",16:"شپاړسم",17:"اوولسم",18:"اتلسم",19:"نولسم",20:"شلم"};
- return ordinals[n]?("د خرڅلاو "+ordinals[n]+" رسید"):("د خرڅلاو رسید نمبر "+String(n).replace(/[0-9]/g,d=>"۰۱۲۳۴۵۶۷۸۹"[Number(d)]));
+ return ordinals[n]?("د خرڅلاو "+ordinals[n]+" پاکتور"):("د خرڅلاو پاکتور نمبر "+String(n).replace(/[0-9]/g,d=>"۰۱۲۳۴۵۶۷۸۹"[Number(d)]));
 }
 function printSale(id){
  const selected=(db.sales||[]).find(x=>String(x.id)===String(id));if(!selected)return alert("رسید ونه موندل شو");
@@ -3688,7 +3688,7 @@ function printSale(id){
  const customer=safe(customerRecord?.name||selected.customer||"نغدي مشتری");
  const itemRows=rows.map(x=>'<tr><td class="item-name">'+safe(x.productName||"-")+'</td><td>'+safe(x.qty)+' '+safe(unitLabel(x.unit||"دانه"))+'</td><td>'+money(x.price)+'</td><td class="amount">'+money(Number(x.total)||0)+'</td></tr>').join("");
  const note=selected.note?'<div class="note"><b>یادښت:</b> '+safe(selected.note)+'</div>':"";
- const html='<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>رسید '+safe(invoice||selected.id)+'</title><style>'+
+ const html='<!doctype html><html lang="ps" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>پاکتور '+safe(invoice||selected.id)+'</title><style>'+
  '*{box-sizing:border-box}'+
  '@page{size:58mm auto;margin:0}'+
  'html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}'+
@@ -3708,7 +3708,7 @@ function printSale(id){
  '@media screen{html,body{width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:0!important;background:#fff}.invoice{width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:16px 14px 24px!important;background:#fff;box-shadow:none;font-size:15px;line-height:1.65}.top h1{font-size:23px}.top .subtitle{font-size:14px}.meta div{font-size:15px}.meta b{font-size:12px}.meta strong{font-size:17px!important;font-weight:900!important}table{font-size:13px}th{font-size:12px}.totals div{font-size:14px;padding:8px 4px}.totals b{font-size:14px}.grand{font-size:18px!important}.grand b{font-size:19px!important}.paid,.debt{font-size:15px}.thanks{font-size:14px}.footer{font-size:11px}}'+
  '@media print{html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important}.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
  '</style></head><body><main class="invoice">'+
- '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
+ '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو پاکتور</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
  '<section class="meta"><div><b>د رسید ډول</b><strong>'+safe(pashtoSaleReceiptLabel(invoice))+'</strong></div><div><b>نېټه او ورځ</b><strong>'+safe(date)+'</strong></div><div><b>مشتری</b><strong>'+customer+'</strong></div><div><b>د جنسونو شمېر</b><strong>'+rows.length+'</strong></div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
