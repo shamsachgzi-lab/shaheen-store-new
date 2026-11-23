@@ -3664,12 +3664,10 @@ function deleteInvoiceCompletely(){
  saveDB();closeInvoiceEdit();refreshAll();if(currentCustomerId)renderCustomerDetail();
  alert('رسید حذف شو؛ د جنسونو موجودي بېرته زیاته شوه او حسابونه تازه شول.');
 }
-function pashtoSaleReceiptLabel(invoice){
- const match=String(invoice||"").match(/^SH-(\d{1,6})$/);
- if(!match)return "د خرڅلاو رسید";
- const n=Number(match[1]);
- const ordinals={1:"لومړی",2:"دوهم",3:"درېیم",4:"څلورم",5:"پنځم",6:"شپږم",7:"اووم",8:"اتم",9:"نهم",10:"لسم",11:"یوولسم",12:"دوولسم",13:"دیارلسم",14:"څوارلسم",15:"پنځلسم",16:"شپاړسم",17:"اوولسم",18:"اتلسم",19:"نولسم",20:"شلم"};
- return ordinals[n]?("د خرڅلاو "+ordinals[n]+" پاکتور"):("د خرڅلاو پاکتور نمبر "+String(n).replace(/[0-9]/g,d=>"۰۱۲۳۴۵۶۷۸۹"[Number(d)]));
+function pashtoInvoiceNumber(invoice){
+ const match=String(invoice||"").match(/SH-([0-9]{1,6})$/);
+ if(!match)return "—";
+ return String(Number(match[1])).replace(/[0-9]/g,d=>"۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
 }
 function printSale(id){
  const selected=(db.sales||[]).find(x=>String(x.id)===String(id));if(!selected)return alert("پاکټور ونه موندل شو");
@@ -3709,7 +3707,7 @@ function printSale(id){
  '@media print{html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important}.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
  '</style></head><body><main class="invoice">'+
  '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو پاکتور</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">پاکټور ثبت شو</div></header>'+
- '<section class="meta"><div><b>د پاکټور شمېره</b><strong>'+safe(pashtoSaleReceiptLabel(invoice))+'</strong></div><div><b>نېټه او ورځ</b><strong>'+safe(date)+'</strong></div><div class="meta-customer"><b>د مشتری نوم</b><strong>'+customer+'</strong></div><div class="meta-count"><b>د جنسونو شمېر</b><strong>'+String(rows.length).replace(/[0-9]/g,d=>"۰۱۲۳۴۵۶۷۸۹"[Number(d)])+'</strong></div></section>'+
+ '<section class="meta"><div><b>د پاکټور شمېره</b><strong>'+safe(pashtoInvoiceNumber(invoice))+'</strong></div><div><b>نېټه او ورځ</b><strong>'+safe(date)+'</strong></div><div class="meta-customer"><b>د مشتری نوم</b><strong>'+customer+'</strong></div><div class="meta-count"><b>د جنسونو شمېر</b><strong>'+String(rows.length).replace(/[0-9]/g,d=>"۰۱۲۳۴۵۶۷۸۹"[Number(d)])+'</strong></div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
