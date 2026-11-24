@@ -3709,13 +3709,13 @@ function printSale(id){
  ' .receipt-actions{display:flex;gap:10px;justify-content:center;padding:12px;background:#f3f4f6;position:sticky;top:0;z-index:10}'+
  '.receipt-actions button{border:1px solid #333;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;background:#fff;color:#111}'+
  '@media print{.receipt-actions{display:none!important}html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important}.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
- '</style></head><body><div class="receipt-actions"><button type="button" onclick="window.print()">🖨 چاپ</button><button type="button" onclick="shareReceipt()">↗ شریکول</button></div><main class="invoice">'+
+ '</style></head><body><div class="receipt-actions"><button type="button" onclick="window.print()">🖨 چاپ</button><button type="button" onclick="navigator.share({title:document.title,text:document.querySelector(&quot;.invoice&quot;).innerText})">↗ شریکول</button></div><main class="invoice">'+
  '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
- '</main><script>async function shareReceipt(){const text=document.querySelector(".invoice")?.innerText||document.title;try{if(navigator.share){await navigator.share({title:document.title,text});}else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text);alert("د رسید متن کاپي شو؛ اوس یې شریکولی شې.");}else{window.prompt("د رسید متن کاپي کړه:",text);}}catch(e){if(e.name!=="AbortError")alert("شریکول ممکن نه شول؛ د چاپ تڼۍ وکاروه.");}}</script></body></html>';
+ '</body></html>';
  printWindow.onload=function(){try{printWindow.focus();}catch(e){console.error('Receipt focus error:',e);}};
  printWindow.document.open();
  printWindow.document.write(html);
