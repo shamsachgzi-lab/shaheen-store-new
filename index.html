@@ -3671,6 +3671,8 @@ function pashtoInvoiceNumber(invoice){
 }
 function printSale(id){
  const selected=(db.sales||[]).find(x=>String(x.id)===String(id));if(!selected)return alert("پاکټور ونه موندل شو");
+ const printWindow=window.open("","_blank");
+ if(!printWindow)return alert("د چاپ کړکۍ بنده ده؛ په Safari کې د Pop-up اجازه فعاله کړه او بیا چاپ ووهه.");
  const invoice=selected.invoice||"";
  const rows=invoice?(db.sales||[]).filter(x=>String(x.invoice||"")===String(invoice)):[selected];
  // د iPhone په Safari کې تش about:blank مه پرانیزه؛ رسید به لاندې په اپلیکیشن کې ښکاره شي.
@@ -3712,6 +3714,10 @@ function printSale(id){
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
  '</body></html>';
+ printWindow.onload=function(){try{printWindow.focus();printWindow.print();}catch(e){console.error('Print error:',e);}};
+ printWindow.document.open();
+ printWindow.document.write(html);
+ printWindow.document.close();
 }
 function filterPurchaseProducts(){
  const q=value("buyProductSearch").toLowerCase();
