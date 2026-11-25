@@ -4625,10 +4625,10 @@ function renderCapitalPage(){
  const customerPayouts=sum(payments.filter(p=>p.type==="customer_out"),"amount");
  const cashExpenses=sum(expenses.filter(e=>e.paymentType!=="stock"),"amount");
  const openingCash=cash-salesCash-customerReceipts+purchaseCash+supplierPayments+cashExpenses+customerPayouts;
- // د ټول وخت ګټه او مصارف باید له اصلي ریکارډونو حساب شي.
- // د میاشتني آرشیف حذف یوازې آرشیف لرې کوي؛ اصلي معاملې نه حذفوي.
- const countedSales=sales;
- const countedExpenses=expenses.filter(e=>e.paymentType!=="cash_nonprofit");
+ // حذف شوې میاشتې باید د ټول وخت له راپور څخه هم مستثنا وي.
+ const excludedMonths=new Set(Array.isArray(db.deletedProfitMonths)?db.deletedProfitMonths:[]);
+ const countedSales=sales.filter(x=>!excludedMonths.has(String(x.date||"").slice(0,7)));
+ const countedExpenses=expenses.filter(e=>e.paymentType!=="cash_nonprofit"&&!excludedMonths.has(String(e.date||"").slice(0,7)));
  const grossProfit=sum(countedSales,"profit"),allExpenses=sum(countedExpenses,"amount"),netProfit=grossProfit-allExpenses;
  const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
  put("capitalPageTotal",total);put("capitalCash",cash);put("capitalStock",stock);
