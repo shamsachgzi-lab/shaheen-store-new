@@ -2707,7 +2707,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <h3>🏦 پانګه</h3>
  <div class="panel">
   <div class="capital-total"><small>ټوله پانګه / مالي حالت</small><strong id="capitalPageTotal">0 AFN</strong></div>
-  <p class="notice">نغدي + موجودي + د مشتریانو پورونه − د تامین کوونکو پور</p>
+  <p class="notice">نغدي + موجودي + د مشتریانو پورونه + له صراف سره ستا پیسې − د شرکتونو پورونه − صراف ته ستا پور</p>
   <div class="item"><b>💵 نغدې پیسې</b><strong id="capitalCash">0 AFN</strong></div>
   <div class="item"><b>📦 د موجودي ارزښت</b><strong id="capitalStock">0 AFN</strong></div>
   <div class="item"><b>👥 د اوسنیو مشتریانو پور</b><strong id="capitalActiveDebt">0 AFN</strong></div>
@@ -2721,6 +2721,8 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <div class="item">📦 موجودي <strong id="capitalBreakStock">0 AFN</strong></div>
   <div class="item">👥 اوسني مشتریان <strong id="capitalBreakActive">0 AFN</strong></div>
   <div class="item">🕰 زاړه پوروړي <strong id="capitalBreakOld">0 AFN</strong></div>
+  <div class="item">💱 له صراف سره پیسې <strong id="capitalBreakSarafHeld">0 AFN</strong></div>
+  <div class="item">📒 صراف ته پور <strong id="capitalBreakSarafOwed">0 AFN</strong></div>
   <div class="item">🏢 تامین کوونکو ته پور <strong id="capitalBreakPayables">0 AFN</strong></div>
   <div class="item"><b>ټوله پانګه</b><strong id="capitalBreakTotal">0 AFN</strong></div>
  </div>
@@ -4703,8 +4705,8 @@ function renderCapitalPage(){
  const grossProfit=sum(countedSales,"profit"),allExpenses=sum(countedExpenses,"amount"),netProfit=grossProfit-allExpenses;
  const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
  put("capitalPageTotal",total);put("capitalCash",cash);put("capitalStock",stock);
- put("capitalActiveDebt",activeDebt);put("capitalOldDebt",oldDebt);put("capitalReceivables",receivables);put("capitalPayables",payables);
- put("capitalBreakCash",cash);put("capitalBreakStock",stock);put("capitalBreakActive",activeDebt);put("capitalBreakOld",oldDebt);put("capitalBreakPayables",-payables);put("capitalBreakTotal",total);
+ put("capitalActiveDebt",activeDebt);put("capitalOldDebt",oldDebt);put("capitalReceivables",receivables);put("capitalPayables",payables);put("capitalSarafHeld",sarafHeld);put("capitalSarafOwed",sarafOwed);
+ put("capitalBreakCash",cash);put("capitalBreakStock",stock);put("capitalBreakActive",activeDebt);put("capitalBreakOld",oldDebt);put("capitalBreakSarafHeld",sarafHeld);put("capitalBreakSarafOwed",-sarafOwed);put("capitalBreakPayables",-payables);put("capitalBreakTotal",total);
  put("capitalOpeningCash",openingCash);put("capitalSalesCash",salesCash);put("capitalCustomerReceipts",customerReceipts);
  put("capitalPurchaseCash",-purchaseCash);put("capitalSupplierPayments",-supplierPayments);put("capitalCashExpenses",-cashExpenses);put("capitalCashCurrent",cash);
  put("capitalGrossProfit",grossProfit);put("capitalAllExpenses",-allExpenses);put("capitalNetProfit",netProfit);
