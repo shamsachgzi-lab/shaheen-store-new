@@ -4632,7 +4632,8 @@ function diagnoseProfitMonths(){
   "آرشیف شوې میاشتې: "+((db.archives||[]).map(a=>a.month).join(", ")||"نشته")
  ];
  alert(lines.join("\n"));
-}\nfunction renderCapitalPage(){
+}
+function renderCapitalPage(){
  const products=db.products||[],customers=db.customers||[],suppliers=db.suppliers||[];
  const sales=db.sales||[],purchases=db.purchases||[],expenses=db.expenses||[],payments=db.payments||[];
  const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
