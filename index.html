@@ -4895,20 +4895,33 @@ function makeReport(){
  const table=(headers,rows,empty,extraClass="")=>`
  <div class="daily-table-wrap ${extraClass}"><table class="daily-report-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
  <tbody>${rows.length?rows.join(""):`<tr><td colspan="${headers.length}" class="daily-empty">${empty}</td></tr>`}</tbody></table></div>`;
- const purchaseRows=purchases.map(p=>`<tr><td>${esc(p.productName||"—")}</td><td>${esc(p.qty)} ${esc(unitLabel(p.unit||""))}</td><td>${money(purchaseAmount(p))}</td><td>${money(p.paid)}</td></tr>`);
- const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
- const saleRows=sales.map(x=>`<tr><td>${esc(x.productName||"—")}</td><td>${esc(x.customer||"نغدي مشتری")}</td><td>${esc(x.qty)} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
- const customerPurchases=new Map();
- sales.forEach(x=>{
-  const customerName=String(x.customer||"نغدي مشتری").trim()||"نغدي مشتری";
-  const key=(x.customerId&&String(x.customerId)!=="")?"id:"+x.customerId:"name:"+customerName.toLocaleLowerCase();
-  if(!customerPurchases.has(key))customerPurchases.set(key,{name:customerName,items:[],total:0,count:0});
-  const c=customerPurchases.get(key);
-  c.items.push(esc(x.productName||"جنس")+" — "+esc(x.qty)+" "+esc(unitLabel(x.unit||""))+" · "+money(x.total));
-  c.total+=Number(x.total||0);c.count++;
- });
- const customerRows=[...customerPurchases.values()].map(c=>`<tr><td>${esc(c.name)}</td><td>${c.items.join("<br>")}</td><td>${c.count}</td><td>${money(c.total)}</td></tr>`);
- document.getElementById("reportContent").innerHTML=`
+ const productById=new Map((db.products||[]).map(p=>[String(p.id),p]));
+  const saleProductName=x=>{
+   const linked=productById.get(String(x.productId||""));
+   return String(x.productName||x.product?.name||linked?.name||"نامعلوم جنس").trim();
+  };
+  const purchaseRows=purchases.map(p=>{const linked=productById.get(String(p.productId||""));return `<tr><td>${esc(p.productName||linked?.name||"نامعلوم جنس")}</td><td>${esc(p.qty??p.quantity??"—")} ${esc(unitLabel(p.unit||""))}</td><td>${money(purchaseAmount(p))}</td><td>${money(p.paid)}</td></tr>`;});
+  const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
+  const saleRows=sales.map(x=>`<tr><td>${esc(saleProductName(x))}</td><td>${esc(x.customer||"نغدي مشتری")}</td><td>${esc(x.qty??x.quantity??"—")} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
+  const customerPurchases=new Map();
+  sales.forEach(x=>{
+   const customerName=String(x.customer||"نغدي مشتری").trim()||"نغدي مشتری";
+   const key=(x.customerId&&String(x.customerId)!=="")?"id:"+x.customerId:"name:"+customerName.toLocaleLowerCase();
+   if(!customerPurchases.has(key))customerPurchases.set(key,{name:customerName,items:new Map(),total:0,count:0});
+   const c=customerPurchases.get(key);
+   const productName=saleProductName(x),unit=unitLabel(x.unit||"");
+   const itemKey=productName+"|"+unit;
+   if(!c.items.has(itemKey))c.items.set(itemKey,{name:productName,unit,qty:0,amount:0});
+   const item=c.items.get(itemKey);
+   item.qty+=Number(x.qty??x.quantity)||0;
+   item.amount+=Number(x.total||0);
+   c.total+=Number(x.total||0);c.count++;
+  });
+  const customerRows=[...customerPurchases.values()].map(c=>{
+   const items=[...c.items.values()].map(item=>esc(item.name)+" — "+esc(item.qty)+" "+esc(item.unit)+" · "+money(item.amount));
+   return `<tr><td>${esc(c.name)}</td><td>${items.join("<br>")}</td><td>${c.count}</td><td>${money(c.total)}</td></tr>`;
+  });
+  document.getElementById("reportContent").innerHTML=`
  <div class="daily-report">
   <div class="daily-report-head"><h3>📊 د شاهین فروشگاه ورځنی راپور</h3><div>📍 ${esc(dateLabel)}</div></div>
   <div class="daily-summary">
