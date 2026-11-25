@@ -2865,7 +2865,7 @@ function today(){
  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
 function displayDate(iso){return iso?jalaliDisplayDate(String(iso).slice(0,10)):"—";}
-function jalaliDigits(v){return String(v).replace(/[۰-۹]/g,x=>"۰۱۲۳۴۵۶۷۸۹".indexOf(x));}
+function jalaliDigits(v){return String(v).replace(/[۰-۹٠-٩]/g,x=>{const p="۰۱۲۳۴۵۶۷۸۹".indexOf(x);return String(p>=0?p:"٠١٢٣٤٥٦٧٨٩".indexOf(x));});}
 function initAllJalaliDatePickers(root=document){
  root.querySelectorAll('input[type="date"]').forEach(input=>{
   if(input.dataset.jalaliReady==="1")return;
@@ -2874,8 +2874,8 @@ function initAllJalaliDatePickers(root=document){
   input.style.display="none";
   const wrap=document.createElement("div");wrap.className="jalali-date-picker";
   const iso=input.value||"";let jy="",jm="",jd="";
-  if(iso){const parts=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",day:"numeric"}).formatToParts(new Date(iso+"T12:00:00"));const get=k=>parts.find(p=>p.type===k)?.value||"";jy=get("year");jm=get("month");jd=get("day");}
-  const nowYear=Number(new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric"}).format(new Date()));
+  if(iso){const parts=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",day:"numeric"}).formatToParts(new Date(iso+"T12:00:00"));const get=k=>jalaliDigits(parts.find(p=>p.type===k)?.value||"");jy=get("year");jm=get("month");jd=get("day");}
+  const nowYear=Number(jalaliDigits(new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric"}).format(new Date())));
   const years=Array.from({length:31},(_,i)=>nowYear-15+i).map(y=>'<option value="'+y+'" '+(String(y)===String(jy)?"selected":"")+'>'+jalaliDigits(y)+'</option>').join("");
   const months=["وری","غویی","غبرګولی","چنګاښ","زمری","وږی","تله","لړم","لیندۍ","مرغومی","سلواغه","کب"];
   wrap.innerHTML='<div class="jalali-date-fields"><select class="jalali-day" aria-label="ورځ"><option value="">ورځ</option>'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'" '+(String(i+1)===String(jd)?"selected":"")+'>'+jalaliDigits(i+1)+'</option>').join("")+'</select><select class="jalali-month" aria-label="میاشت"><option value="">میاشت</option>'+months.map((m,i)=>'<option value="'+(i+1)+'" '+(String(i+1)===String(jm)?"selected":"")+'>'+m+'</option>').join("")+'</select><select class="jalali-year" aria-label="کال"><option value="">کال</option>'+years+'</select></div><div class="jalali-date-label">'+(iso?displayDate(iso):"لمریز کال / میاشت / ورځ وټاکه")+'</div>';
@@ -2901,7 +2901,7 @@ function jalaliToISO(jy,jm,jd){
  const start=Date.UTC(jy+621,0,1,12),end=Date.UTC(jy+622,3,1,12);
  for(let t=start;t<=end;t+=86400000){
   const parts=fmt.formatToParts(new Date(t));
-  const get=k=>Number(parts.find(p=>p.type===k)?.value);
+  const get=k=>Number(jalaliDigits(parts.find(p=>p.type===k)?.value||""));
   if(get("year")===jy&&get("month")===jm&&get("day")===jd){
    const dt=new Date(t);
    return dt.getUTCFullYear()+"-"+String(dt.getUTCMonth()+1).padStart(2,"0")+"-"+String(dt.getUTCDate()).padStart(2,"0");
