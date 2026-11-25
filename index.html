@@ -3899,7 +3899,7 @@ let purchaseInvoiceEditKey="";
 function purchaseInvoiceEditLineHtml(x,i){
  const products=(db.products||[]).map(p=>'<option value="'+safe(p.id)+'" '+(String(p.id)===String(x.productId)?'selected':'')+'>'+safe(p.name)+'</option>').join("");
  const p=db.products.find(z=>String(z.id)===String(x.productId));
- const qty=Number(x.qty??x.quantity)||0;
+ const qty=Number(x.qty??x.quantity??x.stockQty??x.stock_qty)||0;
  const rawUnit=String(x.unit||p?.unit||"واحد"),displayUnit=typeof unitLabel==="function"?unitLabel(rawUnit):rawUnit;
  const productForWeight={...(p||{}),name:x.productName||x.name||p?.name||""};
  const weight=qty>0&&Number(x.weightKg)>0?Number(x.weightKg)/qty:purchaseUnitWeightKg(productForWeight,rawUnit,x.unitWeightKg);
@@ -4896,16 +4896,26 @@ function makeReport(){
  <div class="daily-table-wrap ${extraClass}"><table class="daily-report-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
  <tbody>${rows.length?rows.join(""):`<tr><td colspan="${headers.length}" class="daily-empty">${empty}</td></tr>`}</tbody></table></div>`;
  const productById=new Map((db.products||[]).map(p=>[String(p.id),p]));
+  const customerById=new Map((db.customers||[]).map(c=>[String(c.id),c]));
   const saleProductName=x=>{
-   const linked=productById.get(String(x.productId||""));
-   return String(x.productName||x.product?.name||linked?.name||"نامعلوم جنس").trim();
+   const pid=x.productId??x.product_id??x.itemId??x.item_id??x.product?.id;
+   const linked=productById.get(String(pid??""));
+   const raw=x.productName??x.product_name??x.itemName??x.item_name??x.product?.name??x.name??linked?.name;
+   return String(raw||"نامعلوم جنس").trim();
   };
-  const purchaseRows=purchases.map(p=>{const linked=productById.get(String(p.productId||""));return `<tr><td>${esc(p.productName||linked?.name||"نامعلوم جنس")}</td><td>${esc(p.qty??p.quantity??"—")} ${esc(unitLabel(p.unit||""))}</td><td>${money(purchaseAmount(p))}</td><td>${money(p.paid)}</td></tr>`;});
+  const saleCustomerName=x=>{
+   const cid=x.customerId??x.customer_id??x.clientId;
+   const linked=customerById.get(String(cid??""))||customerById.get(String(x.customer??""));
+   const raw=x.customerName??x.customer_name??x.clientName??x.client_name;
+   const name=raw||linked?.name||x.customer;
+   return String(name&&String(name)!==String(cid??"")?name:"نوم نه دی موندل شوی").trim();
+  };
+    const purchaseRows=purchases.map(p=>{const linked=productById.get(String(p.productId||""));return `<tr><td>${esc(p.productName||linked?.name||"نامعلوم جنس")}</td><td>${esc(p.qty??p.quantity??"—")} ${esc(unitLabel(p.unit||""))}</td><td>${money(purchaseAmount(p))}</td><td>${money(p.paid)}</td></tr>`;});
   const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
-  const saleRows=sales.map(x=>`<tr><td>${esc(saleProductName(x))}</td><td>${esc(x.customer||"نغدي مشتری")}</td><td>${esc(x.qty??x.quantity??"—")} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
+  const saleRows=sales.map(x=>`<tr><td>${esc(saleProductName(x))}</td><td>${esc(saleCustomerName(x))}</td><td>${esc(x.qty??x.quantity??x.stockQty??x.stock_qty??"—")} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
   const customerPurchases=new Map();
   sales.forEach(x=>{
-   const customerName=String(x.customer||"نغدي مشتری").trim()||"نغدي مشتری";
+   const customerName=saleCustomerName(x);
    const key=(x.customerId&&String(x.customerId)!=="")?"id:"+x.customerId:"name:"+customerName.toLocaleLowerCase();
    if(!customerPurchases.has(key))customerPurchases.set(key,{name:customerName,items:new Map(),total:0,count:0});
    const c=customerPurchases.get(key);
@@ -4913,7 +4923,7 @@ function makeReport(){
    const itemKey=productName+"|"+unit;
    if(!c.items.has(itemKey))c.items.set(itemKey,{name:productName,unit,qty:0,amount:0});
    const item=c.items.get(itemKey);
-   item.qty+=Number(x.qty??x.quantity)||0;
+   item.qty+=Number(x.qty??x.quantity??x.stockQty??x.stock_qty)||0;
    item.amount+=Number(x.total||0);
    c.total+=Number(x.total||0);c.count++;
   });
