@@ -4928,7 +4928,7 @@ function makeReport(){
   const productById=new Map((db.products||[]).map(p=>[String(p.id),p]));
   const customerById=new Map((db.customers||[]).map(c=>[String(c.id),c]));
   const saleProductName=x=>{
-   const pid=x.productId??x.product_id??x.itemId??x.item_id??x.product?.id;
+   const pid=x.productId??x.product_id??x.itemId??x.item_id??x.pid??x.product?.id;
    const linked=productById.get(String(pid??""));
    const raw=x.productName??x.product_name??x.itemName??x.item_name??x.product?.name??x.name??linked?.name;
    return String(raw||"نامعلوم جنس").trim();
@@ -4944,7 +4944,7 @@ function makeReport(){
   const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
   const saleRows=reportSales.map(x=>`<tr><td>${esc(saleProductName(x))}</td><td>${esc(saleCustomerName(x))}</td><td>${esc(x.qty??x.quantity??x.stockQty??x.stock_qty??"—")} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
   const customerPurchases=new Map();
-  sales.forEach(x=>{
+  reportSales.forEach(x=>{
    const customerName=saleCustomerName(x);
    const key=(x.customerId&&String(x.customerId)!=="")?"id:"+x.customerId:"name:"+customerName.toLocaleLowerCase();
    if(!customerPurchases.has(key))customerPurchases.set(key,{name:customerName,items:new Map(),total:0,count:0});
