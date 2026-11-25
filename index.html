@@ -4651,14 +4651,19 @@ function renderCapitalPage(){
  const customerPayouts=sum(payments.filter(p=>p.type==="customer_out"),"amount");
  const cashExpenses=sum(expenses.filter(e=>e.paymentType!=="stock"),"amount");
  const openingCash=cash-salesCash-customerReceipts+purchaseCash+supplierPayments+cashExpenses+customerPayouts;
- // حذف شوې میاشتې باید د ټول وخت له راپور څخه هم مستثنا وي.
- const excludedMonths=new Set(Array.isArray(db.deletedProfitMonths)?db.deletedProfitMonths:[]);
- // روانه میاشت باید د زړو حذف شوو نښو له امله له راپور څخه ونه وځي.
+ // د پانګې د ګټې او مصارفو برخه یوازې روانه لمریزه میاشت ښيي؛ نور حسابونه او تاریخچه نه بدلېږي.
  const now=new Date();
- const currentMonth=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
- excludedMonths.delete(currentMonth);
- const countedSales=sales.filter(x=>!excludedMonths.has(String(x.date||"").slice(0,7)));
- const countedExpenses=expenses.filter(e=>e.paymentType!=="cash_nonprofit"&&!excludedMonths.has(String(e.date||"").slice(0,7)));
+ const jalaliParts=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric"}).formatToParts(now);
+ const jy=Number(jalaliParts.find(p=>p.type==="year")?.value);
+ const jm=Number(jalaliParts.find(p=>p.type==="month")?.value);
+ const nextJm=jm===12?1:jm+1,nextJy=jm===12?jy+1:jy;
+ const monthStart=jalaliToISO(jy,jm,1);
+ const nextMonthStart=jalaliToISO(nextJy,nextJm,1);
+ const monthEnd=nextMonthStart?new Date(new Date(nextMonthStart+"T12:00:00").getTime()-86400000):null;
+ const monthEndISO=monthEnd?monthEnd.getFullYear()+"-"+String(monthEnd.getMonth()+1).padStart(2,"0")+"-"+String(monthEnd.getDate()).padStart(2,"0"):"";
+ const inCurrentSolarMonth=d=>{const date=String(d||"").slice(0,10);return !!monthStart&&!!monthEndISO&&date>=monthStart&&date<=monthEndISO;};
+ const countedSales=sales.filter(x=>inCurrentSolarMonth(x.date));
+ const countedExpenses=expenses.filter(e=>e.paymentType!=="cash_nonprofit"&&inCurrentSolarMonth(e.date));
  const grossProfit=sum(countedSales,"profit"),allExpenses=sum(countedExpenses,"amount"),netProfit=grossProfit-allExpenses;
  const put=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=money(n)};
  put("capitalPageTotal",total);put("capitalCash",cash);put("capitalStock",stock);
