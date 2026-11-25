@@ -3720,20 +3720,41 @@ function printSale(id){
  ' .receipt-actions button,.receipt-actions a{border:1px solid #333;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}'+
  '.receipt-actions button{border:1px solid #333;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;background:#fff;color:#111}'+
  '@media print{.receipt-actions{display:none!important}html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important}.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
- '</style></head><body><div class="receipt-actions"><button type="button" onclick="window.print()">🖨 چاپ</button><button type="button" onclick="shareReceiptImage()">🖼 عکس شریکول</button><a href="https://shamsachgzi-lab.github.io/">↩ بېرته اپلیکیشن ته</a></div><main class="invoice">'+
+ '</style></head><body><div class="receipt-actions"><button type="button" onclick="window.print()">🖨 چاپ</button><button type="button" onclick="if(window.opener&&window.opener.makeReceiptImageFromReceipt){window.opener.makeReceiptImageFromReceipt(window);}else{alert('اپلیکیشن بېرته خلاص کړه او بیا هڅه وکړه');}">🖼 عکس شریکول</button><a href="https://shamsachgzi-lab.github.io/">↩ بېرته اپلیکیشن ته</a></div><main class="invoice">'+
  '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
- '<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>'+
- '<script>async function shareReceiptImage(){try{if(typeof html2canvas!=="function"){alert("د عکس جوړولو کتابتون نه دی پورته شوی؛ انټرنېټ وګوره او بیا هڅه وکړه.");return;}const target=document.querySelector(".invoice");const canvas=await html2canvas(target,{scale:2,backgroundColor:"#ffffff",useCORS:true});canvas.toBlob(async function(blob){if(!blob){alert("عکس جوړ نه شو؛ بیا هڅه وکړه.");return;}const file=new File([blob],"Shaheen-"+Date.now()+".png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"د خرڅلاو رسید"});}catch(e){if(e.name!=="AbortError")alert("عکس شریک نه شو: "+e.message);}}else{const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);alert("رسید د PNG عکس په توګه ښکته شو؛ اوس یې له عکسونو یا فایلونو شریک کړه.");}}, "image/png");}catch(e){console.error(e);alert("د رسید عکس جوړولو کې ستونزه راغله؛ بیا هڅه وکړه.");}}</\/script>'+
+ 
  '</body></html>';
  printWindow.onload=function(){try{printWindow.focus();}catch(e){console.error('Receipt focus error:',e);}};
  printWindow.document.open();
  printWindow.document.write(html);
  printWindow.document.close();
 }
+window.makeReceiptImageFromReceipt = async function(receiptWindow){
+ try{
+  if(!receiptWindow||!receiptWindow.document||!receiptWindow.document.querySelector(".invoice")){alert("رسید ونه موندل شو؛ بیا یې خلاص کړه.");return;}
+  if(typeof window.html2canvas!=="function"){
+   await new Promise((resolve,reject)=>{const script=document.createElement("script");script.src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";script.onload=resolve;script.onerror=()=>reject(new Error("کتابتون پورته نه شو"));document.head.appendChild(script);});
+  }
+  const canvas=await window.html2canvas(receiptWindow.document.querySelector(".invoice"),{scale:2,backgroundColor:"#ffffff",useCORS:true,window:receiptWindow});
+  canvas.toBlob(async blob=>{
+   if(!blob){alert("عکس جوړ نه شو؛ بیا هڅه وکړه.");return;}
+   const file=new File([blob],"Shaheen-"+Date.now()+".png",{type:"image/png"});
+   if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:"د خرڅلاو رسید"});}
+    catch(e){if(e.name!=="AbortError")alert("عکس شریک نه شو: "+e.message);}
+   }else{
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+    alert("رسید د PNG عکس په توګه ښکته شو؛ اوس یې له فایلونو شریک کړه.");
+   }
+  },"image/png");
+ }catch(e){console.error("Receipt image error:",e);alert("د عکس جوړولو ستونزه: "+(e.message||e));}
+};
 function filterPurchaseProducts(){
  const q=value("buyProductSearch").toLowerCase();
  const select=document.getElementById("buyProduct");
