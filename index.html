@@ -4868,6 +4868,24 @@ function jalaliDisplayDate(iso){
  const fa=n=>String(n).replace(/[۰-۹]/g,x=>"۰۱۲۳۴۵۶۷۸۹".indexOf(x));
  return weekdays[d.getUTCDay()]+"، "+fa(jd)+" "+months[jm-1]+" "+fa(jy);
 }
+function diagnoseSaleProductLinks(){
+ const products=Array.isArray(db.products)?db.products:[];
+ const sales=Array.isArray(db.sales)?db.sales:[];
+ const productIds=new Set(products.map(p=>String(p.id)));
+ const unknown=sales.filter(x=>{
+  const id=x.productId??x.product_id??x.itemId??x.item_id??x.product?.id;
+  const name=x.productName??x.product_name??x.itemName??x.item_name??x.product?.name;
+  return !name&&!productIds.has(String(id??""));
+ }).slice(0,5);
+ const lines=["خوندي تشخیص — هېڅ معلومات نه بدلوي","ټول جنسونه: "+products.length,"ټول خرڅلاو ریکارډونه: "+sales.length,"د بې‌نومه خرڅلاو نمونې:"];
+ unknown.forEach((x,i)=>{
+  lines.push((i+1)+". د ریکارډ ساحې: "+Object.keys(x).join(", "));
+  lines.push("   پېژند: "+String(x.productId??x.product_id??x.itemId??x.item_id??"نشته")+"؛ نوم: "+String(x.productName??x.product_name??x.itemName??x.item_name??"نشته")+"؛ مقدار: "+String(x.qty??x.quantity??x.stockQty??"نشته")+"؛ رسید: "+String(x.invoice??"نشته"));
+ });
+ lines.push("د جنسونو د نمونې پېژند او نوم:");
+ products.slice(0,8).forEach(p=>lines.push(String(p.id)+" = "+String(p.name||p.title||"بې نومه")));
+ alert(lines.join("\n"));
+}
 function makeReport(){
  const from=value("reportFrom"),to=value("reportTo");
  if(from&&to&&from>to)return alert("د پیل نېټه باید د پای له نېټې مخکې وي");
@@ -4953,7 +4971,7 @@ function makeReport(){
    <div class="daily-report-total">د ګټې حساب مصارف <b>${money(expenseTotal)}</b></div><div class="daily-report-total">نغدي فیسونه (له ګټې بهر) <b>${money(cashNonProfitTotal)}</b></div>
   </section>
   <section class="daily-report-section">
-   <h3>👥 ثبت شوي مشتریان او د هغوی اخیستل شوي جنسونه — ${esc(dateLabel)}</h3>
+   <h3>👥 ثبت شوي مشتریان او د هغوی اخیستل شوي جنسونه — ${esc(dateLabel)}</h3><button type="button" class="gray" onclick="diagnoseSaleProductLinks()">🔎 د جنسونو د پېژندنې تشخیص</button>
    ${table(["د مشتری نوم","اخیستل شوي جنسونه او مقدار","د خریدونو شمېر","ټول مبلغ"],customerRows,"په ټاکلې موده کې ثبت شوي مشتریانو خریدونه نشته","daily-customer-table")}
   </section>
   <section class="daily-report-section">
