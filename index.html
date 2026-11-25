@@ -2741,6 +2741,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <div class="item">ټول مصارف <strong id="capitalAllExpenses">− 0 AFN</strong></div>
   <div class="item"><b>خالصه ګټه</b><strong id="capitalNetProfit">0 AFN</strong></div>
   <p class="notice">ګټه پخپله پانګې ته ورزیاتېږي: نغدي خرڅلاو نغدو ته، پور خرڅلاو د مشتری پور ته ځي او موجودي د جنس په قیمت کمېږي. مصارف نغدي (یا موجودي) کموي. له همدې امله ګټه بیا جلا نه جمع کېږي، چې یوه پیسه دوه ځله ونه شمېرل شي.</p>
+  <button type="button" class="gray" onclick="diagnoseProfitMonths()">🔎 د میاشتو خوندي تشخیص</button>
  </div>
 </section>
 
@@ -4607,7 +4608,31 @@ function paySupplierDebt(){
 }
 
 /* د پانګې او ورځني حساب */
-function renderCapitalPage(){
+function diagnoseProfitMonths(){
+ const sales=Array.isArray(db.sales)?db.sales:[];
+ const expenses=Array.isArray(db.expenses)?db.expenses:[];
+ const deleted=Array.isArray(db.deletedProfitMonths)?db.deletedProfitMonths:[];
+ const key=d=>String(d||"").slice(0,7);
+ const months=[...new Set(sales.map(x=>key(x.date)).filter(x=>/^\\d{4}-\\d{2}$/.test(x)))].sort();
+ const included=sales.filter(x=>!deleted.includes(key(x.date)));
+ const excluded=sales.filter(x=>deleted.includes(key(x.date)));
+ const profit=arr=>arr.reduce((n,x)=>n+Number(x.profit||0),0);
+ const expenseMonths=[...new Set(expenses.map(x=>key(x.date)).filter(x=>/^\\d{4}-\\d{2}$/.test(x)))].sort();
+ const lines=[
+  "خوندي تشخیص — هېڅ معلومات نه بدلوي",
+  "ټول خرڅلاو ریکارډونه: "+sales.length,
+  "د خرڅلاو میاشتې: "+(months.join(", ")||"نشته"),
+  "حذف شوې میاشتې: "+(deleted.join(", ")||"نشته"),
+  "شامل خرڅلاو ریکارډونه: "+included.length,
+  "د حذف شویو میاشتو خرڅلاو ریکارډونه: "+excluded.length,
+  "د شامل خرڅلاو ګټه: "+profit(included)+" AFN",
+  "د ایستل شوو خرڅلاو ګټه: "+profit(excluded)+" AFN",
+  "د مصارفو ریکارډونه: "+expenses.length,
+  "د مصارفو میاشتې: "+(expenseMonths.join(", ")||"نشته"),
+  "آرشیف شوې میاشتې: "+((db.archives||[]).map(a=>a.month).join(", ")||"نشته")
+ ];
+ alert(lines.join("\\n"));
+}\nfunction renderCapitalPage(){
  const products=db.products||[],customers=db.customers||[],suppliers=db.suppliers||[];
  const sales=db.sales||[],purchases=db.purchases||[],expenses=db.expenses||[],payments=db.payments||[];
  const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
