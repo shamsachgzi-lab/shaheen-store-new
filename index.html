@@ -4653,6 +4653,10 @@ function renderCapitalPage(){
  const openingCash=cash-salesCash-customerReceipts+purchaseCash+supplierPayments+cashExpenses+customerPayouts;
  // حذف شوې میاشتې باید د ټول وخت له راپور څخه هم مستثنا وي.
  const excludedMonths=new Set(Array.isArray(db.deletedProfitMonths)?db.deletedProfitMonths:[]);
+ // روانه میاشت باید د زړو حذف شوو نښو له امله له راپور څخه ونه وځي.
+ const now=new Date();
+ const currentMonth=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+ excludedMonths.delete(currentMonth);
  const countedSales=sales.filter(x=>!excludedMonths.has(String(x.date||"").slice(0,7)));
  const countedExpenses=expenses.filter(e=>e.paymentType!=="cash_nonprofit"&&!excludedMonths.has(String(e.date||"").slice(0,7)));
  const grossProfit=sum(countedSales,"profit"),allExpenses=sum(countedExpenses,"amount"),netProfit=grossProfit-allExpenses;
