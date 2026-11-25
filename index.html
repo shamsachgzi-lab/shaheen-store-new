@@ -4887,7 +4887,7 @@ function diagnoseSaleProductLinks(){
  products.slice(0,5).forEach(p=>lines.push(Object.keys(p).join(", ")+"؛ پېژند="+String(p.id??p.pid??p.productId??"—")+"؛ نوم="+String(p.name??p.title??"—")));
  alert(lines.join("\n"));
 }
-function makeReport(){
+function makeReportSingleDay(){
  const from=value("reportFrom"),to=value("reportTo");
  if(from&&to&&from>to)return alert("د پیل نېټه باید د پای له نېټې مخکې وي");
  const inside=d=>(!from||String(d||"")>=from)&&(!to||String(d||"")<=to);
@@ -4993,6 +4993,27 @@ function makeReport(){
 
  </div>`;
 }
+
+function makeReport(){
+ const from=value("reportFrom"),to=value("reportTo");
+ if(from&&to&&from>to)return alert("د پیل نېټه باید د پای له نېټې مخکې وي");
+ if(!from||!to||from===to)return makeReportSingleDay();
+ const start=new Date(from+"T12:00:00Z"),end=new Date(to+"T12:00:00Z");
+ if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime()))return alert("مهرباني وکړه سمې نېټې وټاکه");
+ const days=Math.round((end-start)/86400000)+1;
+ if(days>366)return alert("په یو ځل تر ۳۶۶ ورځو زیات ورځني راپورونه نه شي ښکاره کېدای؛ نېټې لنډې کړه");
+ const reports=[],fromInput=document.getElementById("reportFrom"),toInput=document.getElementById("reportTo");
+ for(let i=0;i<days;i++){
+  const d=new Date(start.getTime()+i*86400000).toISOString().slice(0,10);
+  fromInput.value=d;toInput.value=d;
+  makeReportSingleDay();
+  reports.push(document.getElementById("reportContent").innerHTML);
+ }
+ fromInput.value=from;toInput.value=to;
+ syncJalaliDatePicker("reportFrom");syncJalaliDatePicker("reportTo");
+ document.getElementById("reportContent").innerHTML=reports.map((html,i)=>'<div class="daily-report-day">'+html+'</div>').join('<div style="height:18px"></div>');
+}
+
 function renderSettings(){
  const name=document.getElementById("settingShopName"),phone=document.getElementById("settingShopPhone"),currency=document.getElementById("settingCurrency");
  if(name)name.value=db.settings?.shopName||"شاهین فروشگاه";
