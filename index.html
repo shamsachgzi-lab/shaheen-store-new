@@ -3720,14 +3720,47 @@ function printSale(id){
  ' .receipt-actions button,.receipt-actions a{border:1px solid #333;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;background:#fff;color:#111;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}'+
  '.receipt-actions button{border:1px solid #333;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;background:#fff;color:#111}'+
  '@media print{.receipt-actions{display:none!important}html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important}.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
- '</style></head><body><div class="receipt-actions"><button type="button" onclick="window.print()">🖨 چاپ</button><button type="button" onclick="document.getElementById(&quot;shareOptions&quot;).hidden=false">↗ شریکول</button><span id="shareOptions" hidden><button type="button" onclick="if(window.opener&&window.opener.shareReceiptFromReceipt){window.opener.shareReceiptFromReceipt(window,&quot;image&quot;);}else{alert(&quot;اپلیکیشن بېرته خلاص کړه او بیا هڅه وکړه&quot;);}">🖼 د عکس په بڼه</button><button type="button" onclick="if(window.opener&&window.opener.shareReceiptFromReceipt){window.opener.shareReceiptFromReceipt(window,&quot;pdf&quot;);}else{alert(&quot;اپلیکیشن بېرته خلاص کړه او بیا هڅه وکړه&quot;);}">📄 د PDF په بڼه</button></span><a href="https://shamsachgzi-lab.github.io/">↩ بېرته اپلیکیشن ته</a></div><main class="invoice">'+
+ '</style></head><body><div class="receipt-actions"><button type="button" onclick="window.print()">🖨 چاپ</button><button type="button" onclick="document.getElementById(&quot;shareOptions&quot;).hidden=false">↗ شریکول</button><span id="shareOptions" hidden><button type="button" onclick="shareReceiptLocal(&quot;image&quot;)">🖼 د عکس په بڼه</button><button type="button" onclick="shareReceiptLocal(&quot;pdf&quot;)">📄 د PDF په بڼه</button></span><a href="https://shamsachgzi-lab.github.io/">↩ بېرته اپلیکیشن ته</a></div><main class="invoice">'+
  '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
  '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
  
- '</body></html>';
+ '<script>
+async function shareReceiptLocal(format){
+ try{
+  const target=document.querySelector(".invoice");
+  if(!target){alert("رسید ونه موندل شو.");return;}
+  if(typeof window.html2canvas!=="function"){
+   await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("د عکس جوړولو کتابتون پورته نه شو؛ انټرنېټ وګوره."));document.head.appendChild(sc);});
+  }
+  const canvas=await window.html2canvas(target,{scale:2,backgroundColor:"#ffffff",useCORS:true});
+  let blob,name,type;
+  if(format==="pdf"){
+   if(!(window.jspdf&&window.jspdf.jsPDF)){
+    await new Promise((resolve,reject)=>{const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("د PDF کتابتون پورته نه شو؛ انټرنېټ وګوره."));document.head.appendChild(sc);});
+   }
+   const h=canvas.height*58/canvas.width;
+   const pdf=new window.jspdf.jsPDF({orientation:"portrait",unit:"mm",format:[58,h]});
+   pdf.addImage(canvas.toDataURL("image/jpeg",0.95),"JPEG",0,0,58,h);
+   blob=pdf.output("blob");name="Shaheen-"+Date.now()+".pdf";type="application/pdf";
+  }else{
+   blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("PNG عکس جوړ نه شو.")),"image/png"));
+   name="Shaheen-"+Date.now()+".png";type="image/png";
+  }
+  const file=new File([blob],name,{type});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+   try{await navigator.share({files:[file],title:"د خرڅلاو رسید"});return;}
+   catch(e){if(e&&e.name==="AbortError")return;console.warn("Native share failed",e);}
+  }
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  alert("رسید جوړ شو او فایلونو ته ښکته کېږي. له Files څخه یې شریک کړه.");
+ }catch(e){console.error("Receipt share failed",e);alert("شریکول ناکام شول: "+(e.message||e));}
+}
+</script></body></html>'
  printWindow.onload=function(){try{printWindow.focus();}catch(e){console.error('Receipt focus error:',e);}};
  printWindow.document.open();
  printWindow.document.write(html);
