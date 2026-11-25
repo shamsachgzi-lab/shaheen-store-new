@@ -4811,7 +4811,7 @@ function archiveMonth(){
 }
 function renderArchives(){
   const box=document.getElementById("archiveList");if(!box)return;
-  box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(a.month)+"</b><div>"+safe(displayDate(a.start||a.month+"-01"))+" → "+safe(displayDate(a.end||a.month+"-31"))+" · خرڅلاو "+money(a.sales)+" · خالصه ګټه "+money(a.netProfit??((Number(a.grossProfit)||0)-(Number(a.expenses)||0)))+"</div><div class=\"actions\"><button class=\"gray\" onclick=\"showArchiveReport('"+safe(a.id)+"')\">📄 راپور</button><button class=\"red\" onclick=\"deleteArchiveReport('"+safe(a.id)+"')\">🗑 راپور حذف کړه</button></div></div>").join("")||"<p>آرشیف نشته</p>";
+  box.innerHTML=(db.archives||[]).slice().reverse().map(a=>"<div class=\"item\"><b>"+safe(jalaliDisplayMonth(a.month))+"</b><div>"+safe(displayDate(a.start||a.month+"-01"))+" → "+safe(displayDate(a.end||a.month+"-31"))+" · خرڅلاو "+money(a.sales)+" · خالصه ګټه "+money(a.netProfit??((Number(a.grossProfit)||0)-(Number(a.expenses)||0)))+"</div><div class=\"actions\"><button class=\"gray\" onclick=\"showArchiveReport('"+safe(a.id)+"')\">📄 راپور</button><button class=\"red\" onclick=\"deleteArchiveReport('"+safe(a.id)+"')\">🗑 راپور حذف کړه</button></div></div>").join("")||"<p>آرشیف نشته</p>";
  }
 function deleteArchiveReport(id){
   const a=(db.archives||[]).find(x=>x.id===id);if(!a)return;
@@ -4829,6 +4829,17 @@ function makeDailyReport(){
  document.getElementById("reportTo").value=d;
  syncJalaliDatePicker("reportFrom");syncJalaliDatePicker("reportTo");
  makeReport();
+}
+function jalaliDisplayMonth(isoMonth){
+ if(!isoMonth)return "—";
+ const parts=String(isoMonth).slice(0,7).split("-").map(Number);
+ const gy=parts[0],gm=parts[1];
+ if(!gy||gm<1||gm>12)return String(isoMonth);
+ const p=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",timeZone:"UTC"}).formatToParts(new Date(Date.UTC(gy,gm-1,15,12)));
+ const get=k=>Number(p.find(x=>x.type===k)?.value);
+ const months=["وری","غویی","غبرګولی","چنګاښ","زمری","وږی","تله","لړم","لیندۍ","مرغومی","سلواغه","کب"];
+ const fa=n=>String(n).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]);
+ return months[get("month")-1]+" "+fa(get("year"));
 }
 function jalaliDisplayDate(iso){
  if(!iso)return "ټولې نېټې";
@@ -5300,7 +5311,7 @@ function renderMonthOverview(){
  const fmt=d=>jalaliDisplayDate(d);
  box.innerHTML=`
  <div class="month-overview">
-  <h3>میاشت · ${safe(period.month)}</h3>
+  <h3>میاشت · ${safe(jalaliDisplayMonth(period.month))}</h3>
   <p>له ${safe(displayDate(period.start))} راهیسې · ${sales.length} فروش · ${purchases.length} خرید · ${expenses.length} مصرف</p>
   <div class="month-opening">د میاشتې په شروع کې د مال ارزښت: <b>${money(db.monthOpeningStockValue)}</b> <button class="gray" onclick="editMonthOpeningStock()">✏️</button></div>
   <div class="month-stats">
