@@ -4185,7 +4185,7 @@ function renderCustomerDetail(){
     <b>🧾 #${safe(h.record.invoice||"—")} · ${safe(dateText(h.record.date))} · ${Number(h.record.debt)>0?(Number(h.record.paid)>0?"نیم نغدي / نیم پور":"پور"):"نغدي"}</b>
     <div class="customer-history-items">${h.record.rows.map(x=>`<div>• ${safe(x.productName||"جنس")} ${safe(x.qty)} ${safe(unitLabel(x.unit||""))} — ${money(x.total)}</div>`).join("")}</div>
     <div>ټول ${money(h.record.total)} · ورکړل شوي ${money(h.record.paid)} · پور ${money(h.record.debt)} · ګټه ${money(h.record.profit)}</div>
-    <div class="actions"><button class="gray" onclick="printSale('${h.id}')">🖨</button><button class="gray" onclick="editSale('${h.id}')">✏️ اصلاح</button></div>
+    <div class="actions"><button class="gray" onclick="printSale('${h.id}')">🖨 چاپ</button><button class="gray" onclick="editSale('${h.id}')">✏️ اصلاح</button></div>
    </div>`).join("")||"<p>تاریخچه نشته</p>"}
   <div class="item customer-opening-debt"><b>📝 پخوانی / لاسي ثبت شوی پور</b><div>${money(opening)}</div></div>
  </div>`;
