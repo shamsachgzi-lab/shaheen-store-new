@@ -4613,11 +4613,11 @@ function diagnoseProfitMonths(){
  const expenses=Array.isArray(db.expenses)?db.expenses:[];
  const deleted=Array.isArray(db.deletedProfitMonths)?db.deletedProfitMonths:[];
  const key=d=>String(d||"").slice(0,7);
- const months=[...new Set(sales.map(x=>key(x.date)).filter(x=>/^\\d{4}-\\d{2}$/.test(x)))].sort();
+ const months=[...new Set(sales.map(x=>key(x.date)).filter(x=>x.length===7&&x[4]==="-"))].sort();
  const included=sales.filter(x=>!deleted.includes(key(x.date)));
  const excluded=sales.filter(x=>deleted.includes(key(x.date)));
  const profit=arr=>arr.reduce((n,x)=>n+Number(x.profit||0),0);
- const expenseMonths=[...new Set(expenses.map(x=>key(x.date)).filter(x=>/^\\d{4}-\\d{2}$/.test(x)))].sort();
+ const expenseMonths=[...new Set(expenses.map(x=>key(x.date)).filter(x=>x.length===7&&x[4]==="-"))].sort();
  const lines=[
   "خوندي تشخیص — هېڅ معلومات نه بدلوي",
   "ټول خرڅلاو ریکارډونه: "+sales.length,
@@ -4631,7 +4631,7 @@ function diagnoseProfitMonths(){
   "د مصارفو میاشتې: "+(expenseMonths.join(", ")||"نشته"),
   "آرشیف شوې میاشتې: "+((db.archives||[]).map(a=>a.month).join(", ")||"نشته")
  ];
- alert(lines.join("\\n"));
+ alert(lines.join("\n"));
 }\nfunction renderCapitalPage(){
  const products=db.products||[],customers=db.customers||[],suppliers=db.suppliers||[];
  const sales=db.sales||[],purchases=db.purchases||[],expenses=db.expenses||[],payments=db.payments||[];
