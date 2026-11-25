@@ -4871,21 +4871,20 @@ function jalaliDisplayDate(iso){
 function diagnoseSaleProductLinks(){
  const products=Array.isArray(db.products)?db.products:[];
  const sales=Array.isArray(db.sales)?db.sales:[];
- const productIds=new Set(products.map(p=>String(p.id)));
- const unknown=sales.filter(x=>{
-  const id=x.productId??x.product_id??x.itemId??x.item_id??x.product?.id;
-  const name=x.productName??x.product_name??x.itemName??x.item_name??x.product?.name;
-  return !name&&!productIds.has(String(id??""));
- }).slice(0,5);
- const lines=["خوندي تشخیص — هېڅ معلومات نه بدلوي","ټول جنسونه: "+products.length,"ټول خرڅلاو ریکارډونه: "+sales.length,"د بې‌نومه خرڅلاو نمونې:"];
- unknown.forEach((x,i)=>{
-  lines.push((i+1)+". د ریکارډ ساحې: "+Object.keys(x).join(", "));
-  lines.push("   پېژند: "+String(x.productId??x.product_id??x.itemId??x.item_id??"نشته")+"؛ نوم: "+String(x.productName??x.product_name??x.itemName??x.item_name??"نشته")+"؛ مقدار: "+String(x.qty??x.quantity??x.stockQty??"نشته")+"؛ رسید: "+String(x.invoice??"نشته"));
-  lines.push("   د items ډول: "+(Array.isArray(x.items)?"لړلیک، شمېر: "+x.items.length:typeof x.items));
-  if(Array.isArray(x.items))x.items.slice(0,2).forEach((it,j)=>lines.push("   د جنس "+(j+1)+" ساحې: "+Object.keys(it||{}).join(", ")+"؛ نمونه: "+JSON.stringify(it).slice(0,700)));
+ const productMap=new Map();
+ products.forEach(p=>[p.id,p.pid,p.productId,p.product_id].filter(v=>v!=null).forEach(v=>productMap.set(String(v),p)));
+ const sample=sales.filter(x=>Array.isArray(x.items)&&x.items.length).slice(0,8);
+ const lines=["خوندي تشخیص — هېڅ معلومات نه بدلوي","ټول جنسونه: "+products.length,"ټول خرڅلاو ریکارډونه: "+sales.length,"د خرڅلاو د جنسونو د پېژندنې نمونه:"];
+ sample.forEach((sale,i)=>{
+  lines.push((i+1)+". رسید: "+String(sale.invoice||sale.id||"—")+"؛ مشتری: "+String(sale.customer||"—"));
+  sale.items.slice(0,3).forEach((it,j)=>{
+   const pid=it?.pid??it?.productId??it?.product_id??it?.itemId??it?.item_id;
+   const p=productMap.get(String(pid??""));
+   lines.push("   جنس "+(j+1)+": pid="+String(pid??"نشته")+"؛ مقدار="+String(it?.qty??it?.quantity??it?.baseQty??"نشته")+"؛ د جنس سره برابر="+(p?"هو":"نه")+"؛ نوم="+String(p?.name??p?.title??p?.productName??"نه موندل کېږي"));
+  });
  });
- lines.push("د جنسونو د نمونې پېژند او نوم:");
- products.slice(0,8).forEach(p=>lines.push(String(p.id)+" = "+String(p.name||p.title||"بې نومه")));
+ lines.push("د جنسونو د لومړیو 5 ریکارډونو ساحې:");
+ products.slice(0,5).forEach(p=>lines.push(Object.keys(p).join(", ")+"؛ پېژند="+String(p.id??p.pid??p.productId??"—")+"؛ نوم="+String(p.name??p.title??"—")));
  alert(lines.join("\n"));
 }
 function makeReport(){
@@ -4925,12 +4924,12 @@ function makeReport(){
     return {...it,customer:parent.customer,customerId:parent.customerId,date:parent.date,invoice:parent.invoice,id:parent.id,qty:it.qty??it.quantity??qty,unit:it.unit??parent.unit,total:amount};
    });
   });
-  const productById=new Map((db.products||[]).map(p=>[String(p.id),p]));
+  const productById=new Map();(db.products||[]).forEach(p=>[p.id,p.pid,p.productId,p.product_id].filter(v=>v!=null).forEach(v=>productById.set(String(v),p)));
   const customerById=new Map((db.customers||[]).map(c=>[String(c.id),c]));
   const saleProductName=x=>{
    const pid=x.productId??x.product_id??x.itemId??x.item_id??x.pid??x.product?.id;
    const linked=productById.get(String(pid??""));
-   const raw=x.productName??x.product_name??x.itemName??x.item_name??x.product?.name??x.name??linked?.name;
+   const raw=x.productName??x.product_name??x.itemName??x.item_name??x.product?.name??x.name??linked?.name??linked?.title??linked?.productName;
    return String(raw||"نامعلوم جنس").trim();
   };
   const saleCustomerName=x=>{
