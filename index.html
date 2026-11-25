@@ -4881,6 +4881,8 @@ function diagnoseSaleProductLinks(){
  unknown.forEach((x,i)=>{
   lines.push((i+1)+". د ریکارډ ساحې: "+Object.keys(x).join(", "));
   lines.push("   پېژند: "+String(x.productId??x.product_id??x.itemId??x.item_id??"نشته")+"؛ نوم: "+String(x.productName??x.product_name??x.itemName??x.item_name??"نشته")+"؛ مقدار: "+String(x.qty??x.quantity??x.stockQty??"نشته")+"؛ رسید: "+String(x.invoice??"نشته"));
+  lines.push("   د items ډول: "+(Array.isArray(x.items)?"لړلیک، شمېر: "+x.items.length:typeof x.items));
+  if(Array.isArray(x.items))x.items.slice(0,2).forEach((it,j)=>lines.push("   د جنس "+(j+1)+" ساحې: "+Object.keys(it||{}).join(", ")+"؛ نمونه: "+JSON.stringify(it).slice(0,700)));
  });
  lines.push("د جنسونو د نمونې پېژند او نوم:");
  products.slice(0,8).forEach(p=>lines.push(String(p.id)+" = "+String(p.name||p.title||"بې نومه")));
