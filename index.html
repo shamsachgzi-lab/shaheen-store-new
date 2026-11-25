@@ -4913,7 +4913,17 @@ function makeReport(){
  const table=(headers,rows,empty,extraClass="")=>`
  <div class="daily-table-wrap ${extraClass}"><table class="daily-report-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
  <tbody>${rows.length?rows.join(""):`<tr><td colspan="${headers.length}" class="daily-empty">${empty}</td></tr>`}</tbody></table></div>`;
- const productById=new Map((db.products||[]).map(p=>[String(p.id),p]));
+ const reportSales=sales.flatMap(parent=>{
+   if(!Array.isArray(parent.items)||!parent.items.length)return [parent];
+   return parent.items.map(item=>{
+    const it=item&&typeof item==="object"?item:{};
+    const qty=Number(it.qty??it.quantity??it.stockQty??it.stock_qty??it.count??0);
+    const price=Number(it.price??it.unitPrice??it.salePrice??0);
+    const amount=Number(it.total??it.lineTotal??it.amount??it.subtotal??(qty*price));
+    return {...it,customer:parent.customer,customerId:parent.customerId,date:parent.date,invoice:parent.invoice,id:parent.id,qty:it.qty??it.quantity??qty,unit:it.unit??parent.unit,total:amount};
+   });
+  });
+  const productById=new Map((db.products||[]).map(p=>[String(p.id),p]));
   const customerById=new Map((db.customers||[]).map(c=>[String(c.id),c]));
   const saleProductName=x=>{
    const pid=x.productId??x.product_id??x.itemId??x.item_id??x.product?.id;
@@ -4930,7 +4940,7 @@ function makeReport(){
   };
     const purchaseRows=purchases.map(p=>{const linked=productById.get(String(p.productId||""));return `<tr><td>${esc(p.productName||linked?.name||"نامعلوم جنس")}</td><td>${esc(p.qty??p.quantity??"—")} ${esc(unitLabel(p.unit||""))}</td><td>${money(purchaseAmount(p))}</td><td>${money(p.paid)}</td></tr>`;});
   const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
-  const saleRows=sales.map(x=>`<tr><td>${esc(saleProductName(x))}</td><td>${esc(saleCustomerName(x))}</td><td>${esc(x.qty??x.quantity??x.stockQty??x.stock_qty??"—")} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
+  const saleRows=reportSales.map(x=>`<tr><td>${esc(saleProductName(x))}</td><td>${esc(saleCustomerName(x))}</td><td>${esc(x.qty??x.quantity??x.stockQty??x.stock_qty??"—")} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
   const customerPurchases=new Map();
   sales.forEach(x=>{
    const customerName=saleCustomerName(x);
