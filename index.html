@@ -2455,7 +2455,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 <h3>💱 صرافي حساب</h3>
 <div class="grid2">
  <div class="panel"><small>💵 زما پیسې له صراف سره</small><h2 id="sarafHeldTotal">0 AFN</h2></div>
- <div class="panel"><small>📒 صراف زما پوروړی دی؟ نه — زه صراف ته پوروړی یم</small><h2 id="sarafOwedTotal">0 AFN</h2></div>
+ <div class="panel"><small>📒 زه د صراف پوروړی یم</small><h2 id="sarafOwedTotal">0 AFN</h2></div>
 </div>
 <div class="panel">
  <h3>➕ نوې معامله</h3>
@@ -2463,7 +2463,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <select id="sarafType" onchange="toggleSarafCompany()">
   <option value="deposit">صراف ته مې خپلې پیسې ورکړې</option>
   <option value="companyPayment">صراف زما له پیسو شرکت ته ورکړې</option>
-  <option value="creditPayment">صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې (زما پور)</option>
+  <option value="creditPayment">صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې (زه د صراف پوروړی یم)</option>
  </select>
  <div id="sarafCompanyWrap" class="hidden">
   <label id="sarafCompanyLabel">د شرکت یا شخص نوم</label>
@@ -2473,7 +2473,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <label>نېټه</label><input id="sarafDate" type="date">
  <label>یادښت (اختیاري)</label><input id="sarafNote" placeholder="د معاملې تفصیل">
  <button class="primary" onclick="addSarafTransaction()">💾 معامله ثبت کړه</button>
- <p class="notice">که صراف ته پیسې ورکړې، ستا د صراف سره پیسې زیاتېږي. که صراف ستا له پیسو شرکت ته ورکړې، هغه پیسې کمېږي. که صراف ستا پر ځای پیسې ورکړي او ستا پیسې ورسره نه وي، ستا د صراف پور زیاتېږي.</p>
+ <p class="notice">که صراف ته پیسې ورکړې، ستا د صراف سره پیسې زیاتېږي. که صراف ستا له پیسو شرکت ته ورکړې، هغه پیسې کمېږي. که صراف ستا پر ځای پیسې ورکړي او ستا پیسې ورسره نه وي، ستا پور صراف ته زیاتېږي.</p>
 </div>
 <div class="panel"><h3>📜 د صرافۍ معاملاتو تاریخچه</h3><div id="sarafList"></div></div>
 </section>
@@ -2732,7 +2732,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <h3>🏦 پانګه</h3>
  <div class="panel">
   <div class="capital-total"><small>ټوله پانګه / مالي حالت</small><strong id="capitalPageTotal">0 AFN</strong></div>
-  <p class="notice">نغدي + موجودي + د مشتریانو پورونه + له صراف سره ستا پیسې − د شرکتونو پورونه − صراف ته ستا پور</p>
+  <p class="notice">نغدي + موجودي + د مشتریانو پورونه + له صراف سره ستا پیسې − د شرکتونو پورونه − زه د صراف پوروړی یم</p>
   <div class="item"><b>💵 نغدې پیسې</b><strong id="capitalCash">0 AFN</strong></div>
   <div class="item"><b>📦 د موجودي ارزښت</b><strong id="capitalStock">0 AFN</strong></div>
   <div class="item"><b>👥 د اوسنیو مشتریانو پور</b><strong id="capitalActiveDebt">0 AFN</strong></div>
@@ -4565,9 +4565,9 @@ function addSarafTransaction(){
 function editSarafTransaction(id){
  const x=(db.sarafTransactions||[]).find(t=>String(t.id)===String(id));
  if(!x)return alert("معامله ونه موندل شوه");
- const kinds=[["deposit","صراف ته مې خپلې پیسې ورکړې"],["companyPayment","صراف زما له پیسو شرکت ته ورکړې"],["creditPayment","صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې (زما پور)"]];
+ const kinds=[["deposit","صراف ته مې خپلې پیسې ورکړې"],["companyPayment","صراف زما له پیسو شرکت ته ورکړې"],["creditPayment","صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې (زه د صراف پوروړی یم)"]];
  const oldName=x.company||"";
- const choice=prompt("د معاملې ډول وټاکه:\n1 = صراف ته مې پیسې ورکړې\n2 = صراف زما له پیسو شرکت ته ورکړې\n3 = صراف زما پر ځای پیسې ورکړې (پور)",""+(kinds.findIndex(k=>k[0]===x.type)+1||1));
+ const choice=prompt("د معاملې ډول وټاکه:\n1 = صراف ته مې پیسې ورکړې\n2 = صراف زما له پیسو شرکت ته ورکړې\n3 = صراف زما پر ځای پیسې ورکړې (زه د صراف پوروړی یم)",""+(kinds.findIndex(k=>k[0]===x.type)+1||1));
  if(choice===null)return;
  const type=kinds[Number(choice)-1]?.[0];if(!type)return alert("۱، ۲ یا ۳ ولیکه");
  const amountText=prompt("مبلغ (AFN):",String(x.amount||""));if(amountText===null)return;
@@ -4591,7 +4591,7 @@ function renderSaraf(){
  if(h)h.textContent=money(t.held);if(o)o.textContent=money(t.owed);
  const list=document.getElementById("sarafList");if(!list)return;
  const tx=(db.sarafTransactions||[]).slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
- const labels={deposit:"صراف ته مې خپلې پیسې ورکړې",withdraw:"له صرافه مې پیسې واخیستې (پخوانۍ معامله)",borrow:"له صرافه مې پور واخیست (پخوانۍ معامله)",repay:"صراف ته مې د پور پیسې ورکړې (پخوانۍ معامله)",owedSet:"د پور اندازه اصلاح (پخوانۍ معامله)",companyPayment:"صراف زما له پیسو شرکت ته ورکړې",creditPayment:"صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې — زما پور"};
+ const labels={deposit:"صراف ته مې خپلې پیسې ورکړې",withdraw:"له صرافه مې پیسې واخیستې (پخوانۍ معامله)",borrow:"له صرافه مې پور واخیست (پخوانۍ معامله)",repay:"صراف ته مې د پور پیسې ورکړې (پخوانۍ معامله)",owedSet:"د پور اندازه اصلاح (پخوانۍ معامله)",companyPayment:"صراف زما له پیسو شرکت ته ورکړې",creditPayment:"صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې — زه د صراف پوروړی یم"};
  list.innerHTML=tx.map(x=>'<div class="item"><b>'+safe(labels[x.type]||x.type)+'</b><div>مبلغ: <b>'+money(x.amount)+'</b></div><div>نېټه: '+safe(displayDate(x.date))+'</div>'+(x.company?'<div>شرکت/شخص: <b>'+safe(x.company)+'</b></div>':"")+(x.note?'<div>یادښت: '+safe(x.note)+'</div>':"")+'<div class="actions"><button class="gray" onclick="editSarafTransaction(\''+safe(x.id)+'\')">✏️ معامله اصلاح کړه</button></div></div>').join("")||"تر اوسه معامله نه ده ثبت شوې";
 }
 function toggleStockExpenseFields(){
