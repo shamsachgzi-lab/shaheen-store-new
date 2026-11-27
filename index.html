@@ -3961,8 +3961,7 @@ function addPurchase(){
  if(t.debt>0&&!supplierRecord)return alert("د پور پېرود لپاره د هماغه شرکت انتخابول حتمي دي");
  const cashOut=(paymentSource==="saraf"?extra:paid+extra);
  if(cashOut>Number(db.cash||0))return alert("په صندوق کې د انتقال او نورو مصارفو لپاره کافي نغدې پیسې نشته");
- const sarafHeld=paymentSource==="saraf"?sarafTotals().held:0;
- if(paymentSource==="saraf"&&paid>sarafHeld)return alert("د صراف سره دومره امانت پیسې نشته. موجود امانت: "+money(sarafHeld)+" AFN");
+ const sarafHeld=paymentSource==="saraf"?Math.max(0,Number(sarafTotals().held)||0):0;
  const invoice="PUR-"+Date.now(),oldCash=Number(db.cash||0),oldDebt=supplierRecord?Number(supplierRecord.debt||0):0;
  const updates=[];
  let totalWeightKg=0;
@@ -3993,17 +3992,19 @@ function addPurchase(){
   v.p.cost=nextQty>0?(v.oldQty*v.oldCost+v.costValue)/nextQty:0;
  });
  updates.forEach(u=>{
-  const r={id:uid(),invoice,productId:u.p.id,productName:u.p.name,qty:u.line.qty,unit:u.line.unit,stockQty:u.stockAdd,unitFactor:u.line.factor,weightKg:u.weightKg,price:u.landedUnit,total:u.goods+u.share,goodsTotal:u.goods,expenseShare:u.share,paid:t.goods>0?paid*(u.goods/t.goods):0,debt:t.goods>0?t.debt*(u.goods/t.goods):0,supplier:supplierRecord?.name||"نغدي پېرود",supplierId:supplierRecord?.id||"",date,itemsCount:purchaseCart.length};
+  const r={id:uid(),invoice,productId:u.p.id,productName:u.p.name,qty:u.line.qty,unit:u.line.unit,stockQty:u.stockAdd,unitFactor:u.line.factor,weightKg:u.weightKg,price:u.landedUnit,total:u.goods+u.share,goodsTotal:u.goods,expenseShare:u.share,paid:t.goods>0?paid*(u.goods/t.goods):0,debt:t.goods>0?t.debt*(u.goods/t.goods):0,paymentSource,supplier:supplierRecord?.name||"نغدي پېرود",supplierId:supplierRecord?.id||"",date,itemsCount:purchaseCart.length};
   db.purchases.push(r);records.push(r);
  });
  db.cash=oldCash-cashOut;
  if(paymentSource==="saraf"&&paid>0){
   if(!Array.isArray(db.sarafTransactions))db.sarafTransactions=[];
-  db.sarafTransactions.push({id:uid(),sarafId:"main",type:"companyPayment",amount:paid,date,note:"د پېرود رسید "+invoice+" لپاره له صراف څخه ورکړه",company:"د پېرود رسید "+invoice,recipientType:"purchase",purchaseInvoice:invoice});
+  const groupId=uid(),heldPart=Math.min(paid,sarafHeld),shortfall=Math.max(0,paid-heldPart);
+  if(heldPart>0)db.sarafTransactions.push({id:uid(),sarafId:"main",type:"companyPayment",amount:heldPart,date,note:"د پېرود رسید "+invoice+" لپاره له صراف څخه ورکړه",company:"د پېرود رسید "+invoice,recipientType:"purchase",purchaseInvoice:invoice,payoutGroupId:groupId});
+  if(shortfall>0)db.sarafTransactions.push({id:uid(),sarafId:"main",type:"creditPayment",amount:shortfall,date,note:"د پېرود رسید "+invoice+" پاتې اندازه د صراف پور شو",company:"د پېرود رسید "+invoice,recipientType:"purchase",purchaseInvoice:invoice,payoutGroupId:groupId});
  }
  if(supplierRecord){
   supplierRecord.debt=oldDebt+t.debt;
-  db.supplierReceipts.push({id:uid(),supplierId:supplierRecord.id,supplierName:supplierRecord.name,kind:"purchase",amount:t.debt,total:t.goods,paid,date,note:"د پېرود ګډ رسید "+invoice+" · "+purchaseCart.map(x=>x.name).join("، ")+" · اضافي مصارف "+money(extra),purchaseId:invoice,previousDebt:oldDebt,newDebt:supplierRecord.debt,createdAt:Date.now()});
+  db.supplierReceipts.push({id:uid(),supplierId:supplierRecord.id,supplierName:supplierRecord.name,kind:"purchase",amount:t.debt,total:t.goods,paid,date,note:"د پېرود ګډ رسید "+invoice+" · "+purchaseCart.map(x=>x.name).join("، ")+" · "+(paymentSource==="saraf"?"د صراف له لارې تادیه":"نغدي تادیه")+" · اضافي مصارف "+money(extra),purchaseId:invoice,previousDebt:oldDebt,newDebt:supplierRecord.debt,createdAt:Date.now()});
  }
  try{saveDB();}catch(e){
   updates.forEach(u=>{u.p.qty=u.oldQty;u.p.cost=u.oldCost;});
