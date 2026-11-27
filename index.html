@@ -4566,9 +4566,17 @@ function addSarafTransaction(){
  const t=sarafTotals();
  if(type==="companyPayment"&&amount>t.held)return alert("له صراف سره ستا خپلې پیسې د دې مبلغ لپاره بسنه نه کوي. که صراف پور درکړی وي، د پور اختیار وټاکه.");
  if(type==="deposit"&&amount>Number(db.cash||0))return alert("په صندوق کې دومره نغدې پیسې نشته");
- if(type==="deposit")db.cash=Number(db.cash||0)-amount;
  if(!Array.isArray(db.sarafTransactions))db.sarafTransactions=[];
- db.sarafTransactions.push({id:uid(),sarafId:"main",type,amount,date,note,company:type==="deposit"?"":company});
+ if(type==="deposit"){
+  // کله چې صراف ته پیسې ورکوې، لومړی پخوانی پور پرې کړه؛ پاتې برخه دې امانت شي.
+  const repayAmount=Math.min(amount,t.owed);
+  const heldAmount=amount-repayAmount;
+  db.cash=Number(db.cash||0)-amount;
+  if(repayAmount>0)db.sarafTransactions.push({id:uid(),sarafId:"main",type:"repay",amount:repayAmount,date,note:"د صراف پخوانی پور په اتومات ډول ادا شو"+(note?" — "+note:""),company:""});
+  if(heldAmount>0)db.sarafTransactions.push({id:uid(),sarafId:"main",type:"deposit",amount:heldAmount,date,note:repayAmount>0?"له پور کمولو وروسته د صراف سره پاتې امانت"+(note?" — "+note:""):note,company:""});
+ }else{
+  db.sarafTransactions.push({id:uid(),sarafId:"main",type,amount,date,note,company});
+ }
  saveDB();
  ["sarafAmount","sarafNote","sarafCompany"].forEach(k=>{const e=document.getElementById(k);if(e)e.value=""});
  const d=document.getElementById("sarafDate");if(d)d.value=today();
@@ -4637,7 +4645,7 @@ function renderSaraf(){
  if(h)h.textContent=money(t.held);if(o)o.textContent=money(t.owed);
  const list=document.getElementById("sarafList");if(!list)return;
  const tx=(db.sarafTransactions||[]).slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
- const labels={deposit:"صراف ته مې خپلې پیسې ورکړې",withdraw:"له صرافه مې پیسې واخیستې (پخوانۍ معامله)",borrow:"له صرافه مې پور واخیست (پخوانۍ معامله)",repay:"صراف ته مې د پور پیسې ورکړې (پخوانۍ معامله)",owedSet:"د پور اندازه اصلاح (پخوانۍ معامله)",companyPayment:"صراف زما له پیسو شرکت ته ورکړې",creditPayment:"صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې — زه د صراف پوروړی یم"};
+ const labels={deposit:"صراف ته مې خپلې پیسې ورکړې",withdraw:"له صرافه مې پیسې واخیستې (پخوانۍ معامله)",borrow:"له صرافه مې پور واخیست (پخوانۍ معامله)",repay:"د صراف پخوانی پور مې ادا کړ",owedSet:"د پور اندازه اصلاح (پخوانۍ معامله)",companyPayment:"صراف زما له پیسو شرکت ته ورکړې",creditPayment:"صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې — زه د صراف پوروړی یم"};
  list.innerHTML=tx.map(x=>'<div class="item"><b>'+safe(labels[x.type]||x.type)+'</b><div>مبلغ: <b>'+money(x.amount)+'</b></div><div>نېټه: '+safe(displayDate(x.date))+'</div>'+(x.company?'<div>شرکت/شخص: <b>'+safe(x.company)+'</b></div>':"")+(x.note?'<div>یادښت: '+safe(x.note)+'</div>':"")+'<div class="actions"><button class="gray" onclick="editSarafTransaction(\''+safe(x.id)+'\')">✏️ معامله اصلاح کړه</button></div></div>').join("")||"تر اوسه معامله نه ده ثبت شوې";
 }
 function toggleStockExpenseFields(){
