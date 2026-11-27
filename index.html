@@ -2979,6 +2979,7 @@ function today(){
  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
 function displayDate(iso){return iso?jalaliDisplayDate(String(iso).slice(0,10)):"—";}
+function displaySaleDateTime(record){const date=displayDate(record?.date);const raw=record?.createdAt||record?.timestamp||record?.created;if(!raw)return date+" · وخت نه دی ثبت";const d=new Date(raw);if(!Number.isFinite(d.getTime()))return date+" · وخت نه دی ثبت";return date+" · "+new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",hour12:true}).format(d);}
 function jalaliDigits(v){return String(v).replace(/[۰-۹٠-٩]/g,x=>{const p="۰۱۲۳۴۵۶۷۸۹".indexOf(x);return String(p>=0?p:"٠١٢٣٤٥٦٧٨٩".indexOf(x));});}
 function initAllJalaliDatePickers(root=document){
  root.querySelectorAll('input[type="date"]').forEach(input=>{
@@ -3595,7 +3596,7 @@ function addSale(){
  if(total-paid>0&&!c){c={id:uid(),name:customer,phone:"",debt:0,type:"active",created:today()};db.customers.push(c);}
  const invoiceCustomerName=c?.name||customer;
  for(const item of saleCart){const p=db.products.find(x=>x.id===item.productId);if(!p||Number(p.qty)<item.stockQty)return alert("د "+item.productName+" موجودي بدله شوې؛ کارټ بیا وګوره.");}
- const invoice=nextSaleInvoiceNumber(),date=value("saleDate")||today();
+ const invoice=nextSaleInvoiceNumber(),date=value("saleDate")||today(),createdAt=new Date().toISOString();
  let paidLeft=paid,discountLeft=discount;
  saleCart.forEach((item,index)=>{
   const p=db.products.find(x=>x.id===item.productId),lineSubtotal=item.qty*item.price;
@@ -3607,7 +3608,7 @@ function addSale(){
   const lineDebt=lineTotal-linePaid;
   p.qty=Number(p.qty)-item.stockQty;
   const lineProfit=(item.price-item.costAtSale*item.factor)*item.qty-lineDiscount;
-  db.sales.push({id:uid(),invoice,productId:p.id,productName:item.productName,qty:item.qty,unit:item.unit,stockQty:item.stockQty,unitFactor:item.factor,price:item.price,subtotal:lineSubtotal,discount:lineDiscount,discountPercent:number("saleDiscount"),total:lineTotal,costAtSale:item.costAtSale,profit:lineProfit,paid:linePaid,debt:lineDebt,customer:invoiceCustomerName,customerId:c?.id||"",note:value("saleNote"),date});
+  db.sales.push({id:uid(),invoice,productId:p.id,productName:item.productName,qty:item.qty,unit:item.unit,stockQty:item.stockQty,unitFactor:item.factor,price:item.price,subtotal:lineSubtotal,discount:lineDiscount,discountPercent:number("saleDiscount"),total:lineTotal,costAtSale:item.costAtSale,profit:lineProfit,paid:linePaid,debt:lineDebt,customer:invoiceCustomerName,customerId:c?.id||"",note:value("saleNote"),date,createdAt});
  });
  db.cash=Number(db.cash||0)+paid;
  if(c)c.debt=Number(c.debt||0)+(total-paid);
@@ -3809,7 +3810,7 @@ function printSale(id){
  const total=rows.reduce((n,x)=>n+Number(x.total||0),0);
  const paid=rows.reduce((n,x)=>n+Number(x.paid||0),0);
  const debt=rows.reduce((n,x)=>n+Number(x.debt||0),0);
- const date=displayDate(selected.date);
+ const date=displayDate(selected.date),saleTime=selected.createdAt?new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",hour12:true}).format(new Date(selected.createdAt)):"وخت نه دی ثبت";
  const customerRecord=(db.customers||[]).find(c=>String(c.id)===String(selected.customerId||""));
  const customer=safe(customerRecord?.name||selected.customer||"نغدي مشتری");
  const itemRows=rows.map(x=>'<tr><td class="item-name">'+safe(x.productName||"-")+'</td><td>'+safe(x.qty)+' '+safe(unitLabel(x.unit||"دانه"))+'</td><td>'+money(x.price)+'</td><td class="amount">'+money(Number(x.total)||0)+'</td></tr>').join("");
@@ -3838,7 +3839,7 @@ function printSale(id){
  '@media print{.receipt-actions{display:none!important}html{direction:ltr!important;width:58mm!important;min-width:58mm!important;margin:0!important;padding:0!important}body{direction:rtl!important;display:block!important;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;margin-left:0!important;margin-right:auto!important;padding:0!important}.invoice{direction:rtl;width:58mm!important;min-width:58mm!important;max-width:58mm!important;margin:0!important;padding:2.5mm 2mm 3mm!important;box-shadow:none!important}tr,.totals div{break-inside:avoid;page-break-inside:avoid}}'+
  '</style></head><body><div class="receipt-actions"><button type="button" onclick="window.print()">🖨 چاپ</button><button type="button" onclick="shareReceiptLocal(&quot;image&quot;)">🖼 عکس شریکول</button><button type="button" onclick="shareReceiptLocal(&quot;pdf&quot;)">📄 PDF شریکول</button><a href="https://shamsachgzi-lab.github.io/shaheen-store-new/">↩ بېرته اپلیکیشن ته</a></div><main class="invoice">'+
  '<header class="top"><h1>'+shop+'</h1><p class="subtitle">د عمده او پرچون خرڅلاو رسید</p>'+(phone?'<div class="phone">اړیکه: '+phone+'</div>':"")+'<div class="receipt-title">خرڅلاو ثبت شو</div></header>'+
- '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
+ '<section class="meta"><div><b>د رسید شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>د خرڅلاو ساعت</b>'+safe(saleTime)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>پاتې پور</span><b>'+money(debt)+'</b></div></section>'+
  note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
@@ -4312,7 +4313,7 @@ function renderCustomerDetail(){
  const debtAddedPayouts=sum(payouts.filter(x=>x.debtAdded===true),"amount");
  const opening=Math.max(0,Number(c.debt||0)-creditSales+receivedForDebt-debtAddedPayouts);
  const history=[
-  ...Object.values(sales.reduce((groups,x)=>{const key=x.invoice||x.id;(groups[key]||(groups[key]={kind:"sale",date:x.date||"",id:x.id,record:{invoice:x.invoice||x.id,customer:x.customer,date:x.date,rows:[],total:0,paid:0,debt:0,profit:0}})).record.rows.push(x);const g=groups[key].record;g.total+=Number(x.total||0);g.paid+=Number(x.paid||0);g.debt+=Number(x.debt||0);g.profit+=Number(x.profit||0);return groups;},{})),
+  ...Object.values(sales.reduce((groups,x)=>{const key=x.invoice||x.id;(groups[key]||(groups[key]={kind:"sale",date:x.date||"",id:x.id,record:{invoice:x.invoice||x.id,customer:x.customer,date:x.date,createdAt:x.createdAt,rows:[],total:0,paid:0,debt:0,profit:0}})).record.rows.push(x);const g=groups[key].record;g.total+=Number(x.total||0);g.paid+=Number(x.paid||0);g.debt+=Number(x.debt||0);g.profit+=Number(x.profit||0);return groups;},{})),
   ...receipts.map(x=>({kind:"payment",date:x.date||"",id:x.id,record:x})),
   ...payouts.map(x=>({kind:"payout",date:x.date||"",id:x.id,record:x}))
  ].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
@@ -4360,7 +4361,7 @@ function renderCustomerDetail(){
     <button class="red" onclick="deleteCustomerReceipt('${h.id}')">🗑</button>
    </div>`:`
    <div class="item customer-history-sale">
-    <b>🧾 #${safe(h.record.invoice||"—")} · ${safe(dateText(h.record.date))} · ${Number(h.record.debt)>0?(Number(h.record.paid)>0?"نیم نغدي / نیم پور":"پور"):"نغدي"}</b>
+    <b>🧾 #${safe(h.record.invoice||"—")} · ${safe(displaySaleDateTime(h.record))} · ${Number(h.record.debt)>0?(Number(h.record.paid)>0?"نیم نغدي / نیم پور":"پور"):"نغدي"}</b>
     <div class="customer-history-items">${h.record.rows.map(x=>`<div>• ${safe(x.productName||"جنس")} ${safe(x.qty)} ${safe(unitLabel(x.unit||""))} — ${money(x.total)}</div>`).join("")}</div>
     <div>ټول ${money(h.record.total)} · ورکړل شوي ${money(h.record.paid)} · پور ${money(h.record.debt)} · ګټه ${money(h.record.profit)}</div>
     <div class="actions"><button class="gray" onclick="printSale('${h.id}')">🖨 چاپ</button><button class="gray" onclick="editSale('${h.id}')">✏️ اصلاح</button></div>
@@ -5294,7 +5295,7 @@ function makeReportSingleDay(){
     const qty=Number(it.qty??it.quantity??it.stockQty??it.stock_qty??it.count??0);
     const price=Number(it.price??it.unitPrice??it.salePrice??0);
     const amount=Number(it.total??it.lineTotal??it.amount??it.subtotal??(qty*price));
-    return {...it,customer:parent.customer,customerId:parent.customerId,date:parent.date,invoice:parent.invoice,id:parent.id,qty:it.qty??it.quantity??qty,unit:it.unit??parent.unit,total:amount};
+    return {...it,customer:parent.customer,customerId:parent.customerId,date:parent.date,createdAt:parent.createdAt,invoice:parent.invoice,id:parent.id,qty:it.qty??it.quantity??qty,unit:it.unit??parent.unit,total:amount};
    });
   });
   const productById=new Map();(db.products||[]).forEach(p=>[p.id,p.pid,p.productId,p.product_id].filter(v=>v!=null).forEach(v=>productById.set(String(v),p)));
@@ -5314,7 +5315,7 @@ function makeReportSingleDay(){
   };
     const purchaseRows=purchases.map(p=>{const linked=productById.get(String(p.productId||""));return `<tr><td>${esc(p.productName||linked?.name||"نامعلوم جنس")}</td><td>${esc(p.qty??p.quantity??"—")} ${esc(unitLabel(p.unit||""))}</td><td>${money(purchaseAmount(p))}</td><td>${money(p.paid)}</td></tr>`;});
   const expenseRows=expenses.map(e=>`<tr><td>${esc(e.name||e.note||"مصرف")}</td><td>${esc(e.note||e.category||"—")}</td><td>${money(e.amount)}</td><td>${esc(e.category||"—")}</td></tr>`);
-  const saleRows=reportSales.map(x=>`<tr><td>${esc(saleProductName(x))}</td><td>${esc(saleCustomerName(x))}</td><td>${esc(x.qty??x.quantity??x.stockQty??x.stock_qty??"—")} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td></tr>`);
+  const saleRows=reportSales.map(x=>`<tr><td>${esc(saleProductName(x))}</td><td>${esc(saleCustomerName(x))}</td><td>${esc(x.qty??x.quantity??x.stockQty??x.stock_qty??"—")} ${esc(unitLabel(x.unit||""))}</td><td>${money(x.total)}</td><td>${esc(displaySaleDateTime(x))}</td></tr>`);
   const customerPurchases=new Map();
   reportSales.forEach(x=>{
    const customerName=saleCustomerName(x);
@@ -5360,7 +5361,7 @@ function makeReportSingleDay(){
   </section>
   <section class="daily-report-section">
    <h3>🧾 پلورل شوي جنسونه — ${esc(dateLabel)}</h3>
-   ${table(["جنس","مشتری","مقدار","مبلغ"],saleRows,"معلومات نشته")}
+   ${table(["جنس","مشتری","مقدار","مبلغ","نېټه او ساعت"],saleRows,"معلومات نشته")}
    <div class="daily-report-footer">نغدي ترلاسه: <b>${money(totalPaid)}</b> · په پور: <b>${money(totalDebt)}</b> · ناخالصه ګټه: <b>${money(gross)}</b></div>
   </section>
 
