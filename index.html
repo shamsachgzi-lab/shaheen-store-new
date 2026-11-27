@@ -3031,10 +3031,10 @@ function initJalaliSaleDate(){
  const get=k=>Number(parts.find(p=>p.type===k)?.value);
  const jy=get("year"),jm=get("month"),jd=get("day");
  y.innerHTML="";
- for(let n=jy-5;n<=jy+10;n++)y.add(new Option(String(n).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]),String(n)));
+ for(let n=jy-5;n<=jy+10;n++)y.add(new Option(String(n),String(n)));
  y.value=String(jy);m.value=String(jm);
  d.innerHTML="";
- for(let n=1;n<=31;n++)d.add(new Option(String(n).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]),String(n)));
+ for(let n=1;n<=31;n++)d.add(new Option(String(n),String(n)));
  d.value=String(jd);
  updateSaleDateLabel();
 }
