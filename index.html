@@ -2854,24 +2854,7 @@ if(!Array.isArray(db.settings.units))db.settings.units=[
 if(!db.settings.currency)db.settings.currency="AFN";
 if(!db.settings.shopName)db.settings.shopName="شاهین فروشگاه";
 
-/* د 2026-11-25 بیک‌اف څخه د صراف پخوانۍ 8 معاملې بېرته راوستل؛ یوازې ورکې معاملې زیاتوي، صندوق او نور حسابونه نه بدلوي. */
-const recoveredSarafTransactions = [
- {id:"mwt8fahmllwwv",sarafId:"main",type:"borrow",amount:9660,date:"2026-11-23",note:"",company:""},
- {id:"mwt8gp2klf7jp",sarafId:"main",type:"owedSet",amount:10,date:"2026-11-23",note:"",company:""},
- {id:"mwt8gx7ads690",sarafId:"main",type:"owedSet",amount:9660,date:"2026-11-23",note:"",company:""},
- {id:"mwt8inuvs46gr",sarafId:"main",type:"deposit",amount:72000,date:"2026-11-23",note:"",company:""},
- {id:"mwt8j49a8fpj1",sarafId:"main",type:"companyPayment",amount:12000,date:"2026-11-23",note:"",company:"قاری قنات"},
- {id:"mwt8k18pn4f1i",sarafId:"main",type:"owedSet",amount:10,date:"2026-11-23",note:"",company:""},
- {id:"mwt8khahxvbxu",sarafId:"main",type:"withdraw",amount:9660,date:"2026-11-23",note:"",company:""},
- {id:"mwt8vg5c5oed1",sarafId:"main",type:"deposit",amount:1000,date:"2026-11-23",note:"",company:""}
-];
-const existingSarafIds = new Set((db.sarafTransactions||[]).map(x=>String(x.id)));
-const missingSarafTransactions = recoveredSarafTransactions.filter(x=>!existingSarafIds.has(x.id));
-if(missingSarafTransactions.length){
- db.sarafTransactions.push(...missingSarafTransactions);
- localStorage.setItem(DB_KEY,JSON.stringify(db));
-}
-
+/* د صراف پخوانۍ معاملې نور په هر ځل د اپلیکیشن په پرانیستلو نه راګرځي؛ د کارونکي حذف ته درناوی کېږي. */
 
 
 function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(db))}
