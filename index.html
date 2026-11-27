@@ -4444,6 +4444,35 @@ function renderCustomerDetail(monthFilter=""){
   <div class="item customer-opening-debt"><b>📝 پخوانی / لاسي ثبت شوی پور</b><div>${money(opening)}</div></div>
  </div>`;
 }
+
+function closeCustomerAccount(id){
+ const c=db.customers.find(x=>String(x.id)===String(id));if(!c)return;
+ if(!confirm("د دې مشتری اوسنی حساب وتړل شي او نوی حساب پیل شي؟ پخوانۍ معاملې به په جلا راپور کې خوندي وي او پاتې پور به نوي حساب ته انتقال شي. د نغدو پیسو او ټول پور مقدار به نه بدلېږي."))return;
+ const archives=Array.isArray(c.accountCycles)?c.accountCycles:[];
+ const oldSaleIds=new Set(archives.flatMap(a=>a.saleIds||[]).map(String));
+ const oldPaymentIds=new Set(archives.flatMap(a=>a.paymentIds||[]).map(String));
+ const matchesCustomer=x=>String(x.customerId||"")===String(c.id)||(!x.customerId&&String(x.customer||"")===String(c.name));
+ const matchesPayment=x=>String(x.personId||"")===String(c.id)||(!x.personId&&String(x.personName||"")===String(c.name));
+ const sales=db.sales.filter(x=>matchesCustomer(x)&&!oldSaleIds.has(String(x.id)));
+ const receipts=(db.payments||[]).filter(x=>x.type==="customer"&&matchesPayment(x)&&!oldPaymentIds.has(String(x.id)));
+ const payouts=(db.payments||[]).filter(x=>x.type==="customer_out"&&matchesPayment(x)&&!oldPaymentIds.has(String(x.id)));
+ const sum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
+ const allSales=db.sales.filter(matchesCustomer);
+ const allReceipts=(db.payments||[]).filter(x=>x.type==="customer"&&matchesPayment(x));
+ const allPayouts=(db.payments||[]).filter(x=>x.type==="customer_out"&&matchesPayment(x));
+ const legacyOpening=Math.max(0,Number(c.debt||0)-sum(allSales,"debt")+allReceipts.reduce((n,p)=>n+Number(p.appliedToDebt??p.amount??0),0)-sum(allPayouts.filter(x=>x.debtAdded===true),"amount"));
+ const opening=Number(c.accountOpeningDebt??legacyOpening);
+ const snapshot=arr=>JSON.parse(JSON.stringify(arr));
+ const closedAt=today();
+ const archive={id:uid(),closedAt,openingDebt:opening,closingDebt:Number(c.debt||0),sales:snapshot(sales),receipts:snapshot(receipts),payouts:snapshot(payouts),saleIds:sales.map(x=>String(x.id)),paymentIds:[...receipts,...payouts].map(x=>String(x.id))};
+ archives.push(archive);
+ c.accountCycles=archives;
+ c.accountOpeningDebt=Number(c.debt||0);
+ c.accountCurrentStartedAt=closedAt;
+ saveDB();refreshAll();renderCustomerDetail();
+ alert("حساب وتړل شو. پخوانی راپور خوندي دی او نوی حساب د "+money(c.accountOpeningDebt)+" پیل پور سره شروع شو.");
+}
+
 function saveCustomerPayout(id){
  const c=db.customers.find(x=>x.id===id);if(!c)return;
  const amount=number("customerPayoutAmount"),date=value("customerPayoutDate")||today(),note=value("customerPayoutNote");
