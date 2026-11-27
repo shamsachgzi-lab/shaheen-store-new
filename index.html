@@ -4706,8 +4706,7 @@ function renderSaraf(){
  const t=sarafTotals(),h=document.getElementById("sarafHeldTotal"),o=document.getElementById("sarafOwedTotal");
  if(h)h.textContent=money(t.held);if(o)o.textContent=money(t.owed);
  const list=document.getElementById("sarafList");if(!list)return;
- const all=(db.sarafTransactions||[]).slice();
- const grouped=new Map();
+ const all=(db.sarafTransactions||[]).slice(),grouped=new Map();
  all.forEach(x=>{
   if(x.payoutGroupId){
    let g=grouped.get(x.payoutGroupId);
@@ -4721,17 +4720,29 @@ function renderSaraf(){
  const outgoing=rows.filter(x=>["deposit","repay"].includes(x.type));
  const incoming=rows.filter(x=>["payout","withdraw","borrow","companyPayment","creditPayment"].includes(x.type));
  const misc=rows.filter(x=>!outgoing.includes(x)&&!incoming.includes(x));
+ const total=items=>items.reduce((n,x)=>n+(Number(x.amount)||0),0);
  const renderRows=(items,kind)=>items.map(x=>{
   const isPayout=x.type==="payout";
   const label=isPayout?"له صراف څخه پیسې واخیستل شوې او بل چاته ورکړل شوې":x.type==="deposit"?"صراف ته پیسې ورکړل شوې":x.type==="repay"?"صراف ته د پور پیسې ورکړل شوې":x.type==="withdraw"?"له صراف څخه نغدې پیسې واخیستل شوې":x.type==="borrow"?"له صراف څخه پور واخیستل شو":x.type==="companyPayment"||x.type==="creditPayment"?"له صراف څخه پیسې واخیستل شوې":"د صراف حساب";
   const action=isPayout?'حساب بېرته واړوه':'معامله اصلاح کړه';
-  const detail=isPayout?'<div class="saraf-meta">د صراف له خپلو پیسو: '+money(x.parts.filter(p=>p.type==="companyPayment").reduce((n,p)=>n+(Number(p.amount)||0),0))+' · د صراف پور: '+money(x.parts.filter(p=>p.type==="creditPayment").reduce((n,p)=>n+(Number(p.amount)||0),0))+'</div>':"";
-  return '<article class="saraf-history-card '+kind+'"><div class="saraf-history-top"><b>'+label+'</b><strong>'+money(x.amount)+'</strong></div><div class="saraf-meta">نېټه: '+safe(displayDate(x.date))+'</div>'+(x.company?'<div class="saraf-meta">اخیستونکی: <b>'+safe(x.company)+'</b></div>':"")+detail+(x.note?'<div class="saraf-meta">یادښت: '+safe(x.note)+'</div>':"")+'<div class="saraf-history-actions"><button class="gray" onclick="editSarafTransaction(\''+safe(x.id)+'\')">↩ '+action+'</button></div></article>';
- }).join("")||'<div class="saraf-empty">په دې برخه کې تر اوسه معامله نشته</div>';
- list.innerHTML='<style>.saraf-history-section{margin:14px 0 20px;padding:14px;border-radius:18px;background:var(--panel,#fff);border:1px solid var(--border,#e5e7eb)}.saraf-history-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;font-size:16px}.saraf-history-heading small{font-size:12px;color:var(--muted,#777);font-weight:400}.saraf-history-card{padding:13px;margin:9px 0;border:1px solid var(--border,#e5e7eb);border-radius:14px;background:var(--card,#fafafa)}.saraf-history-card.out{border-right:4px solid #d97706}.saraf-history-card.in{border-right:4px solid #0d9488}.saraf-history-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.saraf-history-top strong{font-size:17px;direction:ltr;color:var(--text,#222)}.saraf-meta{font-size:13px;color:var(--muted,#666);margin-top:6px}.saraf-history-actions{margin-top:10px}.saraf-empty{padding:14px;text-align:center;color:var(--muted,#777);font-size:13px}</style>'+
- '<section class="saraf-history-section"><div class="saraf-history-heading"><span>📤 صراف ته ورکړل شوې پیسې</span><small>'+outgoing.length+' معاملې</small></div>'+renderRows(outgoing,"out")+'</section>'+
- '<section class="saraf-history-section"><div class="saraf-history-heading"><span>📥 له صراف څخه اخیستل شوې پیسې</span><small>'+incoming.length+' معاملې</small></div>'+renderRows(incoming,"in")+'</section>'+
- (misc.length?'<section class="saraf-history-section"><div class="saraf-history-heading">📋 نورې پخوانۍ معاملې</div>'+renderRows(misc,"")+'</section>':"");
+  const detail=isPayout?'<div class="saraf-card-detail">د صراف له امانت څخه: <b>'+money(x.parts.filter(p=>p.type==="companyPayment").reduce((n,p)=>n+(Number(p.amount)||0),0))+'</b><span>·</span> د صراف پور: <b>'+money(x.parts.filter(p=>p.type==="creditPayment").reduce((n,p)=>n+(Number(p.amount)||0),0))+'</b></div>':"";
+  return '<article class="saraf-modern-card '+kind+'"><div class="saraf-modern-card-top"><span class="saraf-kind-pill">'+(kind==="out"?"ورکړل شوې":"اخیستل شوې")+'</span><strong>'+money(x.amount)+' <small>AFN</small></strong></div><div class="saraf-modern-title">'+label+'</div><div class="saraf-modern-date">📅 '+safe(displayDate(x.date))+'</div>'+(x.company?'<div class="saraf-modern-recipient">👤 '+safe(x.company)+'</div>':"")+detail+(x.note?'<div class="saraf-modern-note">یادښت: '+safe(x.note)+'</div>':"")+'<div class="saraf-modern-actions"><button class="gray" onclick="editSarafTransaction(\''+safe(x.id)+'\')">✏️ '+action+'</button></div></article>';
+ }).join("")||'<div class="saraf-modern-empty">🌿 تر اوسه په دې برخه کې معامله نه ده ثبت شوې</div>';
+ list.innerHTML='<style>'+
+ '.saraf-modern-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:12px 0 18px}'+
+ '.saraf-modern-summary{padding:16px;border-radius:18px;color:#fff;box-shadow:0 7px 20px #00000012}.saraf-modern-summary.out{background:linear-gradient(135deg,#b7791f,#e3a33b)}.saraf-modern-summary.in{background:linear-gradient(135deg,#087f73,#20b5a3)}'+
+ '.saraf-modern-summary small{display:block;opacity:.9;font-size:12px}.saraf-modern-summary strong{display:block;font-size:22px;margin-top:7px;direction:ltr;text-align:right}.saraf-modern-summary em{font-style:normal;font-size:11px;opacity:.85}'+
+ '.saraf-modern-section{margin:15px 0 22px;padding:14px;border-radius:20px;background:var(--panel,#fff);border:1px solid var(--border,#e5e7eb)}'+
+ '.saraf-modern-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}.saraf-modern-heading b{font-size:16px}.saraf-modern-heading small{font-size:12px;color:var(--muted,#777);white-space:nowrap}'+
+ '.saraf-modern-card{padding:14px;margin:10px 0;border:1px solid var(--border,#e5e7eb);border-radius:16px;background:var(--card,#fafafa)}.saraf-modern-card.out{border-right:4px solid #d99a32}.saraf-modern-card.in{border-right:4px solid #12a391}'+
+ '.saraf-modern-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.saraf-kind-pill{font-size:11px;padding:5px 9px;border-radius:30px;background:#8882;color:var(--text,#333)}.saraf-modern-card.out .saraf-kind-pill{background:#d99a3220;color:#a66a0a}.saraf-modern-card.in .saraf-kind-pill{background:#12a39120;color:#078477}'+
+ '.saraf-modern-card-top strong{font-size:19px;color:var(--text,#222);direction:ltr}.saraf-modern-card-top strong small{font-size:10px;color:var(--muted,#777)}.saraf-modern-title{font-weight:700;margin-top:9px}.saraf-modern-date,.saraf-modern-recipient,.saraf-modern-note,.saraf-card-detail{font-size:12px;color:var(--muted,#666);margin-top:7px}.saraf-card-detail{display:flex;gap:6px;flex-wrap:wrap}.saraf-modern-actions{margin-top:12px}.saraf-modern-actions button{border-radius:10px;padding:8px 12px}.saraf-modern-empty{padding:22px 12px;text-align:center;border:1px dashed var(--border,#ddd);border-radius:14px;color:var(--muted,#777);font-size:13px}'+
+ '@media(max-width:420px){.saraf-modern-section{padding:10px}.saraf-modern-card{padding:11px}.saraf-modern-card-top strong{font-size:17px}}'+
+ '</style>'+
+ '<div class="saraf-modern-wrap"><div class="saraf-modern-summary out"><small>📤 ټولې پیسې چې صراف ته دې ورکړې</small><strong>'+money(total(outgoing))+' <em>AFN</em></strong><small>'+outgoing.length+' معاملې</small></div><div class="saraf-modern-summary in"><small>📥 ټولې پیسې چې له صراف څخه دې اخیستې</small><strong>'+money(total(incoming))+' <em>AFN</em></strong><small>'+incoming.length+' معاملې</small></div></div>'+
+ '<section class="saraf-modern-section"><div class="saraf-modern-heading"><b>📤 صراف ته مې پیسې ورکړې</b><small>'+outgoing.length+' معاملې · '+money(total(outgoing))+' AFN</small></div>'+renderRows(outgoing,"out")+'</section>'+
+ '<section class="saraf-modern-section"><div class="saraf-modern-heading"><b>📥 له صراف څخه مې پیسې واخیستې</b><small>'+incoming.length+' معاملې · '+money(total(incoming))+' AFN</small></div>'+renderRows(incoming,"in")+'</section>'+
+ (misc.length?'<section class="saraf-modern-section"><div class="saraf-modern-heading"><b>📋 نورې پخوانۍ معاملې</b></div>'+renderRows(misc,"")+'</section>':"");
 }
 function toggleStockExpenseFields(){
  const isStock=value("eCategory")==="stock";
