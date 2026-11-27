@@ -4426,7 +4426,7 @@ function renderCustomerDetail(monthFilter="",archiveId="current"){
    <b>🔒 د حساب تصفیه او نوی حساب</b>
    <p style="margin:7px 0;color:#475569">پخوانۍ معاملې به د پخواني راپور په توګه خوندي شي؛ پاتې پور به د نوي حساب پیل پور وي.</p>
    ${selectedArchive?'':`<button class="primary" style="width:100%" onclick="closeCustomerAccount('${c.id}')">حساب تصفیه کړه او نوی حساب پیل کړه</button>`}
-   ${archives.length?'<div style="margin-top:10px"><b>پخواني حسابونه:</b> '+archives.map(a=>'<button type="button" class="gray" style="width:100%;margin-top:6px" onclick="renderCustomerDetail(\'\',\''+safe(a.id)+'\')">📁 راپور '+safe(a.closedAt||'نېټه نشته')+' — پیل پور '+money(a.openingDebt)+' — پای پور '+money(a.closingDebt)+'</button>').join('')+'</div>':''}
+   ${archives.length?'<div style="margin-top:10px"><b>پخواني حسابونه:</b> '+archives.map(a=>'<button type="button" class="gray" style="width:100%;margin-top:6px" onclick="renderCustomerDetail(\'\',\''+safe(a.id)+'\')">📁 راپور '+safe(a.closedAt?jalaliDisplayDate(a.closedAt):'نېټه نشته')+' — پیل پور '+money(a.openingDebt)+' — پای پور '+money(a.closingDebt)+'</button>').join('')+'</div>':''}
    ${selectedArchive?'<button type="button" class="gray" style="width:100%;margin-top:8px" onclick="renderCustomerDetail(\'\',\'current\')">اوسني حساب ته بېرته</button>':''}
   </div>
   <h3 class="customer-history-title">📚 د مشتری د معاملاتو تاریخچه</h3>
