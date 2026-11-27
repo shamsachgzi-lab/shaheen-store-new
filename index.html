@@ -2486,7 +2486,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <div class="panel"><label>نېټه</label><input id="sarafEditDate" type="date"></div>
   <div class="panel hidden" id="sarafEditCompanyWrap"><label id="sarafEditCompanyLabel">د شرکت یا شخص نوم</label><input id="sarafEditCompany" placeholder="د شرکت یا شخص نوم"></div>
   <div class="panel"><label>یادښت</label><textarea id="sarafEditNote" rows="4" placeholder="د معاملې تفصیل"></textarea></div>
-  <div class="saraf-edit-actions"><button type="button" class="gray" onclick="closeSarafEditPage()">لغوه کړه</button><button type="button" class="primary" onclick="saveSarafTransactionEdit()">💾 بدلونونه خوندي کړه</button></div>
+  <div class="saraf-edit-actions"><button type="button" class="gray" onclick="closeSarafEditPage()">لغوه کړه</button><button type="button" class="saraf-delete-button" onclick="deleteSarafTransaction()">🗑 پخوانۍ معامله حذف کړه</button><button type="button" class="saraf-edit-save-button" onclick="saveSarafTransactionEdit()">💾 بدلونونه خوندي کړه</button></div>
  </div>
 </div>
 </section>
@@ -4622,6 +4622,15 @@ function saveSarafTransactionEdit(){
  db.cash=newCash;
  x.type=type;x.amount=amount;x.date=date;x.company=type==="deposit"?"":company;x.note=note;
  saveDB();closeSarafEditPage();refreshAll();alert("د صراف معامله اصلاح شوه");
+}
+function deleteSarafTransaction(){
+ const id=document.getElementById("sarafEditId")?.value;
+ const x=(db.sarafTransactions||[]).find(t=>String(t.id)===String(id));
+ if(!x)return alert("معامله ونه موندل شوه");
+ if(!confirm("ایا ډاډه یې چې دا پخوانۍ معامله حذف کړې؟ دا کار به د صراف حساب او اړوند صندوقي پیسې هم سمې کړي."))return;
+ db.cash=Number(db.cash||0)-sarafCashEffect(x.type,x.amount);
+ db.sarafTransactions=db.sarafTransactions.filter(t=>String(t.id)!==String(id));
+ saveDB();closeSarafEditPage();refreshAll();alert("معامله حذف شوه او حسابونه نوي شول");
 }
 function renderSaraf(){
  const t=sarafTotals(),h=document.getElementById("sarafHeldTotal"),o=document.getElementById("sarafOwedTotal");
@@ -7157,6 +7166,14 @@ body.sale-modal-open{
  text-shadow:0 1px 2px rgba(0,0,0,.35)!important;
 }
 #sarafPage .saraf-entry-panel button.saraf-save-button:active{transform:translateY(2px)!important;box-shadow:0 2px 0 #043c2a!important}
+
+
+/* Clear colors and layout for Saraf edit actions */
+.saraf-edit-actions{display:flex;flex-wrap:wrap;gap:9px;position:sticky;bottom:0;background:#eef3f9;padding:12px;border:1px solid #d7e1ed;border-radius:14px;box-shadow:0 -4px 14px #102b4a14}
+.saraf-edit-actions button{flex:1 1 100%;min-height:54px!important;border:2px solid transparent!important;border-radius:12px!important;font-size:17px!important;font-weight:900!important}
+.saraf-edit-actions .saraf-edit-save-button{background:#075c3b!important;color:#fff!important;border-color:#9be3ba!important;box-shadow:0 3px 0 #043c2a!important}
+.saraf-edit-actions .saraf-delete-button{background:#fff0f0!important;color:#a31324!important;border-color:#e7a0a8!important}
+.saraf-edit-actions .gray{background:#e8eef7!important;color:#26354a!important;border-color:#cbd5e1!important}
 
 </style>
 <!-- SHAHEEN_PRODUCTS_RENDER_RECOVERY_V3 -->
