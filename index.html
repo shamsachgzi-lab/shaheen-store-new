@@ -2855,6 +2855,15 @@ if(!db.settings.currency)db.settings.currency="AFN";
 if(!db.settings.shopName)db.settings.shopName="شاهین فروشگاه";
 
 /* د صراف پخوانۍ معاملې نور په هر ځل د اپلیکیشن په پرانیستلو نه راګرځي؛ د کارونکي حذف ته درناوی کېږي. */
+/* د حذف شوې 2026-11-25 صرافۍ د 8 معاملاتو د صندوقي اغېز یو ځل اصلاح:
+   deposit 73,000 AFN صندوق ته بېرته زیات کړي وو؛ borrow او withdraw ټول 19,320 AFN کم کړي وو.
+   خالص ناسم زیاتوالی 53,680 AFN و. */
+if(!db.settings.sarafDeletedHistoryCashCorrectionV1){
+ db.cash=Number(db.cash||0)-53680;
+ db.settings.sarafDeletedHistoryCashCorrectionV1=true;
+ localStorage.setItem(DB_KEY,JSON.stringify(db));
+}
+
 
 
 function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(db))}
