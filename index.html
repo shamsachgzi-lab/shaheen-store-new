@@ -3489,18 +3489,21 @@ function updateSaleCartPrices(){
  const unit=value("saleUnit")||(selected?.tradeUnit||selected?.unit||"واحد");
  const priceInput=document.getElementById("salePrice");
  if(selected&&priceInput)priceInput.value=saleUnitPrice(selected,unit).toFixed(4).replace(/0+$/,"").replace(/\.$/,"");
- // په کارټ کې مخکې اضافه شوي جنسونه هم د نوي نرخ ډول ته واړوه
- saleCart.forEach(x=>{const p=db.products.find(z=>z.id===x.productId);if(p)x.price=saleUnitPrice(p,x.unit);});
+ // د کارټ هر جنس خپل عمده/پرچون ډول لري؛ د بل جنس نرخ مه بدلوه.
  renderSaleCart();updateSalePreview();
 }
 function updateSaleCartLine(index,field,raw){
  const x=saleCart[index];if(!x)return;
  const p=db.products.find(z=>z.id===x.productId);if(!p)return;
  const old={qty:x.qty,unit:x.unit,price:x.price,factor:x.factor,stockQty:x.stockQty};
- if(field==="unit"){
+ if(field==="saleType"){
+  if(raw!=="retail"&&raw!=="wholesale")return;
+  x.saleType=raw;
+  x.price=saleUnitPriceForType(p,x.unit,raw);
+ }else if(field==="unit"){
   const nextFactor=saleFactorForUnit(p,raw);
-  const baseUnitPrice=x.price/(Number(x.factor)||1);
-  x.price=baseUnitPrice*nextFactor;x.unit=raw;x.factor=nextFactor;
+  x.unit=raw;x.factor=nextFactor;
+  x.price=saleUnitPriceForType(p,raw,x.saleType||"retail");
  }else{
   const n=Number(raw);
   if(!Number.isFinite(n)||n<0||(field==="qty"&&n<=0)){
@@ -3542,6 +3545,7 @@ function renderSaleCart(){
   <div class="sale-line-card">
    <div class="sale-line-head"><b>${i+1}. ${safe(x.productName)}</b><button type="button" class="red sale-remove" onclick="removeSaleCartItem(${i})">✕</button></div>
    <div class="sale-line-fields">
+    <div><label>د خرڅلاو ډول</label><select data-sale-index="${i}" data-sale-field="saleType" onchange="updateSaleCartLine(${i},'saleType',this.value)"><option value="retail" ${(x.saleType||"retail")==="retail"?"selected":""}>پرچون</option><option value="wholesale" ${x.saleType==="wholesale"?"selected":""}>عمده</option></select></div>
     <div><label>مقدار</label><input data-sale-index="${i}" data-sale-field="qty" type="number" min="0.001" step="any" value="${x.qty}" onchange="updateSaleCartLine(${i},'qty',this.value)"></div>
     <div><label>واحد</label><select data-sale-index="${i}" data-sale-field="unit" onchange="updateSaleCartLine(${i},'unit',this.value)">${productUnitOptionsMarkup(db.products.find(p=>p.id===x.productId),x.unit)}</select></div>
     <div><label>فی واحد نرخ</label><input data-sale-index="${i}" data-sale-field="price" type="number" min="0" step="any" value="${x.price}" onchange="updateSaleCartLine(${i},'price',this.value)"></div>
