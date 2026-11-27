@@ -4339,7 +4339,18 @@ function renderCustomers(){
  </div>`).join("")||"<p>مشتری نشته</p>";
 }
 window.renderCustomers=renderCustomers;
-function renderCustomerDetail(){
+function customerHistoryMonthInfo(iso){
+ const s=String(iso||"").slice(0,10),a=s.split("-").map(Number);
+ if(a.length!==3||!a[0]||a[1]<1||a[1]>12||a[2]<1||a[2]>31)return null;
+ try{
+  const parts=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"2-digit",timeZone:"UTC"}).formatToParts(new Date(Date.UTC(a[0],a[1]-1,a[2],12)));
+  const get=k=>parts.find(x=>x.type===k)?.value||"";
+  const year=jalaliDigits(get("year")),month=jalaliDigits(get("month")).padStart(2,"0");
+  return {key:year+"-"+month,label:year+"/"+month};
+ }catch(e){return null;}
+}
+function renderCustomerDetail(monthFilter=""){
+
  document.getElementById("customers")?.classList.add("customer-ledger-open");
  const c=db.customers.find(x=>x.id===currentCustomerId);
  if(!c){currentCustomerId="";renderCustomers();return;}
@@ -4355,6 +4366,16 @@ function renderCustomerDetail(){
   ...receipts.map(x=>({kind:"payment",date:x.date||"",id:x.id,record:x})),
   ...payouts.map(x=>({kind:"payout",date:x.date||"",id:x.id,record:x}))
  ].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const monthMap=new Map();
+ history.forEach(item=>{const info=customerHistoryMonthInfo(item.date);if(info)monthMap.set(info.key,info.label);});
+ const monthOptions=[...monthMap.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+ if(monthFilter&&!monthMap.has(monthFilter))monthFilter="";
+ const visibleHistory=monthFilter?history.filter(item=>customerHistoryMonthInfo(item.date)?.key===monthFilter):history;
+ const monthSales=visibleHistory.filter(x=>x.kind==="sale").map(x=>x.record);
+ const monthReceipts=visibleHistory.filter(x=>x.kind==="payment").map(x=>x.record);
+ const monthPayouts=visibleHistory.filter(x=>x.kind==="payout").map(x=>x.record);
+ const monthSum=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]||0),0);
+ const monthStats={sales:monthSum(monthSales,"total"),cash:monthSum(monthSales,"paid"),debt:monthSum(monthSales,"debt"),received:monthSum(monthReceipts,"amount"),payout:monthSum(monthPayouts,"amount"),profit:monthSum(monthSales,"profit")};
  const dateText=d=>d?jalaliDisplayDate(d):"نېټه نشته";
  document.getElementById("customerListTitle").textContent="د مشتری حساب";
  document.getElementById("customerListCount").textContent=c.name;
@@ -4390,7 +4411,23 @@ function renderCustomerDetail(){
    </div>
   </div>
   <h3 class="customer-history-title">📚 د مشتری د معاملاتو تاریخچه</h3>
-  ${history.map(h=>h.kind==="payout"?`
+  <div class="customer-history-month-filter" style="margin:12px 0;padding:12px;border:1px solid #dbe5f2;border-radius:14px;background:#f8fbff">
+   <label for="customerHistoryMonth" style="display:block;font-weight:700;margin-bottom:7px">📅 د راپور میاشت وټاکه</label>
+   <select id="customerHistoryMonth" onchange="renderCustomerDetail(this.value)" style="width:100%;padding:12px;border:1px solid #b8cce5;border-radius:10px;background:#fff;font-size:16px">
+    <option value="" ${!monthFilter?"selected":""}>ټولې میاشتې — بشپړ تاریخچه</option>
+    ${monthOptions.map(([key,label])=>`<option value="${safe(key)}" ${monthFilter===key?"selected":""}>${safe(label)}</option>`).join("")}
+   </select>
+  </div>
+  <div class="customer-history-month-summary" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;padding:12px;border:1px solid #d9e5f3;border-radius:14px;background:#f3f8ff">
+   <div><small>ټول خرڅلاو</small><b style="display:block">${money(monthStats.sales)}</b></div>
+   <div><small>د خرڅلاو پر وخت نغدې</small><b style="display:block">${money(monthStats.cash)}</b></div>
+   <div><small>د خرڅلاو پور</small><b style="display:block">${money(monthStats.debt)}</b></div>
+   <div><small>وروسته ترلاسه شوې پیسې</small><b style="display:block">${money(monthStats.received)}</b></div>
+   <div><small>مشتری ته ورکړل شوې پیسې</small><b style="display:block">${money(monthStats.payout)}</b></div>
+   <div><small>د خرڅلاو ګټه</small><b style="display:block">${money(monthStats.profit)}</b></div>
+  </div>
+  <div class="customer-history-record-count" style="margin:8px 0;color:#52647a">په دې راپور کې ${visibleHistory.length} معاملې دي</div>
+  ${visibleHistory.map(h=>h.kind==="payout"?`
    <div class="item customer-history-payment"><b>💸 مشتری ته نغدې ورکړل شوې · ${safe(dateText(h.record.date))}</b><div class="customer-history-amount">− ${money(h.record.amount)}</div>${h.record.note?`<small>${safe(h.record.note)}</small>`:""}<button class="red" onclick="deleteCustomerPayout('${h.id}')">🗑</button></div>`:h.kind==="payment"?`
    <div class="item customer-history-payment">
     <b>💵 پیسې ترلاسه شوې · ${safe(dateText(h.record.date))}</b>
