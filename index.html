@@ -1166,6 +1166,21 @@ body:has(#purchases:not(.hidden)) main{padding-top:0!important}
 .purchase-history .purchase-section-title{margin:-12px -12px 10px!important;background:#f0f5ff!important;border-bottom:1px solid #e0e9f7!important;border-radius:16px 16px 0 0}.purchase-history .purchase-section-title b{color:#173a79!important}.purchase-history .purchase-section-title button{font-size:10px!important;padding:6px!important}.purchase-history input{height:43px!important;background:#f5f7ff!important;border-radius:11px!important}.purchase-stats{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:3px!important;background:#f5f7fb;border-radius:11px;padding:7px 2px}.purchase-stats>div{border:0!important;border-left:1px solid #d8e0ed!important;border-radius:0!important;background:transparent!important;padding:4px 2px!important;text-align:center}.purchase-stats small{font-size:10px!important;color:#435879!important}.purchase-stats b{font-size:11px!important;color:#122e66!important;overflow-wrap:anywhere}
 @media(max-width:390px){.purchase-page{padding-left:8px!important;padding-right:8px!important}.purchase-fields{gap:6px!important}.purchase-pro-form input,.purchase-pro-form select{font-size:13px!important;padding:6px!important}.purchase-cost-preview b{font-size:10px!important}.purchase-cost-preview span{font-size:9px!important}.purchase-brand b{font-size:17px}}
 
+
+/* Clear account-cycle panels: restrained colors, visible separators */
+.account-cycle-panel{margin:12px 0!important;padding:14px!important;border:1.5px solid #cbd8eb!important;border-radius:15px!important;background:linear-gradient(180deg,#f8fbff 0%,#fff 100%)!important;box-shadow:0 3px 12px #183b6810!important}
+.account-cycle-title{display:block!important;padding:10px 12px!important;margin:0 0 10px!important;border:1px solid #d5e1f2!important;border-right:4px solid #2872c7!important;border-radius:10px!important;background:#edf4ff!important;color:#163d70!important;font-weight:850!important;line-height:1.6!important}
+.account-cycle-panel>.notice{display:block!important;margin:8px 0 12px!important;padding:10px 12px!important;border:1px solid #dce6f3!important;border-radius:10px!important;background:#f5f8fc!important;color:#53657d!important;line-height:1.8!important}
+.account-cycle-panel button.primary{width:100%!important;min-height:46px!important;margin:4px 0 10px!important;border:1px solid #1763b4!important;border-radius:11px!important;background:linear-gradient(100deg,#1763b4,#287bd0)!important;color:#fff!important;font-weight:800!important;box-shadow:0 3px 8px #1763b426!important}
+.account-cycle-list{display:grid!important;gap:8px!important;margin-top:8px!important}
+.account-cycle-list:empty{display:none!important}
+.account-cycle-list>.notice{margin:0!important;padding:11px 12px!important;border:1px solid #cbdcf1!important;border-right:4px solid #39815f!important;border-radius:10px!important;background:#f7fbff!important;color:#263d59!important;line-height:1.9!important;overflow-wrap:anywhere!important}
+.account-cycle-list>.notice b{display:block!important;padding-bottom:5px!important;margin-bottom:5px!important;border-bottom:1px solid #dce6f1!important;color:#174b82!important}
+.account-cycle-list>small{display:block!important;padding:11px 12px!important;border:1px dashed #c5d1df!important;border-radius:9px!important;background:#fafbfd!important;color:#78869a!important;text-align:center!important}
+.supplier-cycle-panel{margin:8px 0 14px!important}
+.supplier-cycle-panel .account-cycle-title{margin-top:0!important}
+@media(max-width:420px){.account-cycle-panel{padding:11px!important}.account-cycle-title{font-size:14px!important}.account-cycle-list>.notice{font-size:12px!important}}
+
 </style>
 <style>
 .month-overview{margin:10px 0;padding:12px;border:1px solid #d7e1ec;border-radius:12px;background:#f8fbff}
@@ -2564,7 +2579,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <button class="primary saraf-save-button" onclick="addSarafTransaction()">💾 معامله ثبت کړه</button>
  <p class="notice">که صراف ته پیسې ورکړې، ستا د صراف سره پیسې زیاتېږي. که صراف ستا له پیسو شرکت ته ورکړې، هغه پیسې کمېږي. که صراف ستا پر ځای پیسې ورکړي او ستا پیسې ورسره نه وي، ستا پور صراف ته زیاتېږي.</p>
 </div>
-<div class="panel"><h3>🔒 د صراف حساب تصفیه او نوی حساب</h3><p class="notice">پخوانۍ معاملې به جلا راپور کې خوندي شي؛ د صراف سره پیسې او پاتې پور به نه بدلېږي.</p><button type="button" class="primary" onclick="closeSarafAccount()">حساب تصفیه کړه او نوی حساب پیل کړه</button><div id="sarafCyclesList"></div></div><div class="panel"><h3>📜 د صرافۍ معاملاتو تاریخچه</h3><div id="sarafList"></div></div>
+<div class="panel account-cycle-panel saraf-cycle-panel"><h3 class="account-cycle-title">🔒 د صراف حساب تصفیه او نوی حساب</h3><p class="notice">پخوانۍ معاملې به جلا راپور کې خوندي شي؛ د صراف سره پیسې او پاتې پور به نه بدلېږي.</p><button type="button" class="primary" onclick="closeSarafAccount()">حساب تصفیه کړه او نوی حساب پیل کړه</button><div id="sarafCyclesList" class="account-cycle-list"></div></div><div class="panel"><h3>📜 د صرافۍ معاملاتو تاریخچه</h3><div id="sarafList"></div></div>
 
 <div id="sarafEditPage" class="saraf-edit-page" aria-hidden="true">
  <div class="saraf-edit-header"><button type="button" onclick="closeSarafEditPage()">← بېرته</button><div><small>شاهین فروشگاه</small><h2>✏️ د صراف معامله اصلاح</h2></div></div>
@@ -2754,7 +2769,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <label for="supplierLedgerDate">د تادیې نېټه</label><input id="supplierLedgerDate" type="date">
   <label for="supplierLedgerNote">د رسید شمېره / یادښت</label><input id="supplierLedgerNote" placeholder="د شرکت رسید شمېره یا یادښت">
   <button type="button" class="primary supplier-save-btn" onclick="saveSupplierLedgerEntry()">💵 تادیه ثبت کړه، رسید جوړ او پور کم کړه</button>
-  <div class="supplier-ledger-history-title">🔒 د حساب تصفیه او نوی حساب</div><p class="notice">پخواني رسیدونه به جلا راپور کې خوندي شي؛ پاتې پور او صندوق به نه بدلېږي.</p><button type="button" class="primary" onclick="closeSupplierAccount()">حساب تصفیه کړه او نوی حساب پیل کړه</button><div id="supplierAccountCycles"></div><div class="supplier-ledger-history-title">د اوسني حساب تاریخچه</div><div id="supplierLedgerHistory"></div>
+  <div class="supplier-ledger-history-title account-cycle-title">🔒 د حساب تصفیه او نوی حساب</div><div class="account-cycle-panel supplier-cycle-panel"><p class="notice">پخواني رسیدونه به جلا راپور کې خوندي شي؛ پاتې پور او صندوق به نه بدلېږي.</p><button type="button" class="primary" onclick="closeSupplierAccount()">حساب تصفیه کړه او نوی حساب پیل کړه</button><div id="supplierAccountCycles" class="account-cycle-list"></div></div><div class="supplier-ledger-history-title">د اوسني حساب تاریخچه</div><div id="supplierLedgerHistory"></div>
  </div>
  <div class="supplier-list-panel"><div class="supplier-list-heading"><div><small>PARTNERS DIRECTORY</small><h4>د تامین کوونکو لېست</h4></div><span class="supplier-list-mark">☷</span></div>
  <div class="supplier-search-wrap"><span>⌕</span><input id="supplierSearch" type="search" placeholder="د نوم یا موبایل شمېرې له مخې لټون..." oninput="renderSuppliers()"></div><div id="suppliersList" class="supplier-results"></div></div>
