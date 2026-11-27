@@ -2500,7 +2500,10 @@ body:has(#sales.sale-overlay:not(.hidden)) nav{
  scroll-padding-bottom:calc(105px + env(safe-area-inset-bottom))!important;
 }
 </style>
-</head>
+<style id="SHAHEEN_SALES_NAV_OUTSIDE_MAIN_V4">
+body.sale-modal-open>nav,body:has(#sales.sale-overlay:not(.hidden))>nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;z-index:2147483647!important;background:#fff!important}
+#sales.sale-overlay:not(.hidden)>.sale-page{padding-bottom:calc(105px + env(safe-area-inset-bottom))!important}
+</style></head>
 <body>
 <header class="brand-header">
  <div class="head brand-head">
@@ -2921,16 +2924,7 @@ body:has(#sales.sale-overlay:not(.hidden)) nav{
  </div>
 </section>
 
-<nav>
- <button class="active" onclick="show('home',this)">🏠<br>کور</button>
- <button onclick="show('products',this)">📦<br>جنسونه</button>
- <button onclick="show('sales',this)">🛒<br>فروش</button>
- <button onclick="show('customers',this)">👥<br>مشتریان</button>
- <button onclick="show('reports',this)">📊<br>راپور</button>
 
-  <button onclick="show('settings',this);renderSettings()">⚙️<br>تنظیمات</button>
-</nav>
-</main>
 
 <script>
 "use strict";
@@ -3882,7 +3876,18 @@ function printSale(id){
  '<section class="meta"><div><b>د فاکتور شمېره</b>'+safe(invoice||selected.id)+'</div><div><b>نېټه او ورځ</b>'+safe(date)+'</div><div><b>د خرڅلاو ساعت</b>'+safe(saleTime)+'</div><div><b>مشتری</b>'+customer+'</div><div><b>د جنسونو شمېر</b>'+rows.length+'</div></section>'+
  '<table><thead><tr><th>جنس</th><th>مقدار</th><th>فی نرخ</th><th>مجموع</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
  '<section class="totals"><div><span>ټول مبلغ</span><b>'+money(subtotal)+'</b></div><div><span>تخفیف</span><b>'+money(discount)+'</b></div><div class="grand"><span>وروستی مبلغ</span><b>'+money(total)+'</b></div><div class="paid"><span>ورکړل شوي</span><b>'+money(paid)+'</b></div><div class="debt"><span>د دې فاکتور پور</span><b>'+money(debt)+'</b></div><div class="debt"><span>مخکینی پور</span><b>'+money(previousDebt)+'</b></div><div class="debt grand"><span>اوسنی ټول پور</span><b>'+money(currentTotalDebt)+'</b></div></section>'+
- note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>'+
+ note+'<footer class="thanks">مننه چې له شاهین فروشگاه مو پېرود وکړ!</footer><div class="footer">'+shop+' · AFN · 58mm</div></main>
+
+<nav>
+ <button class="active" onclick="show('home',this)">🏠<br>کور</button>
+ <button onclick="show('products',this)">📦<br>جنسونه</button>
+ <button onclick="show('sales',this)">🛒<br>فروش</button>
+ <button onclick="show('customers',this)">👥<br>مشتریان</button>
+ <button onclick="show('reports',this)">📊<br>راپور</button>
+
+  <button onclick="show('settings',this);renderSettings()">⚙️<br>تنظیمات</button>
+</nav>
+'+
  
  '<script>async function shareReceiptLocal(format){try{if(typeof window.html2canvas!=="function"){await new Promise((resolve,reject)=>{var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("د عکس کتابتون پورته نه شو؛ انټرنېټ وګوره"));document.head.appendChild(sc);});}var canvas=await window.html2canvas(document.querySelector(".invoice"),{scale:2,backgroundColor:"#ffffff",useCORS:true});var blob,name,mime;if(format==="pdf"){if(!(window.jspdf&&window.jspdf.jsPDF)){await new Promise((resolve,reject)=>{var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";sc.onload=resolve;sc.onerror=()=>reject(new Error("د PDF کتابتون پورته نه شو"));document.head.appendChild(sc);});}var h=canvas.height*58/canvas.width;var pdf=new window.jspdf.jsPDF({orientation:"portrait",unit:"mm",format:[58,h]});pdf.addImage(canvas.toDataURL("image/jpeg",0.95),"JPEG",0,0,58,h);blob=pdf.output("blob");name="Shaheen-"+Date.now()+".pdf";mime="application/pdf";}else{blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));name="Shaheen-"+Date.now()+".png";mime="image/png";}if(!blob)throw new Error("فایل جوړ نه شو");var file=new File([blob],name,{type:mime});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"د خرڅلاو رسید"});}else{var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);alert("فایل ښکته شو؛ له Files څخه یې شریک کړه");}}catch(e){if(e.name!=="AbortError")alert("د شریکولو ستونزه: "+(e.message||e));}}<\\/script></body></html>';
  printWindow.onload=function(){try{printWindow.focus();}catch(e){console.error('Receipt focus error:',e);}};
