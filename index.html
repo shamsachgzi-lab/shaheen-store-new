@@ -2457,10 +2457,10 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <div class="panel"><small>💵 زما پیسې له صراف سره</small><h2 id="sarafHeldTotal">0 AFN</h2></div>
  <div class="panel"><small>📒 زه د صراف پوروړی یم</small><h2 id="sarafOwedTotal">0 AFN</h2></div>
 </div>
-<div class="panel">
+<div class="panel saraf-entry-panel">
  <h3>➕ نوې معامله</h3>
- <label>د معاملې ډول</label>
- <select id="sarafType" onchange="toggleSarafCompany()">
+ <label class="saraf-type-label">د معاملې ډول</label>
+ <select class="saraf-type-field" id="sarafType" onchange="toggleSarafCompany()">
   <option value="deposit">صراف ته مې خپلې پیسې ورکړې</option>
   <option value="companyPayment">صراف زما له پیسو شرکت ته ورکړې</option>
   <option value="creditPayment">صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې (زه د صراف پوروړی یم)</option>
@@ -2469,10 +2469,10 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <label id="sarafCompanyLabel">د شرکت یا شخص نوم</label>
   <input id="sarafCompany" placeholder="د شرکت یا شخص نوم">
  </div>
- <label>مبلغ (AFN)</label><input id="sarafAmount" type="number" min="0.01" step="any">
- <label>نېټه</label><input id="sarafDate" type="date">
- <label>یادښت (اختیاري)</label><input id="sarafNote" placeholder="د معاملې تفصیل">
- <button class="primary" onclick="addSarafTransaction()">💾 معامله ثبت کړه</button>
+ <label class="saraf-amount-label">مبلغ (AFN)</label><input class="saraf-amount-field" id="sarafAmount" type="number" min="0.01" step="any">
+ <label class="saraf-date-label">نېټه</label><input class="saraf-date-field" id="sarafDate" type="date">
+ <label class="saraf-note-label">یادښت (اختیاري)</label><input class="saraf-note-field" id="sarafNote" placeholder="د معاملې تفصیل">
+ <button class="primary saraf-save-button" onclick="addSarafTransaction()">💾 معامله ثبت کړه</button>
  <p class="notice">که صراف ته پیسې ورکړې، ستا د صراف سره پیسې زیاتېږي. که صراف ستا له پیسو شرکت ته ورکړې، هغه پیسې کمېږي. که صراف ستا پر ځای پیسې ورکړي او ستا پیسې ورسره نه وي، ستا پور صراف ته زیاتېږي.</p>
 </div>
 <div class="panel"><h3>📜 د صرافۍ معاملاتو تاریخچه</h3><div id="sarafList"></div></div>
@@ -7128,6 +7128,20 @@ body.sale-modal-open{
 .saraf-edit-content input,.saraf-edit-content select,.saraf-edit-content textarea{width:100%;min-height:48px;font-size:17px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#172033}
 .saraf-edit-actions{display:flex;gap:10px;position:sticky;bottom:0;background:var(--bg,#f4f6fb);padding:12px 0}
 .saraf-edit-actions button{flex:1;min-height:50px;font-size:16px}
+
+/* Saraf new transaction form: clearly distinguished fields */
+#sarafPage .saraf-entry-panel{padding:16px;border:1px solid #d8e2ef;border-radius:16px;background:#fff;box-shadow:0 3px 12px #16365c10}
+#sarafPage .saraf-entry-panel>label{display:block;margin:15px 0 7px;font-weight:800}
+#sarafPage .saraf-type-label{color:#1557a6}
+#sarafPage .saraf-type-field{background:#edf5ff!important;border:2px solid #78a9e8!important;color:#123e75!important;font-weight:700}
+#sarafPage .saraf-amount-label{color:#087747}
+#sarafPage .saraf-amount-field{background:#edfff5!important;border:2px solid #69c69a!important;color:#075c38!important;font-weight:800;font-size:19px!important}
+#sarafPage .saraf-date-label{color:#a65b08}
+#sarafPage .saraf-date-field{background:#fff7e8!important;border:2px solid #edb65e!important;color:#824508!important;font-weight:700}
+#sarafPage .saraf-note-label{color:#596579}
+#sarafPage .saraf-note-field{background:#f4f6f9!important;border:2px solid #cbd5e1!important;color:#334155!important}
+#sarafPage .saraf-entry-panel .saraf-type-field,#sarafPage .saraf-entry-panel .saraf-amount-field,#sarafPage .saraf-entry-panel .saraf-date-field,#sarafPage .saraf-entry-panel .saraf-note-field{width:100%;min-height:49px;padding:11px 12px;border-radius:11px;font-size:16px}
+#sarafPage .saraf-save-button{width:100%;min-height:54px;margin-top:18px;background:#087747!important;border:1px solid #06643d!important;color:#fff!important;border-radius:12px;font-size:17px;font-weight:800;box-shadow:0 3px 8px #08774730}
 </style>
 <!-- SHAHEEN_PRODUCTS_RENDER_RECOVERY_V3 -->
 <script>
