@@ -2487,6 +2487,19 @@ body.sale-modal-open nav{
  scroll-padding-bottom:calc(100px + env(safe-area-inset-bottom))!important;
 }
 </style>
+<style id="SHAHEEN_SALES_NAV_FINAL_FIX_V3">
+/* د فروش په پاڼه کې هماغه اصلي لاندې مېنو د نورو پاڼو په شان تل ښکاره وي */
+body.sale-modal-open nav,
+body:has(#sales.sale-overlay:not(.hidden)) nav{
+ position:fixed!important;left:0!important;right:0!important;bottom:0!important;
+ display:flex!important;visibility:visible!important;opacity:1!important;
+ pointer-events:auto!important;z-index:2147483647!important;
+}
+#sales.sale-overlay:not(.hidden) .sale-page{
+ padding-bottom:calc(105px + env(safe-area-inset-bottom))!important;
+ scroll-padding-bottom:calc(105px + env(safe-area-inset-bottom))!important;
+}
+</style>
 </head>
 <body>
 <header class="brand-header">
