@@ -3418,18 +3418,13 @@ function getProductUnitChoices(p){
 function productUnitOptionsMarkup(p,selected){
  return getProductUnitChoices(p).map(u=>`<option value="${safe(u.name)}" ${u.name===selected?"selected":""}>${safe(unitLabel(u.name))}</option>`).join("");
 }
-function saleUnitPrice(p,unit){
+function saleUnitPriceForType(p,unit,type){
  const trade=p.tradeUnit||p.unit||unit;
  const factor=saleFactorForUnit(p,unit),tradeFactor=saleFactorForUnit(p,trade);
- const retail=productRetailPrice(p);
- const wholesale=productWholesalePrice(p);
- const kind=value("salePriceType")==="wholesale"?"wholesalePrice":"retailPrice";
- // د زړو جنسونو تش/صفر نرخونه د پخواني خوندي شوي قیمت له مخې سمبال کړه
- let tradePrice=kind==="wholesalePrice"
-  ? wholesale
-  : retail;
+ const tradePrice=type==="wholesale"?productWholesalePrice(p):productRetailPrice(p);
  return tradePrice*(factor/(tradeFactor||1));
 }
+function saleUnitPrice(p,unit){return saleUnitPriceForType(p,unit,value("salePriceType")==="wholesale"?"wholesale":"retail");}
 function filterSaleProducts(){
  const q=value("saleProductSearch").trim().toLowerCase(),select=document.getElementById("saleProduct"),box=document.getElementById("saleSearchResults");
  if(!select||!box)return;
@@ -3481,7 +3476,7 @@ function addSaleToCart(){
  const stockQty=qty*factor;
  const reserved=saleCart.filter(x=>x.productId===p.id).reduce((a,x)=>a+x.stockQty,0);
  if(reserved+stockQty>Number(p.qty))return alert("په ګدام کې د دې جنس موجودي بسنه نه کوي. موجودي: "+p.qty+" "+p.unit);
- saleCart.push({productId:p.id,productName:p.name,qty,unit,price,factor,stockQty,costAtSale:Number(p.cost)||0,baseUnit:p.unit||unit,tradeUnit:p.tradeUnit||p.unit,tradeFactor:Number(p.unitFactor)||1});
+ saleCart.push({productId:p.id,productName:p.name,qty,unit,price,factor,stockQty,costAtSale:Number(p.cost)||0,saleType:value("salePriceType")==="wholesale"?"wholesale":"retail",baseUnit:p.unit||unit,tradeUnit:p.tradeUnit||p.unit,tradeFactor:Number(p.unitFactor)||1});
  document.getElementById("saleQty").value="1";
  document.getElementById("saleProductSearch").value="";
  document.getElementById("saleSearchResults")?.classList.add("hidden");
@@ -3608,7 +3603,7 @@ function addSale(){
   const lineDebt=lineTotal-linePaid;
   p.qty=Number(p.qty)-item.stockQty;
   const lineProfit=(item.price-item.costAtSale*item.factor)*item.qty-lineDiscount;
-  db.sales.push({id:uid(),invoice,productId:p.id,productName:item.productName,qty:item.qty,unit:item.unit,stockQty:item.stockQty,unitFactor:item.factor,price:item.price,subtotal:lineSubtotal,discount:lineDiscount,discountPercent:number("saleDiscount"),total:lineTotal,costAtSale:item.costAtSale,profit:lineProfit,paid:linePaid,debt:lineDebt,customer:invoiceCustomerName,customerId:c?.id||"",previousDebt,note:value("saleNote"),date,createdAt});
+  db.sales.push({id:uid(),invoice,productId:p.id,productName:item.productName,qty:item.qty,unit:item.unit,stockQty:item.stockQty,unitFactor:item.factor,saleType:item.saleType||"retail",price:item.price,subtotal:lineSubtotal,discount:lineDiscount,discountPercent:number("saleDiscount"),total:lineTotal,costAtSale:item.costAtSale,profit:lineProfit,paid:linePaid,debt:lineDebt,customer:invoiceCustomerName,customerId:c?.id||"",previousDebt,note:value("saleNote"),date,createdAt});
  });
  db.cash=Number(db.cash||0)+paid;
  if(c)c.debt=Number(c.debt||0)+(total-paid);
