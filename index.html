@@ -4113,7 +4113,7 @@ function renderPurchases(){
  const sum=(arr,key)=>arr.reduce((n,p)=>n+Number(p[key]||0),0);
  // د سرلیک ټول پېرود باید د رسیدونو د کارتونو له مجموعې سره برابر وي؛ په زړو ریکارډونو کې goodsTotal د total په پرتله کره پاتې شوی.
  const purchaseLineAmount=p=>{const candidates=[p.goodsTotal,p.total,p.amount,(Number(p.qty??p.quantity)||0)*(Number(p.price??p.unitPrice??p.costPrice)||0)];const found=candidates.map(Number).find(v=>Number.isFinite(v)&&v>0);return found||0;};
- const total=dateFiltered.reduce((n,p)=>n+purchaseLineAmount(p),0),paid=sum(dateFiltered,"paid"),debt=dateFiltered.reduce((n,p)=>n+Number(p.debt??Math.max(0,Number(p.total||0)-Number(p.paid||0))),0);
+ const total=dateFiltered.reduce((n,p)=>n+purchaseLineAmount(p),0),paid=sum(dateFiltered,"paid"),debt=Math.max(0,Number((total-paid).toFixed(3)));
  const receiptCount=new Set(dateFiltered.map(p=>p.invoice||p.receipt||p.id)).size;
  const box=document.getElementById("purchasesList");if(!box)return;
  const stats=`<div class="purchase-stats"><div><small>رسیدونه</small><b>${receiptCount}</b></div><div><small>ټول پېرود</small><b>${money(total)}</b></div><div><small>ورکړل شوې پیسې</small><b>${money(paid)}</b></div><div><small>پاتې پور</small><b>${money(debt)}</b></div></div>`;
