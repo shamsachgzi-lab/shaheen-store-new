@@ -5217,7 +5217,7 @@ function jalaliDisplayMonth(isoMonth){
  const p=new Intl.DateTimeFormat("en-u-ca-persian",{year:"numeric",month:"numeric",timeZone:"UTC"}).formatToParts(new Date(Date.UTC(gy,gm-1,15,12)));
  const get=k=>Number(p.find(x=>x.type===k)?.value);
  const months=["وری","غویی","غبرګولی","چنګاښ","زمری","وږی","تله","لړم","لیندۍ","مرغومی","سلواغه","کب"];
- const fa=n=>String(n).replace(/[0-9]/g,x=>"۰۱۲۳۴۵۶۷۸۹"[Number(x)]);
+ const fa=n=>String(n);
  return months[get("month")-1]+" "+fa(get("year"));
 }
 function jalaliDisplayDate(iso){
@@ -5239,7 +5239,7 @@ function jalaliDisplayDate(iso){
  const months=["وری","غویی","غبرګولی","چنګاښ","زمری","وږی","تله","لړم","لیندۍ","مرغومی","سلواغه","کب"];
  const weekdays=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
  const d=new Date(Date.UTC(gy,gm-1,gd,12));
- const fa=n=>String(n).replace(/[۰-۹]/g,x=>"۰۱۲۳۴۵۶۷۸۹".indexOf(x));
+ const fa=n=>String(n);
  return weekdays[d.getUTCDay()]+"، "+fa(jd)+" "+months[jm-1]+" "+fa(jy);
 }
 function diagnoseSaleProductLinks(){
