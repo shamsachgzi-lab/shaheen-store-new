@@ -2455,6 +2455,10 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 @media(max-width:430px){#purchases.purchase-page{padding-left:9px;padding-right:9px}#purchases .purchase-form,#purchases .purchase-history{padding:13px!important}#purchases .purchase-pro-step{align-items:flex-start;flex-wrap:wrap}#purchases .purchase-pro-step small{width:100%;margin-right:13px}#purchases .purchase-fields{gap:7px}#purchases .purchase-form input,#purchases .purchase-form select{font-size:13px;padding:9px!important}#purchases .purchase-section-title b{font-size:14px}}
 
 </style>
+<style>
+#purchases #buyPaymentSource{border:1px solid #cbded8!important;background:#f3f8f6!important;font-weight:700;color:#28634f}
+#purchases #buyPaymentSourceHint{display:block;margin-top:7px}
+</style>
 </head>
 <body>
 <header class="brand-header">
@@ -2632,7 +2636,9 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <div class="purchase-pro-step"><b>۲ · د شرکت او پیسو معلومات</b></div>
   <label>شرکت / عرضه کوونکی انتخاب کړه</label><select id="buySupplier"><option value="">نغدي پېرود / شرکت نه لري</option></select><p class="purchase-hint">که په پور مال اخلې، د هماغه شرکت انتخابول حتمي دي؛ پاتې پور به د شرکت حساب ته اضافه شي.</p>
   <label>د پېرود نېټه</label><input id="buyDate" type="date">
+  <label>د ورکړې پیسو سرچینه</label><select id="buyPaymentSource"><option value="cash">💵 له صندوقه نغدې پیسې</option><option value="saraf">🏦 له صرافۍ څخه پیسې</option></select>
   <div class="row purchase-fields"><div><label>شرکت ته ورکړل شوې پیسې (AFN)</label><input id="buyPaid" type="number" min="0" value="0" step="any" placeholder="نغدي ورکړه"></div><div><label>د انتقال او نورو مصارفو ټول (AFN)</label><input id="buyExtraExpense" type="number" min="0" value="0" step="any" placeholder="مثلاً ۵۰"></div></div>
+  <small id="buyPaymentSourceHint" class="purchase-hint">پیسې به د صندوق له نغدو څخه کمې شي.</small>
   <div id="purchaseCostPreview" class="purchase-cost-preview">د رسید مجموعه: 0 AFN</div>
   <button class="primary purchase-save" onclick="addPurchase()">✓ ټول پېرود په یوه رسید کې ثبت کړه</button>
   <p class="notice purchase-hint">د انتقال مصارف به د جنسونو د ارزښت په تناسب ووېشل شي او د هر جنس د موجودۍ اخیستلو قیمت ته به ورزیات شي. مثال: ۱۵۰۰ + ۵۰ = ۱۵۵۰ AFN. که شرکت ته پور پاتې وي، یوازې د هماغه شرکت حساب به زیات شي.</p>
@@ -3945,7 +3951,7 @@ function addPurchaseCartLine(){
 function removePurchaseCartLine(i){purchaseCart.splice(i,1);renderPurchaseCart();}
 function addPurchase(){
  if(!purchaseCart.length)return alert("لومړی یو یا څو جنسونه رسید ته اضافه کړه");
- const supplierId=value("buySupplier"),paid=number("buyPaid"),extra=number("buyExtraExpense"),date=value("buyDate")||today();
+ const supplierId=value("buySupplier"),paid=number("buyPaid"),extra=number("buyExtraExpense"),date=value("buyDate")||today(),paymentSource=value("buyPaymentSource")||"cash";
  const supplierRecord=supplierId?(db.suppliers||[]).find(x=>String(x.id)===String(supplierId)):null;
  if(supplierId&&!supplierRecord)return alert("ټاکل شوی شرکت ونه موندل شو؛ بیا یې انتخاب کړه");
  const t=purchaseCartTotals();
@@ -3953,7 +3959,10 @@ function addPurchase(){
  if(!Number.isFinite(paid)||paid<0||paid>goodsLimit+0.001)return alert("د شرکت ته ورکړل شوې پیسې سمې نه دي؛ له جنسونو د ټول قیمت څخه زیاتې نه شي کېدای");
  if(!Number.isFinite(extra)||extra<0)return alert("د اضافي مصارفو اندازه سمه نه ده");
  if(t.debt>0&&!supplierRecord)return alert("د پور پېرود لپاره د هماغه شرکت انتخابول حتمي دي");
- if(t.cashOut>Number(db.cash||0))return alert("په صندوق کې د ورکړې او انتقال مصارفو لپاره کافي نغدې پیسې نشته");
+ const cashOut=(paymentSource==="saraf"?extra:paid+extra);
+ if(cashOut>Number(db.cash||0))return alert("په صندوق کې د انتقال او نورو مصارفو لپاره کافي نغدې پیسې نشته");
+ const sarafHeld=paymentSource==="saraf"?sarafTotals().held:0;
+ if(paymentSource==="saraf"&&paid>sarafHeld)return alert("د صراف سره دومره امانت پیسې نشته. موجود امانت: "+money(sarafHeld)+" AFN");
  const invoice="PUR-"+Date.now(),oldCash=Number(db.cash||0),oldDebt=supplierRecord?Number(supplierRecord.debt||0):0;
  const updates=[];
  let totalWeightKg=0;
@@ -3987,7 +3996,11 @@ function addPurchase(){
   const r={id:uid(),invoice,productId:u.p.id,productName:u.p.name,qty:u.line.qty,unit:u.line.unit,stockQty:u.stockAdd,unitFactor:u.line.factor,weightKg:u.weightKg,price:u.landedUnit,total:u.goods+u.share,goodsTotal:u.goods,expenseShare:u.share,paid:t.goods>0?paid*(u.goods/t.goods):0,debt:t.goods>0?t.debt*(u.goods/t.goods):0,supplier:supplierRecord?.name||"نغدي پېرود",supplierId:supplierRecord?.id||"",date,itemsCount:purchaseCart.length};
   db.purchases.push(r);records.push(r);
  });
- db.cash=oldCash-t.cashOut;
+ db.cash=oldCash-cashOut;
+ if(paymentSource==="saraf"&&paid>0){
+  if(!Array.isArray(db.sarafTransactions))db.sarafTransactions=[];
+  db.sarafTransactions.push({id:uid(),sarafId:"main",type:"companyPayment",amount:paid,date,note:"د پېرود رسید "+invoice+" لپاره له صراف څخه ورکړه",company:"د پېرود رسید "+invoice,recipientType:"purchase",purchaseInvoice:invoice});
+ }
  if(supplierRecord){
   supplierRecord.debt=oldDebt+t.debt;
   db.supplierReceipts.push({id:uid(),supplierId:supplierRecord.id,supplierName:supplierRecord.name,kind:"purchase",amount:t.debt,total:t.goods,paid,date,note:"د پېرود ګډ رسید "+invoice+" · "+purchaseCart.map(x=>x.name).join("، ")+" · اضافي مصارف "+money(extra),purchaseId:invoice,previousDebt:oldDebt,newDebt:supplierRecord.debt,createdAt:Date.now()});
@@ -4000,7 +4013,7 @@ function addPurchase(){
   return alert("پېرود خوندي نه شو؛ معلومات پخواني حالت ته بېرته وګرځېدل.");
  }
  const summary="پېرود ثبت شو\nرسید: "+invoice+"\nجنسونه: "+records.length+"\nد جنسونو قیمت: "+money(t.goods)+"\nاضافي مصارف: "+money(extra)+"\nټول: "+money(t.total)+"\nشرکت ته ورکړه: "+money(paid)+"\nپاتې شرکت پور: "+money(t.debt)+"\nله صندوقه وتلې: "+money(t.cashOut);
- purchaseCart=[];document.getElementById("buyPaid").value="0";document.getElementById("buyExtraExpense").value="0";document.getElementById("buyProductSearch").value="";document.getElementById("buyDate").value=today();
+ purchaseCart=[];document.getElementById("buyPaid").value="0";document.getElementById("buyExtraExpense").value="0";document.getElementById("buyProductSearch").value="";document.getElementById("buyDate").value=today();document.getElementById("buyPaymentSource").value="cash";
  renderPurchaseCart();refreshAll();alert(summary);
 }
 
