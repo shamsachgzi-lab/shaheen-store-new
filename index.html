@@ -4354,9 +4354,18 @@ function renderCustomerDetail(monthFilter=""){
  document.getElementById("customers")?.classList.add("customer-ledger-open");
  const c=db.customers.find(x=>x.id===currentCustomerId);
  if(!c){currentCustomerId="";renderCustomers();return;}
- const sales=db.sales.filter(x=>x.customerId===c.id||(!x.customerId&&x.customer===c.name)).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
- const receipts=(db.payments||[]).filter(p=>p.type==="customer"&&(p.personId===c.id||(!p.personId&&p.personName===c.name))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
- const payouts=(db.payments||[]).filter(p=>p.type==="customer_out"&&(p.personId===c.id||(!p.personId&&p.personName===c.name))).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const allSales=db.sales.filter(x=>x.customerId===c.id||(!x.customerId&&x.customer===c.name));
+ const allReceipts=(db.payments||[]).filter(p=>p.type==="customer"&&(p.personId===c.id||(!p.personId&&p.personName===c.name)));
+ const allPayouts=(db.payments||[]).filter(p=>p.type==="customer_out"&&(p.personId===c.id||(!p.personId&&p.personName===c.name)));
+ const archives=Array.isArray(c.accountCycles)?c.accountCycles:[];
+ const archivedSaleIds=new Set(archives.flatMap(a=>a.saleIds||[]).map(String));
+ const archivedPaymentIds=new Set(archives.flatMap(a=>a.paymentIds||[]).map(String));
+ const currentSales=allSales.filter(x=>!archivedSaleIds.has(String(x.id)));
+ const currentReceipts=allReceipts.filter(x=>!archivedPaymentIds.has(String(x.id)));
+ const currentPayouts=allPayouts.filter(x=>!archivedPaymentIds.has(String(x.id)));
+ const sales=currentSales.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const receipts=currentReceipts.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const payouts=currentPayouts.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const sum=(a,k)=>a.reduce((n,x)=>n+Number(x[k]||0),0);
  const creditSales=sum(sales,"debt"),received=sum(receipts,"amount"),receivedForDebt=receipts.reduce((n,p)=>n+Number(p.appliedToDebt??p.amount??0),0),paidToCustomer=sum(payouts,"amount"),profit=sum(sales,"profit");
  const debtAddedPayouts=sum(payouts.filter(x=>x.debtAdded===true),"amount");
@@ -4409,6 +4418,12 @@ function renderCustomerDetail(monthFilter=""){
     <input id="customerPayoutNote" placeholder="د ورکړې یادښت">
     <button class="primary" onclick="saveCustomerPayout('${c.id}')">نغدې ورکړه ثبت کړه</button>
    </div>
+  </div>
+  <div class="customer-account-cycle" style="margin:14px 0;padding:13px;border:1px solid #cbdcf0;border-radius:14px;background:#f7faff">
+   <b>🔒 د حساب تصفیه او نوی حساب</b>
+   <p style="margin:7px 0;color:#475569">پخوانۍ معاملې به د پخواني راپور په توګه خوندي شي؛ پاتې پور به د نوي حساب پیل پور وي.</p>
+   <button class="primary" style="width:100%" onclick="closeCustomerAccount('${c.id}')">حساب تصفیه کړه او نوی حساب پیل کړه</button>
+   ${archives.length?'<div style="margin-top:10px"><b>پخواني حسابونه:</b> '+archives.map(a=>'<div style="padding:6px 0">📁 '+safe(a.closedAt||'نېټه نشته')+' — پیل پور '+money(a.openingDebt)+' — پای پور '+money(a.closingDebt)+'</div>').join('')+'</div>':''}
   </div>
   <h3 class="customer-history-title">📚 د مشتری د معاملاتو تاریخچه</h3>
   <div class="customer-history-month-filter" style="margin:12px 0;padding:12px;border:1px solid #dbe5f2;border-radius:14px;background:#f8fbff">
