@@ -2476,6 +2476,19 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <p class="notice">که صراف ته پیسې ورکړې، ستا د صراف سره پیسې زیاتېږي. که صراف ستا له پیسو شرکت ته ورکړې، هغه پیسې کمېږي. که صراف ستا پر ځای پیسې ورکړي او ستا پیسې ورسره نه وي، ستا پور صراف ته زیاتېږي.</p>
 </div>
 <div class="panel"><h3>📜 د صرافۍ معاملاتو تاریخچه</h3><div id="sarafList"></div></div>
+
+<div id="sarafEditPage" class="saraf-edit-page" aria-hidden="true">
+ <div class="saraf-edit-header"><button type="button" onclick="closeSarafEditPage()">← بېرته</button><div><small>شاهین فروشگاه</small><h2>✏️ د صراف معامله اصلاح</h2></div></div>
+ <div class="saraf-edit-content">
+  <input type="hidden" id="sarafEditId">
+  <div class="panel"><label>د معاملې ډول</label><select id="sarafEditType" onchange="toggleSarafEditFields()"><option value="deposit">صراف ته مې خپلې پیسې ورکړې</option><option value="companyPayment">صراف زما له پیسو شرکت ته ورکړې</option><option value="creditPayment">صراف زما پر ځای پیسې ورکړې (زه د صراف پوروړی یم)</option></select></div>
+  <div class="panel"><label>مبلغ (AFN)</label><input id="sarafEditAmount" type="number" min="0.01" step="any" inputmode="decimal"></div>
+  <div class="panel"><label>نېټه</label><input id="sarafEditDate" type="date"></div>
+  <div class="panel hidden" id="sarafEditCompanyWrap"><label id="sarafEditCompanyLabel">د شرکت یا شخص نوم</label><input id="sarafEditCompany" placeholder="د شرکت یا شخص نوم"></div>
+  <div class="panel"><label>یادښت</label><textarea id="sarafEditNote" rows="4" placeholder="د معاملې تفصیل"></textarea></div>
+  <div class="saraf-edit-actions"><button type="button" class="gray" onclick="closeSarafEditPage()">لغوه کړه</button><button type="button" class="primary" onclick="saveSarafTransactionEdit()">💾 بدلونونه خوندي کړه</button></div>
+ </div>
+</div>
 </section>
 <section id="products" class="hidden">
  <div class="row product-page-head" style="align-items:center;justify-content:space-between;flex-wrap:wrap"><h3>📦 موجودي او جنسونه</h3><b id="productCount">0 جنس</b><button type="button" class="gray" onclick="runStorageDiagnostic()">🔎 د معلوماتو تشخیص</button></div>
@@ -4565,26 +4578,50 @@ function addSarafTransaction(){
 function editSarafTransaction(id){
  const x=(db.sarafTransactions||[]).find(t=>String(t.id)===String(id));
  if(!x)return alert("معامله ونه موندل شوه");
- const kinds=[["deposit","صراف ته مې خپلې پیسې ورکړې"],["companyPayment","صراف زما له پیسو شرکت ته ورکړې"],["creditPayment","صراف زما پر ځای شرکت یا بل چا ته پیسې ورکړې (زه د صراف پوروړی یم)"]];
- const oldName=x.company||"";
- const choice=prompt("د معاملې ډول وټاکه:\n1 = صراف ته مې پیسې ورکړې\n2 = صراف زما له پیسو شرکت ته ورکړې\n3 = صراف زما پر ځای پیسې ورکړې (زه د صراف پوروړی یم)",""+(kinds.findIndex(k=>k[0]===x.type)+1||1));
- if(choice===null)return;
- const type=kinds[Number(choice)-1]?.[0];if(!type)return alert("۱، ۲ یا ۳ ولیکه");
- const amountText=prompt("مبلغ (AFN):",String(x.amount||""));if(amountText===null)return;
- const amount=Number(String(amountText).replace(/,/g,"").trim());if(!Number.isFinite(amount)||amount<=0)return alert("مبلغ ناسم دی");
- const date=prompt("نېټه (YYYY-MM-DD):",String(x.date||today()));if(date===null)return;
- let company="";
- if(type!=="deposit"){company=prompt("د شرکت یا شخص نوم:",oldName);if(company===null)return;if(!company.trim())return alert("نوم ولیکه");}
- const note=prompt("یادښت:",String(x.note||""));if(note===null)return;
+ const page=document.getElementById("sarafEditPage");
+ if(!page)return alert("د اصلاح صفحه ونه موندل شوه");
+ document.getElementById("sarafEditId").value=String(x.id);
+ document.getElementById("sarafEditType").value=["deposit","companyPayment","creditPayment"].includes(x.type)?x.type:"deposit";
+ document.getElementById("sarafEditAmount").value=String(x.amount||"");
+ document.getElementById("sarafEditDate").value=String(x.date||today());
+ document.getElementById("sarafEditCompany").value=String(x.company||"");
+ document.getElementById("sarafEditNote").value=String(x.note||"");
+ toggleSarafEditFields();
+ page.classList.add("active");
+ page.setAttribute("aria-hidden","false");
+}
+function toggleSarafEditFields(){
+ const type=document.getElementById("sarafEditType")?.value||"deposit";
+ const wrap=document.getElementById("sarafEditCompanyWrap");
+ if(wrap)wrap.classList.toggle("hidden",type==="deposit");
+ const label=document.getElementById("sarafEditCompanyLabel");
+ if(label)label.textContent=type==="creditPayment"?"چا ته صراف پیسې ورکړې؟":"کوم شرکت ته پیسې ورکړل شوې؟";
+}
+function closeSarafEditPage(){
+ const page=document.getElementById("sarafEditPage");
+ if(page){page.classList.remove("active");page.setAttribute("aria-hidden","true");}
+}
+function saveSarafTransactionEdit(){
+ const id=document.getElementById("sarafEditId")?.value;
+ const x=(db.sarafTransactions||[]).find(t=>String(t.id)===String(id));
+ if(!x)return alert("معامله ونه موندل شوه");
+ const type=document.getElementById("sarafEditType").value;
+ const amount=Number(String(document.getElementById("sarafEditAmount").value||"").replace(/,/g,"").trim());
+ const date=document.getElementById("sarafEditDate").value;
+ const company=document.getElementById("sarafEditCompany").value.trim();
+ const note=document.getElementById("sarafEditNote").value.trim();
+ if(!Number.isFinite(amount)||amount<=0)return alert("مبلغ په سمه توګه ولیکه");
+ if(!date)return alert("نېټه وټاکه");
+ if(type!=="deposit"&&!company)return alert("د شرکت یا شخص نوم ولیکه");
  const cashAfterReverse=Number(db.cash||0)-sarafCashEffect(x.type,x.amount);
  const newCash=cashAfterReverse+sarafCashEffect(type,amount);
  if(newCash<0)return alert("د دې سمون لپاره په صندوق کې کافي نغدې پیسې نشته");
- const txWithout=(db.sarafTransactions||[]).filter(t=>t.id!==x.id);
- let held=txWithout.reduce((n,t)=>n+(({deposit:1,withdraw:-1,companyPayment:-1})[t.type]||0)*Number(t.amount||0),0);
- if(type==="companyPayment"&&amount>held)return alert("د صراف سره پاتې ستا پیسې د دې مبلغ لپاره بسنه نه کوي");
+ const txWithout=(db.sarafTransactions||[]).filter(t=>String(t.id)!==String(x.id));
+ const held=txWithout.reduce((n,t)=>n+(({deposit:1,withdraw:-1,companyPayment:-1})[t.type]||0)*Number(t.amount||0),0);
+ if(type==="companyPayment"&&amount>held)return alert("د صراف سره ستا خپلې پیسې د دې مبلغ لپاره بسنه نه کوي");
  db.cash=newCash;
- x.type=type;x.amount=amount;x.date=date.trim();x.company=company;x.note=note;
- saveDB();refreshAll();alert("د صراف معامله اصلاح شوه");
+ x.type=type;x.amount=amount;x.date=date;x.company=type==="deposit"?"":company;x.note=note;
+ saveDB();closeSarafEditPage();refreshAll();alert("د صراف معامله اصلاح شوه");
 }
 function renderSaraf(){
  const t=sarafTotals(),h=document.getElementById("sarafHeldTotal"),o=document.getElementById("sarafOwedTotal");
@@ -7078,6 +7115,19 @@ body.sale-modal-open{
 #sales .sale-summary>div.sale-cash-line>strong{color:#087747!important}
 #sales .sale-summary>div.sale-debt-line>strong{color:#b42332!important}
 @media(max-width:390px){#sales .sale-summary>div.sale-cash-line,#sales .sale-summary>div.sale-debt-line{min-height:100px!important;padding:14px 11px!important;gap:7px!important}#sales .sale-summary>div.sale-cash-line>span,#sales .sale-summary>div.sale-debt-line>span{font-size:14px!important}#sales .sale-summary>div.sale-cash-line>strong,#sales .sale-summary>div.sale-debt-line>strong{font-size:21px!important}}
+
+/* Full-page Saraf transaction editor */
+.saraf-edit-page{display:none;position:fixed;inset:0;z-index:99999;background:var(--bg,#f4f6fb);overflow-y:auto;padding:0 0 28px;direction:rtl}
+.saraf-edit-page.active{display:block}
+.saraf-edit-header{position:sticky;top:0;z-index:2;background:#124db5;color:#fff;padding:16px;display:flex;align-items:center;gap:14px;box-shadow:0 3px 12px #0002}
+.saraf-edit-header h2{margin:4px 0;font-size:20px}.saraf-edit-header small{opacity:.85}
+.saraf-edit-header button{background:#fff;color:#124db5;border:0;border-radius:12px;padding:12px;font-weight:700}
+.saraf-edit-content{max-width:720px;margin:18px auto;padding:0 14px}
+.saraf-edit-content .panel{margin-bottom:14px;padding:16px;border-radius:16px;background:var(--card,#fff);box-shadow:0 2px 10px #0000000d}
+.saraf-edit-content label{display:block;font-weight:700;margin:0 0 8px}
+.saraf-edit-content input,.saraf-edit-content select,.saraf-edit-content textarea{width:100%;min-height:48px;font-size:17px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#172033}
+.saraf-edit-actions{display:flex;gap:10px;position:sticky;bottom:0;background:var(--bg,#f4f6fb);padding:12px 0}
+.saraf-edit-actions button{flex:1;min-height:50px;font-size:16px}
 </style>
 <!-- SHAHEEN_PRODUCTS_RENDER_RECOVERY_V3 -->
 <script>
