@@ -4614,7 +4614,7 @@ function addSarafTransaction(){
 }
 function editSarafTransaction(id){
  const x=(db.sarafTransactions||[]).find(t=>String(t.id)===String(id));
- if(x?.payoutGroupId)return alert("دا معامله د صراف له لارې د شرکت/شخص تادیه ده؛ د شرکت رسید او د صراف حساب یوځای خوندي ساتلو لپاره یې له دې ځایه نه شو اصلاح کولای. د حذف لپاره همدا معامله وټاکه.");
+ if(x?.payoutGroupId)return deleteSarafPayoutGroup(x.payoutGroupId);
  if(!x)return alert("معامله ونه موندل شوه");
  const page=document.getElementById("sarafEditPage");
  if(!page)return alert("د اصلاح صفحه ونه موندل شوه");
@@ -4669,6 +4669,18 @@ function saveSarafTransactionEdit(){
   db.sarafTransactions.push({...x,type,amount,date,company,note});
  }
  saveDB();closeSarafEditPage();refreshAll();alert("معامله اصلاح شوه؛ که صراف ته ورکړې شوې پیسې وې، لومړی پخوانی پور ترې کم شو");
+}
+function deleteSarafPayoutGroup(group){
+ if(!confirm("دا تادیه د صراف له حساب او د شرکت له رسید څخه هم حذف شي؟"))return;
+ const receipt=(db.supplierReceipts||[]).find(r=>r.sarafGroupId===group);
+ if(receipt){
+  const supplier=(db.suppliers||[]).find(z=>String(z.id)===String(receipt.supplierId));
+  if(supplier)supplier.debt=Number(supplier.debt||0)+Number(receipt.amount||0);
+  db.supplierReceipts=db.supplierReceipts.filter(r=>r.sarafGroupId!==group);
+  db.payments=(db.payments||[]).filter(p=>p.sarafGroupId!==group);
+ }
+ db.sarafTransactions=db.sarafTransactions.filter(t=>t.payoutGroupId!==group);
+ saveDB();refreshAll();alert("د صراف تادیه او د شرکت رسید بېرته واړول شول");
 }
 function deleteSarafTransaction(){
  const id=document.getElementById("sarafEditId")?.value;
