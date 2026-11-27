@@ -2520,6 +2520,25 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 #sales .sales-bottom-nav-copy button.active{color:#1769d2!important;font-weight:800!important}
 #sales .sale-page{padding-bottom:calc(105px + env(safe-area-inset-bottom))!important}
 </style>
+<style>
+/* د حساب تصفیې تڼۍ: د پاڼې د عمومي رنګونو له override څخه ساتل */
+main>section#sarafPage button.account-cycle-action,
+main>section#suppliers button.account-cycle-action,
+.account-cycle-panel button.account-cycle-action{
+ background:#1457a6!important;
+ background-image:linear-gradient(110deg,#104b91 0%,#2478d0 100%)!important;
+ color:#ffffff!important;
+ -webkit-text-fill-color:#ffffff!important;
+ border:2px solid #0c3970!important;
+ box-shadow:0 4px 0 #092e5c,0 7px 15px rgba(16,75,145,.24)!important;
+ text-shadow:0 1px 2px rgba(0,0,0,.25)!important;
+ opacity:1!important;
+}
+main>section#sarafPage button.account-cycle-action:active,
+main>section#suppliers button.account-cycle-action:active{
+ background:#0c3970!important;color:#fff!important;-webkit-text-fill-color:#fff!important;
+}
+</style>
 </head>
 <body>
 <header class="brand-header">
