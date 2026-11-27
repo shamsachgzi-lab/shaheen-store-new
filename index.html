@@ -1557,6 +1557,8 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 <style id="shaheen-sale-keyboard-done-v2">
 #sales .sale-keyboard-done{display:block;width:100%;min-height:34px!important;height:34px;padding:5px 8px;margin:3px 0 5px;border:1px solid #b8c9df;border-radius:9px;background:#edf4ff;color:#174d91;font-size:12px}
 #sales .sale-keyboard-done[hidden]{display:none!important}
+/* د نغدي خرڅلاو د پېرودونکي نوم */
+#sales .sale-customer-name-hint{display:block;color:#64748b;font-size:11px;line-height:1.5;margin:2px 1px 7px}
 </style>
 <script id="SHAHEEN_SALE_KEYBOARD_DONE_V2">
 (function(){
@@ -2575,7 +2577,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <div class="panel sale-page">
   <div class="sale-blue-header"><div><small>SHAHEEN WHOLESALE STORE</small><h3>نوی خرڅلاو</h3></div><button type="button" class="sale-modal-close" onclick="show(&quot;home&quot;)">✕</button></div>
   <div class="sale-simple sale-invoice-details">
-   <div><label>مشتری</label><input id="saleCustomer" autocomplete="off" placeholder="د مشتری نوم" oninput="searchSaleCustomers()"><div id="saleCustomerResults" class="sale-customer-results hidden"></div></div>
+   <div><label>د پېرودونکي نوم (په رسید کې چاپېږي)</label><input id="saleCustomer" autocomplete="off" placeholder="د پېرودونکي نوم ولیکه؛ ثبت شوی نه وي هم ستونزه نشته" oninput="searchSaleCustomers()"><div id="saleCustomerResults" class="sale-customer-results hidden"></div><small class="sale-customer-name-hint">د نغدي خرڅلاو لپاره هم نوم ولیکه؛ نوی نوم به په رسید کې چاپ شي، خو بې له پور څخه به د مشتریانو حساب ته نه اضافه کېږي.</small></div>
    <div class="sale-date-row sale-date-top">
     <label>نېټه</label>
     <div class="sale-simple-grid sale-qty-grid">
@@ -3588,8 +3590,10 @@ function addSale(){
  const discount=saleDiscountAmount(subtotal),paid=number("salePaid"),total=subtotal-discount;
  if(number("saleDiscount")<0||number("saleDiscount")>subtotal||paid<0||paid>total)return alert("د تخفیف اندازه یا ورکړل شوې پیسې سمې نه دي");
  let c=null;
- if(customer){c=db.customers.find(x=>x.id===selectedSaleCustomerId)||db.customers.find(x=>String(x.name).toLowerCase()===customer.toLowerCase());if(!c){c={id:uid(),name:customer,phone:"",debt:0,type:"active",created:today()};db.customers.push(c);}}
- else if(total-paid>0)return alert("که خرڅلاو پور وي، د مشتری نوم حتمي ولیکه.");
+ if(!customer)return alert("د پېرودونکي نوم ولیکه؛ دا نوم به په رسید کې چاپ شي.");
+ c=db.customers.find(x=>String(x.id)===String(selectedSaleCustomerId))||db.customers.find(x=>String(x.name).toLowerCase()===customer.toLowerCase())||null;
+ if(total-paid>0&&!c){c={id:uid(),name:customer,phone:"",debt:0,type:"active",created:today()};db.customers.push(c);}
+ const invoiceCustomerName=c?.name||customer;
  for(const item of saleCart){const p=db.products.find(x=>x.id===item.productId);if(!p||Number(p.qty)<item.stockQty)return alert("د "+item.productName+" موجودي بدله شوې؛ کارټ بیا وګوره.");}
  const invoice=nextSaleInvoiceNumber(),date=value("saleDate")||today();
  let paidLeft=paid,discountLeft=discount;
@@ -3603,7 +3607,7 @@ function addSale(){
   const lineDebt=lineTotal-linePaid;
   p.qty=Number(p.qty)-item.stockQty;
   const lineProfit=(item.price-item.costAtSale*item.factor)*item.qty-lineDiscount;
-  db.sales.push({id:uid(),invoice,productId:p.id,productName:item.productName,qty:item.qty,unit:item.unit,stockQty:item.stockQty,unitFactor:item.factor,price:item.price,subtotal:lineSubtotal,discount:lineDiscount,discountPercent:number("saleDiscount"),total:lineTotal,costAtSale:item.costAtSale,profit:lineProfit,paid:linePaid,debt:lineDebt,customer:c?.name||"نغدي مشتری",customerId:c?.id||"",note:value("saleNote"),date});
+  db.sales.push({id:uid(),invoice,productId:p.id,productName:item.productName,qty:item.qty,unit:item.unit,stockQty:item.stockQty,unitFactor:item.factor,price:item.price,subtotal:lineSubtotal,discount:lineDiscount,discountPercent:number("saleDiscount"),total:lineTotal,costAtSale:item.costAtSale,profit:lineProfit,paid:linePaid,debt:lineDebt,customer:invoiceCustomerName,customerId:c?.id||"",note:value("saleNote"),date});
  });
  db.cash=Number(db.cash||0)+paid;
  if(c)c.debt=Number(c.debt||0)+(total-paid);
