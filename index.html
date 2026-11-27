@@ -2564,7 +2564,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
  <button class="primary saraf-save-button" onclick="addSarafTransaction()">💾 معامله ثبت کړه</button>
  <p class="notice">که صراف ته پیسې ورکړې، ستا د صراف سره پیسې زیاتېږي. که صراف ستا له پیسو شرکت ته ورکړې، هغه پیسې کمېږي. که صراف ستا پر ځای پیسې ورکړي او ستا پیسې ورسره نه وي، ستا پور صراف ته زیاتېږي.</p>
 </div>
-<div class="panel"><h3>📜 د صرافۍ معاملاتو تاریخچه</h3><div id="sarafList"></div></div>
+<div class="panel"><h3>🔒 د صراف حساب تصفیه او نوی حساب</h3><p class="notice">پخوانۍ معاملې به جلا راپور کې خوندي شي؛ د صراف سره پیسې او پاتې پور به نه بدلېږي.</p><button type="button" class="primary" onclick="closeSarafAccount()">حساب تصفیه کړه او نوی حساب پیل کړه</button><div id="sarafCyclesList"></div></div><div class="panel"><h3>📜 د صرافۍ معاملاتو تاریخچه</h3><div id="sarafList"></div></div>
 
 <div id="sarafEditPage" class="saraf-edit-page" aria-hidden="true">
  <div class="saraf-edit-header"><button type="button" onclick="closeSarafEditPage()">← بېرته</button><div><small>شاهین فروشگاه</small><h2>✏️ د صراف معامله اصلاح</h2></div></div>
@@ -2754,7 +2754,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <label for="supplierLedgerDate">د تادیې نېټه</label><input id="supplierLedgerDate" type="date">
   <label for="supplierLedgerNote">د رسید شمېره / یادښت</label><input id="supplierLedgerNote" placeholder="د شرکت رسید شمېره یا یادښت">
   <button type="button" class="primary supplier-save-btn" onclick="saveSupplierLedgerEntry()">💵 تادیه ثبت کړه، رسید جوړ او پور کم کړه</button>
-  <div class="supplier-ledger-history-title">د دې تامین کوونکي د رسیدونو تاریخچه</div><div id="supplierLedgerHistory"></div>
+  <div class="supplier-ledger-history-title">🔒 د حساب تصفیه او نوی حساب</div><p class="notice">پخواني رسیدونه به جلا راپور کې خوندي شي؛ پاتې پور او صندوق به نه بدلېږي.</p><button type="button" class="primary" onclick="closeSupplierAccount()">حساب تصفیه کړه او نوی حساب پیل کړه</button><div id="supplierAccountCycles"></div><div class="supplier-ledger-history-title">د اوسني حساب تاریخچه</div><div id="supplierLedgerHistory"></div>
  </div>
  <div class="supplier-list-panel"><div class="supplier-list-heading"><div><small>PARTNERS DIRECTORY</small><h4>د تامین کوونکو لېست</h4></div><span class="supplier-list-mark">☷</span></div>
  <div class="supplier-search-wrap"><span>⌕</span><input id="supplierSearch" type="search" placeholder="د نوم یا موبایل شمېرې له مخې لټون..." oninput="renderSuppliers()"></div><div id="suppliersList" class="supplier-results"></div></div>
@@ -4641,9 +4641,12 @@ function openSupplierLedger(id){
 }
 function closeSupplierLedger(){document.getElementById("supplierLedgerPanel")?.classList.add("hidden");}
 function renderSupplierLedgerHistory(id){
+ const supplier=(db.suppliers||[]).find(x=>String(x.id)===String(id));renderSupplierAccountCycles(supplier||{});
+ const archivedReceiptIds=new Set((supplier?.accountCycles||[]).flatMap(a=>a.receiptIds||[]).map(String));
+ const archivedPaymentIds=new Set((supplier?.accountCycles||[]).flatMap(a=>a.paymentIds||[]).map(String));
  const rows=[];
- (db.supplierReceipts||[]).filter(x=>String(x.supplierId)===String(id)).forEach(x=>rows.push(x));
- (db.payments||[]).filter(x=>x.type==="supplier"&&String(x.personId)===String(id)&&!(db.supplierReceipts||[]).some(y=>y.paymentId===x.id)).forEach(x=>rows.push({...x,kind:"payment",note:x.note||"پخوانۍ تادیه"}));
+ (db.supplierReceipts||[]).filter(x=>String(x.supplierId)===String(id)&&!archivedReceiptIds.has(String(x.id))).forEach(x=>rows.push(x));
+ (db.payments||[]).filter(x=>x.type==="supplier"&&String(x.personId)===String(id)&&!archivedPaymentIds.has(String(x.id))&&!(db.supplierReceipts||[]).some(y=>y.paymentId===x.id)).forEach(x=>rows.push({...x,kind:"payment",note:x.note||"پخوانۍ تادیه"}));
  rows.sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
  const box=document.getElementById("supplierLedgerHistory");
  if(!box)return;
@@ -4903,11 +4906,43 @@ function deleteSarafTransaction(){
  }
  saveDB();closeSarafEditPage();refreshAll();alert("معامله حذف شوه او حسابونه نوي شول");
 }
+function closeSarafAccount(){
+ const old=Array.isArray(db.sarafAccountCycles)?db.sarafAccountCycles:[];
+ const used=new Set(old.flatMap(a=>a.transactionIds||[]).map(String));
+ const rows=(db.sarafTransactions||[]).filter(x=>!used.has(String(x.id)));
+ if(!rows.length)return alert("په اوسني حساب کې نوې معامله نشته.");
+ const t=sarafTotals("main");
+ if(!confirm("د صراف اوسنی حساب وتړم؟ پخوانۍ معاملې به خوندي شي. له صراف سره پیسې "+money(t.held)+" او صراف ته پور "+money(t.owed)+" نه بدلېږي."))return;
+ old.push({id:uid(),closedAt:today(),closingHeld:t.held,closingOwed:t.owed,transactions:JSON.parse(JSON.stringify(rows)),transactionIds:rows.map(x=>String(x.id))});
+ db.sarafAccountCycles=old;saveDB();refreshAll();alert("د صراف پخوانی حساب خوندي شو؛ نوی حساب د هماغه پاتې بیلانس څخه پیل شو.");
+}
+function renderSarafCycles(){
+ const box=document.getElementById("sarafCyclesList");if(!box)return;
+ const rows=db.sarafAccountCycles||[];
+ box.innerHTML=rows.slice().reverse().map(x=>'<div class="notice" style="margin-top:8px"><b>📁 '+safe(jalaliDisplayDate(x.closedAt))+'</b><br>له صراف سره پیسې: '+money(x.closingHeld)+' AFN<br>صراف ته پور: '+money(x.closingOwed)+' AFN<br>معاملې: '+(x.transactions||[]).length+'</div>').join("")||'<small>پخوانی حساب نشته</small>';
+}
+function closeSupplierAccount(){
+ const id=document.getElementById("supplierLedgerId")?.value,s=db.suppliers.find(x=>String(x.id)===String(id));if(!s)return;
+ const old=Array.isArray(s.accountCycles)?s.accountCycles:[];
+ const used=new Set(old.flatMap(a=>a.receiptIds||[]).map(String));
+ const rows=(db.supplierReceipts||[]).filter(x=>String(x.supplierId)===String(s.id)&&!used.has(String(x.id)));
+ const payments=(db.payments||[]).filter(x=>x.type==="supplier"&&String(x.personId)===String(s.id)&&!(db.supplierReceipts||[]).some(y=>y.paymentId===x.id));
+ if(!rows.length&&!payments.length)return alert("په اوسني حساب کې نوې معامله نشته.");
+ if(!confirm("د "+s.name+" حساب وتړم؟ پخواني رسیدونه به خوندي شي؛ پاتې پور "+money(s.debt||0)+" به نوي حساب ته د پیل پور وي او هېڅ پیسې به نه بدلېږي."))return;
+ old.push({id:uid(),closedAt:today(),closingDebt:Number(s.debt||0),receipts:JSON.parse(JSON.stringify([...rows,...payments])),receiptIds:rows.map(x=>String(x.id)),paymentIds:payments.map(x=>String(x.id))});
+ s.accountCycles=old;saveDB();renderSupplierLedgerHistory(s.id);refreshAll();alert("د شرکت پخوانی حساب خوندي شو؛ نوی حساب د "+money(s.debt||0)+" پیل پور سره پیل شو.");
+}
+function renderSupplierAccountCycles(s){
+ const box=document.getElementById("supplierAccountCycles");if(!box)return;
+ const rows=s.accountCycles||[];
+ box.innerHTML=rows.slice().reverse().map(x=>'<div class="notice" style="margin:8px 0"><b>📁 '+safe(jalaliDisplayDate(x.closedAt))+'</b><br>پای پور: '+money(x.closingDebt)+' AFN<br>رسیدونه: '+(x.receipts||[]).length+'</div>').join("")||'<small>پخوانی حساب نشته</small>';
+}
 function renderSaraf(){
  const t=sarafTotals(),h=document.getElementById("sarafHeldTotal"),o=document.getElementById("sarafOwedTotal");
  if(h)h.textContent=money(t.held);if(o)o.textContent=money(t.owed);
  const list=document.getElementById("sarafList");if(!list)return;
- const all=(db.sarafTransactions||[]).slice(),grouped=new Map();
+ const archivedIds=new Set((db.sarafAccountCycles||[]).flatMap(a=>a.transactionIds||[]).map(String));
+ const all=(db.sarafTransactions||[]).filter(x=>!archivedIds.has(String(x.id))),grouped=new Map();
  all.forEach(x=>{
   if(x.payoutGroupId){
    let g=grouped.get(x.payoutGroupId);
@@ -4944,6 +4979,7 @@ function renderSaraf(){
  '<section class="saraf-modern-section"><div class="saraf-modern-heading"><b>📤 صراف ته مې پیسې ورکړې</b><small>'+outgoing.length+' معاملې · '+money(total(outgoing))+' AFN</small></div>'+renderRows(outgoing,"out")+'</section>'+
  '<section class="saraf-modern-section"><div class="saraf-modern-heading"><b>📥 له صراف څخه مې پیسې واخیستې</b><small>'+incoming.length+' معاملې · '+money(total(incoming))+' AFN</small></div>'+renderRows(incoming,"in")+'</section>'+
  (misc.length?'<section class="saraf-modern-section"><div class="saraf-modern-heading"><b>📋 نورې پخوانۍ معاملې</b></div>'+renderRows(misc,"")+'</section>':"");
+ renderSarafCycles();
 }
 function toggleStockExpenseFields(){
  const isStock=value("eCategory")==="stock";
