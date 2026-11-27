@@ -3876,6 +3876,25 @@ function printSale(id){
  display:block!important;
 }
 </style>
+
+<style id="sales-bottom-navigation-visible-v1">
+/* د خرڅلاو د پاڼې د سکرول پر مهال هم لاندې اصلي مېنو ښکاره او د کار وړ وي */
+body.sale-modal-open nav,
+body:has(#sales.sale-overlay:not(.hidden)) nav{
+ position:fixed!important;
+ left:0!important;
+ right:0!important;
+ bottom:0!important;
+ z-index:90!important;
+ display:flex!important;
+ visibility:visible!important;
+ opacity:1!important;
+ pointer-events:auto!important;
+}
+#sales.sale-overlay:not(.hidden) .sale-page{
+ padding-bottom:calc(88px + env(safe-area-inset-bottom))!important;
+}
+</style>
 </body></html>';
  printWindow.onload=function(){try{printWindow.focus();}catch(e){console.error('Receipt focus error:',e);}};
  printWindow.document.open();
