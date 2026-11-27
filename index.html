@@ -4425,7 +4425,7 @@ function renderCustomerDetail(monthFilter="",archiveId="current"){
   <div class="customer-account-cycle" style="margin:14px 0;padding:13px;border:1px solid #cbdcf0;border-radius:14px;background:#f7faff">
    <b>🔒 د حساب تصفیه او نوی حساب</b>
    <p style="margin:7px 0;color:#475569">پخوانۍ معاملې به د پخواني راپور په توګه خوندي شي؛ پاتې پور به د نوي حساب پیل پور وي.</p>
-   <button class="primary" style="width:100%" onclick="closeCustomerAccount('${c.id}')">حساب تصفیه کړه او نوی حساب پیل کړه</button>
+   ${selectedArchive?'':`<button class="primary" style="width:100%" onclick="closeCustomerAccount('${c.id}')">حساب تصفیه کړه او نوی حساب پیل کړه</button>`}
    ${archives.length?'<div style="margin-top:10px"><b>پخواني حسابونه:</b> '+archives.map(a=>'<button type="button" class="gray" style="width:100%;margin-top:6px" onclick="renderCustomerDetail(\'\',\''+safe(a.id)+'\')">📁 راپور '+safe(a.closedAt||'نېټه نشته')+' — پیل پور '+money(a.openingDebt)+' — پای پور '+money(a.closingDebt)+'</button>').join('')+'</div>':''}
    ${selectedArchive?'<button type="button" class="gray" style="width:100%;margin-top:8px" onclick="renderCustomerDetail(\'\',\'current\')">اوسني حساب ته بېرته</button>':''}
   </div>
