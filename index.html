@@ -2636,9 +2636,9 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <div class="purchase-pro-step"><b>۲ · د شرکت او پیسو معلومات</b></div>
   <label>شرکت / عرضه کوونکی انتخاب کړه</label><select id="buySupplier"><option value="">نغدي پېرود / شرکت نه لري</option></select><p class="purchase-hint">که په پور مال اخلې، د هماغه شرکت انتخابول حتمي دي؛ پاتې پور به د شرکت حساب ته اضافه شي.</p>
   <label>د پېرود نېټه</label><input id="buyDate" type="date">
-  <label>د ورکړې پیسو سرچینه</label><select id="buyPaymentSource"><option value="cash">💵 له صندوقه نغدې پیسې</option><option value="saraf">🏦 له صرافۍ څخه پیسې</option></select>
+  <label>د ورکړې پیسو سرچینه</label><select id="buyPaymentSource" onchange="updatePurchasePaymentHint()"><option value="cash">💵 له صندوقه نغدې پیسې</option><option value="saraf">🏦 د صراف له لارې پیسې</option></select>
   <div class="row purchase-fields"><div><label>شرکت ته ورکړل شوې پیسې (AFN)</label><input id="buyPaid" type="number" min="0" value="0" step="any" placeholder="نغدي ورکړه"></div><div><label>د انتقال او نورو مصارفو ټول (AFN)</label><input id="buyExtraExpense" type="number" min="0" value="0" step="any" placeholder="مثلاً ۵۰"></div></div>
-  <small id="buyPaymentSourceHint" class="purchase-hint">پیسې به د صندوق له نغدو څخه کمې شي.</small>
+  <small id="buyPaymentSourceHint" class="purchase-hint">د ورکړې پیسې به د صندوق له نغدو څخه کمې شي.</small>
   <div id="purchaseCostPreview" class="purchase-cost-preview">د رسید مجموعه: 0 AFN</div>
   <button class="primary purchase-save" onclick="addPurchase()">✓ ټول پېرود په یوه رسید کې ثبت کړه</button>
   <p class="notice purchase-hint">د انتقال مصارف به د جنسونو د ارزښت په تناسب ووېشل شي او د هر جنس د موجودۍ اخیستلو قیمت ته به ورزیات شي. مثال: ۱۵۰۰ + ۵۰ = ۱۵۵۰ AFN. که شرکت ته پور پاتې وي، یوازې د هماغه شرکت حساب به زیات شي.</p>
@@ -3923,6 +3923,14 @@ document.getElementById("buyProduct").addEventListener("change",updatePurchaseUn
 document.getElementById("buyUnit").addEventListener("change",updatePurchasePriceForUnit);
 document.getElementById("buyDate").value=today();
 ["buyPaid","buyExtraExpense"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("input",renderPurchaseCart);});
+function updatePurchasePaymentHint(){
+ const el=document.getElementById("buyPaymentSourceHint");if(!el)return;
+ const source=value("buyPaymentSource")||"cash",paid=Math.max(0,number("buyPaid"));
+ if(source==="saraf"){
+  const held=Math.max(0,Number(sarafTotals().held)||0),used=Math.min(paid,held),shortfall=Math.max(0,paid-held);
+  el.textContent="د صراف له امانت څخه: "+money(used)+" AFN"+(shortfall>0?" · د صراف نوی پور: "+money(shortfall)+" AFN":"")+". صندوق نه کمېږي؛ اضافي مصارف له صندوقه ورکول کېږي.";
+ }else el.textContent="ورکړل شوې پیسې او اضافي مصارف به د صندوق له نغدو څخه کم شي.";
+}
 function purchaseCartTotals(){
  const goods=purchaseCart.reduce((n,x)=>n+x.qty*x.price,0);
  const extra=Math.max(0,number("buyExtraExpense"));
@@ -4013,7 +4021,7 @@ function addPurchase(){
   db.supplierReceipts=db.supplierReceipts.filter(x=>x.purchaseId!==invoice);
   return alert("پېرود خوندي نه شو؛ معلومات پخواني حالت ته بېرته وګرځېدل.");
  }
- const summary="پېرود ثبت شو\nرسید: "+invoice+"\nجنسونه: "+records.length+"\nد جنسونو قیمت: "+money(t.goods)+"\nاضافي مصارف: "+money(extra)+"\nټول: "+money(t.total)+"\nشرکت ته ورکړه: "+money(paid)+"\nپاتې شرکت پور: "+money(t.debt)+"\nله صندوقه وتلې: "+money(t.cashOut);
+ const summary="پېرود ثبت شو\nرسید: "+invoice+"\nجنسونه: "+records.length+"\nد جنسونو قیمت: "+money(t.goods)+"\nاضافي مصارف: "+money(extra)+"\nټول: "+money(t.total)+"\nشرکت ته ورکړه: "+money(paid)+"\nپاتې شرکت پور: "+money(t.debt)+"\nله صندوقه وتلې: "+money(paymentSource==="saraf"?extra:paid+extra)+"\nد صراف له لارې ورکړه: "+money(paymentSource==="saraf"?paid:0);
  purchaseCart=[];document.getElementById("buyPaid").value="0";document.getElementById("buyExtraExpense").value="0";document.getElementById("buyProductSearch").value="";document.getElementById("buyDate").value=today();document.getElementById("buyPaymentSource").value="cash";
  renderPurchaseCart();refreshAll();alert(summary);
 }
