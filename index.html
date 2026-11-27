@@ -4621,15 +4621,24 @@ function saveSarafTransactionEdit(){
  if(!Number.isFinite(amount)||amount<=0)return alert("مبلغ په سمه توګه ولیکه");
  if(!date)return alert("نېټه وټاکه");
  if(type!=="deposit"&&!company)return alert("د شرکت یا شخص نوم ولیکه");
+ const txWithout=(db.sarafTransactions||[]).filter(t=>String(t.id)!==String(x.id));
+ const owedBefore=txWithout.reduce((n,t)=>t.type==="owedSet"?Math.max(0,Number(t.amount)||0):n+(({borrow:1,repay:-1,creditPayment:1})[t.type]||0)*Number(t.amount||0),0);
  const cashAfterReverse=Number(db.cash||0)-sarafCashEffect(x.type,x.amount);
  const newCash=cashAfterReverse+sarafCashEffect(type,amount);
  if(newCash<0)return alert("د دې سمون لپاره په صندوق کې کافي نغدې پیسې نشته");
- const txWithout=(db.sarafTransactions||[]).filter(t=>String(t.id)!==String(x.id));
  const held=txWithout.reduce((n,t)=>n+(({deposit:1,withdraw:-1,companyPayment:-1})[t.type]||0)*Number(t.amount||0),0);
  if(type==="companyPayment"&&amount>held)return alert("د صراف سره ستا خپلې پیسې د دې مبلغ لپاره بسنه نه کوي");
  db.cash=newCash;
- x.type=type;x.amount=amount;x.date=date;x.company=type==="deposit"?"":company;x.note=note;
- saveDB();closeSarafEditPage();refreshAll();alert("د صراف معامله اصلاح شوه");
+ db.sarafTransactions=txWithout;
+ if(type==="deposit"){
+  const repayAmount=Math.min(amount,Math.max(0,owedBefore));
+  const heldAmount=amount-repayAmount;
+  if(repayAmount>0)db.sarafTransactions.push({id:uid(),sarafId:"main",type:"repay",amount:repayAmount,date,note:"د صراف پخوانی پور په اتومات ډول ادا شو"+(note?" — "+note:""),company:""});
+  if(heldAmount>0)db.sarafTransactions.push({id:uid(),sarafId:"main",type:"deposit",amount:heldAmount,date,note:repayAmount>0?"له پور کمولو وروسته د صراف سره پاتې امانت"+(note?" — "+note:""):note,company:""});
+ }else{
+  db.sarafTransactions.push({...x,type,amount,date,company,note});
+ }
+ saveDB();closeSarafEditPage();refreshAll();alert("معامله اصلاح شوه؛ که صراف ته ورکړې شوې پیسې وې، لومړی پخوانی پور ترې کم شو");
 }
 function deleteSarafTransaction(){
  const id=document.getElementById("sarafEditId")?.value;
