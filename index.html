@@ -2637,7 +2637,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <label>شرکت / عرضه کوونکی انتخاب کړه</label><select id="buySupplier"><option value="">نغدي پېرود / شرکت نه لري</option></select><p class="purchase-hint">که په پور مال اخلې، د هماغه شرکت انتخابول حتمي دي؛ پاتې پور به د شرکت حساب ته اضافه شي.</p>
   <label>د پېرود نېټه</label><input id="buyDate" type="date">
   <label>د ورکړې پیسو سرچینه</label><select id="buyPaymentSource" onchange="updatePurchasePaymentHint()"><option value="cash">💵 له صندوقه نغدې پیسې</option><option value="saraf">🏦 د صراف له لارې پیسې</option></select>
-  <div class="row purchase-fields"><div><label>شرکت ته ورکړل شوې پیسې (AFN)</label><input id="buyPaid" type="number" min="0" value="0" step="any" placeholder="نغدي ورکړه"></div><div><label>د انتقال او نورو مصارفو ټول (AFN)</label><input id="buyExtraExpense" type="number" min="0" value="0" step="any" placeholder="مثلاً ۵۰"></div></div>
+  <div class="row purchase-fields"><div><label>شرکت ته ورکړل شوې پیسې (AFN)</label><input id="buyPaid" type="number" min="0" value="0" step="any" placeholder="ورکړل شوې پیسې" oninput="updatePurchasePaymentHint()"></div><div><label>د انتقال او نورو مصارفو ټول (AFN)</label><input id="buyExtraExpense" type="number" min="0" value="0" step="any" placeholder="مثلاً ۵۰"></div></div>
   <small id="buyPaymentSourceHint" class="purchase-hint">د ورکړې پیسې به د صندوق له نغدو څخه کمې شي.</small>
   <div id="purchaseCostPreview" class="purchase-cost-preview">د رسید مجموعه: 0 AFN</div>
   <button class="primary purchase-save" onclick="addPurchase()">✓ ټول پېرود په یوه رسید کې ثبت کړه</button>
@@ -4023,7 +4023,7 @@ function addPurchase(){
  }
  const summary="پېرود ثبت شو\nرسید: "+invoice+"\nجنسونه: "+records.length+"\nد جنسونو قیمت: "+money(t.goods)+"\nاضافي مصارف: "+money(extra)+"\nټول: "+money(t.total)+"\nشرکت ته ورکړه: "+money(paid)+"\nپاتې شرکت پور: "+money(t.debt)+"\nله صندوقه وتلې: "+money(paymentSource==="saraf"?extra:paid+extra)+"\nد صراف له لارې ورکړه: "+money(paymentSource==="saraf"?paid:0);
  purchaseCart=[];document.getElementById("buyPaid").value="0";document.getElementById("buyExtraExpense").value="0";document.getElementById("buyProductSearch").value="";document.getElementById("buyDate").value=today();document.getElementById("buyPaymentSource").value="cash";
- renderPurchaseCart();refreshAll();alert(summary);
+ renderPurchaseCart();updatePurchasePaymentHint();refreshAll();alert(summary);
 }
 
 function clearPurchaseHistory(){
