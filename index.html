@@ -1433,6 +1433,8 @@ nav button.active{background:color-mix(in srgb,var(--nav) 16%,#fff)!important;co
 <style>
 /* Customer area: clean, simple mobile-first layout */
 #customers{padding-bottom:24px}
+#customers .customer-search-top{position:relative;z-index:4;margin:0 0 8px;padding:8px;background:#fff;border:1px solid #dce5ef;border-radius:12px;box-shadow:0 2px 8px rgba(15,40,70,.04)}
+#customers .customer-search-top #customerSearch{width:100%;margin:0;border-radius:9px}
 #customers .customer-top{padding:14px 15px;margin:0 -2px 12px;background:linear-gradient(130deg,#102f50,#1769a6);color:#fff;border-radius:0 0 18px 18px}
 #customers .customer-top small,#customers .customer-top span{color:#d9eafa}
 #customers .customer-top h3{color:#fff;font-size:21px}
@@ -2649,6 +2651,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
 </section>
 
 <section id="customers" class="hidden">
+ <div class="panel customer-search-top"><input id="customerSearch" placeholder="🔍 د مشتری نوم یا شمېره ولټوه"></div>
  <div class="customer-top"><div><small>Dukan Pro</small><h3>شاهین فروشگاه</h3></div><span>فارسي</span></div>
  <div class="customer-addbar"><button class="primary" onclick="toggleCustomerForm()">＋</button><b>مشتریان او پورونه</b><button type="button" class="gray" onclick="runStorageDiagnostic()">🔎 تشخیص</button></div>
  <div class="customer-summary">
@@ -2685,7 +2688,7 @@ html.sale-modal-open,body.sale-modal-open{overflow:hidden!important;overscroll-b
   <button type="button" id="addCustomerBtn" class="primary">مشتری ثبت کړه</button>
  </div>
  <div class="customer-list-head"><div><b id="customerListTitle">ټول مشتریان</b><small id="customerListCount">0</small></div><b id="customerListTotal">0 AFN</b></div>
- <div class="panel"><input id="customerSearch" placeholder="🔍 د مشتری نوم یا شمېره ولټوه"><div id="customersList"></div>
+ <div class="panel"><div id="customersList"></div>
  <div id="invoiceEditModal" class="hidden"></div></div>
 </section>
 
