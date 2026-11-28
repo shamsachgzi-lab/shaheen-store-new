@@ -3140,6 +3140,7 @@ function closeProductFormPage(){show("products");}
   <button id="customerTabActive" onclick="setCustomerView('active')">اوسني</button>
   <button id="customerTabOld" onclick="setCustomerView('old')">زاړه پوروړي</button>
   <button id="customerTabMonthly" onclick="setCustomerView('monthly')">📅 میاشتنی حساب</button>
+  <button id="customerTabCredit" onclick="setCustomerView('credit')">💰 اضافه پیسې</button>
  </div>
  <div class="panel hidden" id="customerFormPanel">
   <div class="customer-form-head"><div><small>شاهین فروشگاه</small><h3>＋ نوی مشتری ثبت کړه</h3><p>د مشتری معلومات په دقت ولیکه</p></div><button type="button" class="gray" onclick="toggleCustomerForm()">✕ بېرته</button></div>
@@ -4731,7 +4732,7 @@ let customerView="all";
 let currentCustomerId="";
 function setCustomerView(view){
  customerView=view;
- ["all","active","old","monthly"].forEach(k=>document.getElementById("customerTab"+({all:"All",active:"Active",old:"Old",monthly:"Monthly"}[k]))?.classList.toggle("selected",k===view));
+ ["all","active","old","monthly","credit"].forEach(k=>document.getElementById("customerTab"+({all:"All",active:"Active",old:"Old",monthly:"Monthly",credit:"Credit"}[k]))?.classList.toggle("selected",k===view));
  renderCustomers();
 }
 function toggleCustomerForm(){const root=document.getElementById("customers"),panel=document.getElementById("customerFormPanel");if(!root||!panel)return;const opening=!root.classList.contains("customer-form-open");root.classList.remove("customer-ledger-open");root.classList.toggle("customer-form-open",opening);panel.classList.toggle("hidden",!opening);if(opening){currentCustomerId="";const y=window.scrollY;setTimeout(()=>{const el=document.getElementById("cName");if(el)el.focus({preventScroll:true});requestAnimationFrame(()=>window.scrollTo(0,y));},50);} }
@@ -4777,9 +4778,10 @@ function renderCustomers(){
   document.getElementById("customerDailyReport").innerHTML=customerReport(customerReceipts.filter(p=>String(p.date||"").slice(0,10)===todayKey),"نن هېڅ مشتری پیسې نه دي راکړې");
   document.getElementById("customerMonthlyReport").innerHTML=customerReport(customerReceipts.filter(p=>String(p.date||"").slice(0,7)===monthKey),"په دې میاشت کې پیسې نه دي ترلاسه شوې");
  const monthly=customerRecords.filter(c=>c.monthlyPayer===true);
- const base=customerView==="active"?active:customerView==="old"?old:customerView==="monthly"?monthly:customerRecords;
+ const credit=customerRecords.filter(c=>Number(c.debt)<0);
+ const base=customerView==="active"?active:customerView==="old"?old:customerView==="monthly"?monthly:customerView==="credit"?credit:customerRecords;
  const list=base.filter(c=>String(c.name).toLowerCase().includes(q)||String(c.father||"").toLowerCase().includes(q)||String(c.phone||"").includes(q)||String(c.village||"").toLowerCase().includes(q)||String(c.area||"").toLowerCase().includes(q));
- const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي",monthly:"میاشتني پیسې ورکوونکي مشتریان"};
+ const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي",monthly:"میاشتني پیسې ورکوونکي مشتریان",credit:"اضافه پیسې لرونکي مشتریان"};
  document.getElementById("customerListTitle").textContent=titles[customerView];
  document.getElementById("customerListCount").textContent="("+list.length+")";
  document.getElementById("customerListTotal").textContent=money(debtOf(list));
@@ -4789,7 +4791,7 @@ function renderCustomers(){
    <small>${c.father?" · د پلار نوم: "+safe(c.father):""}${c.phone?" · شمېره: "+safe(c.phone):""}${c.village?" · کلی: "+safe(c.village):""}${c.area?" · سیمه: "+safe(c.area):""}</small>
    <div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger('${c.id}')">📒</button><button class="gray" title="سمون او د حساب اصلاح" onclick="editCustomer('${c.id}')">✏️</button><button class="${c.monthlyPayer===true?'primary':'gray'}" title="دا مشتری هره میاشت پیسې راکوي" onclick="toggleCustomerMonthlyPayer('${c.id}')">${c.monthlyPayer===true?'☑ میاشتنی':'☐ میاشتنی'}</button></div>
   </div>
-  <div class="customer-row-debt">${money(c.debt)}</div>
+  <div class="customer-row-debt">${customerView==="credit"?money(Math.abs(Number(c.debt||0)))+" · اضافه":money(c.debt)}</div>
  </div>`).join("")||"<p>مشتری نشته</p>";
 }
 window.renderCustomers=renderCustomers;
@@ -8085,7 +8087,7 @@ body.sale-modal-open{
    root.classList.remove("customer-ledger-open");
    const records=db.customers.filter(c=>c&&typeof c==="object");
    let view="all";try{if(typeof customerView!=="undefined")view=customerView;}catch(e){}
-   const active=records.filter(c=>(c.type||"active")!=="old"),old=records.filter(c=>c.type==="old");
+   const active=records.filter(c=>(c.type||"active")!=="old"),old=records.filter(c=>c.type==="old"),monthly=records.filter(c=>c.monthlyPayer===true),credit=records.filter(c=>Number(c.debt)<0);
    const debtOf=a=>a.reduce((n,c)=>n+(Number(c.debt)||0),0),el=id=>document.getElementById(id);
    if(el("activeCustomerDebt"))el("activeCustomerDebt").textContent=money(debtOf(active));
    if(el("oldCustomerDebt"))el("oldCustomerDebt").textContent=money(debtOf(old));
@@ -8096,13 +8098,13 @@ body.sale-modal-open{
    const todayRows=receipts.filter(p=>String(p.date||"").slice(0,10)===todayKey),monthRows=receipts.filter(p=>String(p.date||"").slice(0,7)===monthKey);
    if(el("customerReceivedToday"))el("customerReceivedToday").textContent=money(sumRows(todayRows));
    if(el("customerReceivedMonth"))el("customerReceivedMonth").textContent=money(sumRows(monthRows));
-   const base=view==="active"?active:view==="old"?old:records,q=(el("customerSearch")?.value||"").trim().toLowerCase();
+   const base=view==="active"?active:view==="old"?old:view==="monthly"?monthly:view==="credit"?credit:records,q=(el("customerSearch")?.value||"").trim().toLowerCase();
    const list=base.filter(c=>String(c.name||"").toLowerCase().includes(q)||String(c.father||"").toLowerCase().includes(q)||String(c.phone||"").includes(q)||String(c.village||"").toLowerCase().includes(q)||String(c.area||"").toLowerCase().includes(q));
-   const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي",monthly:"میاشتني پیسې ورکوونکي مشتریان"};
+   const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي",monthly:"میاشتني پیسې ورکوونکي مشتریان",credit:"اضافه پیسې لرونکي مشتریان"};
    if(el("customerListTitle"))el("customerListTitle").textContent=titles[view]||titles.all;
    if(el("customerListCount"))el("customerListCount").textContent="("+list.length+")";
-   if(el("customerListTotal"))el("customerListTotal").textContent=money(debtOf(list));
-   if(el("customersList"))el("customersList").innerHTML=list.map(c=>'<div class="customer-row"><div class="customer-row-main"><b>'+safe(c.name||"بې نومه مشتری")+' <small style="display:inline">'+(c.type==="old"?"زاړه پوروړي":"اوسنی")+'</small></b><small>'+(c.father?" · د پلار نوم: "+safe(c.father):"")+(c.phone?" · شمېره: "+safe(c.phone):"")+(c.village?" · کلی: "+safe(c.village):"")+(c.area?" · سیمه: "+safe(c.area):"")+'</small><div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger(\''+safe(c.id)+'\')">📒</button><button class="gray" title="سمون او د حساب اصلاح" onclick="editCustomer(\''+safe(c.id)+'\')">✏️</button><button class="${c.monthlyPayer===true?'primary':'gray'}" title="دا مشتری هره میاشت پیسې راکوي" onclick="toggleCustomerMonthlyPayer(\''+safe(c.id)+'\')">${c.monthlyPayer===true?'☑ میاشتنی':'☐ میاشتنی'}</button></div></div><div class="customer-row-debt">'+money(c.debt)+'</div></div>').join("")||"<p>مشتری نشته</p>";
+   if(el("customerListTotal"))el("customerListTotal").textContent=money(view==="credit"?list.reduce((n,c)=>n+Math.abs(Number(c.debt||0)),0):debtOf(list));
+   if(el("customersList"))el("customersList").innerHTML=list.map(c=>'<div class="customer-row"><div class="customer-row-main"><b>'+safe(c.name||"بې نومه مشتری")+' <small style="display:inline">'+(c.type==="old"?"زاړه پوروړي":"اوسنی")+'</small></b><small>'+(c.father?" · د پلار نوم: "+safe(c.father):"")+(c.phone?" · شمېره: "+safe(c.phone):"")+(c.village?" · کلی: "+safe(c.village):"")+(c.area?" · سیمه: "+safe(c.area):"")+'</small><div class="customer-row-actions"><button class="gray" title="د پور حساب" onclick="openCustomerLedger(\''+safe(c.id)+'\')">📒</button><button class="gray" title="سمون او د حساب اصلاح" onclick="editCustomer(\''+safe(c.id)+'\')">✏️</button><button class="${c.monthlyPayer===true?'primary':'gray'}" title="دا مشتری هره میاشت پیسې راکوي" onclick="toggleCustomerMonthlyPayer(\''+safe(c.id)+'\')">${c.monthlyPayer===true?'☑ میاشتنی':'☐ میاشتنی'}</button></div></div><div class="customer-row-debt">'+(view==="credit"?money(Math.abs(Number(c.debt||0)))+" · اضافه":money(c.debt))+'</div></div>').join("")||"<p>مشتری نشته</p>";
   }catch(error){console.error("Customer safe renderer:",error);const box=document.getElementById("customersList");if(box)box.innerHTML="<p>د مشتریانو پاڼه کې تخنیکي ستونزه ده؛ معلومات خوندي دي.</p>";}
  };
  try{if(document.querySelector("main section:not(.hidden)")?.id==="customers")window.renderCustomers();}catch(e){console.error(e);}
