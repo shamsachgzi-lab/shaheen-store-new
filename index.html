@@ -3139,6 +3139,7 @@ function closeProductFormPage(){show("products");}
   <button class="selected" id="customerTabAll" onclick="setCustomerView('all')">ټول</button>
   <button id="customerTabActive" onclick="setCustomerView('active')">اوسني</button>
   <button id="customerTabOld" onclick="setCustomerView('old')">زاړه پوروړي</button>
+  <button id="customerTabMonthly" onclick="setCustomerView('monthly')">📅 میاشتنی حساب</button>
  </div>
  <div class="panel hidden" id="customerFormPanel">
   <div class="customer-form-head"><div><small>شاهین فروشگاه</small><h3>＋ نوی مشتری ثبت کړه</h3><p>د مشتری معلومات په دقت ولیکه</p></div><button type="button" class="gray" onclick="toggleCustomerForm()">✕ بېرته</button></div>
@@ -3152,6 +3153,7 @@ function closeProductFormPage(){show("products");}
   <label>د پخواني پور اندازه</label><input id="cDebt" type="number" min="0" value="0">
   <label>د مشتری ډول</label>
   <select id="cType"><option value="active">اوسنی مشتری</option><option value="old">پخوانی پور لرونکی</option></select>
+  <label style="display:flex;align-items:center;gap:9px;margin:12px 0;padding:10px;background:#eef6ff;border-radius:10px"><input id="cMonthlyPayer" type="checkbox" style="width:19px;height:19px;margin:0"> 📅 دا مشتری هره میاشت پیسې راکوي</label>
   <button type="button" id="addCustomerBtn" class="primary">مشتری ثبت کړه</button>
  </div>
  <div class="customer-list-head"><div><b id="customerListTitle">ټول مشتریان</b><small id="customerListCount">0</small></div><b id="customerListTotal">0 AFN</b></div>
@@ -4702,11 +4704,12 @@ window.addCustomer=function(){
  const debtInput=document.getElementById("cDebt");
  const debt=Number(debtInput?.value||0);
  const type=document.getElementById("cType")?.value||"active";
+ const monthlyPayer=!!document.getElementById("cMonthlyPayer")?.checked;
  if(!name){alert("د مشتری نوم ولیکه");document.getElementById("cName")?.focus();return;}
  if(!Number.isFinite(debt)||debt<0){alert("د پور اندازه سمه ولیکه");return;}
  if(!Array.isArray(db.customers))db.customers=[];
  if(db.customers.some(c=>String(c.name||"").trim().toLowerCase()===name.toLowerCase())){alert("دا مشتری مخکې ثبت شوی دی");return;}
- const customer={id:uid(),name,father,phone,village,area,debt,type,created:today()};
+ const customer={id:uid(),name,father,phone,village,area,debt,type,monthlyPayer,created:today()};
  db.customers.push(customer);
  try{
   saveDB();
@@ -4716,6 +4719,7 @@ window.addCustomer=function(){
   return;
  }
  ["cName","cFather","cPhone","cVillage","cArea","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ const monthlyCheck=document.getElementById("cMonthlyPayer");if(monthlyCheck)monthlyCheck.checked=false;
  const panel=document.getElementById("customerFormPanel");
  if(panel)panel.classList.add("hidden");
  document.getElementById("customers")?.classList.remove("customer-form-open");
@@ -4727,7 +4731,7 @@ let customerView="all";
 let currentCustomerId="";
 function setCustomerView(view){
  customerView=view;
- ["all","active","old"].forEach(k=>document.getElementById("customerTab"+(k==="all"?"All":k==="active"?"Active":"Old"))?.classList.toggle("selected",k===view));
+ ["all","active","old","monthly"].forEach(k=>document.getElementById("customerTab"+({all:"All",active:"Active",old:"Old",monthly:"Monthly"}[k]))?.classList.toggle("selected",k===view));
  renderCustomers();
 }
 function toggleCustomerForm(){const root=document.getElementById("customers"),panel=document.getElementById("customerFormPanel");if(!root||!panel)return;const opening=!root.classList.contains("customer-form-open");root.classList.remove("customer-ledger-open");root.classList.toggle("customer-form-open",opening);panel.classList.toggle("hidden",!opening);if(opening){currentCustomerId="";const y=window.scrollY;setTimeout(()=>{const el=document.getElementById("cName");if(el)el.focus({preventScroll:true});requestAnimationFrame(()=>window.scrollTo(0,y));},50);} }
@@ -4772,9 +4776,10 @@ function renderCustomers(){
   };
   document.getElementById("customerDailyReport").innerHTML=customerReport(customerReceipts.filter(p=>String(p.date||"").slice(0,10)===todayKey),"نن هېڅ مشتری پیسې نه دي راکړې");
   document.getElementById("customerMonthlyReport").innerHTML=customerReport(customerReceipts.filter(p=>String(p.date||"").slice(0,7)===monthKey),"په دې میاشت کې پیسې نه دي ترلاسه شوې");
- const base=customerView==="active"?active:customerView==="old"?old:customerRecords;
+ const monthly=customerRecords.filter(c=>c.monthlyPayer===true);
+ const base=customerView==="active"?active:customerView==="old"?old:customerView==="monthly"?monthly:customerRecords;
  const list=base.filter(c=>String(c.name).toLowerCase().includes(q)||String(c.father||"").toLowerCase().includes(q)||String(c.phone||"").includes(q)||String(c.village||"").toLowerCase().includes(q)||String(c.area||"").toLowerCase().includes(q));
- const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي"};
+ const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي",monthly:"میاشتني پیسې ورکوونکي مشتریان"};
  document.getElementById("customerListTitle").textContent=titles[customerView];
  document.getElementById("customerListCount").textContent="("+list.length+")";
  document.getElementById("customerListTotal").textContent=money(debtOf(list));
@@ -4990,10 +4995,11 @@ function editCustomer(id){
  const village=prompt("کلی",c.village||"");if(village===null)return;
  const area=prompt("سیمه",c.area||"");if(area===null)return;
  const type=prompt("active یا old ولیکه",c.type||"active");if(type===null)return;
+ const monthlyText=prompt("ایا دا مشتری هره میاشت پیسې درکوي؟ yes یا no",c.monthlyPayer?"yes":"no");if(monthlyText===null)return;
  const debtText=prompt("د مشتری اوسنی پاتې پور (AFN) — د حساب د لاسي اصلاح لپاره",String(Number(c.debt||0)));if(debtText===null)return;
  const correctedDebt=Number(debtText);
  if(!Number.isFinite(correctedDebt))return alert("د پور اندازه سمه نه ده.");
- c.name=name.trim()||c.name;c.father=father.trim();c.phone=phone.trim();c.village=village.trim();c.area=area.trim();c.type=type==="old"?"old":"active";c.debt=correctedDebt;
+ c.name=name.trim()||c.name;c.father=father.trim();c.phone=phone.trim();c.village=village.trim();c.area=area.trim();c.type=type==="old"?"old":"active";c.monthlyPayer=["yes","y","هو","1","true"].includes(monthlyText.trim().toLowerCase());c.debt=correctedDebt;
  saveDB();refreshAll();
 }
 function deleteCustomer(id){
@@ -6341,14 +6347,16 @@ window.addCustomer=function(){
  const area=(document.getElementById("cArea")?.value||"").trim();
  const debt=Number(document.getElementById("cDebt")?.value||0);
  const type=document.getElementById("cType")?.value||"active";
+ const monthlyPayer=!!document.getElementById("cMonthlyPayer")?.checked;
  if(!name){alert("د مشتری نوم ولیکه");document.getElementById("cName")?.focus();return;}
  if(!Number.isFinite(debt)||debt<0){alert("د پور اندازه سمه ولیکه");return;}
  if(!Array.isArray(db.customers))db.customers=[];
  if(db.customers.some(c=>String(c.name||"").trim().toLowerCase()===name.toLowerCase())){alert("دا مشتری مخکې ثبت شوی دی");return;}
- const item={id:uid(),name,father,phone,village,area,debt,type,created:today()};
+ const item={id:uid(),name,father,phone,village,area,debt,type,monthlyPayer,created:today()};
  db.customers.push(item);
  try{saveDB();}catch(e){db.customers.pop();alert("ثبت ناکام شو. د اپ بیک اپ واخله او د موبایل د زېرمتون ځای وګوره.");return;}
  ["cName","cFather","cPhone","cVillage","cArea","cDebt"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ const monthlyCheck=document.getElementById("cMonthlyPayer");if(monthlyCheck)monthlyCheck.checked=false;
  document.getElementById("customerFormPanel")?.classList.add("hidden");
  document.getElementById("customers")?.classList.remove("customer-form-open");
  if(typeof currentCustomerId!=="undefined")currentCustomerId="";
@@ -8084,7 +8092,7 @@ body.sale-modal-open{
    if(el("customerReceivedMonth"))el("customerReceivedMonth").textContent=money(sumRows(monthRows));
    const base=view==="active"?active:view==="old"?old:records,q=(el("customerSearch")?.value||"").trim().toLowerCase();
    const list=base.filter(c=>String(c.name||"").toLowerCase().includes(q)||String(c.father||"").toLowerCase().includes(q)||String(c.phone||"").includes(q)||String(c.village||"").toLowerCase().includes(q)||String(c.area||"").toLowerCase().includes(q));
-   const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي"};
+   const titles={all:"ټول مشتریان",active:"اوسني مشتریان (چې دکان ته راځي)",old:"زاړه پوروړي",monthly:"میاشتني پیسې ورکوونکي مشتریان"};
    if(el("customerListTitle"))el("customerListTitle").textContent=titles[view]||titles.all;
    if(el("customerListCount"))el("customerListCount").textContent="("+list.length+")";
    if(el("customerListTotal"))el("customerListTotal").textContent=money(debtOf(list));
