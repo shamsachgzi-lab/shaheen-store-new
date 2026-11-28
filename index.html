@@ -2879,6 +2879,23 @@ html body #purchases .purchase-date-actions button{background:#e2eaff!important;
 html body #purchases #purchasesList .purchase-history-item{background:#fff!important;border:1px solid #dfe6f7!important;border-radius:15px!important;padding:12px!important}
 @media(max-width:390px){html body #purchases.purchase-page{padding-left:8px!important;padding-right:8px!important}html body #purchases .purchase-page-head{margin-left:-8px!important;margin-right:-8px!important}html body #purchases .purchase-form.panel.purchase-pro-form,html body #purchases .purchase-history.panel{padding:10px!important}html body #purchases .purchase-form .row.purchase-fields{gap:7px!important}}
 </style>
+
+<style id="SHAHEEN_SALE_CUSTOMER_FIELD_COMPACT_V2">
+/* د خرڅلاو د مشتری نوم خانه لنډول او اضافي تشریحي متن لرې کول */
+#sales .sale-invoice-details>div:first-child{
+ width:86%!important;max-width:360px!important;justify-self:end!important;
+}
+#sales .sale-invoice-details #saleCustomer{
+ width:100%!important;box-sizing:border-box!important;
+}
+#sales .sale-customer-name-hint{display:none!important}
+@media(max-width:520px){
+ #sales .sale-invoice-details>div:first-child{
+  width:88%!important;max-width:340px!important;
+  justify-self:end!important;grid-column:1/-1!important;
+ }
+}
+</style>
 </head>
 <body>
 <header class="brand-header">
@@ -2995,7 +3012,7 @@ html body #purchases #purchasesList .purchase-history-item{background:#fff!impor
  <div class="panel sale-page">
   <div class="sale-blue-header"><div><small>SHAHEEN WHOLESALE STORE</small><h3>نوی خرڅلاو</h3></div><button type="button" class="sale-modal-close" onclick="show(&quot;home&quot;)">✕</button></div>
   <div class="sale-simple sale-invoice-details">
-   <div><label>د پېرودونکي نوم (په رسید کې چاپېږي)</label><input id="saleCustomer" autocomplete="off" placeholder="د پېرودونکي نوم ولیکه؛ ثبت شوی نه وي هم ستونزه نشته" oninput="searchSaleCustomers()"><div id="saleCustomerResults" class="sale-customer-results hidden"></div><small class="sale-customer-name-hint">د نغدي خرڅلاو لپاره هم نوم ولیکه؛ نوی نوم به په رسید کې چاپ شي، خو بې له پور څخه به د مشتریانو حساب ته نه اضافه کېږي.</small></div>
+   <div><label>د پېرودونکي نوم (په رسید کې چاپېږي)</label><input id="saleCustomer" autocomplete="off" placeholder="د پېرودونکي نوم ولیکه؛ ثبت شوی نه وي هم ستونزه نشته" oninput="searchSaleCustomers()"><div id="saleCustomerResults" class="sale-customer-results hidden"></div></div>
    <div class="sale-date-row sale-date-top">
     <label>نېټه</label>
     <div class="sale-simple-grid sale-qty-grid">
