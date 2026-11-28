@@ -2904,21 +2904,21 @@ html body #purchases #purchasesList .purchase-history-item{background:#fff!impor
 
 <style id="SHAHEEN_PRODUCT_FORM_SEPARATE_PAGE_V1">
 #products .product-add-open{display:block!important;width:100%!important;margin:14px 0!important;padding:17px!important;border:0!important;border-radius:16px!important;background:linear-gradient(110deg,#176bd1,#438ef0)!important;color:#fff!important;font-size:17px!important;font-weight:900!important;box-shadow:0 6px 18px #176bd12b!important}
-#products .product-form-overlay{position:fixed!important;inset:0!important;z-index:9999!important;background:#101b35a8!important;padding: max(12px,env(safe-area-inset-top)) 10px max(12px,env(safe-area-inset-bottom))!important;overflow-y:auto!important}
-#products .product-form-overlay.hidden{display:none!important}
-#products .product-form-page{max-width:680px!important;margin:0 auto!important;background:#f5f7fc!important;border-radius:20px!important;min-height:100%!important;padding:12px!important;box-shadow:0 15px 45px #07132e55!important}
-#products .product-form-page-head{display:flex!important;align-items:center!important;justify-content:space-between!important;background:linear-gradient(110deg,#143c75,#287fc5)!important;color:#fff!important;padding:13px 15px!important;border-radius:15px!important;margin-bottom:12px!important}
-#products .product-form-page-head h3{margin:0!important;color:#fff!important;font-size:18px!important}
-#products .product-form-page-head button{width:40px!important;height:40px!important;border:1px solid #ffffff66!important;border-radius:12px!important;background:#ffffff20!important;color:#fff!important;font-size:20px!important}
-#products .product-form-page .product-form-panel{display:block!important;margin:0!important;border:1px solid #dce5f1!important;border-radius:16px!important;background:#fff!important;padding:14px!important;box-shadow:none!important}
-#products .product-form-page .product-form-panel label{display:block!important;margin:12px 0 6px!important;color:#203e69!important;font-weight:850!important}
-#products .product-form-page .product-form-panel input,#products .product-form-page .product-form-panel select{width:100%!important;min-height:46px!important;border:1px solid #cbd8e8!important;border-radius:11px!important;background:#fbfdff!important;padding:10px!important;color:#20334a!important}
-#products .product-form-page .product-form-panel .primary{width:100%!important;margin-top:16px!important;min-height:52px!important;border-radius:13px!important;background:linear-gradient(110deg,#168451,#20a36a)!important;color:#fff!important;font-weight:900!important}
+#productCreatePage{position:fixed!important;inset:0!important;z-index:9999!important;background:#101b35a8!important;padding: max(12px,env(safe-area-inset-top)) 10px max(12px,env(safe-area-inset-bottom))!important;overflow-y:auto!important}
+#productCreatePage.hidden{display:none!important}
+#productCreatePage .product-form-page{max-width:680px!important;margin:0 auto!important;background:#f5f7fc!important;border-radius:20px!important;min-height:100%!important;padding:12px!important;box-shadow:0 15px 45px #07132e55!important}
+#productCreatePage .product-form-page-head{display:flex!important;align-items:center!important;justify-content:space-between!important;background:linear-gradient(110deg,#143c75,#287fc5)!important;color:#fff!important;padding:13px 15px!important;border-radius:15px!important;margin-bottom:12px!important}
+#productCreatePage .product-form-page-head h3{margin:0!important;color:#fff!important;font-size:18px!important}
+#productCreatePage .product-form-page-head button{width:40px!important;height:40px!important;border:1px solid #ffffff66!important;border-radius:12px!important;background:#ffffff20!important;color:#fff!important;font-size:20px!important}
+#productCreatePage .product-form-page .product-form-panel{display:block!important;margin:0!important;border:1px solid #dce5f1!important;border-radius:16px!important;background:#fff!important;padding:14px!important;box-shadow:none!important}
+#productCreatePage .product-form-page .product-form-panel label{display:block!important;margin:12px 0 6px!important;color:#203e69!important;font-weight:850!important}
+#productCreatePage .product-form-page .product-form-panel input,#productCreatePage .product-form-page .product-form-panel select{width:100%!important;min-height:46px!important;border:1px solid #cbd8e8!important;border-radius:11px!important;background:#fbfdff!important;padding:10px!important;color:#20334a!important}
+#productCreatePage .product-form-page .product-form-panel .primary{width:100%!important;margin-top:16px!important;min-height:52px!important;border-radius:13px!important;background:linear-gradient(110deg,#168451,#20a36a)!important;color:#fff!important;font-weight:900!important}
 #products .product-list-panel{margin-top:12px!important}
 </style>
 <script>
-function openProductFormPage(){const e=document.getElementById("productFormOverlay");if(e)e.classList.remove("hidden");}
-function closeProductFormPage(){const e=document.getElementById("productFormOverlay");if(e)e.classList.add("hidden");}
+function openProductFormPage(){show("productCreatePage");setTimeout(()=>document.getElementById("pName")?.focus(),80);}
+function closeProductFormPage(){show("products");}
 </script>
 
 </head>
@@ -3014,7 +3014,8 @@ function closeProductFormPage(){const e=document.getElementById("productFormOver
 <section id="products" class="hidden">
  <div class="row product-page-head" style="align-items:center;justify-content:space-between;flex-wrap:wrap"><h3>📦 موجودي او جنسونه</h3><b id="productCount">0 جنس</b><button type="button" class="gray" onclick="runStorageDiagnostic()">🔎 د معلوماتو تشخیص</button></div>
  <button type="button" class="product-add-open" onclick="openProductFormPage()">＋ نوی جنس اضافه کړه</button>
- <div id="productFormOverlay" class="product-form-overlay hidden"><div class="product-form-page"><div class="product-form-page-head"><h3>＋ نوی جنس اضافه کړه</h3><button type="button" onclick="closeProductFormPage()" aria-label="بندول">✕</button></div><div class="panel product-form-panel">
+ <div class="panel product-list-panel"><input id="productSearch" placeholder="🔍 د جنس نوم ولټوه"><div id="productList"></div></div>
+</section><section id="productCreatePage" class="hidden"><div class="product-form-page"><div class="product-form-page"><div class="product-form-page-head"><h3>＋ نوی جنس اضافه کړه</h3><button type="button" onclick="closeProductFormPage()" aria-label="بندول">✕</button></div><div class="panel product-form-panel">
   <label>د جنس نوم</label><input id="pName" placeholder="مثلاً وریجې"><label>د جنس عکس (اختیاري)</label><input id="pImage" type="file" accept="image/*" onchange="previewProductImage(this)"><div id="pImagePreview" class="product-image-preview">د جنس عکس دلته انتخاب کړه</div><input id="editProductImage" type="file" accept="image/*" class="hidden" onchange="saveEditedProductImage(this)"><label>بارکوډ / کوډ</label><input id="pCode" placeholder="اختیاري بارکوډ یا کوډ">
   <label>اصلي واحد (د ګدام د ساتلو واحد)</label><select id="pUnit" onchange="updateProductEntryLabels()"></select>
   <label>د خرڅلاو/پېرود واحد</label><select id="pTradeUnit" onchange="updateProductEntryLabels()"></select>
@@ -3030,9 +3031,7 @@ function closeProductFormPage(){const e=document.getElementById("productFormOver
    <div><label id="pMinLabel">د کمې موجودۍ حد (واحد)</label><input id="pMinQty" type="number" min="0" step="any" value="5"></div>
   </div>
   <button class="primary" onclick="addProduct()">جنس ثبت کړه</button>
- </div></div>
- <div class="panel product-list-panel"><input id="productSearch" placeholder="🔍 د جنس نوم ولټوه"><div id="productList"></div></div>
-</section>
+ </div></div></section>
 
 <section id="sales" class="hidden sale-overlay">
  <div class="panel sale-page">
