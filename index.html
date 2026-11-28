@@ -3670,7 +3670,8 @@ let returnToPurchaseAfterProduct=false;
 function openProductFromPurchase(){
  returnToPurchaseAfterProduct=true;
  show("products");
- document.getElementById("pName")?.focus();
+ openProductFormPage();
+ setTimeout(()=>document.getElementById("pName")?.focus(),80);
 }
 function updateProductEntryLabels(){
  const unit=value("pUnit")||"واحد",trade=value("pTradeUnit")||unit,factor=Math.max(0,number("pUnitFactor"));
@@ -3695,6 +3696,7 @@ async function addProduct(){
  saveDB();["pName","pCode","pCost","pPrice","pWholesalePrice","pQty"].forEach(id=>document.getElementById(id).value="");document.getElementById("pMinQty").value="5";document.getElementById("pUnitFactor").value="1";updateProductEntryLabels();
  document.getElementById("pImage").value="";document.getElementById("pImagePreview").textContent="د جنس عکس دلته انتخاب کړه";
  refreshAll();
+ closeProductFormPage();
  if(returnToPurchaseAfterProduct){
   returnToPurchaseAfterProduct=false;
   show("purchases");
