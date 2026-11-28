@@ -4805,7 +4805,7 @@ function customerHistoryMonthInfo(iso){
   return {key:year+"-"+month,label:year+"/"+month};
  }catch(e){return null;}
 }
-function renderCustomerDetail(monthFilter="",archiveId="current"){
+function renderCustomerDetail(monthFilter="",archiveId="current",historyType="all"){
 
  document.getElementById("customers")?.classList.add("customer-ledger-open");
  const c=db.customers.find(x=>x.id===currentCustomerId);
@@ -4838,7 +4838,10 @@ function renderCustomerDetail(monthFilter="",archiveId="current"){
  history.forEach(item=>{const info=customerHistoryMonthInfo(item.date);if(info)monthMap.set(info.key,info.label);});
  const monthOptions=[...monthMap.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
  if(monthFilter&&!monthMap.has(monthFilter))monthFilter="";
- const visibleHistory=monthFilter?history.filter(item=>customerHistoryMonthInfo(item.date)?.key===monthFilter):history;
+ const monthVisibleHistory=monthFilter?history.filter(item=>customerHistoryMonthInfo(item.date)?.key===monthFilter):history;
+ const historyFilters={cash:x=>x.kind==="sale"&&Number(x.record.debt||0)<=0,credit:x=>x.kind==="sale"&&Number(x.record.debt||0)>0,received:x=>x.kind==="payment",paid:x=>x.kind==="payout"};
+ const visibleHistory=historyType==="all"?monthVisibleHistory:monthVisibleHistory.filter(historyFilters[historyType]||(()=>true));
+ const archiveKey=selectedArchive?String(selectedArchive.id):"current";
  const monthSales=visibleHistory.filter(x=>x.kind==="sale").map(x=>x.record);
  const monthReceipts=visibleHistory.filter(x=>x.kind==="payment").map(x=>x.record);
  const monthPayouts=visibleHistory.filter(x=>x.kind==="payout").map(x=>x.record);
@@ -4886,9 +4889,16 @@ function renderCustomerDetail(monthFilter="",archiveId="current"){
    ${selectedArchive?'<button type="button" class="gray" style="width:100%;margin-top:8px" onclick="renderCustomerDetail(\'\',\'current\')">اوسني حساب ته بېرته</button>':''}
   </div>
   <h3 class="customer-history-title">📚 د مشتری د معاملاتو تاریخچه</h3>
+  <div class="customer-history-type-tabs" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0">
+   <button type="button" class="${historyType==="cash"?"primary":"gray"}" onclick="renderCustomerDetail('${safe(monthFilter)}','${archiveKey}','cash')">🛒 جنس په نغدو</button>
+   <button type="button" class="${historyType==="credit"?"primary":"gray"}" onclick="renderCustomerDetail('${safe(monthFilter)}','${archiveKey}','credit')">📒 جنس په پور</button>
+   <button type="button" class="${historyType==="received"?"primary":"gray"}" onclick="renderCustomerDetail('${safe(monthFilter)}','${archiveKey}','received')">💵 پیسې راکړې</button>
+   <button type="button" class="${historyType==="paid"?"primary":"gray"}" onclick="renderCustomerDetail('${safe(monthFilter)}','${archiveKey}','paid')">💸 ما پیسې ورکړې</button>
+   <button type="button" class="${historyType==="all"?"primary":"gray"}" style="grid-column:1/-1" onclick="renderCustomerDetail('${safe(monthFilter)}','${archiveKey}','all')">ټولې معاملې</button>
+  </div>
   <div class="customer-history-month-filter" style="margin:12px 0;padding:12px;border:1px solid #dbe5f2;border-radius:14px;background:#f8fbff">
    <label for="customerHistoryMonth" style="display:block;font-weight:700;margin-bottom:7px">📅 د راپور میاشت وټاکه</label>
-   <select id="customerHistoryMonth" onchange="renderCustomerDetail(this.value)" style="width:100%;padding:12px;border:1px solid #b8cce5;border-radius:10px;background:#fff;font-size:16px">
+   <select id="customerHistoryMonth" onchange="renderCustomerDetail(this.value,'${archiveKey}','${historyType}')" style="width:100%;padding:12px;border:1px solid #b8cce5;border-radius:10px;background:#fff;font-size:16px">
     <option value="" ${!monthFilter?"selected":""}>ټولې میاشتې — بشپړ تاریخچه</option>
     ${monthOptions.map(([key,label])=>`<option value="${safe(key)}" ${monthFilter===key?"selected":""}>${safe(label)}</option>`).join("")}
    </select>
