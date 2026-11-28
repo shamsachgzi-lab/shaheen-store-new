@@ -3707,6 +3707,11 @@ async function addProduct(){
   document.getElementById("buyQty")?.focus();
  }else alert("جنس ثبت شو");
 }
+function productUnitPashto(name){
+ const raw=String(name||"").trim().toLowerCase();
+ const known={bori:"بوجۍ",bory:"بوجۍ",bor:"بوجۍ",bora:"بوجۍ",bag:"بوجۍ",sack:"بوجۍ",basta:"بسته",carton:"کارټن",cartons:"کارټن",kg:"کیلو",kilo:"کیلو",kilogram:"کیلو",gram:"ګرام",g:"ګرام",piece:"ټوټه",pcs:"ټوټه",bottle:"بوتل",liter:"لیټر",litre:"لیټر",packet:"پاکټ",pack:"بسته",glass:"ګیلاس",cup:"ګیلاس",dana:"دانه"};
+ return known[raw]||window.unitLabel(name);
+}
 function renderProducts(){
  const q=value("productSearch").toLowerCase();
  const list=(Array.isArray(db.products)?db.products:[]).filter(p=>p&&typeof p==="object"&&(String(p.name??"").toLowerCase().includes(q)||String(p.code??"").toLowerCase().includes(q)));
@@ -3719,8 +3724,8 @@ function renderProducts(){
   return `
  <div class="item product-list-item">${p.image?'<img class="product-thumb" alt="د جنس عکس" src="'+safe(p.image)+'">':'<div class="product-thumb product-no-image">📦</div>'}
  <div class="product-list-info"><b>${safe(p.name)}</b>
- <div>موجودي: <b>${Number(shownQty.toFixed(3))} ${safe(window.unitLabel(trade))}</b>${trade!==base?' <small>('+Number((Number(p.qty)||0).toFixed(3))+' '+safe(window.unitLabel(base))+')</small>':''}</div>
- <div>فی ${safe(window.unitLabel(trade))}: پېرود ${money(tradeCost)} · عمده ${money(wholesale)} · پرچون ${money(retail)}</div>
+ <div>موجودي: <b>${Number(shownQty.toFixed(3))} ${safe(productUnitPashto(trade))}</b>${trade!==base?' <small>('+Number((Number(p.qty)||0).toFixed(3))+' '+safe(window.unitLabel(base))+')</small>':''}</div>
+ <div>فی ${safe(productUnitPashto(trade))}: پېرود ${money(tradeCost)} · عمده ${money(wholesale)} · پرچون ${money(retail)}</div>
  <div>کوډ: ${safe(p.code||"-")}</div>
  <div class="actions"><button class="gray" onclick="editProduct('${p.id}')">سمون</button><button class="gray" onclick="changeProductImage('${p.id}')">عکس بدلول</button><button class="red" onclick="deleteProduct('${p.id}')">حذف</button></div></div></div>`;
  }).join("")||"<p>جنس نشته</p>";
