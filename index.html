@@ -8011,8 +8011,15 @@ body.sale-modal-open{
 (function(){
  function labelUnit(value){
   const n=String(value||"واحد").trim();
-  const map={kg:"کیلو",g:"ګرام",bag:"بوجۍ",sack:"بوجۍ",piece:"ټوټه",pcs:"ټوټه",carton:"کارټن",bottle:"بوتل",liter:"لیټر",litre:"لیټر",packet:"پاکټ",glass:"ګلاس",dana:"دانه"};
-  return map[n.toLowerCase()]||n;
+  const key=n.toLowerCase().replace(/[ _-]+/g,"");
+  const map={
+   bori:"بوجۍ",bory:"بوجۍ",bor:"بوجۍ",bora:"بوجۍ",bag:"بوجۍ",bags:"بوجۍ",sack:"بوجۍ",sacks:"بوجۍ",
+   kg:"کیلو",kilo:"کیلو",kilos:"کیلو",kilogram:"کیلو",kilograms:"کیلو",g:"ګرام",gram:"ګرام",grams:"ګرام",
+   piece:"ټوټه",pieces:"ټوټه",pcs:"ټوټه",pc:"ټوټه",carton:"کارټن",cartons:"کارټن",box:"کارتن",boxes:"کارتن",
+   bottle:"بوتل",bottles:"بوتل",liter:"لیټر",litre:"لیټر",liters:"لیټر",litres:"لیټر",
+   packet:"پاکټ",packets:"پاکټ",pack:"بسته",packs:"بسته",glass:"ګیلاس",glasses:"ګیلاس",cup:"ګیلاس",cups:"ګیلاس",dana:"دانه"
+  };
+  return map[key]||(typeof window.productUnitPashto==="function"?window.productUnitPashto(n):n);
  }
  function safeText(value){
   return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
